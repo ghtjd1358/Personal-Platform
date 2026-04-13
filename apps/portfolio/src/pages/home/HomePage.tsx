@@ -1,0 +1,309 @@
+/**
+ * HomePage - Portfolio 메인 페이지
+ * 인스타그램 스타일 레이아웃 + AOS 스크롤 애니메이션
+ */
+
+import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ScrollTopButton, getCurrentUser } from '@sonhoseong/mfa-lib';
+import { usePortfolios } from './hooks';
+import { LINK_PREFIX } from '@/config/constants';
+import PortfolioModal from '@/components/PortfolioModal';
+import AOS from 'aos';
+
+const HomePage: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTech, setSelectedTech] = useState<string | null>(null);
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
+  const { portfolios, featuredProjects, otherProjects, loading } = usePortfolios();
+  const currentUser = getCurrentUser();
+  const navigate = useNavigate();
+
+  // 기술 스택 목록 추출
+  const allTechStacks = useMemo(() => {
+    const techSet = new Set<string>();
+    portfolios.forEach(p => {
+      p.techStack?.forEach(t => techSet.add(t.name));
+    });
+    return Array.from(techSet).sort();
+  }, [portfolios]);
+
+  // 필터링된 프로젝트
+  const filteredProjects = useMemo(() => {
+    let projects = portfolios;
+
+    // 검색어 필터
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      projects = projects.filter(p =>
+        p.title.toLowerCase().includes(query) ||
+        p.description?.toLowerCase().includes(query) ||
+        p.short_description?.toLowerCase().includes(query) ||
+        p.techStack?.some(t => t.name.toLowerCase().includes(query)) ||
+        p.tags?.some(t => (t.tag || t).toLowerCase().includes(query))
+      );
+    }
+
+    // 기술 스택 필터
+    if (selectedTech) {
+      projects = projects.filter(p =>
+        p.techStack?.some(t => t.name === selectedTech)
+      );
+    }
+
+    return projects;
+  }, [portfolios, searchQuery, selectedTech]);
+
+  // 필터된 프로젝트 분류
+  const filteredFeatured = useMemo(() =>
+    filteredProjects.filter(p => p.is_featured),
+    [filteredProjects]
+  );
+
+  const filteredOther = useMemo(() =>
+    filteredProjects.filter(p => !p.is_featured),
+    [filteredProjects]
+  );
+
+  const isFiltering = searchQuery.trim() || selectedTech;
+
+  // 데이터 로드 후 AOS refresh
+  useEffect(() => {
+    if (!loading && portfolios.length > 0) {
+      AOS.refresh();
+    }
+  }, [loading, portfolios]);
+
+  const handleProjectClick = (portfolioId: string) => {
+    setSelectedPortfolioId(portfolioId);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPortfolioId(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="portfolio-loading">
+        <div className="loading-spinner"></div>
+        <p>포트폴리오를 불러오는 중...</p>
+      </div>
+    );
+  }
+
+  // 필터링 여부에 따라 다른 데이터 사용
+  const heroProjects = isFiltering ? [] : featuredProjects.slice(0, 2);
+  const gridProjects = isFiltering
+    ? filteredProjects
+    : [...featuredProjects.slice(2), ...otherProjects];
+
+  return (
+    <div className="portfolio-module">
+      {/* 히어로 섹션 - 인스타그램 스타일 */}
+      <section className="insta-hero">
+        <div className="insta-hero-bg"></div>
+        <div className="container">
+          <div className="insta-hero-header" data-aos="fade-down">
+            <h1 className="insta-hero-title">
+              Creative <span className="gradient-text">Portfolio</span>
+            </h1>
+            <p className="insta-hero-subtitle">
+              아이디어를 현실로 만드는 개발자의 작업물입니다
+            </p>
+          </div>
+
+          {heroProjects.length > 0 && (
+            <div className="insta-hero-grid">
+              {heroProjects.map((project, index) => (
+                <article
+                  key={project.id}
+                  className={`insta-hero-card ${index === 0 ? 'primary' : 'secondary'}`}
+                  data-aos={index === 0 ? 'fade-right' : 'fade-left'}
+                  data-aos-delay={index * 200}
+                  onClick={() => handleProjectClick(project.id)}
+                >
+                  <div className="insta-card-image">
+                    {project.cover_image ? (
+                      <img src={project.cover_image} alt={project.title} />
+                    ) : (
+                      <div className="insta-card-placeholder">
+                        <span className="insta-card-emoji">{project.badge || '🚀'}</span>
+                      </div>
+                    )}
+                    <div className="insta-card-overlay">
+                      <div className="insta-card-stats">
+                        <span className="stat">
+                          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                          </svg>
+                          {project.view_count || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="insta-card-content">
+                    <div className="insta-card-header">
+                      {project.category && (
+                        <span className="insta-card-category">{project.category.name}</span>
+                      )}
+                      {index === 0 && <span className="insta-featured-badge">Featured</span>}
+                    </div>
+                    <h2 className="insta-card-title">{project.title}</h2>
+                    <p className="insta-card-desc">{project.short_description || project.description}</p>
+                    <div className="insta-card-tech">
+                      {project.techStack?.slice(0, 4).map((tech) => (
+                        <span key={tech.id} className="insta-tech-tag">
+                          {tech.name}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="insta-card-footer">
+                      {project.detail?.period && (
+                        <span className="insta-card-meta">{project.detail.period}</span>
+                      )}
+                      <span className="insta-card-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 전체 프로젝트 그리드 */}
+      <section id="portfolio" className="section">
+        <div className="container">
+          <div className="section-header" data-aos="fade-up">
+            <div className="section-label">All Projects</div>
+            <h2 className="section-title">전체 프로젝트</h2>
+          </div>
+
+          {/* 검색 및 필터 */}
+          <div className="filter-bar" data-aos="fade-up">
+            <div className="search-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="프로젝트 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button className="search-clear" onClick={() => setSearchQuery('')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {allTechStacks.length > 0 && (
+              <div className="tech-filter">
+                <button
+                  className={`filter-chip ${!selectedTech ? 'active' : ''}`}
+                  onClick={() => setSelectedTech(null)}
+                >
+                  전체
+                </button>
+                {allTechStacks.slice(0, 8).map(tech => (
+                  <button
+                    key={tech}
+                    className={`filter-chip ${selectedTech === tech ? 'active' : ''}`}
+                    onClick={() => setSelectedTech(selectedTech === tech ? null : tech)}
+                  >
+                    {tech}
+                  </button>
+                ))}
+              </div>
+            )}
+            {isFiltering && (
+              <div className="filter-result">
+                <span>{filteredProjects.length}개의 프로젝트</span>
+                <button className="clear-filter" onClick={() => { setSearchQuery(''); setSelectedTech(null); }}>
+                  필터 초기화
+                </button>
+              </div>
+            )}
+          </div>
+
+          {gridProjects.length === 0 && heroProjects.length === 0 ? (
+            <div className="empty-state" data-aos="fade-up">
+              <div className="empty-state-icon">📁</div>
+              <p className="empty-state-text">아직 등록된 포트폴리오가 없습니다.</p>
+            </div>
+          ) : (
+            <div className="insta-grid">
+              {gridProjects.map((project, index) => (
+                <article
+                  key={project.id}
+                  className="insta-grid-card"
+                  data-aos="fade-up"
+                  data-aos-delay={Math.min(index * 100, 400)}
+                  onClick={() => handleProjectClick(project.id)}
+                >
+                  <div className="insta-grid-image">
+                    {project.cover_image ? (
+                      <img src={project.cover_image} alt={project.title} />
+                    ) : (
+                      <div className="insta-grid-placeholder">
+                        <span>{project.badge || '📁'}</span>
+                      </div>
+                    )}
+                    <div className="insta-grid-overlay">
+                      <div className="insta-grid-info">
+                        <h3 className="insta-grid-title">{project.title}</h3>
+                        <div className="insta-grid-stats">
+                          <span>
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                            {project.view_count || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 플로팅 버튼 영역 */}
+      <div className="floating-buttons">
+        <ScrollTopButton />
+        {currentUser && (
+          <button
+            className="floating-user-btn"
+            onClick={() => navigate(`${LINK_PREFIX}/mypage`)}
+            title="내 포트폴리오"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* 포트폴리오 상세 모달 */}
+      {selectedPortfolioId && (
+        <PortfolioModal
+          portfolioId={selectedPortfolioId}
+          onClose={handleCloseModal}
+        />
+      )}
+    </div>
+  );
+};
+
+export default HomePage;

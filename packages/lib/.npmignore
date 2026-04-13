@@ -1,0 +1,22 @@
+# Source files (dist에 빌드된 것만 배포)
+src/
+
+# Config files
+tsconfig.json
+.eslintrc*
+.prettierrc*
+jest.config.*
+
+# Dev files
+*.test.ts
+*.spec.ts
+__tests__/
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
+.DS_Store

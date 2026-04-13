@@ -1,0 +1,33 @@
+{
+  "name": "mfa-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n \"resume,blog,portfolio,techblog,host\" -c \"blue,green,yellow,cyan,magenta\" \"npm run dev:resume\" \"npm run dev:blog\" \"npm run dev:portfolio\" \"npm run dev:techblog\" \"npm run dev:host\"",
+    "dev:host": "npm start --workspace=apps/host",
+    "dev:resume": "npm start --workspace=apps/resume",
+    "dev:blog": "npm start --workspace=apps/blog",
+    "dev:portfolio": "npm start --workspace=apps/portfolio",
+    "dev:techblog": "npm start --workspace=apps/techblog",
+    "build": "npm run build:lib && npm run build:host",
+    "build:all": "npm run build:lib && npm run build:resume && npm run build:blog && npm run build:portfolio && npm run build:techblog && npm run build:host",
+    "build:lib": "npm run build --workspace=packages/lib",
+    "build:host": "cross-env NODE_OPTIONS=--max_old_space_size=4096 npm run build --workspace=apps/host",
+    "build:resume": "cross-env NODE_OPTIONS=--max_old_space_size=4096 npm run build --workspace=apps/resume",
+    "build:blog": "cross-env NODE_OPTIONS=--max_old_space_size=4096 npm run build --workspace=apps/blog",
+    "build:portfolio": "cross-env NODE_OPTIONS=--max_old_space_size=4096 npm run build --workspace=apps/portfolio",
+    "build:techblog": "cross-env NODE_OPTIONS=--max_old_space_size=4096 npm run build --workspace=apps/techblog"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "cross-env": "^10.1.0"
+  }
+}

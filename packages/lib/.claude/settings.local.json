@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "mcp__plugin_claude-mem_mcp-search__search",
+      "Bash(cd *)",
+      "Bash(ls *)",
+      "Bash(npm *)",
+      "Bash(git *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(cat *)",
+      "Bash(mkdir *)",
+      "Bash(rm *)",
+      "Bash(cmd *)",
+      "Bash(taskkill *)",
+      "Bash(netstat *)",
+      "Bash(timeout *)",
+      "Read(**)",
+      "Edit(**)",
+      "Write(**)"
+    ]
+  }
+}

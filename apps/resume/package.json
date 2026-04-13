@@ -1,0 +1,46 @@
+{
+  "name": "portfolio-mfa",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "webpack serve --config webpack.dev.js",
+    "start": "webpack serve --config webpack.dev.js",
+    "build": "npx cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack.prod.js",
+    "start:container": "cd packages/container && npm start",
+    "start:app1": "cd packages/app1 && npm start",
+    "start:app2": "cd packages/app2 && npm start",
+    "start:all": "concurrently \"npm run start:app1\" \"npm run start:app2\" \"npm run start:container\"",
+    "install:all": "cd packages/container && npm install && cd ../app1 && npm install && cd ../app2 && npm install"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.11.2",
+    "@sonhoseong/mfa-lib": "^1.3.10",
+    "@supabase/supabase-js": "^2.95.3",
+    "dotenv-webpack": "^8.1.1",
+    "history": "^5.3.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-icons": "^5.5.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.11.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "babel-loader": "^10.0.0",
+    "concurrently": "^9.2.1",
+    "copy-webpack-plugin": "^13.0.1",
+    "cross-env": "^10.1.0",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.5",
+    "jsonwebtoken": "^9.0.3",
+    "style-loader": "^4.0.0",
+    "typescript": "^5.9.3",
+    "webpack": "^5.103.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2",
+    "webpack-merge": "^6.0.1"
+  }
+}
