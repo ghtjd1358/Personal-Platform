@@ -1,19 +1,53 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ScrollIndicator } from './ScrollIndicator';
 
 const HeroSection: React.FC = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (isVisible && video) {
+      video.load();
+      video.play().catch(() => {});
+    }
+  }, [isVisible]);
+
   return (
     <section className="hero blog-hero">
       <div className="hero-media">
         <video
+          ref={videoRef}
           className="hero-media-content"
           autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload="none"
+          poster="/cloude.webp"
+          onLoadedData={() => setIsLoaded(true)}
+          style={{ opacity: isLoaded ? 1 : 0.7, transition: 'opacity 0.5s ease' }}
         >
-          <source src="/hero-video.mp4" type="video/mp4" />
+          {isVisible && <source src="/hero-video.mp4" type="video/mp4" />}
         </video>
         <div className="hero-overlay" />
       </div>

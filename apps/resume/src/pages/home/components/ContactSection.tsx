@@ -1,5 +1,6 @@
 import React from 'react';
-import { SiGmail, SiGithub, SiVelog, SiLinkedin } from 'react-icons/si';
+import { SiGmail, SiGithub, SiVelog } from 'react-icons/si';
+import { FaLinkedin } from 'react-icons/fa6';
 import { ContactLink } from '../../../data';
 
 interface ContactSectionProps {
@@ -10,7 +11,7 @@ const iconMap: Record<ContactLink['type'], React.ReactNode> = {
   email: <SiGmail size={28} color="#EA4335" />,
   github: <SiGithub size={28} color="#181717" />,
   blog: <SiVelog size={28} color="#20C997" />,
-  linkedin: <SiLinkedin size={28} color="#0A66C2" />,
+  linkedin: <FaLinkedin size={28} color="#0A66C2" />,
   other: null,
 };
 

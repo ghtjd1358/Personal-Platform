@@ -11,7 +11,7 @@ interface ParallaxCardSectionProps {
 
 const ParallaxCardSection: React.FC<ParallaxCardSectionProps> = ({
   posts,
-  backgroundImage = '/cloude.png',
+  backgroundImage = '/cloude.webp', // WebP optimized (93% smaller)
   maxCards = 4,
   isLoading = false
 }) => {
