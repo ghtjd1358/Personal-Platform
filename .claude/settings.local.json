@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(npm run build:all:*)",
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(npm run build:resume:*)",
+      "Bash(du:*)",
+      "Bash(for app in resume blog portfolio techblog host)",
+      "Bash(do echo -n \"$app: \")",
+      "Bash(done)",
+      "Bash(where:*)",
+      "Bash(npm install:*)",
+      "Bash(node scripts/optimize-media.js:*)",
+      "Bash(cd:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nperf: 번들 및 미디어 최적화 (94.4% 감소)\n\n- Webpack 최적화: Tree-shaking, Code Splitting 적용 (JS 92.9% 감소)\n- 이미지 최적화: PNG → WebP 변환 (91.6% 감소)\n- 비디오 Lazy Loading: Intersection Observer 활용\n- react-icons 임포트 수정 및 커스텀 AWS 아이콘 추가\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(find:*)"
+    ]
+  },
+  "outputStyle": "Learning"
+}

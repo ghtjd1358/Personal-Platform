@@ -22,16 +22,18 @@ npm run build:lib     # 공유 라이브러리 빌드
 
 ## 아키텍처
 ```
-mfa-portfolio/
+mfa-monorepo/
 ├── packages/
 │   └── lib/          # @sonhoseong/mfa-lib (공유 컴포넌트, 훅, 유틸)
 └── apps/
-    ├── host/         # 컨테이너 앱 (port 5000)
-    ├── resume/       # 이력서 앱 (port 5001)
-    ├── blog/         # 블로그 앱 (port 5002)
-    ├── portfolio/    # 포트폴리오 앱 (port 5003)
-    └── techblog/     # 기술블로그 앱 (port 5004)
+    ├── host/         # 컨테이너 앱 (port 5000) - CLAUDE.md 참조
+    ├── resume/       # 이력서 앱 (port 5001) - CLAUDE.md 참조
+    ├── blog/         # 블로그 앱 (port 5002) - CLAUDE.md 참조
+    ├── portfolio/    # 포트폴리오 앱 (port 5003) - CLAUDE.md 참조
+    └── techblog/     # 기술블로그 앱 (port 5004) - CLAUDE.md 참조
 ```
+
+각 앱/패키지 폴더에 상세 CLAUDE.md가 있음. 해당 앱 작업 시 참조.
 
 ## 핵심 패턴
 - **동적 리모트 로딩:** 런타임에 remoteEntry.js 로드
@@ -55,3 +57,4 @@ REMOTE3_URL=https://...vercel.app
 - resume: Root Directory = `apps/resume`
 - blog: Root Directory = `apps/blog`
 - portfolio: Root Directory = `apps/portfolio`
+- techblog: Root Directory = `apps/techblog`
