@@ -1,6 +1,5 @@
 import React, { Suspense, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { HelmetProvider } from 'react-helmet-async';
 import { selectAccessToken } from '@sonhoseong/mfa-lib';
 import { RoutesGuestPages, RoutesAuthPages } from '@/pages/routes';
 import { DeferredComponent } from '@/components/DeferredComponent';
@@ -37,13 +36,13 @@ function App() {
     const isAuthenticated = useMemo(() => !!accessToken, [accessToken]);
 
     return (
-        <HelmetProvider>
+        <>
             <Suspense fallback={<PageLoadingFallback />}>
                 {!isAuthenticated && <RoutesGuestPages/>}
                 {isAuthenticated && <RoutesAuthPages />}
             </Suspense>
             <UserFloatingMenu />
-        </HelmetProvider>
+        </>
     );
 }
 

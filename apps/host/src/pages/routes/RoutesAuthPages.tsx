@@ -69,44 +69,13 @@ const MyPage = React.lazy(() =>
   }))
 );
 
-// Remote pathPrefix (안전한 로딩) - /container prefix 포함
-let resumePathPrefix = '/container/resume'; // 기본값
-let blogPathPrefix = '/container/blog'; // 기본값
-let portfolioPathPrefix = '/container/portfolio'; // 기본값
-let jobtrackerPathPrefix = '/container/jobtracker'; // 기본값
-
-// top-level await로 pathPrefix 로드 (실패 시 기본값 사용)
-try {
-  // @ts-ignore
-  const resumeLnb = await import('@resume/LnbItems');
-  resumePathPrefix = resumeLnb.pathPrefix || resumePathPrefix;
-} catch (e) {
-  console.warn('[MFA] Resume LnbItems 로드 실패, 기본값 사용:', resumePathPrefix);
-}
-
-try {
-  // @ts-ignore
-  const blogLnb = await import('@blog/LnbItems');
-  blogPathPrefix = blogLnb.pathPrefix || blogPathPrefix;
-} catch (e) {
-  console.warn('[MFA] Blog LnbItems 로드 실패, 기본값 사용:', blogPathPrefix);
-}
-
-try {
-  // @ts-ignore
-  const portfolioLnb = await import('@portfolio/LnbItems');
-  portfolioPathPrefix = portfolioLnb.pathPrefix || portfolioPathPrefix;
-} catch (e) {
-  console.warn('[MFA] Portfolio LnbItems 로드 실패, 기본값 사용:', portfolioPathPrefix);
-}
-
-try {
-  // @ts-ignore
-  const jobtrackerLnb = await import('@jobtracker/LnbItems');
-  jobtrackerPathPrefix = jobtrackerLnb.pathPrefix || jobtrackerPathPrefix;
-} catch (e) {
-  console.warn('[MFA] JobTracker LnbItems 로드 실패, 기본값 사용:', jobtrackerPathPrefix);
-}
+// Remote pathPrefix - /container prefix 고정 (LnbItems 동적 로딩 제거)
+// 이전엔 remote별 pathPrefix를 top-level await로 가져왔으나, Module Federation의
+// shared scope 초기화 타이밍 이슈로 load 실패가 빈번. 기본값이 이미 정확하므로 고정.
+const resumePathPrefix = '/container/resume';
+const blogPathPrefix = '/container/blog';
+const portfolioPathPrefix = '/container/portfolio';
+const jobtrackerPathPrefix = '/container/jobtracker';
 
 // ============================================
 // 컴포넌트

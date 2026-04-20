@@ -1,11 +1,11 @@
 /**
  * SEOHead - 블로그 SEO 메타 태그 컴포넌트
  *
- * Open Graph, Twitter Cards, 기본 메타 태그 관리
+ * React 19 네이티브 Document Metadata 사용 (react-helmet-async 불필요).
+ * JSX에 직접 렌더된 <title>/<meta>/<link>는 자동으로 <head>로 hoist된다.
  */
 
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 
 interface SEOHeadProps {
   title: string;
@@ -48,7 +48,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   const absoluteUrl = getAbsoluteUrl(url);
 
   return (
-    <Helmet>
+    <>
       {/* 기본 메타 태그 */}
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
@@ -86,7 +86,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       {/* 추가 메타 태그 */}
       <meta name="robots" content="index, follow" />
       <meta name="googlebot" content="index, follow" />
-    </Helmet>
+    </>
   );
 };
 
