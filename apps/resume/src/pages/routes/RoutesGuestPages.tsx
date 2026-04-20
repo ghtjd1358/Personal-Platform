@@ -1,8 +1,9 @@
 import React, { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import { LoginPage } from '@sonhoseong/mfa-lib'
 import { PREFIX } from '@/config/constants'
 
+const HomePage = lazy(() => import('../home/HomePage'))
 const ResumeBrowsePage = lazy(() => import('../resumes/ResumeBrowsePage'))
 const ResumeDetailPage = lazy(() => import('../resumes/ResumeDetailPage'))
 const UserResumePage = lazy(() => import('../resumes/UserResumePage'))
@@ -17,9 +18,9 @@ function RoutesGuestPages() {
     return (
         <Suspense fallback={<LoadingFallback />}>
             <Routes>
-                {/* 메인 페이지 = 공개 이력서 목록 */}
-                <Route path="/" element={<ResumeBrowsePage />} />
-                {PREFIX && <Route path={PREFIX} element={<ResumeBrowsePage />} />}
+                {/* 메인 페이지 = 포트폴리오 홈 */}
+                <Route path="/" element={<HomePage />} />
+                {PREFIX && <Route path={PREFIX} element={<HomePage />} />}
 
                 {/* 이력서 둘러보기 (공개) */}
                 <Route path={`${PREFIX}/resumes`} element={<ResumeBrowsePage />} />
@@ -34,7 +35,7 @@ function RoutesGuestPages() {
                 <Route path={`${PREFIX}/mypage/*`} element={<LoginPage appName="이력서" redirectPath="/" />} />
                 <Route path={`${PREFIX}/admin/*`} element={<LoginPage appName="이력서" redirectPath="/" />} />
 
-                <Route path="*" element={<ResumeBrowsePage />} />
+                <Route path="*" element={<Navigate to={PREFIX || '/'} replace />} />
             </Routes>
         </Suspense>
     )

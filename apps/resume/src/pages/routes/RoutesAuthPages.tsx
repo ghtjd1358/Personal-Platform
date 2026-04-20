@@ -1,7 +1,10 @@
 import React, { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import { PREFIX } from '@/config/constants'
 import { RoutePath } from './paths'
+
+// 홈 페이지 (포트폴리오 소개)
+const HomePage = lazy(() => import('../home/HomePage'))
 
 // 이력서 둘러보기 (공개)
 const ResumeBrowsePage = lazy(() => import('../resumes/ResumeBrowsePage'))
@@ -30,9 +33,9 @@ function RoutesAuthPages() {
     return (
         <Suspense fallback={<LoadingFallback />}>
             <Routes>
-                {/* 메인 페이지 = 이력서 둘러보기 */}
-                <Route path="/" element={<ResumeBrowsePage />} />
-                {PREFIX && <Route path={PREFIX} element={<ResumeBrowsePage />} />}
+                {/* 메인 페이지 = 포트폴리오 홈 (이력서는 /resumes, 본인 이력서는 /mypage) */}
+                <Route path="/" element={<HomePage />} />
+                {PREFIX && <Route path={PREFIX} element={<HomePage />} />}
 
                 {/* 이력서 둘러보기 (공개) */}
                 <Route path={`${PREFIX}${RoutePath.Resumes}`} element={<ResumeBrowsePage />} />
@@ -62,7 +65,7 @@ function RoutesAuthPages() {
                 <Route path={`${PREFIX}${RoutePath.AdminProjectsNew}`} element={<ProjectsEditorPage />} />
                 <Route path={`${PREFIX}${RoutePath.AdminProjectsEdit}`} element={<ProjectsEditorPage />} />
 
-                <Route path="*" element={<ResumeBrowsePage />} />
+                <Route path="*" element={<Navigate to={PREFIX || '/'} replace />} />
             </Routes>
         </Suspense>
     )
