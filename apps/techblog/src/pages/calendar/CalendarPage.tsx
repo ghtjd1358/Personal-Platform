@@ -1,12 +1,22 @@
 import React, { useState, useMemo } from 'react';
-import { mockCalendarEvents, mockApplications } from '@/data/mockJobs';
 import { CalendarEvent } from '@/types/job';
+import { useCalendarEvents } from '@/hooks';
+import CreateEventModal from '@/components/CreateEventModal';
 
 const CalendarPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+
+  // Use hook for calendar events
+  const {
+    isLoading,
+    monthEvents,
+    getEventsForDate,
+    create,
+  } = useCalendarEvents({ year, month });
 
   // 달력 데이터 생성
   const calendarDays = useMemo(() => {
@@ -28,7 +38,7 @@ const CalendarPage: React.FC = () => {
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(year, month, i);
       const dateStr = date.toISOString().split('T')[0];
-      const events = mockCalendarEvents.filter(e => e.date === dateStr);
+      const events = getEventsForDate(dateStr);
       days.push({ date, isCurrentMonth: true, events });
     }
 
@@ -40,7 +50,7 @@ const CalendarPage: React.FC = () => {
     }
 
     return days;
-  }, [year, month]);
+  }, [year, month, getEventsForDate]);
 
   const navigateMonth = (direction: number) => {
     setCurrentDate(new Date(year, month + direction, 1));
@@ -57,11 +67,20 @@ const CalendarPage: React.FC = () => {
 
   const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
 
-  // 이번 달 일정 요약
-  const monthEvents = mockCalendarEvents.filter(e => {
-    const eventDate = new Date(e.date);
-    return eventDate.getFullYear() === year && eventDate.getMonth() === month;
-  });
+  if (isLoading) {
+    return (
+      <div className="job-tracker-app">
+        <div className="page-header">
+          <h1>일정 캘린더</h1>
+          <p>면접 일정과 마감일을 확인하세요</p>
+        </div>
+        <div className="empty-state">
+          <div className="empty-state-icon">⏳</div>
+          <div className="empty-state-title">로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="job-tracker-app">
@@ -140,43 +159,41 @@ const CalendarPage: React.FC = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {monthEvents
-                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                .map(event => (
-                  <div
-                    key={event.id}
-                    style={{
-                      padding: '12px',
-                      background: 'var(--background)',
-                      borderRadius: 'var(--radius)',
-                      borderLeft: `4px solid ${event.color || 'var(--primary)'}`
-                    }}
-                  >
-                    <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
-                      {event.title}
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                        {new Date(event.date).toLocaleDateString('ko-KR', {
-                          month: 'long',
-                          day: 'numeric',
-                          weekday: 'short'
-                        })}
-                      </span>
-                      <span
-                        className={`calendar-event ${event.type}`}
-                        style={{ position: 'static', padding: '2px 8px' }}
-                      >
-                        {event.type === 'interview' ? '면접' :
-                         event.type === 'deadline' ? '마감' : '지원'}
-                      </span>
-                    </div>
+              {monthEvents.map(event => (
+                <div
+                  key={event.id}
+                  style={{
+                    padding: '12px',
+                    background: 'var(--background)',
+                    borderRadius: 'var(--radius)',
+                    borderLeft: `4px solid ${event.color || 'var(--primary)'}`
+                  }}
+                >
+                  <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
+                    {event.title}
                   </div>
-                ))}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      {new Date(event.date).toLocaleDateString('ko-KR', {
+                        month: 'long',
+                        day: 'numeric',
+                        weekday: 'short'
+                      })}
+                    </span>
+                    <span
+                      className={`calendar-event ${event.type}`}
+                      style={{ position: 'static', padding: '2px 8px' }}
+                    >
+                      {event.type === 'interview' ? '면접' :
+                       event.type === 'deadline' ? '마감' : '지원'}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
@@ -184,6 +201,7 @@ const CalendarPage: React.FC = () => {
           <button
             className="btn btn-primary"
             style={{ width: '100%', marginTop: '16px' }}
+            onClick={() => setShowCreateModal(true)}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -231,6 +249,14 @@ const CalendarPage: React.FC = () => {
           지원
         </div>
       </div>
+
+      {/* 일정 추가 모달 */}
+      {showCreateModal && (
+        <CreateEventModal
+          onClose={() => setShowCreateModal(false)}
+          onCreate={create}
+        />
+      )}
     </div>
   );
 };

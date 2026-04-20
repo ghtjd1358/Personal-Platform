@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { portfoliosApi } from '../../../network'
+import { LINK_PREFIX } from '@/config/constants'
+import { getCurrentUser } from '@sonhoseong/mfa-lib'
 
 const ProjectsEditorPage: React.FC = () => {
     const { id } = useParams()
+    const [searchParams] = useSearchParams()
+    const resumeId = searchParams.get('resumeId')
     const navigate = useNavigate()
+    const user = getCurrentUser()
     const isEdit = !!id
+
+    // 쿼리 파라미터 유지
+    const listUrl = resumeId
+        ? `${LINK_PREFIX}/admin/projects?resumeId=${resumeId}`
+        : `${LINK_PREFIX}/admin/projects`
 
     const [form, setForm] = useState({
         title: '',
@@ -42,17 +52,21 @@ const ProjectsEditorPage: React.FC = () => {
         setLoading(true)
         const { error } = isEdit
             ? await portfoliosApi.update(id!, form)
-            : await portfoliosApi.create(form)
+            : await portfoliosApi.create({
+                ...form,
+                user_id: user?.id,
+                resume_id: resumeId || undefined, // 새 프로젝트 생성시 resume_id 포함
+            })
 
         setLoading(false)
         if (error) alert('저장 실패: ' + error.message)
-        else navigate('/admin/projects')
+        else navigate(listUrl)
     }
 
     return (
         <div className="admin-editor-page">
             <header className="admin-page-header">
-                <button type="button" onClick={() => navigate('/admin/projects')}>← 목록으로</button>
+                <button type="button" onClick={() => navigate(listUrl)}>← 목록으로</button>
                 <h1>{isEdit ? '프로젝트 수정' : '새 프로젝트 추가'}</h1>
             </header>
 
@@ -81,7 +95,7 @@ const ProjectsEditorPage: React.FC = () => {
                     <input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} />
                 </div>
                 <div className="admin-form-actions">
-                    <button type="button" onClick={() => navigate('/admin/projects')}>취소</button>
+                    <button type="button" onClick={() => navigate(listUrl)}>취소</button>
                     <button type="submit" disabled={loading}>{loading ? '저장 중...' : '저장'}</button>
                 </div>
             </form>

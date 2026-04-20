@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
-import { JobApplication, JobNote, ApplicationStatus, NoteType } from '@/types/job';
-import { mockNotes } from '@/data/mockJobs';
+import { JobApplication, JobNote, ApplicationStatus, ApplicationResult, ApplicationSource, NoteType } from '@/types/job';
+import { useNotes } from '@/hooks';
 import NoteEditor from './NoteEditor';
 
 interface ApplicationDetailModalProps {
   application: JobApplication;
   onClose: () => void;
   onStatusChange: (status: ApplicationStatus) => void;
+  onResultChange?: (result: ApplicationResult) => void;
 }
 
 const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
   application,
   onClose,
-  onStatusChange
+  onStatusChange,
+  onResultChange,
 }) => {
-  const [notes, setNotes] = useState<JobNote[]>(
-    mockNotes.filter(n => n.applicationId === application.id)
-  );
+  const {
+    notes,
+    isLoading: notesLoading,
+    create: createNote,
+    remove: removeNote,
+  } = useNotes(application.id);
+
   const [activeTab, setActiveTab] = useState<'info' | 'notes'>('info');
 
   const statusOptions: { value: ApplicationStatus; label: string; color: string }[] = [
@@ -26,21 +32,23 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
     { value: 'result', label: '결과', color: 'var(--success)' }
   ];
 
-  const handleAddNote = (noteData: Omit<JobNote, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
-    const newNote: JobNote = {
-      id: `note-${Date.now()}`,
-      userId: 'user-1',
-      applicationId: noteData.applicationId,
-      content: noteData.content,
-      noteType: noteData.noteType,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    setNotes(prev => [newNote, ...prev]);
+  const sourceLabels: Record<ApplicationSource, string> = {
+    wanted: '원티드',
+    saramin: '사람인',
+    jobkorea: '잡코리아',
+    linkedin: '링크드인',
+    remember: '리멤버',
+    direct: '회사 직접',
+    referral: '추천/소개',
+    other: '기타',
   };
 
-  const handleDeleteNote = (noteId: string) => {
-    setNotes(prev => prev.filter(n => n.id !== noteId));
+  const handleAddNote = async (noteData: Omit<JobNote, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    await createNote(noteData.content, noteData.noteType);
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    await removeNote(noteId);
   };
 
   const formatDate = (dateStr?: string) => {
@@ -191,6 +199,14 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
                     {formatDate(application.interviewAt)}
                   </div>
                 </div>
+                <div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    지원 경로
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: '500' }}>
+                    {application.source ? sourceLabels[application.source] : '-'}
+                  </div>
+                </div>
               </div>
 
               {/* 공고 링크 */}
@@ -235,6 +251,7 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
                         background: application.result === 'passed' ? 'var(--success)' : undefined,
                         color: application.result === 'passed' ? 'white' : undefined
                       }}
+                      onClick={() => onResultChange?.('passed')}
                     >
                       합격
                     </button>
@@ -244,6 +261,7 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
                         background: application.result === 'failed' ? 'var(--danger)' : undefined,
                         color: application.result === 'failed' ? 'white' : undefined
                       }}
+                      onClick={() => onResultChange?.('failed')}
                     >
                       불합격
                     </button>
@@ -251,6 +269,10 @@ const ApplicationDetailModal: React.FC<ApplicationDetailModalProps> = ({
                 </div>
               )}
             </>
+          ) : notesLoading ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+              노트 로딩 중...
+            </div>
           ) : (
             <NoteEditor
               applicationId={application.id}

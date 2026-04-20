@@ -9,6 +9,17 @@ interface SeriesPost {
   slug: string;
 }
 
+// API 응답의 시리즈 포스트 아이템 타입
+interface SeriesPostItem {
+  order_index: number;
+  post: {
+    id: string;
+    title: string;
+    slug: string;
+    status: string;
+  };
+}
+
 interface SeriesInfo {
   seriesId: string;
   seriesTitle: string;
@@ -49,8 +60,8 @@ const SeriesNavigation: React.FC<SeriesNavigationProps> = ({ postId }) => {
 
         const series = detailRes.data;
         const posts = (series.posts || [])
-          .filter((p: any) => p.post && p.post.status === 'published')
-          .map((p: any) => ({
+          .filter((p: SeriesPostItem) => p.post && p.post.status === 'published')
+          .map((p: SeriesPostItem) => ({
             id: p.post.id,
             title: p.post.title,
             slug: p.post.slug || p.post.id,

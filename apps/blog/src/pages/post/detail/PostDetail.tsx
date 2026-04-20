@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useConfirmModal, useToast } from '@sonhoseong/mfa-lib';
 import { useDeletePost, usePostDetail } from '@/hooks';
-import { CommentSection, LoadingSpinner, SeriesNavigation } from '@/components';
+import { CommentSection, LoadingSpinner, SeriesNavigation, SEOHead, ReadingProgress } from '@/components';
 import { LINK_PREFIX } from '@/config/constants';
 import { PostHeader, PostContent, PostFooter } from './components';
 
@@ -53,6 +53,17 @@ const PostDetail: React.FC = () => {
 
   return (
     <article className="post-detail">
+      <ReadingProgress targetSelector=".post-detail" />
+      <SEOHead
+        title={post.title}
+        description={post.excerpt || post.meta_description || undefined}
+        image={post.cover_image || undefined}
+        type="article"
+        publishedTime={post.created_at}
+        modifiedTime={post.updated_at}
+        author={post.author?.name}
+        tags={post.tags?.map(t => t.name)}
+      />
       <PostHeader post={post} />
       <PostContent postId={post.id} content={parsedContent} />
 
@@ -66,6 +77,8 @@ const PostDetail: React.FC = () => {
       <PostFooter
         postSlug={post.slug}
         postId={post.id}
+        postTitle={post.title}
+        postExcerpt={post.excerpt}
         onDelete={handleDelete}
       />
       {/* comment */}

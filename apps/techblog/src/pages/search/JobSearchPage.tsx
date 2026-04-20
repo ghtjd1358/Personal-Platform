@@ -1,54 +1,28 @@
-import React, { useState, useMemo } from 'react';
-import { mockJobs } from '@/data/mockJobs';
+import React, { useState } from 'react';
 import { Job } from '@/types/job';
+import { useJobs, useJobBookmarks } from '@/hooks';
 import JobCard from '@/components/JobCard';
 import JobDetailModal from '@/components/JobDetailModal';
 
 const JobSearchPage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('전체');
-  const [selectedSkill, setSelectedSkill] = useState('전체');
-  const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
-  // 지역 목록 추출
-  const locations = useMemo(() => {
-    const locs = [...new Set(mockJobs.map(job => job.location.split(' ')[0]))];
-    return ['전체', ...locs];
-  }, []);
+  // Use hooks for data fetching
+  const {
+    jobs,
+    isLoading,
+    locations,
+    skills,
+    currentSearch,
+    currentLocation,
+    currentSkill,
+    setSearch,
+    setLocation,
+    setSkill,
+    pagination,
+  } = useJobs();
 
-  // 기술 스택 목록 추출
-  const skills = useMemo(() => {
-    const allSkills = mockJobs.flatMap(job => job.skills);
-    const uniqueSkills = [...new Set(allSkills)];
-    return ['전체', ...uniqueSkills.slice(0, 10)];
-  }, []);
-
-  // 필터링된 채용공고
-  const filteredJobs = useMemo(() => {
-    return mockJobs.filter(job => {
-      const matchesQuery = searchQuery === '' ||
-        job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      const matchesLocation = selectedLocation === '전체' ||
-        job.location.includes(selectedLocation);
-
-      const matchesSkill = selectedSkill === '전체' ||
-        job.skills.includes(selectedSkill);
-
-      return matchesQuery && matchesLocation && matchesSkill;
-    });
-  }, [searchQuery, selectedLocation, selectedSkill]);
-
-  const toggleBookmark = (jobId: string) => {
-    setBookmarks(prev =>
-      prev.includes(jobId)
-        ? prev.filter(id => id !== jobId)
-        : [...prev, jobId]
-    );
-  };
+  const { isBookmarked, toggle: toggleBookmark } = useJobBookmarks();
 
   return (
     <div className="job-tracker-app">
@@ -68,15 +42,15 @@ const JobSearchPage: React.FC = () => {
             type="text"
             className="search-input"
             placeholder="회사명, 포지션, 기술 스택으로 검색..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={currentSearch}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <select
           className="input"
           style={{ width: '150px' }}
-          value={selectedLocation}
-          onChange={(e) => setSelectedLocation(e.target.value)}
+          value={currentLocation}
+          onChange={(e) => setLocation(e.target.value)}
         >
           {locations.map(loc => (
             <option key={loc} value={loc}>{loc}</option>
@@ -89,8 +63,8 @@ const JobSearchPage: React.FC = () => {
         {skills.map(skill => (
           <button
             key={skill}
-            className={`filter-tag ${selectedSkill === skill ? 'active' : ''}`}
-            onClick={() => setSelectedSkill(skill)}
+            className={`filter-tag ${currentSkill === skill ? 'active' : ''}`}
+            onClick={() => setSkill(skill)}
           >
             {skill}
           </button>
@@ -99,10 +73,15 @@ const JobSearchPage: React.FC = () => {
 
       {/* 검색 결과 */}
       <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-        총 <strong style={{ color: 'var(--primary)' }}>{filteredJobs.length}</strong>개의 채용공고
+        총 <strong style={{ color: 'var(--primary)' }}>{pagination.total}</strong>개의 채용공고
       </div>
 
-      {filteredJobs.length === 0 ? (
+      {isLoading ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">⏳</div>
+          <div className="empty-state-title">로딩 중...</div>
+        </div>
+      ) : jobs.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">🔍</div>
           <div className="empty-state-title">검색 결과가 없습니다</div>
@@ -110,11 +89,11 @@ const JobSearchPage: React.FC = () => {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '16px' }}>
-          {filteredJobs.map(job => (
+          {jobs.map(job => (
             <JobCard
               key={job.id}
               job={job}
-              isBookmarked={bookmarks.includes(job.id)}
+              isBookmarked={isBookmarked(job.id)}
               onBookmark={() => toggleBookmark(job.id)}
               onClick={() => setSelectedJob(job)}
             />
@@ -126,7 +105,7 @@ const JobSearchPage: React.FC = () => {
       {selectedJob && (
         <JobDetailModal
           job={selectedJob}
-          isBookmarked={bookmarks.includes(selectedJob.id)}
+          isBookmarked={isBookmarked(selectedJob.id)}
           onBookmark={() => toggleBookmark(selectedJob.id)}
           onClose={() => setSelectedJob(null)}
         />

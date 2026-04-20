@@ -3,12 +3,17 @@ import { Route, Routes } from 'react-router-dom'
 import { PREFIX } from '@/config/constants'
 import { RoutePath } from './paths'
 
-const HomePage = lazy(() => import('../home/HomePage'))
+// 이력서 둘러보기 (공개)
 const ResumeBrowsePage = lazy(() => import('../resumes/ResumeBrowsePage'))
 const ResumeDetailPage = lazy(() => import('../resumes/ResumeDetailPage'))
 const UserResumePage = lazy(() => import('../resumes/UserResumePage'))
-const MyPage = lazy(() => import('../mypage/MyPage'))
+
+// 마이페이지 (다중 이력서 관리)
+const MyResumesPage = lazy(() => import('../mypage/MyResumesPage'))
+const MyResumeDetailPage = lazy(() => import('../mypage/MyResumeDetailPage'))
 const ResumeEditorPage = lazy(() => import('../mypage/ResumeEditorPage'))
+
+// 관리자 페이지
 const SkillsListPage = lazy(() => import('../admin/skills/SkillsListPage'))
 const ExperienceListPage = lazy(() => import('../admin/experience/ExperienceListPage'))
 const ExperienceEditorPage = lazy(() => import('../admin/experience/ExperienceEditorPage'))
@@ -25,21 +30,22 @@ function RoutesAuthPages() {
     return (
         <Suspense fallback={<LoadingFallback />}>
             <Routes>
-                {/* 메인 페이지 = 이력서 랜딩 페이지 */}
-                <Route path="/" element={<HomePage />} />
-                {PREFIX && <Route path={PREFIX} element={<HomePage />} />}
+                {/* 메인 페이지 = 이력서 둘러보기 */}
+                <Route path="/" element={<ResumeBrowsePage />} />
+                {PREFIX && <Route path={PREFIX} element={<ResumeBrowsePage />} />}
 
                 {/* 이력서 둘러보기 (공개) */}
                 <Route path={`${PREFIX}${RoutePath.Resumes}`} element={<ResumeBrowsePage />} />
                 <Route path={`${PREFIX}${RoutePath.ResumeDetail}`} element={<ResumeDetailPage />} />
 
-                {/* 개인 이력서 페이지 (user_id로 조회) */}
+                {/* 개인 이력서 페이지 (user_id로 조회 - 대표 이력서) */}
                 <Route path={`${PREFIX}${RoutePath.UserResume}`} element={<UserResumePage />} />
 
-                {/* 마이페이지 (로그인 필요) */}
-                <Route path={`${PREFIX}${RoutePath.MyPage}`} element={<MyPage />} />
-                <Route path={`${PREFIX}${RoutePath.MyPageWrite}`} element={<ResumeEditorPage />} />
-                <Route path={`${PREFIX}${RoutePath.MyPageEdit}`} element={<ResumeEditorPage />} />
+                {/* 마이페이지 - 다중 이력서 관리 (로그인 필요) */}
+                <Route path={`${PREFIX}${RoutePath.MyResumes}`} element={<MyResumesPage />} />
+                <Route path={`${PREFIX}${RoutePath.MyResumeCreate}`} element={<ResumeEditorPage />} />
+                <Route path={`${PREFIX}${RoutePath.MyResumeDetail}`} element={<MyResumeDetailPage />} />
+                <Route path={`${PREFIX}${RoutePath.MyResumeEdit}`} element={<ResumeEditorPage />} />
 
                 {/* Skills */}
                 <Route path={`${PREFIX}${RoutePath.AdminSkills}`} element={<SkillsListPage />} />
@@ -56,7 +62,7 @@ function RoutesAuthPages() {
                 <Route path={`${PREFIX}${RoutePath.AdminProjectsNew}`} element={<ProjectsEditorPage />} />
                 <Route path={`${PREFIX}${RoutePath.AdminProjectsEdit}`} element={<ProjectsEditorPage />} />
 
-                <Route path="*" element={<HomePage />} />
+                <Route path="*" element={<ResumeBrowsePage />} />
             </Routes>
         </Suspense>
     )

@@ -1,38 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isHostApp } from '@sonhoseong/mfa-lib';
-import { mockApplications, mockCalendarEvents } from '@/data/mockJobs';
+import { useDashboardStats } from '@/hooks';
 import { ApplicationStatus } from '@/types/job';
+import { HeroSection } from '@/components';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const LINK_PREFIX = isHostApp() ? '/container/jobtracker' : '/jobtracker';
 
-  // 통계 계산
-  const stats = {
-    total: mockApplications.length,
-    interested: mockApplications.filter(a => a.status === 'interested').length,
-    applied: mockApplications.filter(a => a.status === 'applied').length,
-    interview: mockApplications.filter(a => a.status === 'interview').length,
-    result: mockApplications.filter(a => a.status === 'result').length,
-    passed: mockApplications.filter(a => a.result === 'passed').length,
-    failed: mockApplications.filter(a => a.result === 'failed').length
-  };
-
-  const passRate = stats.result > 0
-    ? Math.round((stats.passed / stats.result) * 100)
-    : 0;
-
-  // 다가오는 일정 (3개)
-  const upcomingEvents = mockCalendarEvents
-    .filter(e => new Date(e.date) >= new Date())
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, 3);
-
-  // 최근 지원 (3개)
-  const recentApplications = [...mockApplications]
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    .slice(0, 3);
+  // Use hook for dashboard data
+  const {
+    stats,
+    monthlyTrend,
+    upcomingEvents,
+    recentApplications,
+    isLoading,
+  } = useDashboardStats();
 
   const statusLabels: Record<ApplicationStatus, string> = {
     interested: '관심',
@@ -41,12 +25,29 @@ const HomePage: React.FC = () => {
     result: '결과'
   };
 
-  return (
-    <div className="job-tracker-app">
-      <div className="page-header">
-        <h1>취업 관리 대시보드</h1>
-        <p>지원 현황을 한눈에 확인하세요</p>
+  if (isLoading) {
+    return (
+      <div className="job-tracker-app">
+        <div className="page-header">
+          <h1>취업 관리 대시보드</h1>
+          <p>지원 현황을 한눈에 확인하세요</p>
+        </div>
+        <div className="empty-state">
+          <div className="empty-state-icon">⏳</div>
+          <div className="empty-state-title">로딩 중...</div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <>
+      <HeroSection />
+      <div className="job-tracker-app">
+        <div className="page-header">
+          <h1>취업 관리 대시보드</h1>
+          <p>지원 현황을 한눈에 확인하세요</p>
+        </div>
 
       {/* 통계 카드 */}
       <div className="stats-grid">
@@ -59,7 +60,7 @@ const HomePage: React.FC = () => {
           <div className="stat-label">면접 예정</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{passRate}%</div>
+          <div className="stat-value">{stats.passRate}%</div>
           <div className="stat-label">합격률</div>
         </div>
         <div className="stat-card">
@@ -67,6 +68,115 @@ const HomePage: React.FC = () => {
           <div className="stat-label">합격</div>
         </div>
       </div>
+
+      {/* 급여 통계 */}
+      {stats.salary.applicationsWithSalary > 0 && (
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <div className="card-header">
+            <h3 className="card-title">💰 급여 현황</h3>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+              {stats.salary.applicationsWithSalary}개 지원에서 급여 정보 확인
+            </span>
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '16px',
+            padding: '8px 0'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                평균 연봉 범위
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: '600', color: 'var(--primary)' }}>
+                {stats.salary.avgMinSalary.toLocaleString()}~{stats.salary.avgMaxSalary.toLocaleString()}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>만원</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                최저 제시 연봉
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: '600' }}>
+                {stats.salary.minSalary.toLocaleString()}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>만원</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                최고 제시 연봉
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: '600', color: 'var(--success)' }}>
+                {stats.salary.maxSalary.toLocaleString()}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>만원</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 월별 지원 트렌드 차트 */}
+      {monthlyTrend.length > 0 && (
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <div className="card-header">
+            <h3 className="card-title">월별 지원 현황</h3>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '160px', padding: '16px 0' }}>
+            {monthlyTrend.map((data, index) => {
+              const maxApplied = Math.max(...monthlyTrend.map(d => d.applied), 1);
+              const barHeight = (data.applied / maxApplied) * 100;
+              return (
+                <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ position: 'relative', width: '100%', height: '120px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    {data.applied > 0 && (
+                      <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--primary)', marginBottom: '4px' }}>
+                        {data.applied}
+                      </span>
+                    )}
+                    <div
+                      style={{
+                        width: '70%',
+                        height: `${barHeight}%`,
+                        minHeight: data.applied > 0 ? '8px' : '2px',
+                        background: data.applied > 0 ? 'linear-gradient(180deg, var(--primary), var(--primary-light, #60a5fa))' : 'var(--border)',
+                        borderRadius: '4px 4px 0 0',
+                        transition: 'height 0.5s ease',
+                        position: 'relative',
+                      }}
+                    >
+                      {data.passed > 0 && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            width: '100%',
+                            height: `${(data.passed / data.applied) * 100}%`,
+                            background: 'var(--success)',
+                            borderRadius: '0 0 4px 4px',
+                          }}
+                          title={`합격: ${data.passed}`}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{data.month}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              <span style={{ width: '12px', height: '12px', background: 'var(--primary)', borderRadius: '2px' }} />
+              지원
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              <span style={{ width: '12px', height: '12px', background: 'var(--success)', borderRadius: '2px' }} />
+              합격
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         {/* 단계별 현황 */}
@@ -94,7 +204,7 @@ const HomePage: React.FC = () => {
                   overflow: 'hidden'
                 }}>
                   <div style={{
-                    width: `${(stats[status] / stats.total) * 100}%`,
+                    width: stats.total > 0 ? `${(stats[status] / stats.total) * 100}%` : '0%',
                     height: '100%',
                     background: status === 'result' ? 'var(--success)' :
                                status === 'interview' ? 'var(--warning)' :
@@ -175,58 +285,69 @@ const HomePage: React.FC = () => {
               전체보기
             </button>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {recentApplications.map(app => (
-              <div
-                key={app.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '16px',
-                  background: 'var(--background)',
-                  borderRadius: 'var(--radius)'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div
-                    className="company-logo"
-                    style={{ width: '40px', height: '40px', fontSize: '14px' }}
-                  >
-                    {app.companyName[0]}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '15px', fontWeight: '600' }}>{app.companyName}</div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                      {app.position}
+          {recentApplications.length === 0 ? (
+            <div className="empty-state" style={{ padding: '40px 20px' }}>
+              <p>지원 내역이 없습니다</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {recentApplications.map(app => (
+                <div
+                  key={app.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '16px',
+                    background: 'var(--background)',
+                    borderRadius: 'var(--radius)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div
+                      className="company-logo"
+                      style={{ width: '40px', height: '40px', fontSize: '14px' }}
+                    >
+                      {app.companyName[0]}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '15px', fontWeight: '600' }}>{app.companyName}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                        {app.position}
+                        {app.salaryRange && (
+                          <span style={{ marginLeft: '8px', color: 'var(--primary)', fontSize: '12px' }}>
+                            💰 {app.salaryRange}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{
+                      padding: '4px 12px',
+                      borderRadius: '20px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      background: app.status === 'result'
+                        ? (app.result === 'passed' ? '#d1fae5' : '#fee2e2')
+                        : 'var(--surface)',
+                      color: app.status === 'result'
+                        ? (app.result === 'passed' ? '#065f46' : '#991b1b')
+                        : 'var(--text-primary)',
+                      border: app.status !== 'result' ? '1px solid var(--border)' : 'none'
+                    }}>
+                      {app.status === 'result'
+                        ? (app.result === 'passed' ? '합격' : '불합격')
+                        : statusLabels[app.status]}
+                    </span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      {new Date(app.updatedAt).toLocaleDateString('ko-KR')}
+                    </span>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    background: app.status === 'result'
-                      ? (app.result === 'passed' ? '#d1fae5' : '#fee2e2')
-                      : 'var(--surface)',
-                    color: app.status === 'result'
-                      ? (app.result === 'passed' ? '#065f46' : '#991b1b')
-                      : 'var(--text-primary)',
-                    border: app.status !== 'result' ? '1px solid var(--border)' : 'none'
-                  }}>
-                    {app.status === 'result'
-                      ? (app.result === 'passed' ? '합격' : '불합격')
-                      : statusLabels[app.status]}
-                  </span>
-                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    {new Date(app.updatedAt).toLocaleDateString('ko-KR')}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -261,6 +382,7 @@ const HomePage: React.FC = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };
 

@@ -24,6 +24,17 @@ export interface CompanyInfo {
 export type ApplicationStatus = 'interested' | 'applied' | 'interview' | 'result';
 export type ApplicationResult = 'pending' | 'passed' | 'failed';
 
+// 지원 경로
+export type ApplicationSource =
+  | 'wanted'      // 원티드
+  | 'saramin'     // 사람인
+  | 'jobkorea'    // 잡코리아
+  | 'linkedin'    // 링크드인
+  | 'remember'    // 리멤버
+  | 'direct'      // 회사 직접
+  | 'referral'    // 추천/소개
+  | 'other';      // 기타
+
 // 지원 현황
 export interface JobApplication {
   id: string;
@@ -38,6 +49,7 @@ export interface JobApplication {
   interviewAt?: string;
   salaryRange?: string;
   location?: string;
+  source?: ApplicationSource;
   createdAt: string;
   updatedAt: string;
 }

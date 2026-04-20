@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { mockApplications } from '@/data/mockJobs';
-import { JobApplication, ApplicationStatus } from '@/types/job';
+import { JobApplication, ApplicationStatus, ApplicationResult } from '@/types/job';
+import { useApplications } from '@/hooks';
 import ApplicationDetailModal from '@/components/ApplicationDetailModal';
+import CreateApplicationModal from '@/components/CreateApplicationModal';
 
 const TrackerPage: React.FC = () => {
-  const [applications, setApplications] = useState<JobApplication[]>(mockApplications);
+  const {
+    isLoading,
+    create,
+    updateStatus,
+    updateResult,
+    getByStatus,
+  } = useApplications();
+
   const [draggedCard, setDraggedCard] = useState<JobApplication | null>(null);
   const [selectedApp, setSelectedApp] = useState<JobApplication | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const columns: { id: ApplicationStatus; title: string }[] = [
     { id: 'interested', title: '관심' },
@@ -14,10 +23,6 @@ const TrackerPage: React.FC = () => {
     { id: 'interview', title: '면접' },
     { id: 'result', title: '결과' }
   ];
-
-  const getColumnApplications = (status: ApplicationStatus) => {
-    return applications.filter(app => app.status === status);
-  };
 
   const handleDragStart = (e: React.DragEvent, app: JobApplication) => {
     setDraggedCard(app);
@@ -29,16 +34,12 @@ const TrackerPage: React.FC = () => {
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e: React.DragEvent, targetStatus: ApplicationStatus) => {
+  const handleDrop = async (e: React.DragEvent, targetStatus: ApplicationStatus) => {
     e.preventDefault();
     if (!draggedCard) return;
 
-    // 상태 업데이트
-    setApplications(prev => prev.map(app =>
-      app.id === draggedCard.id
-        ? { ...app, status: targetStatus, updatedAt: new Date().toISOString().split('T')[0] }
-        : app
-    ));
+    // Update status via hook (optimistic update)
+    await updateStatus(draggedCard.id, targetStatus);
     setDraggedCard(null);
   };
 
@@ -46,14 +47,19 @@ const TrackerPage: React.FC = () => {
     setDraggedCard(null);
   };
 
-  const handleStatusChange = (appId: string, newStatus: ApplicationStatus) => {
-    setApplications(prev => prev.map(app =>
-      app.id === appId
-        ? { ...app, status: newStatus, updatedAt: new Date().toISOString().split('T')[0] }
-        : app
-    ));
+  const handleStatusChange = async (appId: string, newStatus: ApplicationStatus) => {
+    await updateStatus(appId, newStatus);
+    // Update selected app if it's the one being changed
     if (selectedApp?.id === appId) {
       setSelectedApp(prev => prev ? { ...prev, status: newStatus } : null);
+    }
+  };
+
+  const handleResultChange = async (appId: string, newResult: ApplicationResult) => {
+    await updateResult(appId, newResult);
+    // Update selected app if it's the one being changed
+    if (selectedApp?.id === appId) {
+      setSelectedApp(prev => prev ? { ...prev, result: newResult } : null);
     }
   };
 
@@ -65,6 +71,21 @@ const TrackerPage: React.FC = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="job-tracker-app">
+        <div className="page-header">
+          <h1>지원 현황</h1>
+          <p>드래그앤드롭으로 지원 상태를 관리하세요</p>
+        </div>
+        <div className="empty-state">
+          <div className="empty-state-icon">⏳</div>
+          <div className="empty-state-title">로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="job-tracker-app">
       <div className="page-header">
@@ -74,7 +95,7 @@ const TrackerPage: React.FC = () => {
 
       <div className="kanban-board">
         {columns.map(column => {
-          const columnApps = getColumnApplications(column.id);
+          const columnApps = getByStatus(column.id);
           return (
             <div
               key={column.id}
@@ -132,6 +153,20 @@ const TrackerPage: React.FC = () => {
                         </div>
                       )}
 
+                      {app.salaryRange && (
+                        <div style={{
+                          fontSize: '11px',
+                          color: 'var(--primary)',
+                          marginBottom: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <span>💰</span>
+                          {app.salaryRange}
+                        </div>
+                      )}
+
                       {app.appliedAt && (
                         <div className="kanban-card-date">
                           지원일: {formatDate(app.appliedAt)}
@@ -160,7 +195,7 @@ const TrackerPage: React.FC = () => {
 
       {/* 새 지원 추가 버튼 */}
       <div style={{ marginTop: '24px', textAlign: 'center' }}>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -175,6 +210,15 @@ const TrackerPage: React.FC = () => {
           application={selectedApp}
           onClose={() => setSelectedApp(null)}
           onStatusChange={(status) => handleStatusChange(selectedApp.id, status)}
+          onResultChange={(result) => handleResultChange(selectedApp.id, result)}
+        />
+      )}
+
+      {/* 새 지원 추가 모달 */}
+      {showCreateModal && (
+        <CreateApplicationModal
+          onClose={() => setShowCreateModal(false)}
+          onCreate={create}
         />
       )}
     </div>

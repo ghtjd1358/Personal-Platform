@@ -11,6 +11,8 @@ interface BlogStats {
 interface BlogDataOptions {
   limit?: number;
   categoryId?: string | null;
+  tagId?: string | null;
+  search?: string;
 }
 
 interface BlogData {
@@ -28,9 +30,9 @@ interface BlogData {
  */
 const useBlogData = (limitOrOptions: number | BlogDataOptions = 20): BlogData => {
   const options = typeof limitOrOptions === 'number'
-    ? { limit: limitOrOptions, categoryId: null }
-    : { limit: 20, ...limitOrOptions };
-  const { limit, categoryId } = options;
+    ? { limit: limitOrOptions, categoryId: null, tagId: null, search: '' }
+    : { limit: 20, categoryId: null, tagId: null, search: '', ...limitOrOptions };
+  const { limit, categoryId, tagId, search } = options;
   const [posts, setPosts] = useState<PostSummary[]>([]);
   const [series, setSeries] = useState<SeriesDetail[]>([]);
   const [stats, setStats] = useState<BlogStats>({
@@ -57,6 +59,8 @@ const useBlogData = (limitOrOptions: number | BlogDataOptions = 20): BlogData =>
       limit,
       page: 1,
       ...(categoryId && { categoryId }),
+      ...(tagId && { tagId }),
+      ...(search && { search }),
     };
 
     Promise.all([getPosts(searchParams), getSeries()])
@@ -74,7 +78,7 @@ const useBlogData = (limitOrOptions: number | BlogDataOptions = 20): BlogData =>
       })
       .catch(() => setError('블로그 데이터 로딩 중 오류가 발생했습니다.'))
       .finally(() => setIsLoading(false));
-  }, [limit, categoryId]);
+  }, [limit, categoryId, tagId, search]);
 
   // 추가 데이터 로드 (무한스크롤)
   const loadMore = useCallback(() => {
@@ -87,6 +91,8 @@ const useBlogData = (limitOrOptions: number | BlogDataOptions = 20): BlogData =>
       limit,
       page: nextPage,
       ...(categoryId && { categoryId }),
+      ...(tagId && { tagId }),
+      ...(search && { search }),
     };
 
     getPosts(searchParams)
@@ -101,7 +107,7 @@ const useBlogData = (limitOrOptions: number | BlogDataOptions = 20): BlogData =>
         console.error('추가 데이터 로딩 실패');
       })
       .finally(() => setIsLoadingMore(false));
-  }, [isLoadingMore, hasMore, page, limit, categoryId]);
+  }, [isLoadingMore, hasMore, page, limit, categoryId, tagId, search]);
 
   // 에러 발생 시 ErrorBoundary로 전파
   if (error) {

@@ -9,12 +9,16 @@ import { ScrollTopButton, getCurrentUser } from '@sonhoseong/mfa-lib';
 import { usePortfolios } from './hooks';
 import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
+import { HeroSection } from '@/components';
 import AOS from 'aos';
+
+type SortOption = 'latest' | 'popular' | 'alphabetical';
 
 const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>('latest');
   const { portfolios, featuredProjects, otherProjects, loading } = usePortfolios();
   const currentUser = getCurrentUser();
   const navigate = useNavigate();
@@ -28,9 +32,9 @@ const HomePage: React.FC = () => {
     return Array.from(techSet).sort();
   }, [portfolios]);
 
-  // 필터링된 프로젝트
+  // 필터링 및 정렬된 프로젝트
   const filteredProjects = useMemo(() => {
-    let projects = portfolios;
+    let projects = [...portfolios];
 
     // 검색어 필터
     if (searchQuery.trim()) {
@@ -51,8 +55,24 @@ const HomePage: React.FC = () => {
       );
     }
 
+    // 정렬
+    switch (sortBy) {
+      case 'popular':
+        projects.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+        break;
+      case 'alphabetical':
+        projects.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+        break;
+      case 'latest':
+      default:
+        projects.sort((a, b) =>
+          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        );
+        break;
+    }
+
     return projects;
-  }, [portfolios, searchQuery, selectedTech]);
+  }, [portfolios, searchQuery, selectedTech, sortBy]);
 
   // 필터된 프로젝트 분류
   const filteredFeatured = useMemo(() =>
@@ -99,81 +119,8 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="portfolio-module">
-      {/* 히어로 섹션 - 인스타그램 스타일 */}
-      <section className="insta-hero">
-        <div className="insta-hero-bg"></div>
-        <div className="container">
-          <div className="insta-hero-header" data-aos="fade-down">
-            <h1 className="insta-hero-title">
-              Creative <span className="gradient-text">Portfolio</span>
-            </h1>
-            <p className="insta-hero-subtitle">
-              아이디어를 현실로 만드는 개발자의 작업물입니다
-            </p>
-          </div>
-
-          {heroProjects.length > 0 && (
-            <div className="insta-hero-grid">
-              {heroProjects.map((project, index) => (
-                <article
-                  key={project.id}
-                  className={`insta-hero-card ${index === 0 ? 'primary' : 'secondary'}`}
-                  data-aos={index === 0 ? 'fade-right' : 'fade-left'}
-                  data-aos-delay={index * 200}
-                  onClick={() => handleProjectClick(project.id)}
-                >
-                  <div className="insta-card-image">
-                    {project.cover_image ? (
-                      <img src={project.cover_image} alt={project.title} />
-                    ) : (
-                      <div className="insta-card-placeholder">
-                        <span className="insta-card-emoji">{project.badge || '🚀'}</span>
-                      </div>
-                    )}
-                    <div className="insta-card-overlay">
-                      <div className="insta-card-stats">
-                        <span className="stat">
-                          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                          </svg>
-                          {project.view_count || 0}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="insta-card-content">
-                    <div className="insta-card-header">
-                      {project.category && (
-                        <span className="insta-card-category">{project.category.name}</span>
-                      )}
-                      {index === 0 && <span className="insta-featured-badge">Featured</span>}
-                    </div>
-                    <h2 className="insta-card-title">{project.title}</h2>
-                    <p className="insta-card-desc">{project.short_description || project.description}</p>
-                    <div className="insta-card-tech">
-                      {project.techStack?.slice(0, 4).map((tech) => (
-                        <span key={tech.id} className="insta-tech-tag">
-                          {tech.name}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="insta-card-footer">
-                      {project.detail?.period && (
-                        <span className="insta-card-meta">{project.detail.period}</span>
-                      )}
-                      <span className="insta-card-arrow">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M5 12h14M12 5l7 7-7 7"/>
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      {/* 히어로 섹션 - 비디오 배경 */}
+      <HeroSection />
 
       {/* 전체 프로젝트 그리드 */}
       <section id="portfolio" className="section">
@@ -185,25 +132,38 @@ const HomePage: React.FC = () => {
 
           {/* 검색 및 필터 */}
           <div className="filter-bar" data-aos="fade-up">
-            <div className="search-box">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                placeholder="프로젝트 검색..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button className="search-clear" onClick={() => setSearchQuery('')}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              )}
+            <div className="filter-bar-row">
+              <div className="search-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="프로젝트 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button className="search-clear" onClick={() => setSearchQuery('')}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <div className="sort-dropdown">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  aria-label="정렬 기준"
+                >
+                  <option value="latest">최신순</option>
+                  <option value="popular">인기순</option>
+                  <option value="alphabetical">이름순</option>
+                </select>
+              </div>
             </div>
             {allTechStacks.length > 0 && (
               <div className="tech-filter">

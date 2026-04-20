@@ -89,3 +89,17 @@ export const storage = {
     sessionStorage.clear();
   },
 };
+
+// Standalone helper functions (for direct import)
+export const isHostApp = (): boolean => storage.isHostApp();
+export const setHostApp = (): void => storage.setHostApp();
+export const removeHostApp = (): void => storage.removeHostApp();
+
+/**
+ * Get link prefix based on host app context
+ * @param basePath - Base path for the app (e.g., '/jobtracker', '/blog')
+ * @returns Full path with container prefix if in host app
+ */
+export const getLinkPrefix = (basePath: string): string => {
+  return storage.isHostApp() ? `/container${basePath}` : basePath;
+};

@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { experiencesApi } from '../../../network'
+import { LINK_PREFIX } from '@/config/constants'
+import { getCurrentUser } from '@sonhoseong/mfa-lib'
 
 const ExperienceEditorPage: React.FC = () => {
     const { id } = useParams()
+    const [searchParams] = useSearchParams()
+    const resumeId = searchParams.get('resumeId')
     const navigate = useNavigate()
+    const user = getCurrentUser()
     const isEdit = !!id
 
     const [form, setForm] = useState({
@@ -16,6 +21,11 @@ const ExperienceEditorPage: React.FC = () => {
         is_dev: true,
     })
     const [loading, setLoading] = useState(false)
+
+    // 쿼리 파라미터 유지
+    const listUrl = resumeId
+        ? `${LINK_PREFIX}/admin/experience?resumeId=${resumeId}`
+        : `${LINK_PREFIX}/admin/experience`
 
     useEffect(() => {
         if (isEdit && id) {
@@ -42,17 +52,21 @@ const ExperienceEditorPage: React.FC = () => {
         setLoading(true)
         const { error } = isEdit
             ? await experiencesApi.update(id!, form)
-            : await experiencesApi.create(form)
+            : await experiencesApi.create({
+                ...form,
+                user_id: user?.id,
+                resume_id: resumeId || undefined, // 새 경력 생성시 resume_id 포함
+            })
 
         setLoading(false)
         if (error) alert('저장 실패: ' + error.message)
-        else navigate('/admin/experience')
+        else navigate(listUrl)
     }
 
     return (
         <div className="admin-editor-page">
             <header className="admin-page-header">
-                <button type="button" onClick={() => navigate('/admin/experience')}>← 목록으로</button>
+                <button type="button" onClick={() => navigate(listUrl)}>← 목록으로</button>
                 <h1>{isEdit ? '경력 수정' : '새 경력 추가'}</h1>
             </header>
 
@@ -80,7 +94,7 @@ const ExperienceEditorPage: React.FC = () => {
                     <label><input type="checkbox" checked={form.is_dev} onChange={e => setForm({...form, is_dev: e.target.checked})} /> 개발직</label>
                 </div>
                 <div className="admin-form-actions">
-                    <button type="button" onClick={() => navigate('/admin/experience')}>취소</button>
+                    <button type="button" onClick={() => navigate(listUrl)}>취소</button>
                     <button type="submit" disabled={loading}>{loading ? '저장 중...' : '저장'}</button>
                 </div>
             </form>

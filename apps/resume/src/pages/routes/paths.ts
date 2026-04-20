@@ -1,4 +1,5 @@
 export enum RoutePath {
+    // 메인 = 이력서 둘러보기
     Home = '/',
 
     // 이력서 둘러보기 (공개)
@@ -6,10 +7,11 @@ export enum RoutePath {
     ResumeDetail = '/resumes/:id',
     UserResume = '/user/:userId',
 
-    // 마이페이지 (로그인 필요)
-    MyPage = '/mypage',
-    MyPageWrite = '/mypage/write',
-    MyPageEdit = '/mypage/edit',
+    // 마이페이지 (로그인 필요) - 다중 이력서 지원
+    MyResumes = '/mypage',                    // 내 이력서 목록
+    MyResumeCreate = '/mypage/create',        // 새 이력서 만들기
+    MyResumeDetail = '/mypage/:resumeId',     // 이력서 상세/관리
+    MyResumeEdit = '/mypage/:resumeId/edit',  // 이력서 수정
 
     // 관리자 페이지
     AdminSkills = '/admin/skills',

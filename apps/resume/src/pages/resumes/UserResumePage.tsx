@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { selectUser } from '@sonhoseong/mfa-lib';
 import { resumesApi } from '@/network';
 import type { ResumeDetail } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
@@ -8,7 +9,7 @@ import { LINK_PREFIX } from '@/config/constants';
 const UserResumePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const currentUser = useSelector((state: any) => state.app?.user);
+  const currentUser = useSelector(selectUser);
   const [resume, setResume] = useState<ResumeDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

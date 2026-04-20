@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { selectIsAuthenticated } from '@sonhoseong/mfa-lib';
 
 interface SectionEditButtonProps {
   /** 편집 페이지 경로 (예: '/admin/skills') */
@@ -18,8 +19,7 @@ export const SectionEditButton: React.FC<SectionEditButtonProps> = ({
   label = '편집'
 }) => {
   const navigate = useNavigate();
-  const accessToken = useSelector((state: any) => state.app?.accessToken);
-  const isAuthenticated = !!accessToken;
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   if (!isAuthenticated) {
     return null;

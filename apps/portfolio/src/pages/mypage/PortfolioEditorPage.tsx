@@ -21,6 +21,9 @@ interface TechStackItem {
     icon_color?: string;
 }
 
+// API 응답의 태그 타입 (객체 또는 문자열)
+type TagItem = { tag: string } | string;
+
 const PortfolioEditorPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -97,11 +100,11 @@ const PortfolioEditorPage: React.FC = () => {
             }
 
             if (p.tags && p.tags.length > 0) {
-                setTagsInput(p.tags.map((t: any) => t.tag || t).join(', '));
+                setTagsInput(p.tags.map((t: TagItem) => typeof t === 'string' ? t : t.tag).join(', '));
             }
 
             if (p.techStack && p.techStack.length > 0) {
-                setTechStack(p.techStack.map((t: any) => ({
+                setTechStack(p.techStack.map((t: TechStackItem) => ({
                     name: t.name,
                     icon: t.icon,
                     icon_color: t.icon_color,
