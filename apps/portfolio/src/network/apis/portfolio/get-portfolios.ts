@@ -1,6 +1,15 @@
 import { supabaseAxios } from '../../axios-instance';
+import { isAxiosError } from '../../axios-factory';
 import { ApiResponse, PageListResponse } from '../common';
 import { PortfolioSearchCondition, PortfolioSummary } from './types';
+
+/** Axios 에러에서 메시지 추출 */
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (isAxiosError(err)) {
+    return err.response?.data?.message || fallback;
+  }
+  return err instanceof Error ? err.message : fallback;
+}
 
 /**
  * 포트폴리오 목록을 조회합니다.
@@ -86,11 +95,11 @@ export async function getPortfolios(
         totalPages: Math.ceil(total / limit),
       },
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error fetching portfolios:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '포트폴리오 목록 조회 중 오류가 발생했습니다.'
+      error: getErrorMessage(err, '포트폴리오 목록 조회 중 오류가 발생했습니다.'),
     };
   }
 }

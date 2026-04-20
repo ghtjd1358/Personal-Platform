@@ -1,6 +1,15 @@
 import { supabaseAxios } from '../../axios-instance';
+import { isAxiosError } from '../../axios-factory';
 import { ApiResponse } from '../common';
 import { PortfolioSummary } from './types';
+
+/** Axios 에러에서 메시지 추출 */
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (isAxiosError(err)) {
+    return err.response?.data?.message || fallback;
+  }
+  return err instanceof Error ? err.message : fallback;
+}
 
 /**
  * 포트폴리오 생성 요청 타입
@@ -102,11 +111,11 @@ export async function createPortfolio(
     }
 
     return { success: true, data: createdPortfolio };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error creating portfolio:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '포트폴리오 생성 중 오류가 발생했습니다.',
+      error: getErrorMessage(err, '포트폴리오 생성 중 오류가 발생했습니다.'),
     };
   }
 }
@@ -178,11 +187,11 @@ export async function updatePortfolio(
     }
 
     return { success: true, data: data[0] };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error updating portfolio:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '포트폴리오 수정 중 오류가 발생했습니다.',
+      error: getErrorMessage(err, '포트폴리오 수정 중 오류가 발생했습니다.'),
     };
   }
 }
@@ -206,11 +215,11 @@ export async function deletePortfolio(
     await supabaseAxios.delete(`/portfolios?id=eq.${portfolioId}`);
 
     return { success: true, data: undefined };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error deleting portfolio:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '포트폴리오 삭제 중 오류가 발생했습니다.',
+      error: getErrorMessage(err, '포트폴리오 삭제 중 오류가 발생했습니다.'),
     };
   }
 }
@@ -233,11 +242,11 @@ export async function getMyPortfolios(
     );
 
     return { success: true, data: data || [] };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error fetching my portfolios:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '포트폴리오 목록 조회 중 오류가 발생했습니다.',
+      error: getErrorMessage(err, '포트폴리오 목록 조회 중 오류가 발생했습니다.'),
     };
   }
 }

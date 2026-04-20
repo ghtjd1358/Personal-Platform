@@ -1,4 +1,8 @@
-import { getSupabase } from '@sonhoseong/mfa-lib'
+import { getSupabase } from '@sonhoseong/mfa-lib';
+
+// ============================================
+// Response Types
+// ============================================
 
 /**
  * API 응답 타입
@@ -38,4 +42,46 @@ export type SortOrder = 'asc' | 'desc';
  */
 export type PostStatus = 'draft' | 'published' | 'archived';
 
-export { getSupabase }
+// ============================================
+// Helper Functions
+// ============================================
+
+/**
+ * Create success response
+ */
+export function successResponse<T>(data: T): ApiResponse<T> {
+  return {
+    success: true,
+    data,
+  };
+}
+
+/**
+ * Create error response
+ */
+export function errorResponse<T = never>(error: string): ApiResponse<T> {
+  return {
+    success: false,
+    error,
+  };
+}
+
+/**
+ * Calculate pagination metadata
+ */
+export function createPaginationMeta<T>(
+  data: T[],
+  total: number,
+  page: number,
+  limit: number
+): PageListResponse<T> {
+  return {
+    data,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+export { getSupabase };

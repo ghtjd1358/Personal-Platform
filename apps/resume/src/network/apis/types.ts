@@ -4,6 +4,7 @@
 export interface Experience {
   id: string;
   user_id: string;
+  resume_id: string | null; // 연결된 이력서 ID
   company: string;
   position: string;
   start_date: string;
@@ -29,6 +30,7 @@ export interface ExperienceInput {
   description?: string;
   order_index?: number;
   user_id?: string;
+  resume_id?: string; // 연결된 이력서 ID
 }
 
 /**
@@ -37,6 +39,7 @@ export interface ExperienceInput {
 export interface Portfolio {
   id: string;
   user_id: string;
+  resume_id: string | null; // 연결된 이력서 ID
   title: string;
   role: string;
   start_date: string;
@@ -62,4 +65,5 @@ export interface PortfolioInput {
   tech_stack?: string[];
   order_index?: number;
   user_id?: string;
+  resume_id?: string; // 연결된 이력서 ID
 }

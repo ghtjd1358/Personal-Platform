@@ -1,5 +1,10 @@
 import { getSupabase, ApiResponse } from '@/network/apis/common';
-import { PostDetail } from './types';
+import { PostDetail, TagDetail } from './types';
+
+/** 포스트-태그 조인 결과 타입 */
+interface PostTagJoin {
+  tag: TagDetail | null;
+}
 
 /**
  * 블로그 게시글 상세 정보를 조회합니다.
@@ -53,7 +58,7 @@ export async function getPostDetail(
       success: true,
       data: {
         ...data,
-        tags: postTags?.map((pt: any) => pt.tag) || [],
+        tags: postTags?.map((pt: PostTagJoin) => pt.tag).filter(Boolean) || [],
       },
     };
   } catch (err) {

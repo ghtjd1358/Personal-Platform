@@ -13,6 +13,8 @@ export interface ResumeProfile {
   github: string | null;
   blog: string | null;
   visibility: ResumeVisibility;
+  resume_name: string; // 이력서 이름 (예: "프론트엔드 이력서", "풀스택 이력서")
+  is_primary: boolean; // 대표 이력서 여부
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +44,7 @@ export interface ResumeDetail extends ResumeProfile {
 export interface ExperienceItem {
   id: string;
   user_id: string;
+  resume_id: string | null; // 연결된 이력서 ID
   company: string;
   position: string;
   start_date: string | null;
@@ -57,6 +60,7 @@ export interface ExperienceItem {
 export interface ProjectItem {
   id: string;
   user_id: string;
+  resume_id: string | null; // 연결된 이력서 ID
   title: string;
   role: string;
   start_date: string | null;
@@ -93,6 +97,8 @@ export interface CreateResumeRequest {
   github?: string;
   blog?: string;
   visibility?: ResumeVisibility;
+  resume_name?: string; // 이력서 이름 (기본값: '기본 이력서')
+  is_primary?: boolean; // 대표 이력서 여부
 }
 
 export interface UpdateResumeRequest {
@@ -104,6 +110,8 @@ export interface UpdateResumeRequest {
   github?: string | null;
   blog?: string | null;
   visibility?: ResumeVisibility;
+  resume_name?: string;
+  is_primary?: boolean;
 }
 
 // API Response types

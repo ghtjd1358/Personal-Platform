@@ -60,6 +60,32 @@ export async function getPosts(
       query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
     }
 
+    // 태그 필터링: blog_post_tags 테이블에서 해당 tagId를 가진 post_id 조회
+    if (tagId) {
+      const { data: taggedPostIds } = await supabase
+        .from('blog_post_tags')
+        .select('post_id')
+        .eq('tag_id', tagId);
+
+      const postIds = taggedPostIds?.map(t => t.post_id) || [];
+      if (postIds.length > 0) {
+        query = query.in('id', postIds);
+      } else {
+        // 해당 태그를 가진 포스트가 없으면 빈 결과 반환
+        return {
+          success: true,
+          data: {
+            data: [],
+            total: 0,
+            page,
+            limit,
+            totalPages: 0,
+            stats: { totalPosts: 0, totalViews: 0, totalLikes: 0, daysRunning: 0 },
+          },
+        };
+      }
+    }
+
     // 정렬 및 페이지네이션
     query = query
       .order('is_pinned', { ascending: false })

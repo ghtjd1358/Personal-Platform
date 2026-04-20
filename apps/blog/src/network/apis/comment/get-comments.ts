@@ -1,6 +1,11 @@
 import { getSupabase, ApiResponse } from '@/network/apis/common';
 import { CommentDetail } from './types';
 
+/** Supabase에서 반환하는 원시 댓글 타입 */
+interface RawComment extends Omit<CommentDetail, 'replies'> {
+  author: { id: string; name: string; avatar_url: string | null } | null;
+}
+
 /**
  * 블로그 댓글 목록을 조회합니다.
  */
@@ -31,8 +36,8 @@ export async function getComments(postId: string): Promise<ApiResponse<CommentDe
   }
 }
 
-function buildCommentTree(comments: any[]): CommentDetail[] {
-  const commentMap: Record<string, any> = {};
+function buildCommentTree(comments: RawComment[]): CommentDetail[] {
+  const commentMap: Record<string, CommentDetail> = {};
   const rootComments: CommentDetail[] = [];
 
   comments.forEach((comment) => {
@@ -43,7 +48,7 @@ function buildCommentTree(comments: any[]): CommentDetail[] {
     if (comment.parent_id) {
       const parent = commentMap[comment.parent_id];
       if (parent) {
-        parent.replies.push(commentMap[comment.id]);
+        parent.replies?.push(commentMap[comment.id]);
       }
     } else {
       rootComments.push(commentMap[comment.id]);

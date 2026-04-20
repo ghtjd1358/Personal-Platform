@@ -1,6 +1,15 @@
 import { supabaseAxios } from '../../axios-instance';
+import { isAxiosError } from '../../axios-factory';
 import { ApiResponse } from '../common';
 import { Comment, CreateCommentRequest, UpdateCommentRequest } from './types';
+
+/** Axios 에러에서 메시지 추출 */
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (isAxiosError(err)) {
+    return err.response?.data?.message || fallback;
+  }
+  return err instanceof Error ? err.message : fallback;
+}
 
 /**
  * 포트폴리오의 댓글 목록을 조회합니다.
@@ -20,11 +29,11 @@ export async function getComments(
     );
 
     return { success: true, data: data || [] };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error fetching comments:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '댓글 조회 중 오류가 발생했습니다.',
+      error: getErrorMessage(err, '댓글 조회 중 오류가 발생했습니다.'),
     };
   }
 }
@@ -51,11 +60,11 @@ export async function createComment(
     }
 
     return { success: true, data: data[0] };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error creating comment:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '댓글 작성 중 오류가 발생했습니다.',
+      error: getErrorMessage(err, '댓글 작성 중 오류가 발생했습니다.'),
     };
   }
 }
@@ -82,11 +91,11 @@ export async function updateComment(
     }
 
     return { success: true, data: data[0] };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error updating comment:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '댓글 수정 중 오류가 발생했습니다.',
+      error: getErrorMessage(err, '댓글 수정 중 오류가 발생했습니다.'),
     };
   }
 }
@@ -104,11 +113,11 @@ export async function deleteComment(
     await supabaseAxios.delete(`/portfolio_comments?id=eq.${commentId}`);
 
     return { success: true, data: undefined };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error deleting comment:', err);
     return {
       success: false,
-      error: err.response?.data?.message || '댓글 삭제 중 오류가 발생했습니다.',
+      error: getErrorMessage(err, '댓글 삭제 중 오류가 발생했습니다.'),
     };
   }
 }
@@ -139,7 +148,7 @@ export async function getCommentCount(
     }
 
     return { success: true, data: count };
-  } catch (err: any) {
+  } catch {
     return { success: true, data: 0 };
   }
 }

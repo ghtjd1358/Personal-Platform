@@ -28,6 +28,8 @@ export interface PortfolioSummary {
   is_public: boolean;
   /** 조회수 */
   view_count: number;
+  /** 좋아요 수 */
+  like_count?: number;
   /** 정렬 순서 */
   order_index: number;
   /** 데모 URL */
