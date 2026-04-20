@@ -1,18 +1,66 @@
 /**
- * Bootstrap - Host Container (단순화)
+ * Bootstrap - Host Container (Composition Root)
+ *
+ * 앱의 진입점. 모든 의존성 초기화를 여기에 집중:
+ * - Supabase 클라이언트 초기화
+ * - Axios Factory (인증/토큰/에러 처리) 연결
+ * - Redux Store 전역 노출 (Remote가 공유할 수 있도록)
+ * - Provider 래핑 후 App 마운트
+ *
+ * App.tsx는 순수 컴포넌트 로직만 담당하도록 side-effect는 모두 여기로.
  */
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { store, ToastProvider, ModalProvider, storage, initSupabase } from '@sonhoseong/mfa-lib';
+import {
+    store,
+    ToastProvider,
+    ModalProvider,
+    storage,
+    initSupabase,
+    initAxiosFactory,
+    exposeStore,
+    setAccessToken,
+    getSupabase,
+} from '@sonhoseong/mfa-lib';
 
+// 1. Host 플래그
 storage.setHostApp();
 
-// Supabase 초기화
+// 2. Supabase 초기화
 initSupabase({
     supabaseUrl: process.env.REACT_APP_SUPABASE_URL || '',
     supabaseAnonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || '',
 });
+
+// 3. Axios Factory (토큰/인증/에러 처리 연결)
+initAxiosFactory({
+    getAccessToken: () => store.getState().app.accessToken,
+    setAccessToken: (token: string) => store.dispatch(setAccessToken(token)),
+    refreshToken: async () => {
+        try {
+            const supabase = getSupabase();
+            const { data, error } = await supabase.auth.refreshSession();
+            if (error || !data.session) {
+                console.warn('[Axios Factory] 토큰 갱신 실패');
+                return null;
+            }
+            return data.session.access_token;
+        } catch {
+            return null;
+        }
+    },
+    onUnauthorized: () => {
+        store.dispatch({ type: 'app/logout' });
+        window.location.href = '/container/login';
+    },
+    onHttpError: (errorInfo) => {
+        console.error(`[HTTP Error] ${errorInfo.status}: ${errorInfo.message}`);
+    },
+});
+
+// 4. Store 전역 노출 (Remote가 window.__REDUX_STORE__로 접근)
+exposeStore(store);
 
 async function start() {
     const container = document.getElementById('root');
