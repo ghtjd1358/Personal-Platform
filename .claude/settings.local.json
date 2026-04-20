@@ -44,7 +44,8 @@
       "mcp__plugin_Notion_notion__notion-search",
       "mcp__plugin_supabase_supabase__list_tables",
       "mcp__plugin_supabase_supabase__list_migrations",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(grep:*)"
     ]
   },
   "outputStyle": "Learning"

@@ -165,7 +165,7 @@ module.exports = {
         '@sonhoseong/mfa-lib': {
           singleton: true,
           eager: true,
-          requiredVersion: '^1.3.9'
+          requiredVersion: '^1.3.10'
         }
       }
 
