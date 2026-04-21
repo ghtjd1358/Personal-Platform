@@ -47,8 +47,11 @@
 }
 
 .post-card:hover {
-    transform: rotate(0deg) translateY(-6px) scale(1.02);
-    box-shadow: 3px 7px 0 rgba(43, 30, 20, 0.15);
+    transform: rotate(0deg) translateY(-10px) scale(1.03);
+    /* 2겹 그림자: offset으로 "벽에서 떨어져 보이는" 입체감 + soft blur로 공간감 */
+    box-shadow:
+        6px 14px 0 rgba(43, 30, 20, 0.3),
+        12px 22px 36px rgba(43, 30, 20, 0.15);
     z-index: 5;
     transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
                 box-shadow 0.35s ease,

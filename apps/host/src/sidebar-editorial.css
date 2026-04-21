@@ -21,7 +21,18 @@
     background: var(--lnb-bone) !important;
     border-right: 1px solid var(--lnb-line) !important;
     box-shadow: inset -1px 0 0 rgba(43, 30, 20, 0.06);
-    position: relative;
+    /* 부드러운 "밀려나는" 느낌 — Material standard curve + 살짝 긴 duration */
+    transition: width 0.45s cubic-bezier(.4, 0, .2, 1) !important;
+    /* 접힐 때 텍스트가 좁은 폭에서 wrap되어 세로로 튀지 않게 클리핑 */
+    overflow: hidden !important;
+}
+
+/* 텍스트·서브 타이틀이 전환 중 한 줄 유지 */
+.app-lnb-text,
+.app-lnb-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* 사이드바 전체에 은은한 fiber 질감 */

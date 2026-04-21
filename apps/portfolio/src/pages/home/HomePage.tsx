@@ -11,6 +11,7 @@ import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
 import { HeroSection } from '@/components';
 import AOS from 'aos';
+import './HomePage.editorial.css';
 
 type SortOption = 'latest' | 'popular' | 'alphabetical';
 
