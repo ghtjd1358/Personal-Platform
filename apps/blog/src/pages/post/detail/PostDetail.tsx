@@ -5,6 +5,7 @@ import { useDeletePost, usePostDetail } from '@/hooks';
 import { CommentSection, LoadingSpinner, SeriesNavigation, SEOHead, ReadingProgress } from '@/components';
 import { LINK_PREFIX } from '@/config/constants';
 import { PostHeader, PostContent, PostFooter } from './components';
+import './PostDetail.editorial.css';
 
 const PostDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();

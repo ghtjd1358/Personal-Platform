@@ -9,7 +9,6 @@ export * from './BlogHeader';
 export * from './TableOfContents';
 export * from './LikeButton';
 export * from './CommentSection';
-export * from './ScrollIndicator';
 export * from './ReadingProgress';
 export * from './mypage';
 export * from './loading';

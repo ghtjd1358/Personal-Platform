@@ -1,0 +1,82 @@
+/* 전역 테마 shift — 흰색 bg → 한지 톤
+ * App.css의 기존 --color-bg/--color-bg-secondary 를 한지 팔레트로 오버라이드.
+ * body/html 도 같이 묶어서 어느 구석도 순백이 남지 않게.
+ */
+
+:root {
+    /* App.css override — Dashboard의 --bone과 동일하게 통일 (user 요청: 전체 dashboard 배경 기준) */
+    --color-bg: #F4EAD5 !important;             /* 한지 미색 (Dashboard 기준) */
+    --color-bg-secondary: #F4EAD5 !important;   /* primary와 동일하게 — 배경 완전 일관화 */
+
+    /* 새 의미 토큰 — editorial 쪽에서도 일관성 위해 노출 */
+    --hanji: #F4EAD5;
+    --hanji-cream: #FBF5E3;
+    --hanji-line: #D4C4A8;
+    --sumi: #2B1E14;
+    --sumi-mute: #8B7355;
+    --jaseong: #8C1E1A;           /* 朱紅 — 인장 */
+    --royal-gold: #C8A35C;        /* 왕실 황 */
+    --straw: #E6D4A3;             /* 볏짚 */
+}
+
+html,
+body {
+    background: var(--hanji) !important;
+    color: var(--sumi);
+}
+
+/* App.css line 80의 하드코딩된 #ffffff 덮어쓰기 (컨테이너 내부 흰 배경)
+ * 실제 요소는 모르는 상태라 body 기준으로 통일 */
+
+/* === 일반적인 흰 bg 패턴 전부 한지로 === */
+.app-container,
+.main-content,
+.content-wrapper {
+    background: var(--hanji) !important;
+}
+
+/* 카드/패널류 — 흔히 쓰는 흰색 바탕을 크림 한지로 */
+.card,
+.panel,
+.surface,
+[class*="-card"]:not(.post-card):not([class*="card-title"]):not([class*="card-body"]):not([class*="card-footer"]):not([class*="card-thumbnail"]) {
+    background-color: var(--hanji-cream);
+}
+
+/* 입력 필드 — 흰 → 밝은 한지 */
+input,
+textarea,
+select {
+    background-color: var(--hanji-cream);
+    color: var(--sumi);
+    border-color: var(--hanji-line);
+}
+
+/* 모달/다이얼로그 컨테이너 (mfa-lib가 흰 bg일 수 있음) */
+.modal-content,
+.dialog-content,
+[class*="modal-body"] {
+    background-color: var(--hanji-cream) !important;
+}
+
+/* 외부 스크롤바 색도 warm 톤으로 */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--hanji);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--hanji-line);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sumi-mute);
+}
+
+/* 선택 하이라이트 — 주홍 */
+::selection {
+    background: rgba(140, 30, 26, 0.25);
+    color: var(--sumi);
+}

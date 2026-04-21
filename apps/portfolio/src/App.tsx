@@ -37,13 +37,12 @@ function App() {
         });
     }, []);
 
+    // host 모드에선 host의 <main className="main-content">가 이미 감싸고 있으므로 중첩 피함
     return (
-        <main className="main-content">
-            <Suspense fallback={<RouteFallback />}>
-                {!isAuthenticated && <RoutesGuestPages />}
-                {isAuthenticated && <RoutesAuthPages />}
-            </Suspense>
-        </main>
+        <Suspense fallback={<RouteFallback />}>
+            {!isAuthenticated && <RoutesGuestPages />}
+            {isAuthenticated && <RoutesAuthPages />}
+        </Suspense>
     );
 }
 

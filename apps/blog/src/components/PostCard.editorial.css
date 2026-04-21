@@ -1,0 +1,204 @@
+/* PostCard Editorial Skin — "조선 게시판 벽보"
+ * 카드마다 살짝 다른 각도, 상단에 종이테이프, 썸네일 없을 땐 한지+먹 initial
+ * 왕세자 팔레트 (먹색 + 한지 + 인장주홍)
+ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
+
+.post-card {
+    --pc-ink: #2B1E14;
+    --pc-bone: #F4EAD5;
+    --pc-cream: #FBF5E3;
+    --pc-accent: #8C1E1A;
+    --pc-mute: #8B7355;
+    --pc-line: #D4C4A8;
+    --rest-angle: 0deg;   /* 쉬는 각도 — nth-child로 재지정 */
+
+    background: var(--pc-cream) !important;
+    border: 1px solid var(--pc-ink) !important;
+    border-radius: 3px !important;
+    position: relative;
+    transform: rotate(var(--rest-angle));
+    transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+                box-shadow 0.35s ease,
+                z-index 0s linear 0.35s;
+    box-shadow: 2px 4px 0 rgba(43, 30, 20, 0.1);
+    overflow: visible !important;
+    z-index: 1;
+}
+
+/* 카드마다 다른 각도 — 4n 패턴으로 "무분별한 벽보" 느낌 */
+.post-card:nth-child(4n+1) { --rest-angle: -1.2deg; }
+.post-card:nth-child(4n+2) { --rest-angle: 0.9deg; }
+.post-card:nth-child(4n+3) { --rest-angle: -0.5deg; }
+.post-card:nth-child(4n)   { --rest-angle: 1.1deg; }
+
+/* scroll 진입 시 흔들리며 나타남 — animate-on-scroll + animate-visible 체인 사용 */
+.post-card.animate-on-scroll.animate-visible {
+    animation: card-sway-in 1.35s cubic-bezier(.25, .8, .3, 1.08) forwards;
+}
+
+@keyframes card-sway-in {
+    0%   { transform: translateY(24px) rotate(var(--rest-angle)); }
+    28%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 3.5deg)); }
+    48%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 2.4deg)); }
+    68%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 1.3deg)); }
+    84%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 0.6deg)); }
+    100% { transform: translateY(0) rotate(var(--rest-angle)); }
+}
+
+.post-card:hover {
+    transform: rotate(0deg) translateY(-6px) scale(1.02);
+    box-shadow: 3px 7px 0 rgba(43, 30, 20, 0.15);
+    z-index: 5;
+    transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+                box-shadow 0.35s ease,
+                z-index 0s linear;
+    animation: none;   /* hover 시 sway 중단, hover transform 우선 */
+}
+
+/* 종이테이프 — 상단 중앙에 비스듬히 걸친 느낌 */
+.post-card::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-4deg);
+    width: 64px;
+    height: 18px;
+    background:
+        repeating-linear-gradient(
+            -45deg,
+            rgba(140, 30, 26, 0.22) 0 3px,
+            rgba(140, 30, 26, 0.32) 3px 6px
+        );
+    border-left: 1px dashed rgba(43, 30, 20, 0.28);
+    border-right: 1px dashed rgba(43, 30, 20, 0.28);
+    box-shadow: 0 1px 2px rgba(43, 30, 20, 0.15);
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.post-card:nth-child(3n+2)::before {
+    transform: translateX(-50%) rotate(3deg);
+    left: 40%;
+}
+.post-card:nth-child(3n)::before {
+    transform: translateX(-50%) rotate(-6deg);
+    left: 60%;
+}
+
+/* 썸네일 컨테이너 */
+.post-card .post-card-thumbnail {
+    background: var(--pc-bone);
+    border-bottom: 1px solid var(--pc-line);
+}
+
+/* 썸네일 placeholder — 이미지 없을 때: 한지 + 큼직한 먹 initial (Fraunces italic) */
+.post-card .post-card-thumbnail-placeholder {
+    background:
+        radial-gradient(ellipse 300px 200px at 30% 40%, rgba(210, 178, 128, 0.35) 0%, transparent 65%),
+        radial-gradient(ellipse 260px 180px at 75% 70%, rgba(195, 165, 115, 0.25) 0%, transparent 60%),
+        linear-gradient(135deg, var(--pc-bone) 0%, #EFE3C8 100%) !important;
+    color: var(--pc-ink) !important;
+    position: relative;
+    overflow: hidden;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 180px;
+}
+
+/* placeholder 위 미묘한 fiber 질감 */
+.post-card .post-card-thumbnail-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015 0.85' numOctaves='2' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size: cover;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+
+.post-card .post-card-thumbnail-placeholder span {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-size: clamp(64px, 10vw, 96px) !important;
+    font-weight: 400 !important;
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1 !important;
+    color: var(--pc-ink) !important;
+    opacity: 0.22;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 0 rgba(140, 30, 26, 0.08);
+}
+
+/* body — 본문 typography */
+.post-card .post-card-body {
+    padding: 20px 20px 16px;
+    background: var(--pc-cream);
+}
+
+.post-card .post-card-title {
+    font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+    color: var(--pc-ink) !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1.3 !important;
+    margin: 0 0 10px !important;
+}
+
+.post-card .post-card-excerpt {
+    font-family: 'Pretendard Variable', sans-serif !important;
+    color: var(--pc-mute) !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    margin: 0 0 14px !important;
+}
+
+.post-card .post-card-date {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    color: var(--pc-mute) !important;
+    font-variant-numeric: tabular-nums;
+}
+
+/* footer — stats */
+.post-card .post-card-footer {
+    border-top: 1px dashed var(--pc-line) !important;
+    padding: 10px 20px !important;
+    background: var(--pc-cream);
+}
+
+.post-card .post-card-stats {
+    display: flex !important;
+    gap: 16px !important;
+}
+
+.post-card .post-card-stat {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    color: var(--pc-mute) !important;
+    letter-spacing: 0.1em;
+    font-variant-numeric: tabular-nums;
+}
+
+.post-card .post-card-stat svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .post-card,
+    .post-card:hover {
+        transform: none;
+        transition: box-shadow 0.2s ease;
+    }
+}

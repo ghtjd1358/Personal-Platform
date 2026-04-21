@@ -84,7 +84,9 @@ module.exports = {
     filename: '[name].[contenthash].js',
     path:
         path.resolve(__dirname, 'dist'),
-    // publicPath: 'auto' → 명시적으로 '/'로 설정 (Vercel 배포 호환)
+    // Host는 루트 기준 절대경로 '/'를 사용. 'auto'로 두면 nested path(/container/blog)에서 새로고침 시
+    // <script src="main.xxx.js">가 상대경로로 해석돼 /container/main.xxx.js 요청 → 404 → 부팅 실패.
+    // Remote는 host에 의해 로드되므로 'auto'가 필요하지만, host는 자기 도메인에서만 뜨므로 '/'가 안전.
     publicPath: '/',
     clean: true
   },

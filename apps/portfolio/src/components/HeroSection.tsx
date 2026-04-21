@@ -1,79 +1,57 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
+import '@/styles/editorial.css';
 
-const ScrollIndicator: React.FC = () => (
-  <div className="hero-scroll-indicator">
-    <div className="scroll-mouse">
-      <span className="scroll-wheel" />
-    </div>
-    <div className="scroll-arrow">
-      <span />
-    </div>
-  </div>
+const Grain: React.FC = () => (
+  <svg className="editorial-grain" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false">
+    <filter id="portfolio-hero-grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.92" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix values="0 0 0 0 0.15  0 0 0 0 0.10  0 0 0 0 0.07  0 0 0 0.55 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#portfolio-hero-grain)" />
+  </svg>
+);
+
+const Fiber: React.FC = () => (
+  <svg className="editorial-fiber" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false">
+    <filter id="portfolio-hero-fiber">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.85" numOctaves="2" seed="23" stitchTiles="stitch" />
+      <feColorMatrix values="0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.4 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#portfolio-hero-fiber)" />
+  </svg>
 );
 
 const HeroSection: React.FC = () => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (isVisible && video) {
-      video.load();
-      video.play().catch(() => {});
-    }
-  }, [isVisible]);
-
   return (
-    <section className="hero portfolio-hero">
-      <div className="hero-media">
-        <video
-          ref={videoRef}
-          className="hero-media-content"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="none"
-          poster="/cloude.webp"
-          onLoadedData={() => setIsLoaded(true)}
-          style={{ opacity: isLoaded ? 1 : 0.7, transition: 'opacity 0.5s ease' }}
-        >
-          {isVisible && <source src="/hero-video.mp4" type="video/mp4" />}
-        </video>
-        <div className="hero-overlay" />
-      </div>
-
-      <div className="container">
-        <div className="hero-content">
-          <h1 className="hero-title">
-            Creative Portfolio
+    <section className="editorial-hero">
+      <Grain />
+      <Fiber />
+      <div className="editorial-inner">
+        <div className="editorial-head">
+          <span className="editorial-eyebrow">WORKS // 2026 — SELECTED</span>
+          <h1 className="editorial-title">
+            Selected,<br />
+            <em>Shown.</em>
           </h1>
-          <p className="hero-desc">
-            아이디어를 현실로 만드는 개발자의 작업물입니다.
+          <p className="editorial-sub">
+            아이디어를 현실로 만드는 과정의 집합 — 카드, 모달, 스크롤 인터랙션.
           </p>
         </div>
+        <div className="editorial-side">
+          <div className="editorial-meta-row">
+            <span className="editorial-meta-label">COLLECTION</span>
+            <span className="editorial-meta-value">SELECTED</span>
+          </div>
+          <div className="editorial-meta-row">
+            <span className="editorial-meta-label">YEARS</span>
+            <span className="editorial-meta-value">2023–2026</span>
+          </div>
+          <div className="editorial-meta-row">
+            <span className="editorial-meta-label">MEDIA</span>
+            <span className="editorial-meta-value">WEB</span>
+          </div>
+        </div>
       </div>
-
-      <ScrollIndicator />
     </section>
   );
 };

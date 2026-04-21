@@ -7,8 +7,9 @@
 - **실행:** `npm run dev:resume` (루트) 또는 `npm start` (앱 내)
 
 ## Module Federation
-- **Name:** `resume`
-- **Exposes:** `./App` → Host에서 로드
+- **Name (webpack):** `remote1` (`apps/resume/webpack.common.js`)
+- **Host import alias:** `@resume` → `remote1/remoteEntry.js` (host webpack remotes 매핑)
+- **Exposes:** `./App` (`src/exposes/App.tsx`), `./LnbItems` (`src/exposes/lnb-items.tsx`)
 
 ## 주요 기능
 - 이력서 표시
@@ -17,6 +18,6 @@
 
 ## Host 연동
 ```typescript
-// Host에서 사용 시
-const ResumeApp = lazy(() => import('resume/App'));
+// Host에서 사용 시 (host import alias 기준)
+const ResumeApp = lazy(() => import('@resume/App'));
 ```

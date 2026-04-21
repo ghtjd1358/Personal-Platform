@@ -14,6 +14,7 @@ import {
   ProfileEditModal,
   TabType
 } from '@/components';
+import './MyPage.editorial.css';
 
 const MyPage: React.FC = () => {
   const { userId } = useParams<{ userId?: string }>();

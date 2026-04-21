@@ -1,0 +1,339 @@
+/* Editorial dialect — Dashboard와 공유되는 편집체 토큰
+ * Fraunces display + Pretendard body + JetBrains Mono meta
+ * navy / sky / slate / offwhite / grain paper
+ * 각 remote에 동일 내용 배포 (lib 빌드 회피 — 추후 @mfa-lib로 합쳐도 됨)
+ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:ital,wght@0,400..800;1,400..800&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css');
+
+.editorial-hero {
+    /* 왕세자 팔레트 — 한지 미색 + 먹색 + 인장 주홍 */
+    --ink: #2B1E14;           /* 먹색 (sumi) */
+    --bone: #F4EAD5;          /* 한지 미색 */
+    --cream: #FBF5E3;         /* 밝은 한지 (card bg) */
+    --accent: #8C1E1A;        /* 조선 인장 주홍 */
+    --accent-deep: #6B1512;
+    --mute: #8B7355;          /* 아교/warm brown-gray */
+    --line: #D4C4A8;          /* warm paper border */
+
+    /* Dashboard와 동일한 플랫 한지 배경 — 얼룩 없이 clean. grain+fiber overlay만 질감 담당 */
+    background: var(--bone);
+    color: var(--ink);
+    padding: clamp(56px, 8vw, 120px) clamp(28px, 5vw, 80px);
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    letter-spacing: -0.005em;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 한지 섬유 오버레이 — 가로로 긴 fiber 질감 (baseFrequency의 X/Y 비대칭) */
+.editorial-fiber {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    z-index: 1;
+}
+
+
+.editorial-grain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.28;
+    mix-blend-mode: multiply;
+    z-index: 1;
+}
+
+.editorial-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--ink);
+}
+
+.editorial-head {
+    opacity: 0;
+    animation: editFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) .1s forwards;
+    min-width: 0;
+}
+
+.editorial-eyebrow {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+}
+
+.editorial-welcome {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--ink);
+    padding: 6px 12px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.editorial-title {
+    font-family: 'Fraunces', 'Pretendard Variable', serif;
+    font-size: clamp(48px, 8vw, 120px);
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    margin: 0;
+    font-variation-settings: "opsz" 144, "SOFT" 100;
+    color: var(--ink);
+}
+
+.editorial-title em,
+.editorial-title .accent {
+    font-style: italic;
+    color: var(--accent);
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+
+.editorial-sub {
+    max-width: 560px;
+    margin: 24px 0 0;
+    font-family: 'Fraunces', 'Pretendard Variable', serif;
+    font-style: italic;
+    font-size: clamp(16px, 1.4vw, 19px);
+    font-weight: 350;
+    line-height: 1.55;
+    color: var(--mute);
+    white-space: pre-line;
+}
+
+/* META SIDE */
+.editorial-side {
+    min-width: 220px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    opacity: 0;
+    animation: editFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) .3s forwards;
+}
+
+.editorial-meta-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(43, 30, 20, 0.2);
+}
+
+.editorial-meta-row:first-child {
+    border-top: 1px dashed rgba(43, 30, 20, 0.2);
+}
+
+.editorial-meta-label {
+    color: var(--mute);
+    letter-spacing: 0.18em;
+    font-weight: 500;
+}
+
+.editorial-meta-value {
+    color: var(--ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* EXTRAS (아래 CTA / 연락처 등) */
+.editorial-extras {
+    position: relative;
+    z-index: 2;
+    max-width: 1400px;
+    margin: 40px auto 0;
+    opacity: 0;
+    animation: editFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) .5s forwards;
+}
+
+/* CONTACT ROW (이력서용) */
+.editorial-contacts {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.editorial-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    text-decoration: none;
+    color: var(--ink);
+    transition: transform 0.3s cubic-bezier(.2, .7, .2, 1);
+}
+
+.editorial-contact:hover {
+    transform: translateY(-2px);
+}
+
+.editorial-contact-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--ink);
+    transition: color 0.3s ease;
+}
+
+.editorial-contact:hover .editorial-contact-icon {
+    color: var(--accent);
+}
+
+.editorial-contact-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mute);
+    font-weight: 500;
+}
+
+/* OUTLINE 버튼 */
+.editorial-cta-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+}
+
+.editorial-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+    font-family: 'Pretendard Variable', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.editorial-btn:hover:not(:disabled) {
+    background: var(--ink);
+    color: var(--bone);
+}
+
+.editorial-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.editorial-btn-icon {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* NATIVE <select> 커스텀 (editorial dialect)
+ * appearance:none으로 OS 기본 UI 제거 후 SVG 화살표 오버레이
+ */
+.editorial-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: #2B1E14;
+    background-color: #FBF5E3;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232B1E14' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px 16px;
+    border: 1px solid #2B1E14;
+    border-radius: 2px;
+    padding: 10px 44px 10px 16px;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+    min-width: 160px;
+}
+
+.editorial-select:hover {
+    background-color: rgba(43, 30, 20, 0.05);
+}
+
+.editorial-select:focus-visible {
+    outline: 2px solid #8C1E1A;
+    outline-offset: 2px;
+}
+
+.editorial-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.editorial-select option {
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    color: #2B1E14;
+    background-color: #FBF5E3;
+}
+
+/* ANIMATIONS */
+@keyframes editFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .editorial-head,
+    .editorial-side,
+    .editorial-extras {
+        animation: none;
+        opacity: 1;
+    }
+    .editorial-contact,
+    .editorial-btn {
+        transition: none;
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 860px) {
+    .editorial-inner {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    .editorial-side {
+        min-width: 0;
+    }
+}

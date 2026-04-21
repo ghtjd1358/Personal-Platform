@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser, ScrollTopButton } from '@sonhoseong/mfa-lib';
+import { selectAccessToken, getCurrentUser, ScrollTopButton, storage } from '@sonhoseong/mfa-lib';
 import { getPortfolioDetail, incrementViewCount } from '@/network/apis/portfolio';
 import { PortfolioSummary } from '@/network/apis/portfolio/types';
 import { Comments, ShareButton, LikeButton } from '@/components';
@@ -307,8 +307,8 @@ const ProjectDetail: React.FC = () => {
       {/* 댓글 섹션 */}
       <Comments portfolioId={project.id} />
 
-      {/* 스크롤 탑 버튼 */}
-      <ScrollTopButton />
+      {/* 스크롤 탑 버튼 - host 모드에선 host가 자체 제공하므로 숨김 */}
+      {!storage.isHostApp() && <ScrollTopButton />}
     </div>
   );
 };

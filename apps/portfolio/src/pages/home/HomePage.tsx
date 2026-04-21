@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ScrollTopButton, getCurrentUser } from '@sonhoseong/mfa-lib';
+import { ScrollTopButton, getCurrentUser, storage } from '@sonhoseong/mfa-lib';
 import { usePortfolios } from './hooks';
 import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
@@ -155,6 +155,7 @@ const HomePage: React.FC = () => {
               </div>
               <div className="sort-dropdown">
                 <select
+                  className="editorial-select"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                   aria-label="정렬 기준"
@@ -238,22 +239,24 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 플로팅 버튼 영역 */}
-      <div className="floating-buttons">
-        <ScrollTopButton />
-        {currentUser && (
-          <button
-            className="floating-user-btn"
-            onClick={() => navigate(`${LINK_PREFIX}/mypage`)}
-            title="내 포트폴리오"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </button>
-        )}
-      </div>
+      {/* 플로팅 버튼 영역 - host 모드에선 host가 제공하는 영역과 겹치지 않도록 숨김 */}
+      {!storage.isHostApp() && (
+        <div className="floating-buttons">
+          <ScrollTopButton />
+          {currentUser && (
+            <button
+              className="floating-user-btn"
+              onClick={() => navigate(`${LINK_PREFIX}/mypage`)}
+              title="내 포트폴리오"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 포트폴리오 상세 모달 */}
       {selectedPortfolioId && (

@@ -7,8 +7,9 @@
 - **실행:** `npm run dev:techblog` (루트) 또는 `npm start` (앱 내)
 
 ## Module Federation
-- **Name:** `techblog` (remote4)
-- **Exposes:** `./App` → Host에서 로드
+- **Name (webpack):** `jobtracker` (`apps/techblog/webpack.common.js`) — 앱 이름은 techblog지만 MF 레벨에서는 `jobtracker`
+- **Host import alias:** `@jobtracker` → `jobtracker/remoteEntry.js`
+- **Exposes:** `./App` (`src/App.tsx`), `./LnbItems` (`src/exposes/lnb-items.ts`)
 
 ## 주요 기능
 - 기술 블로그 포스팅

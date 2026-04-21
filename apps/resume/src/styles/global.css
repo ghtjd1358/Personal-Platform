@@ -12,16 +12,16 @@ html {
 }
 
 :root {
-  /* Colors - 차분한 네이비 */
-  --color-primary: #1E3A5F;
-  --color-secondary: #64748B;
-  --color-accent: #0EA5E9;
-  --color-bg: #FFFFFF;
-  --color-bg-secondary: #F8FAFC;
-  --color-text: #1E3A5F;
-  --color-text-secondary: #64748B;
-  --color-text-muted: #94A3B8;
-  --color-border: #E2E8F0;
+  /* Colors - editorial (먹색 + 한지 + 인장 주홍) — Dashboard 기준 통일 */
+  --color-primary: #2B1E14;
+  --color-secondary: #8B7355;
+  --color-accent: #8C1E1A;
+  --color-bg: #F4EAD5;
+  --color-bg-secondary: #FBF5E3;
+  --color-text: #2B1E14;
+  --color-text-secondary: #8B7355;
+  --color-text-muted: #A89777;
+  --color-border: #D4C4A8;
 
   /* Typography */
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

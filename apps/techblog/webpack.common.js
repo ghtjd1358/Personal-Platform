@@ -11,8 +11,8 @@ module.exports = {
     filename: '[name].[contenthash].js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
-    // publicPath: 'auto' → 명시적으로 '/'로 설정 (Vercel 배포 호환)
-    publicPath: '/'
+    // Module Federation 필수: 'auto'는 런타임에 origin 자동 계산 → host에서 로드돼도 chunk는 자기 origin(5004)에서 로드
+    publicPath: 'auto'
   },
 
   module: {

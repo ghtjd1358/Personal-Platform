@@ -90,18 +90,11 @@ export function parseContent(content: string): string {
   resetHeadingIndex();
   
   let parsed = content;
-  
-  const hasMarkdownCodeBlocks = /```[\s\S]*?```/.test(content);
-  const hasMarkdownHeaders = /^#{1,6}\s+/m.test(content);
-  const hasMarkdownLists = /^[\s]*[-*+]\s+/m.test(content);
-  
-  if (hasMarkdownCodeBlocks || hasMarkdownHeaders || hasMarkdownLists) {
+
+  // HTML 콘텐츠는 Markdown 파싱 건너뜀 (Python # 주석이 헤더 패턴에 오매칭되는 버그 방지)
+  const isHtml = content.trim().startsWith('<');
+  if (!isHtml) {
     parsed = marked.parse(content, { async: false }) as string;
-  } else {
-    const isFullHtml = content.trim().startsWith('<') && content.trim().endsWith('>');
-    if (!isFullHtml) {
-      parsed = marked.parse(content, { async: false }) as string;
-    }
   }
   
   parsed = convertImageUrls(parsed);

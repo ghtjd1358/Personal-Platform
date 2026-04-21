@@ -1,14 +1,12 @@
 import React, { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { LoginPage, storage } from '@sonhoseong/mfa-lib';
+import { LoginPage } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './paths';
+import { PREFIX } from '@/config/constants';
 
 const BlogList = lazy(() => import('@/pages/blog/BlogList'));
 const PostDetail = lazy(() => import('@/pages/post/detail/PostDetail'));
 const SeriesDetail = lazy(() => import('@/pages/series/SeriesDetail'));
-
-// KOMCA 패턴: Host에서 실행 시 PREFIX 빈 문자열, 단독 실행 시 /blog
-const PREFIX = storage.isHostApp() ? '' : '/blog';
 
 function RoutesGuestPages() {
     return (

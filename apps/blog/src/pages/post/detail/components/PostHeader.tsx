@@ -14,9 +14,7 @@ const PostHeader: React.FC<PostHeaderProps> = ({ post }) => {
     <header className="post-header">
       <div className="container">
         <div className="post-header-content">
-          <h1 className="post-title">{post.title}</h1>
-
-          {/* 작성자 정보 + 날짜 */}
+          {/* 작성자 + 날짜 (제목 위) */}
           <div className="post-author-info">
             {post.author && (
               <Link to={`${LINK_PREFIX}/user/${post.author.id}`} className="post-author">
@@ -34,24 +32,20 @@ const PostHeader: React.FC<PostHeaderProps> = ({ post }) => {
             <span className="post-date">{formatDate(post.published_at)}</span>
           </div>
 
-          {/* 통계 */}
-          <div className="post-stats">
-            <span className="stat-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-              {post.view_count}
-            </span>
-            <LikeButton postId={post.id} initialLikeCount={post.like_count} />
-            <span className="stat-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              </svg>
-              {post.comment_count}
-            </span>
-          </div>
+          {/* 제목 */}
+          <h1 className="post-title">{post.title}</h1>
 
+          {/* excerpt */}
+          {post.excerpt && (
+            <p className="post-excerpt">{post.excerpt}</p>
+          )}
+
+          {/* 통계 — brutalist key=value */}
+          <div className="post-stats">
+            <span className="stat-item">views=[{post.view_count.toLocaleString()}]</span>
+            <LikeButton postId={post.id} initialLikeCount={post.like_count} />
+            <span className="stat-item">comments=[{post.comment_count}]</span>
+          </div>
         </div>
       </div>
     </header>

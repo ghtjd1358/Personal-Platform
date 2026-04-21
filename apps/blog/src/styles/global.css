@@ -1,4 +1,5 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
 
 /* ===== Blog Header ===== */
 .blog-header {
@@ -243,20 +244,27 @@ html {
 }
 
 :root {
-  /* Colors - 차분한 네이비 (remote1과 동일) */
-  --color-primary: #1E3A5F;
-  --color-secondary: #64748B;
-  --color-accent: #0EA5E9;
-  --color-bg: #FFFFFF;
-  --color-bg-secondary: #F8FAFC;
-  --color-text: #1E3A5F;
-  --color-text-secondary: #64748B;
-  --color-text-muted: #94A3B8;
-  --color-border: #E2E8F0;
-  --bg-primary: #FFFFFF;
+  /* Colors - editorial (먹색 + 한지 + 인장 주홍) — Dashboard 기준 통일 */
+  --color-primary: #2B1E14;        /* 먹색 */
+  --color-secondary: #8B7355;      /* 아교 */
+  --color-accent: #8C1E1A;         /* 인장 주홍 */
+  --color-bg: #F4EAD5;             /* 한지 미색 */
+  --color-bg-secondary: #FBF5E3;   /* 밝은 한지 */
+  --color-text: #2B1E14;
+  --color-text-secondary: #8B7355;
+  --color-text-muted: #A89777;
+  --color-border: #D4C4A8;         /* warm paper border */
+  --bg-primary: #F4EAD5;
 
   /* Typography */
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'D2Coding ligature', 'Fira Code', 'Consolas', monospace;
+
+  /* Brutalism palette (post detail only) */
+  --brutal-accent: #FFB800;
+  --brutal-ink: #0A0A0A;
+  --brutal-paper: #FAFAF7;
+  --brutal-rule: #111111;
 
   /* Spacing */
   --container-max: 1100px;
@@ -2496,52 +2504,113 @@ body.has-header {
   transform: translateY(-2px);
 }
 
+/* ═══════════════════════════════════════════════════
+   POST DETAIL — Technical Brutalism
+   monospace metadata · hard edges · amber accent
+   ═══════════════════════════════════════════════════ */
 .post-header {
-  padding: 60px 0 20px;
-  background: linear-gradient(180deg, var(--color-bg-secondary) 0%, var(--color-bg) 100%);
+  padding: 72px 0 28px;
+  border-bottom: 2px solid var(--brutal-rule);
+  background: var(--color-bg);
+  position: relative;
+}
+
+.post-header::before {
+  content: "// POST_DETAIL.md";
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  max-width: calc(100% - 40px);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+}
+
+.post-header::after {
+  content: "";
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  max-width: calc(100% - 40px);
+  border-top: 1px dashed var(--color-border);
 }
 
 .post-header-content {
   max-width: 800px;
   margin: 0 auto;
+  position: relative;
 }
 
-/* 작성자 정보 */
+/* 작성자 + 날짜 = 모노스페이스 메타데이터 블록 */
 .post-author-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  font-size: 15px;
-  color: var(--color-text-secondary);
+  gap: 10px;
+  margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.post-author-info::before {
+  content: "[";
+  color: var(--brutal-accent);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.post-author-info::after {
+  content: "]";
+  color: var(--brutal-accent);
+  font-weight: 700;
+  font-size: 14px;
 }
 
 .post-author {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: var(--color-text);
-  font-weight: 600;
+  font-family: inherit;
+  font-weight: 500;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.15s;
 }
 
 .post-author:hover {
-  color: var(--color-accent);
+  color: var(--brutal-accent);
 }
 
 .post-author-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  border: 1px solid var(--brutal-rule);
   object-fit: cover;
+  filter: grayscale(0.4);
 }
 
 .post-author-name {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .post-meta-separator {
+  color: var(--brutal-accent);
+  font-weight: 700;
+}
+
+.post-date {
+  font-family: inherit;
+  font-size: inherit;
   color: var(--color-text-muted);
 }
 
@@ -2549,171 +2618,397 @@ body.has-header {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .post-category {
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  color: white;
-  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--brutal-accent);
+  color: var(--brutal-rule);
+  border-radius: 0;
 }
 
-.post-date {
-  font-size: 14px;
-  color: var(--color-text-muted);
-}
-
+/* 제목: 굵고 낮은 line-height + 좌측 amber 바 마커 */
 .post-header .post-title {
-  font-size: 52px;
-  font-weight: 800;
-  line-height: 1.2;
-  color: var(--color-primary);
+  font-size: 46px;
+  font-weight: 900;
+  line-height: 1.12;
+  color: var(--brutal-ink);
   margin-bottom: 24px;
-  letter-spacing: -0.02em;
+  padding-left: 20px;
+  letter-spacing: -0.035em;
+  word-break: keep-all;
+  border-left: 4px solid var(--brutal-accent);
+  position: relative;
 }
 
+/* excerpt: 인용 블록처럼 `>` prefix + dashed left border */
 .post-excerpt {
-  font-size: 18px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
   color: var(--color-text-secondary);
-  line-height: 1.7;
-  margin-bottom: 24px;
+  line-height: 1.75;
+  margin: 0 0 32px 0;
+  padding: 4px 0 4px 20px;
+  border-left: 1px dashed var(--color-border);
+  position: relative;
 }
 
+.post-excerpt::before {
+  content: "> ";
+  color: var(--brutal-accent);
+  font-weight: 700;
+}
+
+/* stats: monospace key=value, 양쪽에 rule */
 .post-stats {
   display: flex;
   gap: 20px;
-  font-size: 14px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin-bottom: 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.post-stats .stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--color-text-muted);
-  margin-bottom: 20px;
+}
+
+.post-stats .stat-item svg {
+  display: none; /* 아이콘 숨기고 텍스트 라벨만 사용 */
 }
 
 .post-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .post-tag {
-  padding: 6px 12px;
-  font-size: 13px;
-  color: var(--color-accent);
-  background: rgba(14, 165, 233, 0.1);
-  border-radius: var(--radius-sm);
-  transition: all 0.2s ease;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--brutal-ink);
+  background: transparent;
+  border: 1px solid var(--brutal-rule);
+  border-radius: 0;
+  transition: all 0.12s ease;
+  text-transform: lowercase;
 }
 
+.post-tag::before { content: "#"; color: var(--brutal-accent); margin-right: 2px; }
+
 .post-tag:hover {
-  background: rgba(14, 165, 233, 0.2);
+  background: var(--brutal-accent);
+  border-color: var(--brutal-accent);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--brutal-rule);
 }
 
 .post-content-wrapper {
-  padding: 0;
+  padding: 48px 0 0;
 }
 
 .post-content {
   max-width: 100%;
-  font-size: 17px;
-  line-height: 1.9;
-  color: var(--color-text);
+  font-size: 16.5px;
+  line-height: 1.8;
+  color: var(--brutal-ink);
+  word-break: keep-all;
 }
 
+/* heading: monospace `##` prefix in amber + Pretendard 본문 */
 .post-content h1,
 .post-content h2,
 .post-content h3,
 .post-content h4 {
-  margin: 48px 0 20px;
-  font-weight: 700;
-  color: var(--color-primary);
-  line-height: 1.4;
+  margin: 52px 0 18px;
+  font-weight: 800;
+  color: var(--brutal-ink);
+  line-height: 1.22;
+  letter-spacing: -0.028em;
+  word-break: keep-all;
+  position: relative;
+}
+
+.post-content h1:first-child,
+.post-content h2:first-child,
+.post-content h3:first-child {
+  margin-top: 0;
 }
 
 .post-content h1 { font-size: 32px; }
-.post-content h2 { font-size: 26px; }
-.post-content h3 { font-size: 22px; }
-.post-content h4 { font-size: 18px; }
+.post-content h1::before {
+  content: "# ";
+  color: var(--brutal-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.post-content h2 {
+  font-size: 26px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--brutal-rule);
+}
+.post-content h2::before {
+  content: "## ";
+  color: var(--brutal-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.post-content h3 { font-size: 20px; }
+.post-content h3::before {
+  content: "### ";
+  color: var(--brutal-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.post-content h4 {
+  font-size: 17px;
+  color: var(--color-text-secondary);
+}
+.post-content h4::before {
+  content: "#### ";
+  color: var(--brutal-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
 
 .post-content p {
   margin-bottom: 20px;
 }
 
+/* link: 굵은 밑줄 + hover시 amber 블록 반전 */
 .post-content a {
-  color: var(--color-accent);
+  color: var(--brutal-ink);
   text-decoration: underline;
+  text-decoration-color: var(--brutal-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  transition: all 0.12s ease;
+  padding: 0 2px;
 }
 
 .post-content a:hover {
-  color: var(--color-primary);
+  background: var(--brutal-accent);
+  color: var(--brutal-ink);
+  text-decoration: none;
 }
 
+/* image: 사각 테두리 + hard offset shadow */
 .post-content img {
   max-width: 100%;
   height: auto;
-  border-radius: var(--radius-md);
-  margin: 32px 0;
+  border-radius: 0;
+  border: 1px solid var(--brutal-rule);
+  margin: 28px 0;
+  box-shadow: 6px 6px 0 var(--brutal-rule);
+  display: block;
 }
 
+/* blockquote: amber 굵은 바 + 이탤릭 */
 .post-content blockquote {
-  margin: 32px 0;
-  padding: 20px 24px;
-  border-left: 4px solid var(--color-accent);
-  background: var(--color-bg-secondary);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  font-style: italic;
+  margin: 28px 0;
+  padding: 8px 0 8px 22px;
+  border-left: 4px solid var(--brutal-accent);
+  background: transparent;
+  border-radius: 0;
   color: var(--color-text-secondary);
+  font-size: 15.5px;
+  font-style: italic;
+  font-weight: 500;
 }
 
+.post-content blockquote p { margin-bottom: 8px; }
+.post-content blockquote p:last-child { margin-bottom: 0; }
+
+/* pre: 사각 테두리 + 우상단 언어 라벨 태그 */
 .post-content pre {
-  margin: 32px 0;
-  padding: 20px 24px 24px;
-  background: #1e293b;
-  border-radius: var(--radius-md);
+  margin: 28px 0;
+  border-radius: 0;
+  border: 1px solid var(--brutal-rule);
   overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.65;
+  position: relative;
+  box-shadow: 5px 5px 0 var(--brutal-rule);
+}
+
+.post-content pre[data-language]::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--brutal-accent);
+  color: var(--brutal-ink);
+  z-index: 2;
+  border-left: 1px solid var(--brutal-rule);
+  border-bottom: 1px solid var(--brutal-rule);
 }
 
 .post-content pre code {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: inherit;
+  line-height: inherit;
   background: none;
   padding: 0;
+  border: none;
+  color: inherit;
 }
 
+/* inline code: amber 텍스트 + 네모 테두리 */
 .post-content code {
-  padding: 2px 8px;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 14px;
-  background: var(--color-bg-secondary);
-  color: var(--color-accent);
-  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  background: transparent;
+  color: var(--brutal-ink);
+  border-radius: 0;
+  border: 1px solid var(--brutal-accent);
+  font-weight: 500;
 }
 
+/* ul: bullet을 `▸` 로 교체 (amber) */
 .post-content ul,
 .post-content ol {
-  margin: 20px 0;
-  padding-left: 28px;
+  margin: 18px 0;
+  padding-left: 0;
 }
 
-.post-content li {
-  margin-bottom: 8px;
+.post-content ul {
+  list-style: none;
 }
 
 .post-content ul li {
-  list-style: disc;
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 8px;
+  line-height: 1.75;
+  list-style: none;
+}
+
+.post-content ul li::before {
+  content: "▸";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  color: var(--brutal-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.post-content ul li::marker { content: none; }
+
+/* ol: 번호를 `[01]` 형태로 (zero-padded) */
+.post-content ol {
+  list-style: none;
+  counter-reset: brutal-counter;
 }
 
 .post-content ol li {
-  list-style: decimal;
+  position: relative;
+  padding-left: 44px;
+  margin-bottom: 8px;
+  line-height: 1.75;
+  counter-increment: brutal-counter;
+  list-style: none;
 }
 
+.post-content ol li::before {
+  content: "[" counter(brutal-counter, decimal-leading-zero) "]";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  color: var(--brutal-accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.post-content ol li::marker { content: none; }
+
+/* hr: 중앙에 `// · · ·` 텍스트 앵커 */
 .post-content hr {
-  margin: 48px 0;
+  margin: 56px 0;
   border: none;
   height: 1px;
   background: var(--color-border);
+  position: relative;
+  overflow: visible;
+}
+
+.post-content hr::before {
+  content: "// · · ·";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg);
+  padding: 0 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  color: var(--color-text-muted);
+}
+
+/* table: 굵은 테두리 + 모노 헤더 */
+.post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0;
+  font-size: 14px;
+  border: 2px solid var(--brutal-rule);
+  box-shadow: 5px 5px 0 var(--brutal-rule);
+}
+
+.post-content th,
+.post-content td {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.post-content th {
+  background: var(--brutal-rule);
+  color: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-color: var(--brutal-rule);
+}
+
+.post-content tr:hover td {
+  background: rgba(255, 184, 0, 0.1);
 }
 
 .post-footer {
@@ -3671,18 +3966,25 @@ pre.shiki:hover .code-copy-btn,
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--color-border);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--brutal-ink);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--brutal-rule);
+}
+
+.post-toc-title::before {
+  content: "//";
+  color: var(--brutal-accent);
+  font-weight: 700;
 }
 
 .post-toc-title svg {
-  width: 16px;
-  height: 16px;
-  color: var(--color-accent);
+  display: none;
 }
 
 .toc-list {
@@ -3697,26 +3999,28 @@ pre.shiki:hover .code-copy-btn,
 
 .toc-link {
   display: block;
-  padding: 4px 10px;
-  font-size: 13px;
-  line-height: 1.4;
+  padding: 5px 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
   color: var(--color-text-secondary);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   border-left: 2px solid transparent;
-  transition: all 0.2s ease;
+  transition: all 0.12s ease;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .toc-link:hover {
-  color: var(--color-primary);
-  background: rgba(14, 165, 233, 0.05);
+  color: var(--brutal-ink);
+  background: transparent;
+  border-left-color: var(--brutal-rule);
 }
 
 .toc-link.active {
-  color: var(--color-accent);
-  background: rgba(14, 165, 233, 0.1);
-  border-left-color: var(--color-accent);
-  font-weight: 600;
+  color: var(--brutal-ink);
+  background: var(--brutal-accent);
+  border-left-color: var(--brutal-ink);
+  font-weight: 700;
 }
 
 /* TOC Depth Indentation */
@@ -3734,19 +4038,20 @@ pre.shiki:hover .code-copy-btn,
   font-size: 12px;
 }
 
-/* TOC Progress Indicator */
+/* TOC Progress Indicator — brutalist */
 .toc-progress {
-  height: 3px;
+  height: 4px;
   background: var(--color-border);
-  border-radius: 3px;
+  border-radius: 0;
   margin-bottom: 16px;
   overflow: hidden;
+  border: 1px solid var(--brutal-rule);
 }
 
 .toc-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-  border-radius: 3px;
+  background: var(--brutal-accent);
+  border-radius: 0;
   transition: width 0.1s ease;
   width: 0%;
 }
@@ -4016,20 +4321,42 @@ pre.shiki:hover .code-copy-btn,
   cursor: not-allowed;
 }
 
-/* Post Stats with Like Button */
-.post-stats {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 16px;
+/* Post Stats — LikeButton brutalist override (base .post-stats는 2588 라인에 정의됨) */
+.post-stats .like-button {
+  padding: 4px 10px;
+  border: 1px solid var(--brutal-rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  gap: 6px;
 }
 
-.post-stats .stat-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-text-secondary);
-  font-size: 14px;
+.post-stats .like-button:hover {
+  border-color: var(--brutal-accent);
+  background: var(--brutal-accent);
+  color: var(--brutal-ink);
+}
+
+.post-stats .like-button.liked {
+  background: var(--brutal-ink);
+  border-color: var(--brutal-ink);
+  color: var(--brutal-accent);
+}
+
+.post-stats .like-button .like-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.post-stats .like-button .like-count {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
 }
 
 /* ============================================
@@ -5826,14 +6153,14 @@ pre.shiki:hover .code-copy-btn,
 }
 
 .series-post-item {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .series-post-link {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 20px;
-  padding: 24px;
+  padding: 20px 24px;
   background: white;
   border-radius: 16px;
   text-decoration: none;

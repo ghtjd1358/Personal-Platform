@@ -1,0 +1,196 @@
+/* Sidebar Editorial Skin — 조선풍 LNB
+ * 기본: 한지 bg + 먹 text. 포인트: 왕실 황색 (#C8A35C) active 책갈피.
+ * host App.css 위에 override 로 로드 (App.tsx import).
+ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
+
+:root {
+    --lnb-ink: #2B1E14;           /* 먹색 */
+    --lnb-bone: #F4EAD5;          /* 한지 미색 */
+    --lnb-cream: #FBF5E3;         /* 밝은 한지 */
+    --lnb-gold: #B8923D;          /* vintage mustard/brass — editorial accent */
+    --lnb-gold-deep: #8A6A25;
+    --lnb-mute: #8B7355;          /* 아교 갈색 */
+    --lnb-line: #D4C4A8;          /* warm paper border */
+}
+
+/* ========================================================
+ * 컨테이너 — 한지 bg + 섬유 질감 overlay
+ * ======================================================== */
+.app-lnb {
+    background: var(--lnb-bone) !important;
+    border-right: 1px solid var(--lnb-line) !important;
+    box-shadow: inset -1px 0 0 rgba(43, 30, 20, 0.06);
+    position: relative;
+}
+
+/* 사이드바 전체에 은은한 fiber 질감 */
+.app-lnb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='800'%3E%3Cfilter id='lf'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.85' numOctaves='2' seed='17'/%3E%3CfeColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.1  0 0 0 0.3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23lf)'/%3E%3C/svg%3E");
+    background-size: 220px 800px;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.app-lnb > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ========================================================
+ * 헤더 (로고/타이틀 영역)
+ * ======================================================== */
+.app-lnb-header {
+    border-bottom: 1px solid var(--lnb-line) !important;
+    background: transparent !important;
+}
+
+.app-lnb-title {
+    font-family: 'Fraunces', 'Pretendard Variable', serif !important;
+    color: var(--lnb-ink) !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.02em !important;
+    font-variation-settings: "opsz" 36, "SOFT" 100;
+}
+
+.app-lnb-logo {
+    color: var(--lnb-ink) !important;
+}
+
+.app-lnb-toggle {
+    color: var(--lnb-mute) !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    transition: all 0.25s ease;
+}
+
+.app-lnb-toggle:hover {
+    color: var(--lnb-ink) !important;
+    background: rgba(200, 163, 92, 0.15) !important;
+    border-color: rgba(200, 163, 92, 0.35) !important;
+}
+
+/* ========================================================
+ * 메뉴 항목
+ * ======================================================== */
+.app-lnb-nav {
+    background: transparent !important;
+    padding: 12px 8px !important;
+}
+
+.app-lnb-item {
+    margin-bottom: 2px;
+}
+
+.app-lnb-item-btn {
+    position: relative !important;
+    color: var(--lnb-ink) !important;
+    background: transparent !important;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    letter-spacing: -0.015em !important;
+    border: none !important;
+    border-radius: 2px !important;
+    transition: background 0.25s ease, color 0.25s ease !important;
+}
+
+.app-lnb-item-btn:hover {
+    background: rgba(200, 163, 92, 0.1) !important;
+    color: var(--lnb-ink) !important;
+}
+
+/* active 메뉴 — 왕실 황색 책갈피 (좌측 3px 세로줄) + 은은한 황 배경 */
+.app-lnb-item-btn.active,
+.app-lnb-item-btn.active:hover {
+    background: rgba(200, 163, 92, 0.18) !important;
+    color: var(--lnb-ink) !important;
+    font-weight: 600 !important;
+}
+
+.app-lnb-item-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background: var(--lnb-gold);
+    border-radius: 1px;
+    box-shadow: 0 0 4px rgba(200, 163, 92, 0.4);
+}
+
+.app-lnb-icon {
+    color: inherit !important;
+    opacity: 0.85;
+}
+
+.app-lnb-item-btn.active .app-lnb-icon {
+    color: var(--lnb-gold-deep) !important;
+    opacity: 1;
+}
+
+.app-lnb-text {
+    font-family: 'Pretendard Variable', sans-serif !important;
+    letter-spacing: -0.015em !important;
+}
+
+.app-lnb-arrow {
+    color: var(--lnb-mute) !important;
+    transition: transform 0.3s ease, color 0.25s ease;
+}
+
+.app-lnb-item-btn.expanded .app-lnb-arrow {
+    color: var(--lnb-gold-deep) !important;
+}
+
+/* 하위 항목 */
+.app-lnb-subitems {
+    background: transparent !important;
+    padding: 4px 0 4px 20px !important;
+    border-left: 1px dashed var(--lnb-line) !important;
+    margin-left: 16px !important;
+}
+
+.app-lnb-subitem {
+    color: var(--lnb-mute) !important;
+    font-family: 'Pretendard Variable', sans-serif !important;
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+    border-radius: 2px !important;
+    transition: color 0.25s ease, background 0.25s ease !important;
+}
+
+.app-lnb-subitem:hover {
+    color: var(--lnb-ink) !important;
+    background: rgba(200, 163, 92, 0.08) !important;
+}
+
+.app-lnb-subitem.active {
+    color: var(--lnb-ink) !important;
+    font-weight: 600 !important;
+    background: rgba(200, 163, 92, 0.15) !important;
+}
+
+/* collapsed 상태 — 아이콘만 보일 때 황색 점 표시 */
+.app-lnb.collapsed .app-lnb-item-btn.active::before {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-lnb-item-btn,
+    .app-lnb-subitem,
+    .app-lnb-arrow,
+    .app-lnb-toggle {
+        transition: none !important;
+    }
+}

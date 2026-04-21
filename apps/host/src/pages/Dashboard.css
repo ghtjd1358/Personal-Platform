@@ -1,0 +1,437 @@
+/* Dashboard - Editorial Developer Magazine (A안)
+ * Warm cream + ink + terracotta, Fraunces + Pretendard + JetBrains Mono
+ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:ital,wght@0,400..800;1,400..800&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css');
+
+.dashboard-root {
+    /* 왕세자 팔레트 — 한지 미색 + 먹색 + 조선 인장 주홍 */
+    --ink: #2B1E14;           /* 먹색 (sumi) */
+    --bone: #F4EAD5;          /* 한지 미색 */
+    --cream: #FBF5E3;         /* 밝은 한지, card bg */
+    --terra: #8C1E1A;         /* 조선 인장 주홍 (var명은 레거시, 의미는 accent) */
+    --terra-deep: #6B1512;
+    --indigo: #2B1E14;
+    --mute: #8B7355;          /* 아교 갈색 */
+    --line: #D4C4A8;          /* warm paper border */
+
+    background: var(--bone);
+    color: var(--ink);
+    min-height: 100%;
+    padding: clamp(32px, 5vw, 80px);
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    letter-spacing: -0.005em;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-grain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.28;
+    mix-blend-mode: multiply;
+    z-index: 1;
+}
+
+.dashboard-root > *:not(.dashboard-grain) {
+    position: relative;
+    z-index: 2;
+}
+
+/* =================================================================
+ * HERO
+ * ================================================================= */
+.dashboard-hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 48px;
+    padding-bottom: 32px;
+    margin-bottom: 96px;
+    border-bottom: 1px solid var(--ink);
+    opacity: 0;
+    animation: dashFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) forwards;
+}
+
+.hero-eyebrow {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--terra);
+    margin-bottom: 20px;
+}
+
+.hero-title {
+    font-family: 'Fraunces', 'Pretendard Variable', serif;
+    font-size: clamp(56px, 9.5vw, 148px);
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    margin: 0;
+    font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+
+.hero-title em {
+    font-style: italic;
+    color: var(--terra);
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+
+.hero-sub {
+    max-width: 520px;
+    margin: 24px 0 0;
+    font-family: 'Fraunces', 'Pretendard Variable', serif;
+    font-style: italic;
+    font-size: clamp(16px, 1.4vw, 19px);
+    font-weight: 350;
+    line-height: 1.5;
+    color: var(--mute);
+    font-variation-settings: "WONK" 0;
+}
+
+.hero-meta {
+    min-width: 240px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(43, 30, 20, 0.2);
+}
+
+.meta-row:first-child {
+    border-top: 1px dashed rgba(43, 30, 20, 0.2);
+}
+
+.meta-label {
+    color: var(--mute);
+    letter-spacing: 0.18em;
+    font-weight: 500;
+}
+
+.meta-value {
+    color: var(--ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =================================================================
+ * INTRO
+ * ================================================================= */
+.dashboard-intro {
+    max-width: 860px;
+    margin: 0 0 120px 0;
+    font-family: 'Fraunces', 'Pretendard Variable', serif;
+    font-size: clamp(20px, 2.3vw, 30px);
+    line-height: 1.45;
+    font-weight: 300;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    opacity: 0;
+    animation: dashFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) forwards;
+}
+
+.dashboard-intro p {
+    margin: 0;
+}
+
+.dashboard-intro em {
+    font-style: italic;
+    color: var(--terra);
+    font-variation-settings: "WONK" 1;
+}
+
+/* =================================================================
+ * CHANNELS INDEX
+ * ================================================================= */
+.channels-header {
+    display: flex;
+    align-items: baseline;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: dashFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) forwards;
+}
+
+.channels-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--terra);
+    font-weight: 500;
+}
+
+.channels-title {
+    font-family: 'Fraunces', 'Pretendard Variable', serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin: 0;
+}
+
+.channels-title em {
+    font-style: italic;
+    color: var(--mute);
+    font-variation-settings: "WONK" 1;
+}
+
+/* =================================================================
+ * CHANNEL ROW
+ * ================================================================= */
+.channel {
+    display: grid;
+    grid-template-columns: 110px minmax(180px, 240px) 1fr 56px;
+    align-items: center;
+    gap: 40px;
+    padding: 36px 0;
+    border-top: 1px solid var(--ink);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    cursor: pointer;
+    opacity: 0;
+    animation: dashFadeUp 0.7s cubic-bezier(.2, .7, .2, 1) forwards;
+    transition: padding-left 0.5s cubic-bezier(.2, .7, .2, 1),
+                background 0.35s ease;
+}
+
+.channel:last-of-type {
+    border-bottom: 1px solid var(--ink);
+}
+
+.channel:hover {
+    padding-left: 12px;
+    background: rgba(140, 30, 26, 0.055);
+}
+
+.channel-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 34px;
+    font-weight: 300;
+    color: var(--terra);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.channel-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.channel-title {
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: clamp(22px, 2.2vw, 30px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin: 0;
+    color: var(--ink);
+}
+
+.channel-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--mute);
+    font-variation-settings: "WONK" 1;
+    line-height: 1.2;
+}
+
+.channel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+.channel-desc {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0;
+    max-width: 460px;
+}
+
+.channel-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.channel-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 9px;
+    border: 1px solid rgba(43, 30, 20, 0.18);
+    background: var(--cream);
+    color: var(--mute);
+    border-radius: 2px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.channel-arrow {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 44px;
+    color: var(--ink);
+    justify-self: end;
+    line-height: 1;
+    transition: transform 0.5s cubic-bezier(.2, .7, .2, 1),
+                color 0.3s ease;
+}
+
+.channel:hover .channel-arrow {
+    transform: translateX(14px);
+    color: var(--terra);
+}
+
+.channel-icon {
+    position: absolute;
+    right: 90px;
+    top: 50%;
+    width: 68px;
+    height: 68px;
+    color: var(--ink);
+    opacity: 0.08;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: all 0.6s cubic-bezier(.2, .7, .2, 1);
+    z-index: 0;
+}
+
+.channel:hover .channel-icon {
+    opacity: 0.28;
+    color: var(--terra);
+    transform: translateY(-50%) scale(1.12);
+}
+
+/* =================================================================
+ * STACK STRIP (footer)
+ * ================================================================= */
+.stack-strip {
+    margin-top: 120px;
+    padding: 20px 0 0;
+    border-top: 1px solid rgba(43, 30, 20, 0.25);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--mute);
+    font-weight: 500;
+    opacity: 0;
+    animation: dashFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) forwards;
+}
+
+.stack-dot {
+    opacity: 0.35;
+}
+
+.stack-strip-end {
+    margin-left: auto;
+    color: var(--terra);
+    letter-spacing: 0.22em;
+}
+
+/* =================================================================
+ * ANIMATIONS
+ * ================================================================= */
+@keyframes dashFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-hero,
+    .dashboard-intro,
+    .channels-header,
+    .channel,
+    .stack-strip {
+        animation: none;
+        opacity: 1;
+    }
+    .channel,
+    .channel-arrow,
+    .channel-icon,
+    .channel::before {
+        transition: none;
+    }
+}
+
+/* =================================================================
+ * RESPONSIVE
+ * ================================================================= */
+@media (max-width: 960px) {
+    .dashboard-hero {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    .hero-meta {
+        min-width: 0;
+    }
+    .channel {
+        grid-template-columns: 72px 1fr 40px;
+        gap: 20px;
+    }
+    .channel-meta {
+        grid-column: 2 / 3;
+    }
+    .channel-body {
+        grid-column: 1 / -1;
+        padding-left: 92px;
+    }
+    .channel-icon {
+        display: none;
+    }
+    .channel-num {
+        font-size: 26px;
+    }
+    .channel-arrow {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 560px) {
+    .dashboard-root {
+        padding: 28px 20px;
+    }
+    .channel {
+        grid-template-columns: 56px 1fr 32px;
+    }
+    .channel-body {
+        padding-left: 0;
+    }
+    .channel-title {
+        font-size: 22px;
+    }
+}

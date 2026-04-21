@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { PostSummary } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
+import './PostCard.editorial.css';
 
 interface PostCardProps {
   post: PostSummary;

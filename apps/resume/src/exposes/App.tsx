@@ -1,6 +1,6 @@
 import React, { Suspense, useMemo } from 'react'
 import { useSelector } from 'react-redux'
-import { selectAccessToken } from '@sonhoseong/mfa-lib'
+import { selectAccessToken, storage } from '@sonhoseong/mfa-lib'
 import { RoutesGuestPages, RoutesAuthPages } from '../pages/routes'
 import { UserFloatingMenu } from '../components/UserFloatingMenu'
 import '../styles/global.css'
@@ -28,7 +28,7 @@ function App() {
                 {!isAuthenticated && <RoutesGuestPages />}
                 {isAuthenticated && <RoutesAuthPages />}
             </Suspense>
-            <UserFloatingMenu />
+            {!storage.isHostApp() && <UserFloatingMenu />}
         </>
     )
 }
