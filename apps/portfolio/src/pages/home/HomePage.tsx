@@ -238,6 +238,23 @@ const HomePage: React.FC = () => {
                   data-aos-delay={Math.min(index * 100, 400)}
                   onClick={() => handleProjectClick(project.id)}
                 >
+                  {/* Admin 전용 수정 버튼 — 카드 모서리 ✎ (클릭 시 편집 페이지로,
+                     카드 자체 클릭(모달 열기)은 stopPropagation 으로 차단) */}
+                  {isAdmin && (
+                    <Link
+                      to={`/container/resume/admin/portfolio/edit/${project.id}`}
+                      className="insta-grid-edit-btn"
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label="이 프로젝트 수정"
+                      title="이 프로젝트 수정"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </Link>
+                  )}
+
                   <div className="insta-grid-image">
                     {project.cover_image ? (
                       <img src={project.cover_image} alt={project.title} />

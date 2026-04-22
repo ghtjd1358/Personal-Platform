@@ -1,0 +1,506 @@
+/* PortfolioModal Editorial Skin — "조선 전시 도록"
+ * 80vw × 80vh 한지 cream 모달 + 먹 2px border + 좌 콘텐츠 / 우 댓글 split
+ * 프로젝트 cover → 제목(Fraunces italic) → tech chips → 본문 → CTA(Live/GitHub)
+ */
+
+.modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(43, 30, 20, 0.55) !important;
+    backdrop-filter: blur(4px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10000 !important;
+    padding: 32px !important;
+    animation: pmOverlayFade 0.25s ease-out;
+}
+@keyframes pmOverlayFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal-content {
+    position: relative;
+    width: 80vw !important;
+    max-width: 1200px !important;
+    height: 80vh !important;
+    max-height: 860px !important;
+    background: #FBF5E3 !important;
+    border: 2px solid #2B1E14 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        12px 18px 0 rgba(43, 30, 20, 0.25),
+        0 40px 70px rgba(43, 30, 20, 0.2) !important;
+    overflow: hidden !important;
+    animation: pmContentSlide 0.3s cubic-bezier(.2, .7, .2, 1);
+}
+@keyframes pmContentSlide {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* 한지 grain overlay */
+.modal-content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='pmg'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011 0.85' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.12 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23pmg)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+}
+.modal-content > * {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-close {
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #FBF5E3 !important;
+    border: 1px solid #2B1E14 !important;
+    border-radius: 2px !important;
+    color: #2B1E14 !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease !important;
+}
+.modal-close:hover {
+    background: #8C1E1A !important;
+    color: #FBF5E3 !important;
+    border-color: #8C1E1A !important;
+    transform: rotate(90deg);
+}
+
+/* ===== Loading / Error ===== */
+.modal-loading,
+.modal-error {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif;
+    font-style: italic;
+    color: #8B7355;
+    font-size: 18px;
+}
+
+/* ===== 2-col layout (좌 콘텐츠 60% · 우 댓글 40%) ===== */
+.modal-content-wrapper {
+    display: grid !important;
+    grid-template-columns: 1.5fr 1fr !important;
+    height: 100% !important;
+    overflow: hidden !important;
+}
+
+.modal-left {
+    overflow-y: auto;
+    padding: 0;
+    border-right: 1px solid #D4C4A8;
+}
+
+.modal-right {
+    overflow-y: auto;
+    padding: 32px 28px;
+    background: rgba(244, 234, 213, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ===== Cover image ===== */
+.modal-cover {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+    background: #1a1208;
+    border-bottom: 1px solid #2B1E14;
+}
+.modal-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.9) contrast(1.05);
+}
+.modal-cover-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(ellipse at 30% 30%, rgba(140, 30, 26, 0.1) 0%, transparent 60%),
+        linear-gradient(135deg, #FBF5E3 0%, #F4EAD5 100%);
+    color: #8B7355;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 140px;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+    text-shadow: 3px 4px 0 rgba(43, 30, 20, 0.1);
+}
+
+/* ===== 프로젝트 정보 ===== */
+.modal-info {
+    padding: 32px 36px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-info .modal-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+}
+
+.modal-info .modal-category,
+.modal-info .modal-featured {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 0.26em !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    background: transparent !important;
+    border: 1px solid #2B1E14 !important;
+    border-radius: 2px !important;
+    color: #2B1E14 !important;
+}
+.modal-info .modal-featured {
+    background: #8C1E1A !important;
+    border-color: #8C1E1A !important;
+    color: #FBF5E3 !important;
+}
+
+.modal-info .modal-title {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+    font-size: clamp(30px, 3.6vw, 48px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.035em !important;
+    color: #2B1E14 !important;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1 !important;
+    margin: 4px 0 8px !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+}
+
+.modal-info .modal-desc {
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #3a2a1c;
+    margin: 0 0 4px;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+/* Tech chips */
+.modal-info .modal-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+    padding: 16px 0 20px;
+    border-top: 1px dashed #D4C4A8;
+    border-bottom: 1px dashed #D4C4A8;
+}
+
+.modal-info .modal-tech-tag {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 0.1em !important;
+    padding: 5px 11px !important;
+    background: transparent !important;
+    color: #2B1E14 !important;
+    border: 1px solid #2B1E14 !important;
+    border-radius: 2px !important;
+    font-weight: 500 !important;
+}
+
+/* 상세 설명 (HTML) */
+.modal-info .modal-description-content {
+    font-family: 'Pretendard Variable', sans-serif;
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: #3a2a1c;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+/* ===== 링크 CTAs ===== */
+.modal-info .modal-links {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    margin: 12px 0 4px !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.modal-info .modal-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 11px 18px !important;
+    border-radius: 2px !important;
+    font-family: 'Pretendard Variable', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    text-decoration: none !important;
+    border: 1px solid #2B1E14 !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease !important;
+}
+
+.modal-info .modal-link.primary {
+    background: #2B1E14 !important;
+    color: #FBF5E3 !important;
+}
+.modal-info .modal-link.primary:hover {
+    background: #8C1E1A !important;
+    border-color: #8C1E1A !important;
+    transform: translateY(-1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.22);
+}
+
+.modal-info .modal-link.secondary {
+    background: transparent !important;
+    color: #2B1E14 !important;
+}
+.modal-info .modal-link.secondary:hover {
+    background: #F4EAD5 !important;
+    color: #8C1E1A !important;
+    border-color: #8C1E1A !important;
+}
+
+/* ===== Meta (period / view_count) ===== */
+.modal-info .modal-meta {
+    display: flex;
+    gap: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed #D4C4A8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: #8B7355;
+    text-transform: uppercase;
+}
+.modal-info .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.modal-info .meta-item svg {
+    opacity: 0.7;
+}
+
+/* ===== 우측: 댓글 ===== */
+.modal-right .comments-header {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #2B1E14;
+}
+.modal-right .comments-header h3 {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 20px;
+    color: #2B1E14;
+    letter-spacing: -0.01em;
+}
+.modal-right .comments-header .comment-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border: 1px solid #D4C4A8;
+    border-radius: 2px;
+    color: #8B7355;
+    font-style: normal;
+    vertical-align: middle;
+}
+
+/* 댓글 폼 */
+.modal-right .comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modal-right .comment-input {
+    width: 100%;
+    background: #FBF5E3 !important;
+    border: 1px solid #D4C4A8 !important;
+    border-radius: 2px !important;
+    padding: 12px !important;
+    font-family: 'Pretendard Variable', sans-serif !important;
+    font-size: 13px !important;
+    color: #2B1E14 !important;
+    resize: vertical !important;
+    min-height: 80px !important;
+    transition: border-color 0.15s ease !important;
+}
+.modal-right .comment-input:focus {
+    outline: none !important;
+    border-color: #2B1E14 !important;
+    box-shadow: 0 0 0 2px rgba(43, 30, 20, 0.08) !important;
+}
+
+.modal-right .comment-submit {
+    align-self: flex-end;
+    padding: 9px 18px !important;
+    background: #2B1E14 !important;
+    color: #FBF5E3 !important;
+    border: 1px solid #2B1E14 !important;
+    border-radius: 2px !important;
+    font-family: 'Pretendard Variable', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+.modal-right .comment-submit:hover:not(:disabled) {
+    background: #8C1E1A !important;
+    border-color: #8C1E1A !important;
+    transform: translateY(-1px);
+}
+.modal-right .comment-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal-right .login-prompt {
+    padding: 16px;
+    border: 1px dashed #D4C4A8;
+    border-radius: 2px;
+    text-align: center;
+}
+.modal-right .login-prompt p {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: #8B7355;
+}
+
+/* 댓글 목록 */
+.modal-right .comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+}
+
+.modal-right .no-comments {
+    padding: 40px 16px;
+    text-align: center;
+    border: 1px dashed #D4C4A8;
+}
+.modal-right .no-comments p {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: #8B7355;
+    font-size: 14px;
+}
+
+.modal-right .comment-item {
+    padding: 12px 14px;
+    background: #FBF5E3;
+    border: 1px solid #D4C4A8;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modal-right .comment-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-right .comment-avatar {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2B1E14;
+    color: #FBF5E3;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    border-radius: 50%;
+    font-size: 14px;
+}
+
+.modal-right .comment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+}
+
+.modal-right .comment-name {
+    font-family: 'Pretendard Variable', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #2B1E14;
+}
+
+.modal-right .comment-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #8B7355;
+}
+
+.modal-right .comment-content {
+    margin: 0;
+    font-family: 'Pretendard Variable', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #3a2a1c;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 900px) {
+    .modal-content {
+        width: 94vw !important;
+        height: 90vh !important;
+        max-height: unset !important;
+    }
+    .modal-content-wrapper {
+        grid-template-columns: 1fr !important;
+    }
+    .modal-left {
+        border-right: none;
+        border-bottom: 1px solid #D4C4A8;
+    }
+    .modal-cover {
+        height: 220px;
+    }
+    .modal-info {
+        padding: 24px 24px 28px;
+    }
+}

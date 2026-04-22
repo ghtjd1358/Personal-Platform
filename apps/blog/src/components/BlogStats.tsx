@@ -6,7 +6,6 @@ interface BlogStatsProps {
   totalPosts: number;
   totalLikes: number;
   daysRunning: number;
-  isLoading?: boolean;
 }
 
 /**
@@ -48,16 +47,10 @@ const useCountUp = (target: number, duration = 900, active = true): number => {
   return value;
 };
 
-const StatLoadingDots: React.FC = () => (
-  <span className="blog-stat-loading" aria-label="불러오는 중">
-    <span className="blog-stat-dot" />
-    <span className="blog-stat-dot" />
-    <span className="blog-stat-dot" />
-  </span>
-);
-
-const StatValue: React.FC<{ target: number; active: boolean }> = ({ target, active }) => {
-  const v = useCountUp(target, 900, active);
+/* 스켈레톤 dots 제거 — 숫자는 항상 0 에서 count-up, 데이터 도착하면 자연스럽게 올라감.
+   Hero/Admin bar 와 같은 "껍데기" 영역에 skeleton 이 뜨는 게 어색하다는 피드백 반영. */
+const StatValue: React.FC<{ target: number }> = ({ target }) => {
+  const v = useCountUp(target, 900, true);
   return <span className="blog-stat-value">{v.toLocaleString()}</span>;
 };
 
@@ -66,26 +59,25 @@ const BlogStats: React.FC<BlogStatsProps> = ({
   totalPosts,
   totalLikes,
   daysRunning,
-  isLoading = false,
 }) => {
   return (
     <section className="blog-stats-section">
       <div className="container">
         <div className="blog-stats">
           <div className="blog-stat">
-            {isLoading ? <StatLoadingDots /> : <StatValue target={totalViews} active={!isLoading} />}
+            <StatValue target={totalViews} />
             <span className="blog-stat-label">총 방문</span>
           </div>
           <div className="blog-stat">
-            {isLoading ? <StatLoadingDots /> : <StatValue target={totalPosts} active={!isLoading} />}
+            <StatValue target={totalPosts} />
             <span className="blog-stat-label">포스트</span>
           </div>
           <div className="blog-stat">
-            {isLoading ? <StatLoadingDots /> : <StatValue target={totalLikes} active={!isLoading} />}
+            <StatValue target={totalLikes} />
             <span className="blog-stat-label">좋아요</span>
           </div>
           <div className="blog-stat">
-            {isLoading ? <StatLoadingDots /> : <StatValue target={daysRunning} active={!isLoading} />}
+            <StatValue target={daysRunning} />
             <span className="blog-stat-label">일째 운영</span>
           </div>
         </div>

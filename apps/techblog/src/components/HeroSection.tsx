@@ -23,7 +23,7 @@ const Fiber: React.FC = () => (
 
 const HeroSection: React.FC = () => {
   return (
-    <section className="editorial-hero">
+    <section className="editorial-hero editorial-hero--fullheight">
       <Grain />
       <Fiber />
       <div className="editorial-inner">

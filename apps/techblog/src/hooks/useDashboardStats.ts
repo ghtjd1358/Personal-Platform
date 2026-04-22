@@ -8,8 +8,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { JobApplication, CalendarEvent, ApplicationStatus } from '@/types/job';
 import { getApplications, getCalendarEvents } from '@/network/apis';
 
-// Import mock data as fallback
-import { mockApplications, mockCalendarEvents } from '@/data/mockJobs';
+// mock fallback 제거 — API 실패 시 빈 통계로 정직하게 표시
 
 interface SalaryStats {
   applicationsWithSalary: number;
@@ -246,31 +245,22 @@ export function useDashboardStats(): UseDashboardStatsReturn {
       let applications: JobApplication[] = [];
       let events: CalendarEvent[] = [];
 
-      // Process applications
+      // Process applications — 실패 시 빈 배열 (정직한 0 통계)
       if (applicationsResult.success && applicationsResult.data) {
         applications = applicationsResult.data.data;
-      } else {
-        // Fallback to mock data
-        applications = mockApplications;
       }
 
-      // Process events
+      // Process events — 실패 시 빈 배열
       if (eventsResult.success && eventsResult.data) {
         events = eventsResult.data;
-      } else {
-        // Fallback to mock data filtered for upcoming
-        events = mockCalendarEvents.filter(e => new Date(e.date) >= today);
       }
 
-      // Process and set dashboard data
+      // Process and set dashboard data (0 통계라도 processDashboardData 가 안전하게 처리)
       const processedData = processDashboardData(applications, events);
       setState({ ...processedData, isLoading: false, error: null });
     } catch {
-      // Fallback to mock data
-      const today = new Date();
-      const mockEvents = mockCalendarEvents.filter(e => new Date(e.date) >= today);
-      const processedData = processDashboardData(mockApplications, mockEvents);
-      setState({ ...processedData, isLoading: false, error: null });
+      const processedData = processDashboardData([], []);
+      setState({ ...processedData, isLoading: false, error: '대시보드 데이터를 불러오지 못했어요.' });
     }
   }, []);
 

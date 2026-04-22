@@ -23,6 +23,8 @@ const ExperienceListPage = lazy(() => import('../admin/experience/ExperienceList
 const ExperienceEditorPage = lazy(() => import('../admin/experience/ExperienceEditorPage'))
 const PortfolioListPage = lazy(() => import('../admin/projects/PortfolioListPage'))
 const ProjectsEditorPage = lazy(() => import('../admin/projects/ProjectsEditorPage'))
+const FeaturesListPage = lazy(() => import('../admin/features/FeaturesListPage'))
+const FeaturesEditorPage = lazy(() => import('../admin/features/FeaturesEditorPage'))
 
 const LoadingFallback = () => (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
@@ -70,6 +72,11 @@ function RoutesAuthPages() {
                 <Route path={`${PREFIX}${RoutePath.AdminProjects}`} element={<PortfolioListPage />} />
                 <Route path={`${PREFIX}${RoutePath.AdminProjectsNew}`} element={<ProjectsEditorPage />} />
                 <Route path={`${PREFIX}${RoutePath.AdminProjectsEdit}`} element={<ProjectsEditorPage />} />
+
+                {/* Features — "이런 개발자입니다" 카드 CRUD */}
+                <Route path={`${PREFIX}${RoutePath.AdminFeatures}`} element={<FeaturesListPage />} />
+                <Route path={`${PREFIX}${RoutePath.AdminFeaturesNew}`} element={<FeaturesEditorPage />} />
+                <Route path={`${PREFIX}${RoutePath.AdminFeaturesEdit}`} element={<FeaturesEditorPage />} />
 
                 <Route path="*" element={<Navigate to={PREFIX || '/'} replace />} />
             </Routes>

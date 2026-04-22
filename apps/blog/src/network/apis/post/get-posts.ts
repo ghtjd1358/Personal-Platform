@@ -24,7 +24,7 @@ export async function getPosts(
 ): Promise<ApiResponse<PostsWithStats>> {
   try {
     const supabase = getSupabase();
-    const { page = 1, limit = 10, status, isFeatured, search, userId, tagId, categoryId } = params;
+    const { page = 1, limit = 10, status, isFeatured, search, userId, tagId, categoryId, sort = 'latest' } = params;
     const offset = (page - 1) * limit;
 
     // 태그 정보를 JOIN으로 한 번에 조회 (N+1 쿼리 방지)
@@ -86,11 +86,24 @@ export async function getPosts(
       }
     }
 
-    // 정렬 및 페이지네이션
-    query = query
-      .order('is_pinned', { ascending: false })
-      .order('published_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    // 정렬 — sort 파라미터 기반. is_pinned 는 항상 최우선(핀 글 상단 고정).
+    query = query.order('is_pinned', { ascending: false });
+    switch (sort) {
+      case 'popular':
+        query = query.order('view_count', { ascending: false }).order('published_at', { ascending: false });
+        break;
+      case 'liked':
+        query = query.order('like_count', { ascending: false }).order('published_at', { ascending: false });
+        break;
+      case 'oldest':
+        query = query.order('published_at', { ascending: true });
+        break;
+      case 'latest':
+      default:
+        query = query.order('published_at', { ascending: false });
+        break;
+    }
+    query = query.range(offset, offset + limit - 1);
 
     const { data, error, count } = await query;
 

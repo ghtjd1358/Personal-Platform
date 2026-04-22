@@ -32,9 +32,25 @@
 .post-card:nth-child(4n+3) { --rest-angle: -0.25deg; }
 .post-card:nth-child(4n)   { --rest-angle: 0.55deg; }
 
-/* scroll 진입 시 흔들리며 나타남 — animate-on-scroll + animate-visible 체인 사용 */
+/* scroll 진입 sway + 이후 낙엽 idle flutter (portfolio 카드와 동일 dialect, 진폭은 조금 완화) */
 .post-card.animate-on-scroll.animate-visible {
-    animation: card-sway-in 0.75s cubic-bezier(.25, .8, .3, 1.08) forwards;
+    animation:
+        card-sway-in 0.75s cubic-bezier(.25, .8, .3, 1.08) forwards,
+        card-leaf-flutter 8s ease-in-out 0.85s infinite;
+}
+
+/* 4-phase 엇갈림 — 카드들이 서로 다른 위상으로 펄럭 */
+.post-card.animate-on-scroll.animate-visible:nth-child(4n+1) {
+    animation-delay: 0s, 0.85s;
+}
+.post-card.animate-on-scroll.animate-visible:nth-child(4n+2) {
+    animation-delay: 0s, -1.15s;
+}
+.post-card.animate-on-scroll.animate-visible:nth-child(4n+3) {
+    animation-delay: 0s, -3.15s;
+}
+.post-card.animate-on-scroll.animate-visible:nth-child(4n+4) {
+    animation-delay: 0s, -5.15s;
 }
 
 @keyframes card-sway-in {
@@ -44,6 +60,22 @@
     68%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 0.6deg)); }
     84%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 0.3deg)); }
     100% { transform: translateY(0) rotate(var(--rest-angle)); }
+}
+
+/* 낙엽처럼 미세히 흔들림 — 진폭 ±0.3deg, 주기 8s (portfolio 의 7s 보다 느긋) */
+@keyframes card-leaf-flutter {
+    0%   { transform: translateY(0) rotate(var(--rest-angle)); }
+    25%  { transform: translateY(-2px) rotate(calc(var(--rest-angle) + 0.3deg)); }
+    50%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 0.25deg)); }
+    75%  { transform: translateY(-1px) rotate(calc(var(--rest-angle) + 0.2deg)); }
+    100% { transform: translateY(0) rotate(var(--rest-angle)); }
+}
+
+/* 모션 민감 유저 — flutter 비활성 */
+@media (prefers-reduced-motion: reduce) {
+    .post-card.animate-on-scroll.animate-visible {
+        animation: card-sway-in 0.75s cubic-bezier(.25, .8, .3, 1.08) forwards;
+    }
 }
 
 .post-card:hover {
@@ -91,25 +123,42 @@
     left: 60%;
 }
 
-/* 썸네일 컨테이너 */
+/* 썸네일 컨테이너 — 이미지/placeholder 둘 다 같은 영역 차지 (카드마다 위치 통일).
+   aspect-ratio 로 카드별 가로 기준 일정 비율 고정 → 이미지 있든 없든 썸네일 자리는 동일. */
 .post-card .post-card-thumbnail {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
     background: var(--pc-bone);
     border-bottom: 1px solid var(--pc-line);
+    overflow: hidden;
+    display: block;
 }
 
-/* 썸네일 placeholder — 이미지 없을 때: 한지 + 큼직한 먹 initial (Fraunces italic) */
+.post-card .post-card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* 썸네일 placeholder — 이미지 없을 때: 한지 + 큼직한 먹 initial (Fraunces italic).
+   thumbnail 컨테이너 영역 그대로 차지 (position: absolute inset 0) → 이미지 카드와 동일 영역. */
 .post-card .post-card-thumbnail-placeholder {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
     background:
         radial-gradient(ellipse 300px 200px at 30% 40%, rgba(210, 178, 128, 0.35) 0%, transparent 65%),
         radial-gradient(ellipse 260px 180px at 75% 70%, rgba(195, 165, 115, 0.25) 0%, transparent 60%),
         linear-gradient(135deg, var(--pc-bone) 0%, #EFE3C8 100%) !important;
     color: var(--pc-ink) !important;
-    position: relative;
     overflow: hidden;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-height: 180px;
 }
 
 /* placeholder 위 미묘한 fiber 질감 */

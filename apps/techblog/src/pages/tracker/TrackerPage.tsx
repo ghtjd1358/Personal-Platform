@@ -3,6 +3,8 @@ import { JobApplication, ApplicationStatus, ApplicationResult } from '@/types/jo
 import { useApplications } from '@/hooks';
 import ApplicationDetailModal from '@/components/ApplicationDetailModal';
 import CreateApplicationModal from '@/components/CreateApplicationModal';
+import '../home/HomePage.editorial.css';
+import './TrackerPage.editorial.css';
 
 const TrackerPage: React.FC = () => {
   const {

@@ -6,10 +6,15 @@ import {BlogStats, HeroSection, PostsSection, SEOHead} from "@/components";
 import { getCategories, CategoryDetail } from "@/network";
 import { LINK_PREFIX } from '@/config/constants';
 
+type SortOpt = 'latest' | 'oldest' | 'popular' | 'liked';
+type ColsOpt = 3 | 4 | 5;
+
 const BlogList: React.FC = () => {
   const { isAdmin } = usePermission();
   const [categories, setCategories] = useState<CategoryDetail[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortOpt>('latest');
+  const [cols, setCols] = useState<ColsOpt>(4);
 
   const {
     posts,
@@ -21,6 +26,7 @@ const BlogList: React.FC = () => {
   } = useBlogData({
     limit: 20,
     categoryId: selectedCategory,
+    sort,
   });
 
   useScrollAnimation([posts.length]);
@@ -59,7 +65,15 @@ const BlogList: React.FC = () => {
       />
       <HeroSection />
 
-      {/* 관리자 전용 inline action bar — host/standalone 모드 무관하게 admin 이면 보임 */}
+      <BlogStats
+        totalViews={totalViews}
+        totalPosts={totalPosts}
+        totalLikes={totalLikes}
+        daysRunning={daysRunning}
+      />
+
+      {/* 관리자 전용 inline action bar — stats 아래, 글 목록 바로 위에 배치
+         (글쓰기 진입을 카드 목록과 가까이 두어 "지금 바로 쓰기" 맥락 강화) */}
       {isAdmin && (
         <div className="blog-admin-bar">
           <div className="container">
@@ -82,17 +96,40 @@ const BlogList: React.FC = () => {
         </div>
       )}
 
-      <BlogStats
-        totalViews={totalViews}
-        totalPosts={totalPosts}
-        totalLikes={totalLikes}
-        daysRunning={daysRunning}
-        isLoading={isLoading}
-      />
-
       {/* 필터 섹션 */}
       <section className="filter-section">
         <div className="container">
+          {/* 정렬 + 페이지당 개수 */}
+          <div className="filter-group blog-sort-row">
+            <div className="blog-sort-field">
+              <span className="filter-label">정렬</span>
+              <select
+                className="editorial-select"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortOpt)}
+                aria-label="정렬 기준"
+              >
+                <option value="latest">최신순</option>
+                <option value="oldest">오래된순</option>
+                <option value="popular">조회수 많은순</option>
+                <option value="liked">좋아요 많은순</option>
+              </select>
+            </div>
+            <div className="blog-sort-field">
+              <span className="filter-label">열 개수</span>
+              <select
+                className="editorial-select"
+                value={cols}
+                onChange={(e) => setCols(Number(e.target.value) as ColsOpt)}
+                aria-label="열 개수"
+              >
+                <option value={3}>3열</option>
+                <option value={4}>4열</option>
+                <option value={5}>5열</option>
+              </select>
+            </div>
+          </div>
+
           {/* 카테고리 필터 */}
           {categories.length > 0 && (
             <div className="filter-group">
@@ -140,13 +177,16 @@ const BlogList: React.FC = () => {
         </div>
       </section>
 
-      <PostsSection
-        posts={posts}
-        isLoading={isLoading}
-        isLoadingMore={isLoadingMore}
-        hasMore={hasMore}
-        onLoadMore={loadMore}
-      />
+      {/* cols 선택값을 CSS var 로 .blog-grid 에 전달 (grid-template-columns 동적) */}
+      <div style={{ ['--blog-cols' as any]: cols }}>
+        <PostsSection
+          posts={posts}
+          isLoading={isLoading}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+          onLoadMore={loadMore}
+        />
+      </div>
     </>
   );
 };

@@ -1,0 +1,145 @@
+/* Tracker Editorial Skin — "조선 상소 분류함"
+ * 4단 칸반을 한지 공책 카드 느낌으로. 컬럼별 상단에 색띠.
+ */
+
+.job-tracker-app .kanban-board {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: clamp(16px, 2vw, 28px) !important;
+    align-items: flex-start !important;
+}
+
+.job-tracker-app .kanban-column {
+    background: var(--jt-cream, #FBF5E3) !important;
+    border: 1px solid var(--jt-line, #D4C4A8) !important;
+    border-top: none !important;
+    border-radius: 0 !important;
+    padding: 16px !important;
+    min-height: 320px !important;
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.08) !important;
+    position: relative;
+}
+
+/* 컬럼별 상단 색 구획선 (4mm 띠) */
+.job-tracker-app .kanban-column::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    top: -1px;
+    height: 4px;
+    background: var(--jt-ink, #2B1E14);
+}
+.job-tracker-app .kanban-column.interested::before { background: var(--jt-mute, #8B7355); }
+.job-tracker-app .kanban-column.applied::before    { background: var(--jt-ink, #2B1E14); }
+.job-tracker-app .kanban-column.interview::before  { background: var(--jt-brass, #B8923D); }
+.job-tracker-app .kanban-column.result::before     { background: var(--jt-accent, #8C1E1A); }
+
+.job-tracker-app .kanban-column-header {
+    padding: 8px 4px 14px !important;
+    margin-bottom: 14px !important;
+    border-bottom: 1px dashed var(--jt-line, #D4C4A8) !important;
+    display: flex !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+}
+
+.job-tracker-app .kanban-column-title {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-style: italic !important;
+    font-weight: 500 !important;
+    font-size: 20px !important;
+    color: var(--jt-ink, #2B1E14) !important;
+    letter-spacing: -0.01em !important;
+    font-variation-settings: "opsz" 144, "SOFT" 30 !important;
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 10px !important;
+}
+
+.job-tracker-app .kanban-count {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 0.15em !important;
+    color: var(--jt-mute, #8B7355) !important;
+    background: transparent !important;
+    border: 1px solid var(--jt-line, #D4C4A8) !important;
+    border-radius: 0 !important;
+    padding: 2px 8px !important;
+    font-weight: 500 !important;
+}
+
+.job-tracker-app .kanban-cards {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+/* 개별 카드 (KanbanCard 컴포넌트 내부 클래스가 뭐든 일단 .kanban-cards > div 로 커버) */
+.job-tracker-app .kanban-cards > div[draggable="true"],
+.job-tracker-app .kanban-card {
+    background: #FAF2DD !important;
+    border: 1px solid var(--jt-line, #D4C4A8) !important;
+    border-radius: 0 !important;
+    padding: 14px !important;
+    cursor: grab;
+    transition: transform 0.2s cubic-bezier(.2, .7, .2, 1), box-shadow 0.2s ease, border-color 0.2s ease !important;
+    position: relative;
+}
+
+.job-tracker-app .kanban-cards > div[draggable="true"]:hover,
+.job-tracker-app .kanban-card:hover {
+    transform: translateY(-2px) rotate(-0.25deg);
+    box-shadow: 3px 4px 0 rgba(43, 30, 20, 0.12);
+    border-color: var(--jt-ink, #2B1E14);
+}
+
+.job-tracker-app .kanban-cards > div[draggable="true"]:active,
+.job-tracker-app .kanban-card:active {
+    cursor: grabbing;
+}
+
+/* 카드 내부 회사/직무 텍스트 톤 */
+.job-tracker-app .kanban-card h4,
+.job-tracker-app .kanban-cards > div[draggable="true"] h4,
+.job-tracker-app .kanban-cards > div[draggable="true"] .card-title {
+    font-family: 'Fraunces', serif !important;
+    font-weight: 500 !important;
+    font-size: 15px !important;
+    color: var(--jt-ink, #2B1E14) !important;
+    margin: 0 0 4px !important;
+}
+
+/* 카드 내 텍스트 보조선 (모노 meta) */
+.job-tracker-app .kanban-card .meta,
+.job-tracker-app .kanban-cards > div[draggable="true"] .meta {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 0.08em !important;
+    color: var(--jt-mute, #8B7355) !important;
+    text-transform: uppercase !important;
+}
+
+/* Empty column placeholder (inline style 은 CSS 로 덮기 어려움 — style attr wins.
+   컴포넌트에서 별도 class 를 쓸 때만 적용) */
+.job-tracker-app .kanban-cards .empty-column {
+    border: 1px dashed var(--jt-line, #D4C4A8) !important;
+    color: var(--jt-mute, #8B7355) !important;
+    font-family: 'Fraunces', serif !important;
+    font-style: italic !important;
+    padding: 20px !important;
+    text-align: center !important;
+    background: transparent !important;
+}
+
+/* 반응형 */
+@media (max-width: 1100px) {
+    .job-tracker-app .kanban-board {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+@media (max-width: 640px) {
+    .job-tracker-app .kanban-board {
+        grid-template-columns: 1fr !important;
+    }
+}

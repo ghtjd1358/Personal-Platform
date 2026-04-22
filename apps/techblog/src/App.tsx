@@ -2,6 +2,7 @@ import React from 'react';
 import { storage } from '@sonhoseong/mfa-lib';
 import Routes from './pages/routes/Routes';
 import './styles/global.css';
+import './styles/editorial.css';
 
 const App: React.FC = () => {
   // Host 앱에서 실행 중이면 라우터 없이 렌더링 (Host가 라우터 제공)

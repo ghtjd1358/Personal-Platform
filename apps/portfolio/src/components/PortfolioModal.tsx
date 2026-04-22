@@ -4,9 +4,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { getPortfolioDetail, PortfolioDetail } from '@/network';
+import { getPortfolioById, PortfolioDetail } from '@/network';
 import { getCurrentUser, useToast } from '@sonhoseong/mfa-lib';
 import { getComments, createComment, Comment, CreateCommentRequest } from '@/network/apis/comments';
+import './PortfolioModal.editorial.css';
 
 interface PortfolioModalProps {
   portfolioId: string | null;
@@ -48,7 +49,7 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
     setIsLoading(true);
     try {
       const [portfolioRes, commentsRes] = await Promise.all([
-        getPortfolioDetail(portfolioId),
+        getPortfolioById(portfolioId),
         getComments(portfolioId),
       ]);
 

@@ -212,15 +212,20 @@
     flex-wrap: wrap;
 }
 
-.host-mypage-card-cta {
+/* Link(anchor) specificity 강화: host 전역 theme 의 `a { color: ... }` 를 확실히 이기도록
+   :link/:visited 포함 명시 + !important 로 브라우저 UA 스타일(기본 파랑)까지 제압. */
+.host-mypage-card-cta,
+a.host-mypage-card-cta,
+a.host-mypage-card-cta:link,
+a.host-mypage-card-cta:visited {
     display: inline-flex;
     align-items: center;
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: 2px;
     font-family: 'Pretendard Variable', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    text-decoration: none;
+    text-decoration: none !important;
     border: 1px solid var(--mp-ink);
     transition:
         transform 0.15s ease,
@@ -229,31 +234,43 @@
         color 0.15s ease;
     flex: 1 1 auto;
     justify-content: center;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
 }
 
 /* Primary — 새 항목 추가 (글쓰기 · 경력 추가 · 포트폴리오 추가) */
-.host-mypage-card-cta--primary {
-    background: var(--mp-ink);
-    color: var(--mp-bone);
+.host-mypage-card-cta--primary,
+a.host-mypage-card-cta--primary:link,
+a.host-mypage-card-cta--primary:visited {
+    background: var(--mp-ink) !important;
+    color: var(--mp-bone) !important;
+    border-color: var(--mp-ink) !important;
 }
 
-.host-mypage-card-cta--primary:hover {
+.host-mypage-card-cta--primary:hover,
+a.host-mypage-card-cta--primary:hover {
     transform: translate(-1px, -1px);
     box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.22);
-    background: var(--mp-accent);
-    border-color: var(--mp-accent);
+    background: var(--mp-accent) !important;
+    color: var(--mp-bone) !important;
+    border-color: var(--mp-accent) !important;
 }
 
 /* Ghost — 보기 / 열기 (secondary) */
-.host-mypage-card-cta--ghost {
-    background: transparent;
-    color: var(--mp-ink);
+.host-mypage-card-cta--ghost,
+a.host-mypage-card-cta--ghost:link,
+a.host-mypage-card-cta--ghost:visited {
+    background: transparent !important;
+    color: var(--mp-ink) !important;
+    border-color: var(--mp-ink) !important;
 }
 
-.host-mypage-card-cta--ghost:hover {
-    background: var(--mp-cream);
-    color: var(--mp-accent);
-    border-color: var(--mp-accent);
+.host-mypage-card-cta--ghost:hover,
+a.host-mypage-card-cta--ghost:hover {
+    background: var(--mp-cream) !important;
+    color: var(--mp-accent) !important;
+    border-color: var(--mp-accent) !important;
 }
 
 /* ===== Footer note ===== */

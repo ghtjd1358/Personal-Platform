@@ -1,0 +1,274 @@
+/* Dashboard Editorial Skin — "조선 기록부" 톤
+ * 한지 카드 + Fraunces italic 숫자(붓 underline) + mono 라벨
+ * techblog global.css 의 --primary/--background vars 위에 typography/layout 만 덧씌움.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:ital,wght@0,400..800&display=swap');
+
+.job-tracker-app {
+    --jt-ink: #2B1E14;
+    --jt-bone: #F4EAD5;
+    --jt-cream: #FBF5E3;
+    --jt-accent: #8C1E1A;
+    --jt-moss: #5B7A3F;
+    --jt-brass: #B8923D;
+    --jt-mute: #8B7355;
+    --jt-line: #D4C4A8;
+
+    background: var(--jt-bone);
+    color: var(--jt-ink);
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    padding: clamp(32px, 5vw, 64px) clamp(24px, 5vw, 64px) 80px;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* 한지 섬유 오버레이 */
+.job-tracker-app::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cfilter id='jtf'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 0.85' numOctaves='2' seed='13'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.15 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23jtf)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+}
+.job-tracker-app > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== Page header — Fraunces italic 타이틀 ===== */
+.job-tracker-app .page-header {
+    margin-bottom: clamp(32px, 4vw, 56px);
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--jt-ink);
+    position: relative;
+}
+
+.job-tracker-app .page-header::before {
+    content: 'SECTION · DASHBOARD';
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--jt-accent);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.job-tracker-app .page-header h1 {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1 !important;
+    font-size: clamp(36px, 5vw, 64px) !important;
+    letter-spacing: -0.03em !important;
+    color: var(--jt-ink) !important;
+    margin: 0 0 8px !important;
+    line-height: 1.05 !important;
+}
+
+.job-tracker-app .page-header p {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--jt-mute);
+    margin: 0;
+    max-width: 640px;
+}
+
+/* ===== Stats grid — BlogStats 스타일 큰 숫자 + 붓 underline ===== */
+.job-tracker-app .stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: clamp(20px, 3vw, 40px) !important;
+    margin-bottom: clamp(32px, 4vw, 48px) !important;
+    padding: clamp(32px, 4vw, 56px) clamp(24px, 4vw, 48px) !important;
+    background: var(--jt-cream) !important;
+    border: 1px solid var(--jt-ink) !important;
+    box-shadow: 3px 4px 0 rgba(43, 30, 20, 0.08);
+}
+
+.job-tracker-app .stat-card {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+.job-tracker-app .stat-value {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-size: clamp(40px, 6vw, 80px) !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1 !important;
+    color: var(--jt-ink) !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.04em !important;
+    font-variant-numeric: tabular-nums !important;
+    position: relative;
+    padding-bottom: 14px;
+    display: inline-block;
+}
+
+/* 붓 underline */
+.job-tracker-app .stat-value::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 12px;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 14' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='jtu'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='1' seed='9'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='2'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M 6 8 Q 60 3 110 7 T 214 8' stroke='%232B1E14' stroke-width='3' fill='none' stroke-linecap='round' filter='url(%23jtu)' opacity='0.75'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+}
+
+/* 짝수 카드는 주홍 underline */
+.job-tracker-app .stat-card:nth-child(2n) .stat-value::after {
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 14' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='jtu2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='1' seed='11'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='2'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M 6 8 Q 60 3 110 7 T 214 8' stroke='%238C1E1A' stroke-width='3' fill='none' stroke-linecap='round' filter='url(%23jtu2)' opacity='0.8'/%3E%3C/svg%3E");
+}
+
+.job-tracker-app .stat-label {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 0.22em !important;
+    text-transform: uppercase !important;
+    color: var(--jt-mute) !important;
+    font-weight: 500 !important;
+    margin-top: 8px !important;
+}
+
+@media (max-width: 860px) {
+    .job-tracker-app .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ===== Card — 한지 scrapbook 카드 ===== */
+.job-tracker-app .card {
+    background: var(--jt-cream) !important;
+    border: 1px solid var(--jt-line) !important;
+    border-radius: 0 !important;
+    padding: clamp(20px, 3vw, 28px) !important;
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.08) !important;
+    position: relative;
+}
+
+.job-tracker-app .card-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: baseline !important;
+    padding-bottom: 14px !important;
+    margin-bottom: 16px !important;
+    border-bottom: 1px solid var(--jt-line) !important;
+}
+
+.job-tracker-app .card-title {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-weight: 500 !important;
+    font-size: 20px !important;
+    font-style: italic !important;
+    color: var(--jt-ink) !important;
+    letter-spacing: -0.01em !important;
+    font-variation-settings: "opsz" 144, "SOFT" 30 !important;
+    margin: 0 !important;
+}
+
+/* ===== Buttons ===== */
+.job-tracker-app .btn {
+    font-family: 'Pretendard Variable', sans-serif !important;
+    font-weight: 600 !important;
+    border-radius: 2px !important;
+    letter-spacing: 0.02em !important;
+    border: 1px solid var(--jt-ink) !important;
+    padding: 9px 16px !important;
+    font-size: 13px !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease !important;
+}
+
+.job-tracker-app .btn-primary {
+    background: var(--jt-ink) !important;
+    color: var(--jt-cream) !important;
+}
+.job-tracker-app .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.2);
+    background: var(--jt-accent) !important;
+    border-color: var(--jt-accent) !important;
+}
+
+.job-tracker-app .btn-secondary {
+    background: transparent !important;
+    color: var(--jt-ink) !important;
+}
+.job-tracker-app .btn-secondary:hover {
+    background: var(--jt-bone) !important;
+    color: var(--jt-accent) !important;
+    border-color: var(--jt-accent) !important;
+}
+
+.job-tracker-app .btn-sm {
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+}
+
+/* ===== Company logo circle ===== */
+.job-tracker-app .company-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--jt-ink);
+    color: var(--jt-cream);
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    border-radius: 0;
+    border: 1px solid var(--jt-ink);
+}
+
+/* ===== Calendar event pill ===== */
+.job-tracker-app .calendar-event {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    font-weight: 500 !important;
+    padding: 4px 10px !important;
+    border-radius: 0 !important;
+    border: 1px solid currentColor !important;
+    background: transparent !important;
+}
+
+.job-tracker-app .calendar-event.interview { color: var(--jt-accent) !important; }
+.job-tracker-app .calendar-event.deadline { color: var(--jt-brass) !important; }
+.job-tracker-app .calendar-event.applied { color: var(--jt-moss) !important; }
+
+/* ===== Empty state ===== */
+.job-tracker-app .empty-state {
+    padding: 64px 24px !important;
+    border: 1px dashed var(--jt-line) !important;
+    background: transparent !important;
+    text-align: center;
+    font-family: 'Fraunces', serif !important;
+    font-style: italic !important;
+    color: var(--jt-mute) !important;
+}
+
+.job-tracker-app .empty-state p {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--jt-mute);
+}
+
+.job-tracker-app .empty-state-title {
+    font-family: 'Fraunces', serif !important;
+    font-style: italic !important;
+    color: var(--jt-mute) !important;
+    font-size: 18px !important;
+}

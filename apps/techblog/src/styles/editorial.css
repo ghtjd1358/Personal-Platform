@@ -28,6 +28,13 @@
     overflow: hidden;
 }
 
+/* 전체 높이 modifier — MFA 에서 같은 클래스명이 다른 remote 로 leak 되지 않도록
+   scope 격리용 수식어. 이 modifier 가 없는 remote (blog/resume) 는 기존 흐름 유지. */
+.editorial-hero.editorial-hero--fullheight {
+    min-height: 100vh;
+    min-height: 100svh;
+}
+
 /* 한지 섬유 오버레이 — 가로로 긴 fiber 질감 (baseFrequency의 X/Y 비대칭) */
 .editorial-fiber {
     position: absolute;
@@ -336,4 +343,191 @@
     .editorial-side {
         min-width: 0;
     }
+}
+
+/* =========================================================
+ * Modal editorial — JobDetailModal / ApplicationDetailModal /
+ * CreateApplicationModal / CreateEventModal 공용 스킨
+ * ========================================================= */
+.modal-overlay {
+    background: rgba(43, 30, 20, 0.45) !important;
+    backdrop-filter: blur(3px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10000 !important;
+    padding: 20px !important;
+    animation: jtModalFade 0.2s ease-out;
+}
+@keyframes jtModalFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal-content {
+    background: #FBF5E3 !important;
+    border: 1px solid #2B1E14 !important;
+    border-radius: 0 !important;
+    box-shadow: 6px 10px 0 rgba(43, 30, 20, 0.2) !important;
+    overflow: hidden !important;
+    position: relative;
+    animation: jtModalSlide 0.28s cubic-bezier(.2, .7, .2, 1);
+}
+@keyframes jtModalSlide {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* 한지 grain on modal */
+.modal-content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='mm'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.85' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.12 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23mm)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+}
+.modal-content > * {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-header {
+    background: #F4EAD5 !important;
+    padding: 20px 24px !important;
+    border-bottom: 1px solid #2B1E14 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+}
+
+.modal-title {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-style: italic !important;
+    font-weight: 500 !important;
+    font-size: 22px !important;
+    color: #2B1E14 !important;
+    letter-spacing: -0.02em !important;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1 !important;
+    margin: 0 !important;
+    line-height: 1.15 !important;
+}
+
+.modal-close {
+    width: 36px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid #D4C4A8 !important;
+    border-radius: 0 !important;
+    color: #8B7355 !important;
+    cursor: pointer !important;
+    flex-shrink: 0;
+    transition: all 0.15s ease !important;
+}
+.modal-close:hover {
+    background: #8C1E1A !important;
+    color: #FBF5E3 !important;
+    border-color: #8C1E1A !important;
+}
+
+.modal-body {
+    padding: 24px !important;
+    background: transparent !important;
+    color: #2B1E14 !important;
+}
+
+/* body 내부 소제목 (h3, h4) */
+.modal-body h3,
+.modal-body h4 {
+    font-family: 'Fraunces', serif !important;
+    font-weight: 500 !important;
+    color: #2B1E14 !important;
+    font-size: 16px !important;
+    letter-spacing: -0.01em !important;
+    margin: 0 0 12px !important;
+}
+
+/* body 내부 description / long text */
+.modal-body p,
+.modal-body div {
+    color: inherit;
+}
+
+/* modal-footer (있다면) */
+.modal-footer {
+    padding: 16px 24px !important;
+    background: #F4EAD5 !important;
+    border-top: 1px solid #D4C4A8 !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+}
+
+/* ===== Tech skill chips (JobDetailModal 기술스택) ===== */
+.modal-body .tech-icon,
+.modal-body .skill-chip,
+.modal-body .tag {
+    background: transparent !important;
+    border: 1px solid #2B1E14 !important;
+    color: #2B1E14 !important;
+    border-radius: 0 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    padding: 4px 10px !important;
+}
+
+/* ===== Modal links (공식 링크 / 외부 URL 등) ===== */
+.modal-links a,
+.modal-body a.modal-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 14px !important;
+    border: 1px solid #D4C4A8 !important;
+    background: #F4EAD5 !important;
+    color: #2B1E14 !important;
+    text-decoration: none !important;
+    border-radius: 0 !important;
+    font-family: 'Pretendard Variable', sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    transition: all 0.15s ease !important;
+}
+.modal-links a:hover,
+.modal-body a.modal-link:hover {
+    border-color: #2B1E14 !important;
+    background: #FBF5E3 !important;
+    color: #8C1E1A !important;
+}
+
+/* ===== 모달 내 form 요소 (input / textarea / select) ===== */
+.modal-body input[type="text"],
+.modal-body input[type="url"],
+.modal-body input[type="date"],
+.modal-body input[type="number"],
+.modal-body textarea,
+.modal-body select {
+    background: #F4EAD5 !important;
+    border: 1px solid #D4C4A8 !important;
+    border-radius: 0 !important;
+    color: #2B1E14 !important;
+    font-family: 'Pretendard Variable', sans-serif !important;
+    font-size: 13px !important;
+    padding: 10px 12px !important;
+    transition: border-color 0.15s ease !important;
+}
+.modal-body input:focus,
+.modal-body textarea:focus,
+.modal-body select:focus {
+    outline: none !important;
+    border-color: #2B1E14 !important;
+    box-shadow: 0 0 0 2px rgba(43, 30, 20, 0.1) !important;
 }

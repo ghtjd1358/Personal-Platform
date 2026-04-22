@@ -316,3 +316,68 @@
     border-color: var(--ex-ink);
     transform: none;
 }
+
+/* ===== Feature list 썸네일 + Editor 이미지 업로더 ===== */
+.exp-row-thumb {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border: 1px solid var(--ex-line);
+    background: var(--ex-cream);
+    margin-right: 16px;
+    flex-shrink: 0;
+    mix-blend-mode: multiply;
+}
+
+.feature-image-upload {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.feature-image-picker {
+    padding: 24px;
+    border: 2px dashed var(--ex-line);
+    background: var(--ex-bone);
+    color: var(--ex-mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.feature-image-picker:hover:not(:disabled) {
+    border-color: var(--ex-ink);
+    color: var(--ex-ink);
+    background: var(--ex-cream);
+}
+
+.feature-image-picker:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.feature-image-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: var(--ex-cream);
+    border: 1px solid var(--ex-line);
+}
+
+.feature-image-preview img {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    background: var(--ex-bone);
+    border: 1px solid var(--ex-line);
+    mix-blend-mode: multiply;
+}
+
+.feature-image-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

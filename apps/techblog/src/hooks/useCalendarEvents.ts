@@ -15,8 +15,7 @@ import {
   UpdateEventInput,
 } from '@/network/apis';
 
-// Import mock data as fallback
-import { mockCalendarEvents } from '@/data/mockJobs';
+// mock fallback 제거 — API 실패 시 빈 배열로 정직하게 표시
 
 interface UseCalendarEventsState {
   events: CalendarEvent[];
@@ -94,34 +93,12 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
       });
 
       if (result.success && result.data) {
-        setState({
-          events: result.data,
-          isLoading: false,
-          error: null,
-        });
+        setState({ events: result.data, isLoading: false, error: null });
       } else {
-        // Fallback to mock data filtered by month
-        const filteredMock = mockCalendarEvents.filter(e => {
-          const eventDate = new Date(e.date);
-          return eventDate.getFullYear() === year && eventDate.getMonth() === month;
-        });
-        setState({
-          events: filteredMock,
-          isLoading: false,
-          error: null,
-        });
+        setState({ events: [], isLoading: false, error: result.error ?? null });
       }
     } catch {
-      // Fallback to mock data
-      const filteredMock = mockCalendarEvents.filter(e => {
-        const eventDate = new Date(e.date);
-        return eventDate.getFullYear() === year && eventDate.getMonth() === month;
-      });
-      setState({
-        events: filteredMock,
-        isLoading: false,
-        error: null,
-      });
+      setState({ events: [], isLoading: false, error: '일정을 불러오지 못했어요.' });
     }
   }, [dateRange, year, month]);
 

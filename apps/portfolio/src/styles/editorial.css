@@ -28,6 +28,13 @@
     overflow: hidden;
 }
 
+/* 전체 높이 modifier — MFA 에서 같은 클래스명이 다른 remote 로 leak 되지 않도록
+   scope 격리용 수식어. 이 modifier 가 없는 remote (blog/resume) 는 기존 흐름 유지. */
+.editorial-hero.editorial-hero--fullheight {
+    min-height: 100vh;
+    min-height: 100svh;
+}
+
 /* 한지 섬유 오버레이 — 가로로 긴 fiber 질감 (baseFrequency의 X/Y 비대칭) */
 .editorial-fiber {
     position: absolute;

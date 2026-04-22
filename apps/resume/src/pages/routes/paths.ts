@@ -30,4 +30,9 @@ export enum RoutePath {
     AdminProjects = '/admin/projects',
     AdminProjectsNew = '/admin/projects/new',
     AdminProjectsEdit = '/admin/projects/edit/:id',
+
+    // "이런 개발자입니다" 카드 관리
+    AdminFeatures = '/admin/features',
+    AdminFeaturesNew = '/admin/features/new',
+    AdminFeaturesEdit = '/admin/features/edit/:id',
 }

@@ -1,0 +1,155 @@
+/* Calendar Editorial Skin — "조선 달력" 한지 + 먹 격자 + 주홍 오늘 마커 */
+
+.job-tracker-app .calendar-container {
+    background: var(--jt-cream, #FBF5E3) !important;
+    border: 1px solid var(--jt-ink, #2B1E14) !important;
+    border-radius: 0 !important;
+    padding: clamp(16px, 2vw, 28px) !important;
+    box-shadow: 3px 4px 0 rgba(43, 30, 20, 0.1) !important;
+    margin-bottom: 24px !important;
+}
+
+/* Header (월 전환 + Today) */
+.job-tracker-app .calendar-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 16px !important;
+    border-bottom: 1px solid var(--jt-line, #D4C4A8) !important;
+}
+
+.job-tracker-app .calendar-nav {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+}
+
+.job-tracker-app .calendar-nav button {
+    background: transparent !important;
+    border: 1px solid var(--jt-line, #D4C4A8) !important;
+    border-radius: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--jt-ink, #2B1E14) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+.job-tracker-app .calendar-nav button:hover {
+    background: var(--jt-ink, #2B1E14) !important;
+    color: var(--jt-cream, #FBF5E3) !important;
+    border-color: var(--jt-ink, #2B1E14) !important;
+}
+
+.job-tracker-app .calendar-month {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+    font-size: clamp(22px, 3vw, 32px) !important;
+    color: var(--jt-ink, #2B1E14) !important;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1 !important;
+    letter-spacing: -0.02em !important;
+    font-variant-numeric: tabular-nums !important;
+    min-width: 160px !important;
+    text-align: center !important;
+}
+
+/* Grid (7 cols) */
+.job-tracker-app .calendar-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 1px !important;
+    background: var(--jt-line, #D4C4A8) !important;
+    border: 1px solid var(--jt-line, #D4C4A8) !important;
+}
+
+.job-tracker-app .calendar-day-header {
+    background: var(--jt-bone, #F4EAD5) !important;
+    padding: 10px 8px !important;
+    text-align: center !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 0.25em !important;
+    text-transform: uppercase !important;
+    color: var(--jt-mute, #8B7355) !important;
+    font-weight: 500 !important;
+}
+
+/* 일요일·토요일 살짝 구분 */
+.job-tracker-app .calendar-day-header:first-child { color: var(--jt-accent, #8C1E1A) !important; }
+.job-tracker-app .calendar-day-header:last-child { color: var(--jt-ink, #2B1E14) !important; opacity: 0.75; }
+
+.job-tracker-app .calendar-day {
+    background: var(--jt-cream, #FBF5E3) !important;
+    padding: 8px !important;
+    min-height: 92px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    position: relative;
+    transition: background 0.15s ease !important;
+}
+.job-tracker-app .calendar-day:hover {
+    background: #FAF2DD !important;
+}
+
+.job-tracker-app .calendar-day.other-month {
+    background: var(--jt-bone, #F4EAD5) !important;
+    opacity: 0.55 !important;
+}
+
+.job-tracker-app .calendar-day.today {
+    background: #FAEDD4 !important;
+    box-shadow: inset 0 0 0 2px var(--jt-accent, #8C1E1A) !important;
+}
+
+.job-tracker-app .calendar-day-number {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--jt-ink, #2B1E14) !important;
+    font-variant-numeric: tabular-nums !important;
+    letter-spacing: 0.05em !important;
+}
+
+.job-tracker-app .calendar-day.today .calendar-day-number {
+    color: var(--jt-accent, #8C1E1A) !important;
+    font-weight: 700 !important;
+}
+
+.job-tracker-app .calendar-day.other-month .calendar-day-number {
+    color: var(--jt-mute, #8B7355) !important;
+    opacity: 0.6 !important;
+}
+
+/* 셀 내 event pill — HomePage.editorial 의 .calendar-event 스타일 재사용.
+   여기서는 cell 안 작은 mono chip으로 축소. */
+.job-tracker-app .calendar-day .calendar-event {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+    letter-spacing: 0.1em !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left !important;
+}
+
+/* 반응형 */
+@media (max-width: 720px) {
+    .job-tracker-app .calendar-day {
+        min-height: 64px !important;
+        padding: 4px !important;
+    }
+    .job-tracker-app .calendar-day-number {
+        font-size: 11px !important;
+    }
+    .job-tracker-app .calendar-day .calendar-event {
+        font-size: 8px !important;
+    }
+}

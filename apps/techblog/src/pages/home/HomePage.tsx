@@ -4,6 +4,7 @@ import { isHostApp } from '@sonhoseong/mfa-lib';
 import { useDashboardStats } from '@/hooks';
 import { ApplicationStatus } from '@/types/job';
 import { HeroSection } from '@/components';
+import './HomePage.editorial.css';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,16 +28,19 @@ const HomePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="job-tracker-app">
-        <div className="page-header">
-          <h1>취업 관리 대시보드</h1>
-          <p>지원 현황을 한눈에 확인하세요</p>
+      <>
+        <HeroSection />
+        <div className="job-tracker-app">
+          <div className="page-header">
+            <h1>취업 관리 대시보드</h1>
+            <p>지원 현황을 한눈에 확인하세요</p>
+          </div>
+          <div className="empty-state">
+            <div className="empty-state-icon">⏳</div>
+            <div className="empty-state-title">로딩 중...</div>
+          </div>
         </div>
-        <div className="empty-state">
-          <div className="empty-state-icon">⏳</div>
-          <div className="empty-state-title">로딩 중...</div>
-        </div>
-      </div>
+      </>
     );
   }
 

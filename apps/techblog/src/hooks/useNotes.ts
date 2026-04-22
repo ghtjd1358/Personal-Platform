@@ -13,8 +13,7 @@ import {
   deleteNote,
 } from '@/network/apis';
 
-// Import mock data as fallback
-import { mockNotes } from '@/data/mockJobs';
+// mock fallback 제거 — API 실패 시 빈 배열로 정직하게 표시
 
 interface UseNotesState {
   notes: JobNote[];
@@ -69,28 +68,12 @@ export function useNotes(applicationId: string): UseNotesReturn {
       const result = await getNotesByApplicationId(applicationId);
 
       if (result.success && result.data) {
-        setState({
-          notes: result.data,
-          isLoading: false,
-          error: null,
-        });
+        setState({ notes: result.data, isLoading: false, error: null });
       } else {
-        // Fallback to mock data filtered by applicationId
-        const filteredMock = mockNotes.filter(n => n.applicationId === applicationId);
-        setState({
-          notes: filteredMock,
-          isLoading: false,
-          error: null,
-        });
+        setState({ notes: [], isLoading: false, error: result.error ?? null });
       }
     } catch {
-      // Fallback to mock data
-      const filteredMock = mockNotes.filter(n => n.applicationId === applicationId);
-      setState({
-        notes: filteredMock,
-        isLoading: false,
-        error: null,
-      });
+      setState({ notes: [], isLoading: false, error: '메모를 불러오지 못했어요.' });
     }
   }, [applicationId]);
 

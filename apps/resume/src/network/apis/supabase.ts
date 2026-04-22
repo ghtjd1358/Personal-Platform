@@ -1,5 +1,5 @@
 import { getSupabase } from '@sonhoseong/mfa-lib'
-import type { ExperienceInput, PortfolioInput } from './types'
+import type { ExperienceInput, PortfolioInput, FeatureInput } from './types'
 
 // experiences 와 child 테이블(experience_tasks / experience_tags) 을
 // 한 왕복으로 가져와 ExperienceDetail 모양(tasks: {id,task}[], tags: string[])으로 맞춰주는 쉐이퍼
@@ -314,3 +314,70 @@ export const skillsApi = {
     deleteSkill: (id: string) =>
         getSupabase().from('skills').delete().eq('id', id),
 }
+
+// ======================================================================
+// Features — "이런 개발자입니다" 섹션
+//   * Storage bucket: resume-features (public read, owner-only write)
+//   * 파일 경로 규칙: {user_id}/{timestamp}-{safe_filename}
+//     → Storage RLS 가 auth.uid() 와 foldername[1] 을 비교해 소유자 검증
+// ======================================================================
+const FEATURES_BUCKET = 'resume-features';
+
+export const featuresApi = {
+    getAll: () =>
+        getSupabase().from('features').select('*').order('order_index'),
+
+    getByUserId: (userId: string) =>
+        getSupabase().from('features').select('*').eq('user_id', userId).order('order_index'),
+
+    getById: (id: string) =>
+        getSupabase().from('features').select('*').eq('id', id).single(),
+
+    create: async (data: FeatureInput & { user_id?: string }) => {
+        const uid = data.user_id ?? (await getSupabase().auth.getUser()).data.user?.id;
+        return getSupabase()
+            .from('features')
+            .insert({ ...data, user_id: uid })
+            .select()
+            .single();
+    },
+
+    update: (id: string, data: Partial<FeatureInput>) =>
+        getSupabase().from('features').update(data).eq('id', id).select().single(),
+
+    delete: (id: string) =>
+        getSupabase().from('features').delete().eq('id', id),
+
+    /**
+     * 이미지 업로드 → public URL 반환.
+     * 파일명은 "timestamp-원본파일명(특수문자 sanitize)" 로 중복 방지.
+     */
+    uploadImage: async (userId: string, file: File): Promise<string> => {
+        const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `${userId}/${Date.now()}-${safe}`;
+        const { error } = await getSupabase().storage
+            .from(FEATURES_BUCKET)
+            .upload(path, file, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: file.type,
+            });
+        if (error) throw error;
+        const { data } = getSupabase().storage.from(FEATURES_BUCKET).getPublicUrl(path);
+        return data.publicUrl;
+    },
+
+    /**
+     * 교체/삭제 시 orphan 파일 제거. public URL 에서 bucket path 만 뽑아 삭제.
+     * 실패는 throw 하지 않음 — orphan 으로 남아도 치명적이지 않음 (최대 5MB 파일).
+     */
+    deleteImageByUrl: async (publicUrl: string): Promise<void> => {
+        if (!publicUrl) return;
+        const marker = `/${FEATURES_BUCKET}/`;
+        const idx = publicUrl.indexOf(marker);
+        if (idx === -1) return;
+        const path = publicUrl.substring(idx + marker.length);
+        const { error } = await getSupabase().storage.from(FEATURES_BUCKET).remove([path]);
+        if (error) console.warn('[featuresApi.deleteImageByUrl] 삭제 실패 (무시):', error.message);
+    },
+};

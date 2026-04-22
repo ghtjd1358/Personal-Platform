@@ -9,8 +9,10 @@ import {
     experiencesApi,
     portfoliosApi,
     skillsApi,
+    featuresApi,
     type SkillCategoryWithSkills,
 } from '../../../network/apis/supabase';
+import type { Feature } from '../../../network/apis/types';
 import {
     mockResumeProfile,
     mockSkillCategories,
@@ -54,6 +56,7 @@ export const useHomePageData = (): HomeData => {
     const [skillCategories, setSkillCategories] = useState(mockSkillCategories);
     const [experiences, setExperiences] = useState(mockExperiences);
     const [projects, setProjects] = useState(mockProjects);
+    const [features, setFeatures] = useState<typeof mockFeatures | Feature[]>(mockFeatures);
     const [isLive, setIsLive] = useState(false);
 
     useEffect(() => {
@@ -87,13 +90,14 @@ export const useHomePageData = (): HomeData => {
                 const resumeId = primaryResume?.id;
 
                 // 병렬 fetch (experiences + projects 모두 nested tasks/tags 포함)
-                const [profileResp, skillsResp, expWithDetails, projWithDetails] = await Promise.all([
+                const [profileResp, skillsResp, expWithDetails, projWithDetails, featuresResp] = await Promise.all([
                     getSupabase().from('resume_profile').select('*').eq('user_id', userId).maybeSingle(),
                     skillsApi.getCategories().catch((e) => { console.error('[useHomePageData] skills fetch error', e); return [] as SkillCategoryWithSkills[]; }),
                     experiencesApi.getByUserIdWithDetails(userId).catch((e) => { console.error('[useHomePageData] exp fetch error', e); return []; }),
                     resumeId
                         ? portfoliosApi.getByResumeIdWithDetails(resumeId).catch((e) => { console.error('[useHomePageData] proj fetch error', e); return []; })
                         : Promise.resolve([]),
+                    featuresApi.getByUserId(userId).then((r) => r.data ?? []).catch((e) => { console.error('[useHomePageData] features fetch error', e); return [] as Feature[]; }),
                 ]);
 
                 if (cancelled) return;
@@ -131,6 +135,12 @@ export const useHomePageData = (): HomeData => {
                     gotAnyLiveData = true;
                 }
 
+                // features ("이런 개발자입니다")
+                if (Array.isArray(featuresResp) && featuresResp.length > 0) {
+                    setFeatures(featuresResp as Feature[]);
+                    gotAnyLiveData = true;
+                }
+
                 setIsLive(gotAnyLiveData);
             } catch (err) {
                 console.error('[useHomePageData] Supabase fetch 실패, mock 유지:', err);
@@ -150,9 +160,9 @@ export const useHomePageData = (): HomeData => {
         skillCategories,
         experiences,
         projects,
-        // portfolioData/features/contactLinks 는 admin 페이지가 없어 mock 그대로
+        features,   // DB 에서 fetch, 비어있으면 mock fallback
+        // portfolioData/contactLinks 는 admin 페이지가 없어 mock 그대로
         portfolioData: mockPortfolioData,
-        features: mockFeatures,
         contactLinks: mockContactLinks,
         loading,
         isLive,

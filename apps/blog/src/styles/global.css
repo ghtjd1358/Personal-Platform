@@ -1494,7 +1494,8 @@ body.has-header {
 /* ===== Velog Style Blog Grid ===== */
 .blog-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* --blog-cols 는 BlogList 에서 inline style 로 주입 (3/4/5). 기본 4. */
+  grid-template-columns: repeat(var(--blog-cols, 4), 1fr);
   gap: 32px;
 }
 
@@ -6834,4 +6835,58 @@ pre.shiki:hover .code-copy-btn,
     flex: 1;
     justify-content: center;
   }
+}
+
+/* ====== Blog sort / page-size row (editorial) ====== */
+.blog-sort-row {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    background: #FBF5E3;
+    border: 1px solid #D4C4A8;
+    border-radius: 2px;
+}
+
+.blog-sort-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.blog-sort-field .filter-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: #8B7355;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.blog-sort-field .editorial-select {
+    padding: 8px 36px 8px 14px;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #2B1E14;
+    background: #FBF5E3;
+    border: 1px solid #2B1E14;
+    border-radius: 2px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232B1E14' stroke-width='1.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 14px 14px;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blog-sort-field .editorial-select:hover {
+    border-color: #8C1E1A;
+}
+.blog-sort-field .editorial-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(43, 30, 20, 0.12);
 }

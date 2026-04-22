@@ -71,7 +71,13 @@
       "Bash(curl -s -o /dev/null -w \"/container/blog/main.xxx: HTTP %{http_code}\\\\n\" --max-time 3 \"http://localhost:5000/container/main.js\")",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} | bytes=%{size_download}\\\\n\" --max-time 3 \"http://localhost:5004/remoteEntry.js\")",
       "Bash(curl -s -o /dev/null -w '%{http_code}' --max-time 2 http://localhost:__TRACKED_VAR__)",
-      "Skill(commit-commands:commit)"
+      "Skill(commit-commands:commit)",
+      "mcp__plugin_supabase_supabase__apply_migration",
+      "Bash(npx tsc *)",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__list_tables"
     ]
   },
   "outputStyle": "Learning"

@@ -15,8 +15,7 @@ import {
   CreateApplicationInput,
 } from '@/network/apis';
 
-// Import mock data as fallback
-import { mockApplications } from '@/data/mockJobs';
+// mock fallback 제거 — API 실패 시 빈 배열로 정직하게 표시 (유저 데이터는 은폐하지 않음)
 
 interface UseApplicationsState {
   applications: JobApplication[];
@@ -72,19 +71,17 @@ export function useApplications(): UseApplicationsReturn {
           error: null,
         });
       } else {
-        // Fallback to mock data
         setState({
-          applications: mockApplications,
+          applications: [],
           isLoading: false,
-          error: null,
+          error: result.error ?? null,
         });
       }
-    } catch {
-      // Fallback to mock data
+    } catch (err) {
       setState({
-        applications: mockApplications,
+        applications: [],
         isLoading: false,
-        error: null,
+        error: '지원 현황을 불러오지 못했어요.',
       });
     }
   }, []);

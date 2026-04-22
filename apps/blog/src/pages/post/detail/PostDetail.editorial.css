@@ -364,3 +364,225 @@
         line-height: 1.75;
     }
 }
+
+/* =========================================================
+ * Post Footer — 목록으로 / 공유 / 수정 / 삭제 버튼 editorial
+ * ========================================================= */
+.post-detail .post-footer {
+    padding: clamp(32px, 5vw, 56px) 0;
+    margin-top: clamp(48px, 6vw, 80px);
+    border-top: 1px solid var(--p-line);
+    background: transparent;
+}
+
+.post-detail .post-footer .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 clamp(24px, 5vw, 48px);
+}
+
+.post-detail .post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.post-detail .post-action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* editorial 버튼 공통 — footer 내부 .btn 전체 override */
+.post-detail .post-footer .btn,
+.post-detail .post-footer .share-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 10px 18px !important;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 2px !important;
+    border: 1px solid var(--p-ink) !important;
+    background: transparent !important;
+    color: var(--p-ink) !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease !important;
+}
+
+.post-detail .post-footer .btn:hover,
+.post-detail .post-footer .share-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.15) !important;
+    background: var(--p-ink) !important;
+    color: var(--p-cream) !important;
+}
+
+/* danger 변주 — 주홍 */
+.post-detail .post-footer .btn-danger {
+    border-color: var(--p-accent) !important;
+    color: var(--p-accent) !important;
+}
+.post-detail .post-footer .btn-danger:hover {
+    background: var(--p-accent) !important;
+    color: var(--p-cream) !important;
+    border-color: var(--p-accent) !important;
+}
+
+/* =========================================================
+ * Share Modal — portal 기반 editorial 한지 다이얼로그
+ * ========================================================= */
+.share-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(43, 30, 20, 0.45);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    animation: shareModalFadeIn 0.2s ease-out;
+}
+@keyframes shareModalFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.share-modal {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: #FBF5E3;
+    border: 1px solid #2B1E14;
+    box-shadow: 6px 10px 0 rgba(43, 30, 20, 0.2);
+    padding: 32px 28px 24px;
+    animation: shareModalSlideIn 0.28s cubic-bezier(.2, .7, .2, 1);
+}
+@keyframes shareModalSlideIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* 한지 grain */
+.share-modal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='sm'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.85' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23sm)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    opacity: 0.45;
+    pointer-events: none;
+}
+.share-modal > * {
+    position: relative;
+    z-index: 1;
+}
+
+.share-modal-head {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.share-modal-eyebrow {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: #8C1E1A;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.share-modal-title {
+    margin: 0;
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 26px;
+    color: #2B1E14;
+    letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+
+.share-modal-subtitle {
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: #8B7355;
+    line-height: 1.5;
+    border-top: 1px dashed #D4C4A8;
+    padding-top: 12px;
+}
+
+.share-modal-close {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid #D4C4A8;
+    border-radius: 2px;
+    color: #8B7355;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.share-modal-close:hover {
+    border-color: #2B1E14;
+    color: #2B1E14;
+    background: rgba(43, 30, 20, 0.04);
+}
+
+.share-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.share-modal .share-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: transparent;
+    border: 1px solid #D4C4A8;
+    border-radius: 2px;
+    color: #2B1E14;
+    font-family: 'Pretendard Variable', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.share-modal .share-option:hover {
+    border-color: #2B1E14;
+    background: rgba(43, 30, 20, 0.04);
+    transform: translateY(-1px);
+    box-shadow: 2px 2px 0 rgba(43, 30, 20, 0.1);
+}
+
+.share-modal .share-option svg {
+    flex-shrink: 0;
+    color: #2B1E14;
+}
+
+@media (max-width: 480px) {
+    .share-modal-grid {
+        grid-template-columns: 1fr;
+    }
+    .share-modal {
+        padding: 24px 20px 18px;
+    }
+}

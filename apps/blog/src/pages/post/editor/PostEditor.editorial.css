@@ -41,18 +41,25 @@
 }
 
 .post-editor-page .btn-back {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 12px !important;
-    letter-spacing: 0.15em !important;
-    text-transform: uppercase !important;
-    color: var(--pe-mute) !important;
-    padding: 6px 10px !important;
-    border-radius: 0 !important;
-    transition: color 0.2s !important;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: none !important;
+    color: var(--pe-ink) !important;
+    background: transparent !important;
+    border: 1px solid var(--pe-ink) !important;
+    border-radius: 2px !important;
+    padding: 9px 16px !important;
+    cursor: pointer !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease !important;
 }
 
 .post-editor-page .btn-back:hover {
-    color: var(--pe-accent) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.15) !important;
+    background: var(--pe-ink) !important;
+    color: var(--pe-cream) !important;
 }
 
 .post-editor-page .autosave-indicator {
@@ -276,4 +283,56 @@
     .post-editor-page .editor-header {
         padding: 14px 18px !important;
     }
+}
+
+/* ==========================================================
+ * 코드 블록 — 상세페이지(.post-detail .post-content pre) 와 동일한 editorial 톤
+ * global.css 의 dark theme gradient 를 강제로 덮어쓰기.
+ * ========================================================== */
+.post-editor-page .editor-content .tiptap pre {
+    background: var(--pe-cream) !important;
+    background-image: none !important;
+    border: 1px solid var(--pe-line) !important;
+    border-radius: 4px !important;
+    padding: 20px 24px !important;
+    margin: 1.8em 0 !important;
+    color: var(--pe-ink) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    overflow-x: auto !important;
+    box-shadow: none !important;
+}
+
+.post-editor-page .editor-content .tiptap pre code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    color: var(--pe-ink) !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+}
+
+/* Shiki/Lowlight 토큰 색상도 상세와 톤 맞춤 (한지 위에 올라가야 하니 어두운 팔레트로) */
+.post-editor-page .editor-content .tiptap pre .hljs-keyword,
+.post-editor-page .editor-content .tiptap pre .hljs-built_in,
+.post-editor-page .editor-content .tiptap pre .hljs-type {
+    color: #8C1E1A !important;  /* 주홍 — keyword */
+}
+.post-editor-page .editor-content .tiptap pre .hljs-string,
+.post-editor-page .editor-content .tiptap pre .hljs-regexp {
+    color: #5b7a3a !important;  /* 이끼 초록 */
+}
+.post-editor-page .editor-content .tiptap pre .hljs-comment {
+    color: #8B7355 !important;  /* mute */
+    font-style: italic;
+}
+.post-editor-page .editor-content .tiptap pre .hljs-number,
+.post-editor-page .editor-content .tiptap pre .hljs-literal {
+    color: #6B4423 !important;
+}
+.post-editor-page .editor-content .tiptap pre .hljs-function,
+.post-editor-page .editor-content .tiptap pre .hljs-title {
+    color: #2B1E14 !important;
+    font-weight: 600;
 }

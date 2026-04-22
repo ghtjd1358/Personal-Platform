@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { CalendarEvent } from '@/types/job';
 import { useCalendarEvents } from '@/hooks';
 import CreateEventModal from '@/components/CreateEventModal';
+import '../home/HomePage.editorial.css';
+import './CalendarPage.editorial.css';
 
 const CalendarPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());

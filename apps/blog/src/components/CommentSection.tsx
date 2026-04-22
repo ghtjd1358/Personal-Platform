@@ -143,12 +143,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const confirmDialog = useAsyncConfirm();
 
   const handleDelete = async () => {
-    const ok = await confirmDialog({
-      title: '댓글 삭제',
-      message: '댓글을 삭제하시겠습니까?',
-      confirmText: '삭제',
-      cancelText: '취소',
-    });
+    const ok = await confirmDialog('댓글을 삭제하시겠습니까?', '댓글 삭제');
     if (!ok) return;
 
     setDeleting(true);

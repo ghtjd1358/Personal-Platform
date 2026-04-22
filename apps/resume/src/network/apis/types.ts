@@ -80,6 +80,29 @@ export interface Portfolio extends PortfolioCore {
  * - slug 은 안 주면 portfoliosApi.create 가 title 기반 자동 생성
  * - 나머지 portfolio-only 필드는 모두 `?` — resume 만 쓸 거면 안 채워도 됨
  */
+/**
+ * Feature — "이런 개발자입니다" 섹션의 한 카드 (title + description + image).
+ * image_url 은 Supabase Storage `resume-features` bucket 경유 public URL.
+ */
+export interface Feature {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  image_url: string | null;
+  order_index: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface FeatureInput {
+  title: string;
+  description: string;
+  image_url?: string | null;
+  order_index?: number;
+  user_id?: string;
+}
+
 export interface PortfolioInput extends PortfolioCore {
   slug?: string;
   user_id?: string;

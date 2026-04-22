@@ -412,6 +412,9 @@ body.has-header {
   width: 160px;
   height: 160px;
   object-fit: contain;
+  /* 흰 배경 이미지(PNG/JPG)를 한지 톤에 녹여 사실상 투명처럼 보이게.
+     어두운 로고·일러스트 부분은 그대로 유지. */
+  mix-blend-mode: multiply;
 }
 
 .feature-title {

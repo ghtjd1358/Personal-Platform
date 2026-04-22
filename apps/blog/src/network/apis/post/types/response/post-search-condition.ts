@@ -1,5 +1,8 @@
 import { PaginationParams, PostStatus } from '@/network/apis/common';
 
+/** 정렬 기준 */
+export type PostSortOption = 'latest' | 'oldest' | 'popular' | 'liked';
+
 /**
  * 블로그 게시글 검색 조건
  */
@@ -16,4 +19,6 @@ export interface PostSearchCondition extends PaginationParams {
   search?: string;
   /** 사용자 ID */
   userId?: string;
+  /** 정렬 기준 — 미지정 시 latest */
+  sort?: PostSortOption;
 }
