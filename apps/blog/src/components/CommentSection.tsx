@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getComments, createComment, updateComment, deleteComment, CommentDetail, CreateCommentRequest } from '@/network';
-import { getCurrentUser, useToast } from '@sonhoseong/mfa-lib';
+import { getCurrentUser, useToast, useAsyncConfirm } from '@sonhoseong/mfa-lib';
 
 interface CommentSectionProps {
   postId: string;
@@ -140,8 +140,16 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const canEdit = isOwner;
   const canDelete = currentUser && (isOwner || !comment.user_id);
 
-  const handleDelete = () => {
-    if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
+  const confirmDialog = useAsyncConfirm();
+
+  const handleDelete = async () => {
+    const ok = await confirmDialog({
+      title: '댓글 삭제',
+      message: '댓글을 삭제하시겠습니까?',
+      confirmText: '삭제',
+      cancelText: '취소',
+    });
+    if (!ok) return;
 
     setDeleting(true);
     deleteComment(comment.id)

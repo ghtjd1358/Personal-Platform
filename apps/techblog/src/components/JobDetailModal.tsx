@@ -1,4 +1,5 @@
 import React from 'react';
+import { useToast } from '@sonhoseong/mfa-lib';
 import { Job } from '@/types/job';
 
 interface JobDetailModalProps {
@@ -9,6 +10,7 @@ interface JobDetailModalProps {
 }
 
 const JobDetailModal: React.FC<JobDetailModalProps> = ({ job, isBookmarked, onBookmark, onClose }) => {
+  const toast = useToast();
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
@@ -137,7 +139,7 @@ const JobDetailModal: React.FC<JobDetailModalProps> = ({ job, isBookmarked, onBo
           </button>
           <button className="btn btn-primary" onClick={() => {
             // 지원하기 로직 (칸반보드에 추가)
-            alert('지원 목록에 추가되었습니다!');
+            toast.success('지원 목록에 추가되었습니다!');
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 2L11 13" />

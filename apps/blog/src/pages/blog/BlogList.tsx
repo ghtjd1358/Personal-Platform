@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { usePermission } from '@sonhoseong/mfa-lib';
 import {useBlogData, useScrollAnimation} from "@/hooks";
 import {BlogStats, HeroSection, PostsSection, SEOHead} from "@/components";
 import { getCategories, CategoryDetail } from "@/network";
+import { LINK_PREFIX } from '@/config/constants';
 
 const BlogList: React.FC = () => {
+  const { isAdmin } = usePermission();
   const [categories, setCategories] = useState<CategoryDetail[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -54,11 +58,36 @@ const BlogList: React.FC = () => {
         description="개발자 손호성의 기술 블로그입니다. 웹 개발, 프론트엔드, React, TypeScript 관련 글을 작성합니다."
       />
       <HeroSection />
+
+      {/* 관리자 전용 inline action bar — host/standalone 모드 무관하게 admin 이면 보임 */}
+      {isAdmin && (
+        <div className="blog-admin-bar">
+          <div className="container">
+            <div className="blog-admin-bar-inner">
+              <div className="blog-admin-bar-meta">
+                <span className="blog-admin-bar-eyebrow">ADMIN · AUTHOR</span>
+                <span className="blog-admin-bar-hint">새 글을 작성하거나 기존 글을 관리합니다</span>
+              </div>
+              <div className="blog-admin-bar-actions">
+                <Link to={`${LINK_PREFIX}/write`} className="blog-admin-btn blog-admin-btn--primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  + 글쓰기
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BlogStats
         totalViews={totalViews}
         totalPosts={totalPosts}
         totalLikes={totalLikes}
         daysRunning={daysRunning}
+        isLoading={isLoading}
       />
 
       {/* 필터 섹션 */}

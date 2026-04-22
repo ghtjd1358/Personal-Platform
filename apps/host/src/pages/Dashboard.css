@@ -69,17 +69,22 @@
     margin-bottom: 20px;
 }
 
-.hero-title {
-    font-family: 'Fraunces', 'Pretendard Variable', serif;
+/* 중요: `.dashboard-root` 로 스코프 — resume remote 의 global.css 에 있는
+ * `.hero-title { font-size: 52px; font-weight: 700 }` 가 MFA 특성상 <head> 에 주입되면
+ * specificity 같아 선언 순서로 override 되던 버그. `(0,2,0)` 로 항상 이기게 함.
+ */
+.dashboard-root .hero-title {
+    font-family: 'Fraunces', 'FallbackFraunces', 'Georgia', 'Times New Roman', serif;
     font-size: clamp(56px, 9.5vw, 148px);
     font-weight: 300;
     line-height: 0.92;
     letter-spacing: -0.04em;
     margin: 0;
     font-variation-settings: "opsz" 144, "SOFT" 100;
+    animation: none; /* resume 의 fadeInBlur 가 따라오던 것 차단 */
 }
 
-.hero-title em {
+.dashboard-root .hero-title em {
     font-style: italic;
     color: var(--terra);
     font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;

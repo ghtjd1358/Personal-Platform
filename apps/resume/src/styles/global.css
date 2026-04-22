@@ -447,13 +447,16 @@ body.has-header {
   color: var(--color-text-secondary);
   background: transparent;
   border-radius: var(--radius-md);
-  transition: all 0.3s ease;
+  border: 1px solid transparent; /* active 전환 시 너비 변화 방지 — 레이아웃 고정 */
+  /* active ↔ inactive 전환은 즉시 snap. hover color 만 부드럽게. */
+  transition: color 0.2s ease;
 }
 
 .skill-tab.active {
-  background: white;
+  background: var(--color-bg);
   color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.1);
+  border: 1px solid var(--color-primary);
+  box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.12);
 }
 
 .skill-tab:hover:not(.active) {
@@ -735,6 +738,11 @@ body.has-header {
   cursor: pointer;
   margin-bottom: 12px;
   transition: color 0.2s ease;
+  /* button reset (a11y 를 위해 div → button 으로 변경됨) */
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
 }
 
 .toggle-tasks:hover {
@@ -742,10 +750,12 @@ body.has-header {
 }
 
 .toggle-icon {
+  display: inline-block;
   font-size: 18px;
   font-weight: 700;
   color: var(--color-accent);
-  transition: transform 0.2s ease;
+  transition: transform 0.35s cubic-bezier(.2, .7, .2, 1), color 0.2s ease;
+  transform-origin: 50% 55%;
 }
 
 .toggle-tasks.active .toggle-icon {
@@ -755,6 +765,49 @@ body.has-header {
 
 .toggle-tasks.active {
   color: var(--color-primary);
+}
+
+/* ===== Slide-reveal: 감춰진 task 목록이 chevron 토글에 맞춰 펼쳐짐 =====
+ * grid-template-rows: 0fr → 1fr 트릭으로 컨텐츠 높이 몰라도 자연스럽게 슬라이드.
+ * 내부 ul 은 overflow:hidden + min-height:0 필수.
+ */
+.timeline-tasks-collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.45s cubic-bezier(.2, .7, .2, 1),
+    opacity 0.3s ease;
+}
+
+.timeline-tasks-collapsible > ul {
+  overflow: hidden;
+  min-height: 0;
+  margin-top: 0;
+}
+
+.timeline-tasks-collapsible.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+/* 펼쳐진 상태에서 각 task 가 잉크 번지듯 차례로 등장 — staggered fade-up */
+.timeline-tasks-collapsible.is-open .timeline-tasks li {
+  animation: timelineInkReveal 0.5s cubic-bezier(.2, .7, .2, 1) both;
+  animation-delay: calc(var(--i, 0) * 0.06s + 0.1s);
+}
+
+@keyframes timelineInkReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 /* Show More Button */
@@ -1135,33 +1188,90 @@ body.has-header {
   counter-reset: card-counter;
 }
 
+/* editorial (블로그 PostCard와 동일 언어): 한지 cream + 먹 border + offset shadow + 회전
+ * height 는 기존 그대로 유지 (280px). 회전은 --rest-angle 변수로 일관 제어.
+ */
 .card22 {
+  --rest-angle: 0deg;
   position: relative;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.06);
+  background: #FBF5E3;
+  border: 1px solid #2B1E14;
+  border-radius: 3px;
+  overflow: visible;               /* paper tape 가 top 위로 삐져나오게 */
+  box-shadow: 2px 4px 0 rgba(43, 30, 20, 0.1);
   cursor: pointer;
   counter-increment: card-counter;
   height: 280px;
+  transform: rotate(var(--rest-angle));
+  transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+              box-shadow 0.35s ease,
+              z-index 0s linear 0.35s;
+  z-index: 1;
 }
 
-/* 액센트 바 */
+/* 카드마다 다른 rest angle — 4n 주기 */
+.card22:nth-child(4n+1) { --rest-angle: -0.6deg; }
+.card22:nth-child(4n+2) { --rest-angle: 0.45deg; }
+.card22:nth-child(4n+3) { --rest-angle: -0.25deg; }
+.card22:nth-child(4n)   { --rest-angle: 0.55deg; }
+
+/* 종이테이프 — 블로그 카드와 동일, 각도만 카드별 살짝 변주 */
 .card22::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-4deg);
+  width: 64px;
+  height: 18px;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(140, 30, 26, 0.22) 0 3px,
+      rgba(140, 30, 26, 0.32) 3px 6px
+    );
+  border-left: 1px dashed rgba(43, 30, 20, 0.28);
+  border-right: 1px dashed rgba(43, 30, 20, 0.28);
+  box-shadow: 0 1px 2px rgba(43, 30, 20, 0.15);
+  opacity: 0.7;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.card22:nth-child(3n+2)::before {
+  transform: translateX(-50%) rotate(3deg);
+  left: 40%;
+}
+
+.card22:nth-child(3n)::before {
+  transform: translateX(-50%) rotate(-6deg);
+  left: 60%;
 }
 
 .card22:hover {
-  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.1);
+  transform: rotate(0deg) translateY(-10px) scale(1.03);
+  box-shadow:
+    6px 14px 0 rgba(43, 30, 20, 0.3),
+    12px 22px 36px rgba(43, 30, 20, 0.15);
+  z-index: 5;
+  transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+              box-shadow 0.35s ease,
+              z-index 0s linear;
+  animation: none;
+}
+
+/* 스크롤 등장 시 감쇠 진동 — 블로그 PostCard 와 같은 키프레임 적용 */
+.card22.animate-on-scroll.animate-visible {
+  animation: card22-sway-in 0.75s cubic-bezier(.25, .8, .3, 1.08) forwards;
+}
+
+@keyframes card22-sway-in {
+  0%   { transform: translateY(24px) rotate(var(--rest-angle)); }
+  28%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 1.7deg)); }
+  48%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 1.1deg)); }
+  68%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 0.6deg)); }
+  84%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 0.3deg)); }
+  100% { transform: translateY(0) rotate(var(--rest-angle)); }
 }
 
 /* 카드 바디 - 콘텐츠 영역 */
@@ -1425,7 +1535,7 @@ body.has-header {
 .contact-icons {
   display: flex;
   justify-content: center;
-  gap: 32px;
+  gap: 28px;
   margin-top: 32px;
 }
 
@@ -1435,16 +1545,29 @@ body.has-header {
   justify-content: center;
   width: 56px;
   height: 56px;
-  background: white;
+  background: #FBF5E3;
+  border: 1px solid #2B1E14;
   border-radius: 50%;
-  color: var(--color-text-secondary);
-  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.1);
-  transition: all 0.3s ease;
+  color: #2B1E14;
+  box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.12);
+  transition: transform 0.3s cubic-bezier(.2, .7, .2, 1),
+              background-color 0.3s ease,
+              box-shadow 0.3s ease,
+              color 0.3s ease;
 }
 
 .contact-icon-link:hover {
-  transform: translateY(-4px) scale(1.1);
-  box-shadow: 0 8px 24px rgba(30, 58, 95, 0.15);
+  transform: translateY(-4px) scale(1.06);
+  background: #F4EAD5;
+  color: #8C1E1A;
+  box-shadow: 3px 6px 0 rgba(140, 30, 26, 0.28);
+}
+
+/* 아이콘 내부 SVG 색 덮어쓰기 — 기존 inline color 가 있어도 통일 */
+.contact-icon-link svg {
+  color: currentColor !important;
+  fill: currentColor !important;
+  transition: color 0.3s ease, fill 0.3s ease;
 }
 
 /* ===== Floating Navigation (상단 리모컨) ===== */
@@ -2591,7 +2714,7 @@ body.has-header {
 .section-edit-btn:hover {
   background: var(--color-accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.35);
+  box-shadow: 2px 4px 0 rgba(140, 30, 26, 0.35);
 }
 
 .section-edit-btn svg {

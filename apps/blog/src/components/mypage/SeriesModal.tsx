@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getCurrentUser } from '@sonhoseong/mfa-lib';
+import { getCurrentUser, useToast } from '@sonhoseong/mfa-lib';
 import {
   SeriesDetail,
   CreateSeriesRequest,
@@ -39,6 +39,7 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
   onClose,
   onSave,
 }) => {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<TabType>('info');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -183,13 +184,13 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
 
     // 이미지 파일만 허용
     if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드 가능합니다.');
+      toast.error('이미지 파일만 업로드 가능합니다.');
       return;
     }
 
     // 5MB 제한
     if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 5MB 이하만 가능합니다.');
+      toast.error('파일 크기는 5MB 이하만 가능합니다.');
       return;
     }
 
@@ -199,10 +200,10 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
       if (result.success && result.data) {
         setCoverImage(result.data.url);
       } else {
-        alert(result.error || '이미지 업로드에 실패했습니다.');
+        toast.error(result.error || '이미지 업로드에 실패했습니다.');
       }
     } catch (err) {
-      alert('이미지 업로드 중 오류가 발생했습니다.');
+      toast.error('이미지 업로드 중 오류가 발생했습니다.');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

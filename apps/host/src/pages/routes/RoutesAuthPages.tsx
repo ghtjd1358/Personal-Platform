@@ -7,6 +7,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { RemoteErrorBoundary } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './paths';
 import Dashboard from '../Dashboard';
+import MyPage from '../MyPage';
 
 // ============================================
 // 안전한 Remote 로딩 (Graceful Fallback)
@@ -61,13 +62,8 @@ const JobTrackerApp = React.lazy(() =>
   }))
 );
 
-// @ts-ignore - 마이페이지 (Host 레벨)
-const MyPage = React.lazy(() =>
-  // @ts-ignore
-  import('@blog/MyPage').catch(() => ({
-    default: () => null
-  }))
-);
+// 참고: 옛 `@blog/MyPage` remote import 는 host-level MyPage 로 교체 (상단 직접 import).
+// 각 remote 의 `./MyPageData` expose 가 추가되면 lazy import 로 합성될 예정.
 
 // Remote pathPrefix - /container prefix 고정 (LnbItems 동적 로딩 제거)
 // 이전엔 remote별 pathPrefix를 top-level await로 가져왔으나, Module Federation의
@@ -157,14 +153,12 @@ function RoutesAuthPages() {
         }
       />
 
-      {/* 마이페이지 (Host 레벨 - /container/user/:userId) */}
+      {/* 마이페이지 (Host-level 통합 — 4 remote 도메인을 하나의 editorial 대시보드로) */}
       <Route
         path="/container/user/:userId"
         element={
           <RemoteErrorBoundary remoteName="마이페이지">
-            <Suspense fallback={<RemoteLoadingFallback />}>
-              <MyPage />
-            </Suspense>
+            <MyPage />
           </RemoteErrorBoundary>
         }
       />

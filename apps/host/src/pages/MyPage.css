@@ -1,0 +1,300 @@
+/* Host-level MyPage — 4 domain 통합 editorial 대시보드.
+ * Dashboard 와 같은 언어 (한지 · 먹 · 주홍), 카드는 scrapbook 패턴 (PostCard 와 동기화).
+ */
+
+.host-mypage {
+    --mp-ink: #2B1E14;
+    --mp-bone: #F4EAD5;
+    --mp-cream: #FBF5E3;
+    --mp-accent: #8C1E1A;
+    --mp-mute: #8B7355;
+    --mp-line: #D4C4A8;
+
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    color: var(--mp-ink);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 24px 100px;
+}
+
+/* ===== Hero ===== */
+.host-mypage-hero {
+    margin-bottom: 56px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--mp-line);
+    max-width: 780px;
+}
+
+.host-mypage-eyebrow {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--mp-accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.host-mypage-title {
+    margin: 0 0 14px;
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-weight: 300;
+    font-size: clamp(40px, 5.5vw, 72px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--mp-ink);
+    font-variation-settings: "opsz" 144, "SOFT" 80;
+}
+
+.host-mypage-title em {
+    font-style: italic;
+    color: var(--mp-accent);
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+    margin-right: 0.08em;
+}
+
+.host-mypage-sub {
+    margin: 0;
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--mp-mute);
+    max-width: 640px;
+}
+
+.host-mypage-notice {
+    margin-top: 16px;
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--mp-cream);
+    border: 1px dashed var(--mp-accent);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--mp-accent);
+    text-transform: uppercase;
+}
+
+/* ===== Grid ===== */
+.host-mypage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+    margin-bottom: 56px;
+}
+
+/* ===== Card ===== */
+.host-mypage-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 26px 22px;
+    background: var(--mp-cream);
+    border: 2px solid var(--mp-ink);
+    border-radius: 2px;
+    box-shadow: 4px 6px 0 rgba(43, 30, 20, 0.12);
+    transition:
+        transform 0.3s cubic-bezier(.2, .7, .2, 1),
+        box-shadow 0.3s ease;
+    animation: host-mypage-card-enter 0.55s cubic-bezier(.2, .7, .2, 1) both;
+    animation-delay: calc(var(--i, 0) * 0.08s);
+    min-height: 200px;
+}
+
+@keyframes host-mypage-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.host-mypage-card:hover {
+    transform: translateY(-6px);
+    box-shadow:
+        6px 12px 0 rgba(43, 30, 20, 0.2),
+        12px 20px 30px rgba(43, 30, 20, 0.1);
+}
+
+/* Paper tape */
+.host-mypage-card-tape {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 72px;
+    height: 18px;
+    background: rgba(140, 30, 26, 0.22);
+    border: 1px solid rgba(140, 30, 26, 0.35);
+    box-shadow: 1px 1px 0 rgba(43, 30, 20, 0.1);
+    transform: translateX(-50%) rotate(-3deg);
+    pointer-events: none;
+}
+
+.host-mypage-card:nth-child(4n+2) .host-mypage-card-tape {
+    transform: translateX(-50%) rotate(2.5deg);
+    width: 62px;
+}
+
+.host-mypage-card:nth-child(4n+3) .host-mypage-card-tape {
+    transform: translateX(-50%) rotate(-4.5deg);
+    width: 80px;
+}
+
+.host-mypage-card:nth-child(4n+4) .host-mypage-card-tape {
+    transform: translateX(-50%) rotate(1.8deg);
+    width: 68px;
+}
+
+.host-mypage-card-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--mp-accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.host-mypage-card-title {
+    margin: 0 0 8px;
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 28px;
+    color: var(--mp-ink);
+    line-height: 1.1;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+
+.host-mypage-card-sub {
+    margin: 0 0 18px;
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--mp-mute);
+    flex: 1;
+}
+
+.host-mypage-card-divider {
+    height: 1px;
+    background: var(--mp-line);
+    background-image: repeating-linear-gradient(
+        to right,
+        var(--mp-line) 0,
+        var(--mp-line) 4px,
+        transparent 4px,
+        transparent 8px
+    );
+    margin-bottom: 14px;
+}
+
+.host-mypage-card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.host-mypage-card-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--mp-mute);
+    text-transform: uppercase;
+}
+
+.host-mypage-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.host-mypage-card-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 2px;
+    font-family: 'Pretendard Variable', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--mp-ink);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
+    flex: 1 1 auto;
+    justify-content: center;
+}
+
+/* Primary — 새 항목 추가 (글쓰기 · 경력 추가 · 포트폴리오 추가) */
+.host-mypage-card-cta--primary {
+    background: var(--mp-ink);
+    color: var(--mp-bone);
+}
+
+.host-mypage-card-cta--primary:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.22);
+    background: var(--mp-accent);
+    border-color: var(--mp-accent);
+}
+
+/* Ghost — 보기 / 열기 (secondary) */
+.host-mypage-card-cta--ghost {
+    background: transparent;
+    color: var(--mp-ink);
+}
+
+.host-mypage-card-cta--ghost:hover {
+    background: var(--mp-cream);
+    color: var(--mp-accent);
+    border-color: var(--mp-accent);
+}
+
+/* ===== Footer note ===== */
+.host-mypage-footer {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 24px;
+    background: var(--mp-cream);
+    border: 1px dashed var(--mp-line);
+    border-radius: 2px;
+    font-family: 'Pretendard Variable', sans-serif;
+    font-size: 12px;
+    color: var(--mp-mute);
+    line-height: 1.65;
+}
+
+.host-mypage-footer-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--mp-accent);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.host-mypage-footer code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 1px 6px;
+    background: rgba(43, 30, 20, 0.08);
+    border-radius: 2px;
+    color: var(--mp-ink);
+}
+
+@media (max-width: 640px) {
+    .host-mypage {
+        padding: 32px 16px 80px;
+    }
+    .host-mypage-grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+}

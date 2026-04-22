@@ -23,14 +23,16 @@ html,
 body {
     background: var(--hanji) !important;
     color: var(--sumi);
-    /* 새로고침 시 가로 스크롤로 인한 jump 방지 */
-    overflow-x: hidden;
 }
 
-/* 브라우저 scroll restoration과 smooth-scroll 충돌 방지 (refresh 시 scroll jump 완화) */
+/* 브라우저 scroll restoration과 smooth-scroll 충돌 방지 (refresh 시 scroll jump 완화).
+   overflow-x 는 html 에만 — body 에 걸면 body 가 별도 스크롤 컨테이너가 돼
+   position:sticky 의 containing block 이 body 로 제한되어 TOC 같은 sticky 요소가
+   스크롤을 따라가지 못하는 버그 발생 (Chromium 기준). */
 html {
     scroll-behavior: auto;
     overscroll-behavior-y: none;
+    overflow-x: hidden;
 }
 
 /* App.css line 80의 하드코딩된 #ffffff 덮어쓰기 (컨테이너 내부 흰 배경)

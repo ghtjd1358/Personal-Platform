@@ -4,8 +4,8 @@
  */
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ScrollTopButton, getCurrentUser, storage } from '@sonhoseong/mfa-lib';
+import { useNavigate, Link } from 'react-router-dom';
+import { ScrollTopButton, getCurrentUser, storage, usePermission } from '@sonhoseong/mfa-lib';
 import { usePortfolios } from './hooks';
 import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
@@ -23,6 +23,7 @@ const HomePage: React.FC = () => {
   const { portfolios, featuredProjects, otherProjects, loading } = usePortfolios();
   const currentUser = getCurrentUser();
   const navigate = useNavigate();
+  const { isAdmin } = usePermission();
 
   // 기술 스택 목록 추출
   const allTechStacks = useMemo(() => {
@@ -123,6 +124,32 @@ const HomePage: React.FC = () => {
       {/* 히어로 섹션 - 비디오 배경 */}
       <HeroSection />
 
+      {/* 관리자 전용 inline action bar — admin (role=admin 또는 owner) 에게만 */}
+      {isAdmin && (
+        <div className="portfolio-admin-bar">
+          <div className="container">
+            <div className="portfolio-admin-bar-inner">
+              <div className="portfolio-admin-bar-meta">
+                <span className="portfolio-admin-bar-eyebrow">ADMIN · CURATOR</span>
+                <span className="portfolio-admin-bar-hint">작품을 추가하거나 기존 작품을 관리합니다</span>
+              </div>
+              <div className="portfolio-admin-bar-actions">
+                <Link to="/container/resume/admin/portfolio/new" className="portfolio-admin-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  + 포트폴리오 추가
+                </Link>
+                <Link to="/container/resume/admin/portfolio" className="portfolio-admin-btn portfolio-admin-btn--ghost">
+                  전체 관리 →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 전체 프로젝트 그리드 */}
       <section id="portfolio" className="section">
         <div className="container">
@@ -216,21 +243,28 @@ const HomePage: React.FC = () => {
                       <img src={project.cover_image} alt={project.title} />
                     ) : (
                       <div className="insta-grid-placeholder">
-                        <span>{project.badge || '📁'}</span>
+                        <span>{project.badge || '✶'}</span>
                       </div>
                     )}
-                    <div className="insta-grid-overlay">
-                      <div className="insta-grid-info">
-                        <h3 className="insta-grid-title">{project.title}</h3>
-                        <div className="insta-grid-stats">
-                          <span>
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                            </svg>
-                            {project.view_count || 0}
-                          </span>
-                        </div>
-                      </div>
+                  </div>
+                  <div className="insta-grid-info">
+                    <span className="insta-grid-eyebrow">
+                      {project.badge || `CASE · 0${(index % 9) + 1}`}
+                    </span>
+                    <h3 className="insta-grid-title">{project.title}</h3>
+                    {project.short_description && (
+                      <p className="insta-grid-sub">{project.short_description}</p>
+                    )}
+                    <div className="insta-grid-meta">
+                      <span className="insta-grid-meta-item">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                        {project.view_count || 0}
+                      </span>
+                      {(project as any).is_current && (
+                        <span className="insta-grid-meta-item insta-grid-live">● LIVE</span>
+                      )}
                     </div>
                   </div>
                 </article>

@@ -3,7 +3,8 @@ import { ModalCommonProps } from './types';
 import { popModal } from './modal-manager';
 import { PortfolioItem, PortfolioSection } from '../../data';
 import { iconMap } from '../../constants/iconMap';
-import { FaBlog } from 'react-icons/fa';
+import { FaBlog, FaGlobe } from 'react-icons/fa';
+import './PortfolioModal.editorial.css';
 
 // 노션 스타일 섹션 컴포넌트
 const NotionSection: React.FC<{ section: PortfolioSection }> = ({ section }) => (
@@ -237,6 +238,14 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
                       )}
                       {link.label.includes('블로그') && (
                         <span className="modal-link-icon"><FaBlog /></span>
+                      )}
+                      {(link.label.includes('서비스') ||
+                        link.label.includes('데모') ||
+                        link.label.includes('사이트') ||
+                        link.label.includes('배포') ||
+                        link.label.toLowerCase().includes('demo') ||
+                        link.label.toLowerCase().includes('live')) && (
+                        <span className="modal-link-icon"><FaGlobe /></span>
                       )}
                       {link.label}
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

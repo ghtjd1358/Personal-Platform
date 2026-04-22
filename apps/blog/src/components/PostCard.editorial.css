@@ -27,22 +27,22 @@
 }
 
 /* 카드마다 다른 각도 — 4n 패턴으로 "무분별한 벽보" 느낌 */
-.post-card:nth-child(4n+1) { --rest-angle: -1.2deg; }
-.post-card:nth-child(4n+2) { --rest-angle: 0.9deg; }
-.post-card:nth-child(4n+3) { --rest-angle: -0.5deg; }
-.post-card:nth-child(4n)   { --rest-angle: 1.1deg; }
+.post-card:nth-child(4n+1) { --rest-angle: -0.6deg; }
+.post-card:nth-child(4n+2) { --rest-angle: 0.45deg; }
+.post-card:nth-child(4n+3) { --rest-angle: -0.25deg; }
+.post-card:nth-child(4n)   { --rest-angle: 0.55deg; }
 
 /* scroll 진입 시 흔들리며 나타남 — animate-on-scroll + animate-visible 체인 사용 */
 .post-card.animate-on-scroll.animate-visible {
-    animation: card-sway-in 1.35s cubic-bezier(.25, .8, .3, 1.08) forwards;
+    animation: card-sway-in 0.75s cubic-bezier(.25, .8, .3, 1.08) forwards;
 }
 
 @keyframes card-sway-in {
     0%   { transform: translateY(24px) rotate(var(--rest-angle)); }
-    28%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 3.5deg)); }
-    48%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 2.4deg)); }
-    68%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 1.3deg)); }
-    84%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 0.6deg)); }
+    28%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 1.7deg)); }
+    48%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 1.1deg)); }
+    68%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 0.6deg)); }
+    84%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 0.3deg)); }
     100% { transform: translateY(0) rotate(var(--rest-angle)); }
 }
 

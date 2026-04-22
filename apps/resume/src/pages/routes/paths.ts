@@ -22,6 +22,11 @@ export enum RoutePath {
     AdminExperienceNew = '/admin/experience/new',
     AdminExperienceEdit = '/admin/experience/edit/:id',
 
+    // 포트폴리오 관리 (기존 AdminProjects 는 alias 로 유지)
+    AdminPortfolio = '/admin/portfolio',
+    AdminPortfolioNew = '/admin/portfolio/new',
+    AdminPortfolioEdit = '/admin/portfolio/edit/:id',
+
     AdminProjects = '/admin/projects',
     AdminProjectsNew = '/admin/projects/new',
     AdminProjectsEdit = '/admin/projects/edit/:id',

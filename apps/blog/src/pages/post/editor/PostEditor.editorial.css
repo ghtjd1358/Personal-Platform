@@ -1,0 +1,279 @@
+/* PostEditor editorial skin — 한지 bg + 먹 ink + 주홍 accent
+ * global.css 의 Tistory 스타일 에디터를 editorial 톤으로 덮어쓰기
+ */
+
+.post-editor-page {
+    --pe-ink: #2B1E14;
+    --pe-bone: #F4EAD5;
+    --pe-cream: #FBF5E3;
+    --pe-accent: #8C1E1A;
+    --pe-mute: #8B7355;
+    --pe-line: #D4C4A8;
+
+    background: var(--pe-bone) !important;
+    color: var(--pe-ink);
+    position: relative;
+}
+
+/* 한지 섬유 질감 오버레이 */
+.post-editor-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cfilter id='pef'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 0.85' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23pef)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.post-editor-page > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== 상단 헤더 ===== */
+.post-editor-page .editor-header {
+    background: var(--pe-cream) !important;
+    border-bottom: 1px solid var(--pe-ink) !important;
+    box-shadow: 0 1px 0 rgba(43, 30, 20, 0.06) !important;
+    padding: 18px 28px !important;
+}
+
+.post-editor-page .btn-back {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 12px !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    color: var(--pe-mute) !important;
+    padding: 6px 10px !important;
+    border-radius: 0 !important;
+    transition: color 0.2s !important;
+}
+
+.post-editor-page .btn-back:hover {
+    color: var(--pe-accent) !important;
+}
+
+.post-editor-page .autosave-indicator {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    color: var(--pe-mute) !important;
+    background: transparent !important;
+    border: 1px dashed var(--pe-line) !important;
+    border-radius: 0 !important;
+    padding: 4px 10px !important;
+}
+
+.post-editor-page .autosave-indicator.unsaved {
+    color: var(--pe-accent) !important;
+    border-color: var(--pe-accent) !important;
+    background: rgba(140, 30, 26, 0.05) !important;
+}
+
+/* ===== 본문 컨테이너 ===== */
+.post-editor-page .editor-main {
+    max-width: 920px !important;
+}
+
+.post-editor-page .editor-content-area {
+    padding: 56px 48px !important;
+    max-width: 920px !important;
+}
+
+/* ===== 제목 입력 — Fraunces italic display ===== */
+.post-editor-page .editor-title-input {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1 !important;
+    font-size: clamp(38px, 5vw, 56px) !important;
+    color: var(--pe-ink) !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1.15 !important;
+    margin-bottom: 28px !important;
+    padding-bottom: 18px !important;
+    border-bottom: 1px solid var(--pe-line) !important;
+}
+
+.post-editor-page .editor-title-input::placeholder {
+    color: var(--pe-mute) !important;
+    font-style: italic !important;
+    opacity: 0.55 !important;
+}
+
+/* ===== 태그 섹션 ===== */
+.post-editor-page .editor-tags {
+    border-bottom: 1px dashed var(--pe-line) !important;
+    padding-bottom: 22px !important;
+    margin-bottom: 28px !important;
+}
+
+.post-editor-page .tags-label {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 0.22em !important;
+    text-transform: uppercase !important;
+    color: var(--pe-mute) !important;
+    font-weight: 500 !important;
+}
+
+.post-editor-page .tags-search {
+    background: var(--pe-cream) !important;
+    border: 1px solid var(--pe-line) !important;
+    border-radius: 0 !important;
+    color: var(--pe-ink) !important;
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+    transition: border-color 0.2s !important;
+}
+
+.post-editor-page .tags-search:focus {
+    border-color: var(--pe-ink) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(43, 30, 20, 0.1) !important;
+}
+
+.post-editor-page .tags-search::placeholder {
+    color: var(--pe-mute) !important;
+    opacity: 0.55 !important;
+}
+
+.post-editor-page .tags-selected {
+    border-bottom: 1px dashed var(--pe-line) !important;
+}
+
+.post-editor-page .tag-chip {
+    background: transparent !important;
+    border: 1px solid var(--pe-line) !important;
+    color: var(--pe-mute) !important;
+    border-radius: 0 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 12px !important;
+    letter-spacing: 0.05em !important;
+    padding: 6px 12px !important;
+    transition: all 0.2s ease !important;
+}
+
+.post-editor-page .tag-chip:hover {
+    border-color: var(--pe-ink) !important;
+    color: var(--pe-ink) !important;
+    background: rgba(43, 30, 20, 0.04) !important;
+}
+
+.post-editor-page .tag-chip.selected {
+    background: var(--pe-ink) !important;
+    border-color: var(--pe-ink) !important;
+    color: var(--pe-cream) !important;
+}
+
+/* ===== Tiptap 에디터 프레임 ===== */
+.post-editor-page .tiptap-editor {
+    background: var(--pe-cream) !important;
+    border: 1px solid var(--pe-line) !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.07) !important;
+    overflow: hidden !important;
+}
+
+.post-editor-page .editor-toolbar {
+    background: var(--pe-bone) !important;
+    border-bottom: 1px solid var(--pe-line) !important;
+    padding: 10px 14px !important;
+}
+
+.post-editor-page .editor-toolbar button {
+    color: var(--pe-mute) !important;
+    border-radius: 0 !important;
+    transition: all 0.15s ease !important;
+}
+
+.post-editor-page .editor-toolbar button:hover {
+    background: rgba(43, 30, 20, 0.05) !important;
+    color: var(--pe-ink) !important;
+}
+
+.post-editor-page .editor-toolbar button.active {
+    background: var(--pe-ink) !important;
+    color: var(--pe-cream) !important;
+}
+
+.post-editor-page .toolbar-divider {
+    background: var(--pe-line) !important;
+}
+
+.post-editor-page .editor-content {
+    padding: 28px 32px 36px !important;
+    min-height: 480px !important;
+}
+
+.post-editor-page .editor-content .tiptap {
+    color: var(--pe-ink) !important;
+    font-family: 'Pretendard Variable', 'Pretendard', system-ui, sans-serif !important;
+}
+
+.post-editor-page .editor-content .tiptap h1,
+.post-editor-page .editor-content .tiptap h2,
+.post-editor-page .editor-content .tiptap h3 {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    color: var(--pe-ink) !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+}
+
+.post-editor-page .editor-content .tiptap blockquote {
+    border-left: 3px solid var(--pe-accent) !important;
+    background: rgba(140, 30, 26, 0.04) !important;
+    color: var(--pe-ink) !important;
+    font-family: 'Fraunces', serif !important;
+    font-style: italic !important;
+    border-radius: 0 !important;
+}
+
+.post-editor-page .editor-content .tiptap code:not(pre code) {
+    background: rgba(43, 30, 20, 0.06) !important;
+    color: var(--pe-accent) !important;
+    border: 1px solid var(--pe-line) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    border-radius: 2px !important;
+}
+
+.post-editor-page .editor-content .tiptap a {
+    color: var(--pe-accent) !important;
+    text-decoration-color: rgba(140, 30, 26, 0.4) !important;
+    text-underline-offset: 3px !important;
+}
+
+.post-editor-page .editor-content .tiptap hr {
+    background: var(--pe-line) !important;
+}
+
+.post-editor-page .editor-content .tiptap p.is-editor-empty:first-child::before {
+    color: var(--pe-mute) !important;
+    opacity: 0.5 !important;
+    font-style: italic !important;
+}
+
+/* ===== 로딩 ===== */
+.post-editor-page .editor-loading,
+.editor-loading {
+    background: #F4EAD5 !important;
+    color: #8B7355 !important;
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif !important;
+    font-style: italic !important;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 1024px) {
+    .post-editor-page .editor-content-area {
+        padding: 32px 20px !important;
+    }
+    .post-editor-page .editor-title-input {
+        font-size: clamp(28px, 6vw, 38px) !important;
+    }
+    .post-editor-page .editor-header {
+        padding: 14px 18px !important;
+    }
+}

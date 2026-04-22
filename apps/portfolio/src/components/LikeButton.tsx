@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { useToast } from '@sonhoseong/mfa-lib';
 import { useLike } from '@/hooks';
 
 interface LikeButtonProps {
@@ -20,6 +21,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   initialLikeCount = 0,
   showCount = true,
 }) => {
+  const toast = useToast();
   const { isLiked, likeCount, isLoading, isToggling, toggle } = useLike({
     portfolioId,
     userId,
@@ -28,7 +30,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 
   const handleClick = () => {
     if (!userId) {
-      alert('로그인이 필요합니다.');
+      toast.error('로그인이 필요합니다.');
       return;
     }
     toggle();

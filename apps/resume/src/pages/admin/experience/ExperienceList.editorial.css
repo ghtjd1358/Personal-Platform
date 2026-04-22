@@ -1,0 +1,318 @@
+/* Unified 경력 & 프로젝트 admin — editorial 톤 (skills admin 과 언어 통일) */
+
+.exp-admin {
+    --ex-ink: #2B1E14;
+    --ex-bone: #F4EAD5;
+    --ex-cream: #FBF5E3;
+    --ex-accent: #8C1E1A;
+    --ex-mute: #8B7355;
+    --ex-line: #D4C4A8;
+
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    color: var(--ex-ink);
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+}
+
+.exp-admin-loading {
+    text-align: center;
+    padding: 80px 20px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ex-mute);
+}
+
+.exp-admin-header {
+    margin-bottom: 40px;
+    display: block;
+}
+
+.exp-admin-back {
+    color: var(--ex-mute);
+    text-decoration: none;
+    font-size: 13px;
+    margin-bottom: 6px;
+    display: inline-block;
+    letter-spacing: 0.02em;
+}
+
+.exp-admin-back:hover {
+    color: var(--ex-accent);
+}
+
+.exp-admin-title {
+    margin: 0 0 6px;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 34px;
+    letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+
+.exp-admin-sub {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ex-mute);
+    line-height: 1.5;
+}
+
+/* ===== Section ===== */
+.exp-section {
+    margin-bottom: 48px;
+}
+
+.exp-section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--ex-line);
+}
+
+.exp-section-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.exp-section-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ex-accent);
+    text-transform: uppercase;
+}
+
+.exp-section-title {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+
+/* ===== Buttons ===== */
+.exp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    font-family: 'Pretendard Variable', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 2px;
+    border: 1px solid var(--ex-ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.exp-btn--primary {
+    background: var(--ex-ink);
+    color: var(--ex-bone);
+}
+
+.exp-btn--primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.2);
+    background: var(--ex-accent);
+    border-color: var(--ex-accent);
+}
+
+.exp-btn--ghost {
+    background: transparent;
+    color: var(--ex-ink);
+}
+
+.exp-btn--ghost:hover {
+    background: var(--ex-cream);
+    color: var(--ex-accent);
+    border-color: var(--ex-accent);
+}
+
+/* ===== Empty state ===== */
+.exp-empty {
+    padding: 48px 24px;
+    background: var(--ex-cream);
+    border: 1px dashed var(--ex-ink);
+    border-radius: 2px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.exp-empty-title {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ex-ink);
+}
+
+/* ===== Row list ===== */
+.exp-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.exp-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--ex-cream);
+    border: 1px solid var(--ex-line);
+    border-radius: 2px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.exp-row:hover {
+    transform: translateY(-1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.08);
+    border-color: var(--ex-ink);
+}
+
+.exp-row-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.exp-row-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--ex-ink);
+    line-height: 1.3;
+}
+
+.exp-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--ex-bone);
+    background: var(--ex-ink);
+    border-radius: 2px;
+    text-transform: uppercase;
+}
+
+.exp-badge--muted {
+    background: var(--ex-mute);
+}
+
+/* row 내 인라인 뱃지 (이력서 노출 표시용) */
+.exp-row-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    margin-left: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--ex-accent);
+    background: rgba(140, 30, 26, 0.08);
+    border: 1px solid rgba(140, 30, 26, 0.35);
+    border-radius: 2px;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+/* 섹션 설명 (포트폴리오 전체 섹션용) */
+.exp-section-desc {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--ex-mute);
+    line-height: 1.5;
+    max-width: 560px;
+}
+
+.exp-row-sub {
+    font-size: 13px;
+    color: var(--ex-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.exp-row-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ex-mute);
+    text-transform: uppercase;
+}
+
+/* ===== Icon actions (✎ ×) — skills admin 과 언어 통일 ===== */
+.exp-row-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.exp-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    line-height: 1;
+    font-family: 'Pretendard Variable', sans-serif;
+    background: transparent;
+    border: 1px solid var(--ex-line);
+    border-radius: 2px;
+    color: var(--ex-ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+
+.exp-icon-btn:hover {
+    background: var(--ex-ink);
+    color: var(--ex-bone);
+    border-color: var(--ex-ink);
+    transform: translateY(-1px);
+}
+
+.exp-icon-btn--danger:hover {
+    background: var(--ex-accent);
+    color: var(--ex-bone);
+    border-color: var(--ex-accent);
+}
+
+/* Locked — Admin 이 Owner 행 볼 때만. 클릭하면 editor 로 가되 readOnly 모드 (Step 구현 예정) */
+.exp-icon-btn--locked {
+    background: transparent;
+    color: var(--ex-mute);
+    border: 1px dashed var(--ex-mute);
+    cursor: help;
+    font-size: 13px;
+}
+
+.exp-icon-btn--locked:hover {
+    background: transparent;
+    color: var(--ex-ink);
+    border-color: var(--ex-ink);
+    transform: none;
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Logo } from '@sonhoseong/mfa-lib';
+import { useToast } from '@sonhoseong/mfa-lib';
 import { ResumeProfileDetail } from '../../../data';
 import { downloadResume } from '../../../network/apis/resume';
 import '../../../styles/editorial.css';
@@ -51,6 +51,7 @@ const VelogIcon: React.FC = () => (
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ userName, resumeProfile }) => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const toast = useToast();
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -61,7 +62,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ userName, resumeProfil
       await downloadResume({ fileName: 'resume.pdf' });
     } catch (error) {
       console.error('Download failed:', error);
-      alert('다운로드에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      toast.error('다운로드에 실패했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsDownloading(false);
     }
@@ -86,14 +87,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ userName, resumeProfil
           <p className="editorial-sub">{resumeProfile.summary}</p>
         </div>
         <div className="editorial-side">
-          <div style={{ marginBottom: 20, opacity: 0.95 }}>
-            <Logo
-              customSize={56}
-              sideColor="#2B1E14"
-              centerColor="#8C1E1A"
-              eyeColor="#FBF5E3"
-            />
-          </div>
           <div className="editorial-meta-row">
             <span className="editorial-meta-label">YEARS</span>
             <span className="editorial-meta-value">2+</span>

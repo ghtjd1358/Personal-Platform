@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser } from '@sonhoseong/mfa-lib';
+import { selectAccessToken, getCurrentUser, useAsyncConfirm } from '@sonhoseong/mfa-lib';
 import { Link } from 'react-router-dom';
 import {
   getComments,
@@ -20,6 +20,7 @@ interface CommentsProps {
 }
 
 const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
+  const confirmDialog = useAsyncConfirm();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
@@ -98,7 +99,13 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
   };
 
   const handleDelete = async (commentId: string) => {
-    if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
+    const ok = await confirmDialog({
+      title: '댓글 삭제',
+      message: '댓글을 삭제하시겠습니까?',
+      confirmText: '삭제',
+      cancelText: '취소',
+    });
+    if (!ok) return;
 
     const res = await deleteComment(commentId);
     if (res.success) {

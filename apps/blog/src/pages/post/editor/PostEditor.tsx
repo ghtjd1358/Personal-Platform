@@ -1,11 +1,12 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCurrentUser, useToast } from '@sonhoseong/mfa-lib';
-import { TiptapEditor, EditorHeader, TagSelector, EditorSidebar } from '@/components/editor';
+import { TiptapEditor, EditorHeader, TagSelector } from '@/components/editor';
 import { LoadingSpinner } from '@/components/loading';
 import { usePostEditorData, useCreatePost, useUpdatePost, usePostAutosave, PostFormData } from '@/hooks';
-import { CreatePostRequest, UpdatePostRequest, addPostToSeries, removePostFromSeries } from '@/network';
+import { CreatePostRequest, UpdatePostRequest } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
+import './PostEditor.editorial.css';
 
 type PostStatus = 'draft' | 'published';
 
@@ -16,53 +17,21 @@ const PostEditor: React.FC = () => {
   const currentUser = getCurrentUser();
   const isEditMode = Boolean(slug);
 
-  // 데이터 페칭
-  const { tags, series, originalPost, initialFormData, isLoading } = usePostEditorData(slug);
-
-  // 원래 시리즈 ID 저장 (수정 시 변경 감지용)
-  const originalSeriesIdRef = useRef<string | null>(null);
-  React.useEffect(() => {
-    if (initialFormData.seriesId !== undefined) {
-      originalSeriesIdRef.current = initialFormData.seriesId;
-    }
-  }, [initialFormData.seriesId]);
-
-  // 시리즈 변경 처리 함수
-  const handleSeriesChange = useCallback(async (postId: string, newSeriesId: string | null, oldSeriesId: string | null) => {
-    // 시리즈 변경이 없으면 스킵
-    if (newSeriesId === oldSeriesId) return;
-
-    // 기존 시리즈에서 제거
-    if (oldSeriesId) {
-      await removePostFromSeries(oldSeriesId, postId);
-    }
-
-    // 새 시리즈에 추가
-    if (newSeriesId) {
-      await addPostToSeries({ series_id: newSeriesId, post_id: postId });
-    }
-  }, []);
+  // 데이터 페칭 (시리즈는 더 이상 UI에 노출하지 않지만 initialFormData 호환성 유지)
+  const { tags, originalPost, initialFormData, isLoading } = usePostEditorData(slug);
 
   // 뮤테이션
   const { createPost, isCreating } = useCreatePost({
-    onSuccess: async (id) => {
-      // 새 포스트 생성 후 시리즈에 추가
-      if (formData.seriesId) {
-        await addPostToSeries({ series_id: formData.seriesId, post_id: id });
-      }
-      clearAutosave(); // 자동 저장 데이터 삭제
+    onSuccess: (id) => {
+      clearAutosave();
       navigate(`${LINK_PREFIX}/post/${id}`);
     },
     onError: (err) => toast.error(err),
   });
 
   const { updatePost, isUpdating } = useUpdatePost({
-    onSuccess: async () => {
-      // 시리즈 변경 처리
-      if (originalPost) {
-        await handleSeriesChange(originalPost.id, formData.seriesId, originalSeriesIdRef.current);
-      }
-      clearAutosave(); // 자동 저장 데이터 삭제
+    onSuccess: () => {
+      clearAutosave();
       toast.success('게시글이 수정되었습니다.');
       navigate(`${LINK_PREFIX}/post/${originalPost?.slug || originalPost?.id}`);
     },
@@ -71,7 +40,6 @@ const PostEditor: React.FC = () => {
 
   // 폼 상태
   const [formData, setFormData] = useState<PostFormData>(initialFormData);
-  const [showSettings, setShowSettings] = useState(false);
 
   // initialFormData가 변경되면 formData 업데이트 (수정 모드에서 데이터 로드 후)
   React.useEffect(() => {
@@ -104,11 +72,11 @@ const PostEditor: React.FC = () => {
     const postData = {
       title: formData.title,
       content: formData.content,
-      excerpt: formData.excerpt || null,
+      excerpt: null,
       status,
       tagIds: formData.tagIds,
-      meta_title: formData.meta_title || null,
-      meta_description: formData.meta_description || null,
+      meta_title: null,
+      meta_description: null,
     };
 
     if (isEditMode && originalPost) {
@@ -151,11 +119,9 @@ const PostEditor: React.FC = () => {
       <EditorHeader
         isEditMode={isEditMode}
         isSaving={isSaving}
-        showSettings={showSettings}
         lastSavedAt={lastSavedAt}
         hasUnsavedChanges={hasUnsavedChanges}
         onBack={() => navigate(-1)}
-        onToggleSettings={() => setShowSettings(!showSettings)}
         onSaveDraft={() => handleSubmit('draft')}
         onPublish={() => handleSubmit('published')}
       />
@@ -183,20 +149,6 @@ const PostEditor: React.FC = () => {
             placeholder="여기에 내용을 작성하세요..."
           />
         </div>
-
-        {showSettings && (
-          <EditorSidebar
-            excerpt={formData.excerpt}
-            metaTitle={formData.meta_title}
-            metaDescription={formData.meta_description}
-            series={series}
-            selectedSeriesId={formData.seriesId}
-            onExcerptChange={(value) => updateField('excerpt', value)}
-            onMetaTitleChange={(value) => updateField('meta_title', value)}
-            onMetaDescriptionChange={(value) => updateField('meta_description', value)}
-            onSeriesChange={(seriesId) => updateField('seriesId', seriesId)}
-          />
-        )}
       </div>
     </div>
   );

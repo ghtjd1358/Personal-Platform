@@ -21,6 +21,7 @@ import {
 import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
 import { lnbItems } from './lnb-items';
 import FarmerLoading from './components/FarmerLoading';
+import FloatingNav from './components/FloatingNav';
 import './App.css';
 import './sidebar-editorial.css';
 import './theme-editorial.css';
@@ -72,7 +73,8 @@ const App = () => {
         );
     }
 
-    // 로그인: Lnb + 콘텐츠
+    // 로그인: Lnb + 콘텐츠 (FarmerLoading 은 Container 밖 최상위에 1회만 마운트해
+    // StrictMode/HMR 하에서도 overlay 중복 가능성을 원천 차단)
     return (
         <>
             <ModalContainer />
@@ -95,9 +97,10 @@ const App = () => {
                             <RoutesAuthPages />
                         </Suspense>
                     </main>
-                    <FarmerLoading />
                 </ErrorBoundary>
             </Container>
+            <FloatingNav />
+            <FarmerLoading />
         </>
     );
 };

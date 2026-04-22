@@ -1,10 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { selectIsAuthenticated } from '@sonhoseong/mfa-lib';
+import { usePermission } from '@sonhoseong/mfa-lib';
+import { LINK_PREFIX } from '@/config/constants';
 
 interface SectionEditButtonProps {
-  /** 편집 페이지 경로 (예: '/admin/skills') */
+  /** 편집 페이지 경로 (예: '/admin/skills') — LINK_PREFIX 가 자동으로 앞에 붙음 */
   editPath: string;
   /** 버튼 라벨 */
   label?: string;
@@ -12,21 +12,25 @@ interface SectionEditButtonProps {
 
 /**
  * 섹션 편집 버튼 - 로그인 시에만 표시
- * KOMCA 패턴: 각 섹션 우측 하단에 "편집" 버튼
+ * Host 모드에선 자동으로 /container/resume prefix 추가 (standalone 모드에선 /resume)
  */
 export const SectionEditButton: React.FC<SectionEditButtonProps> = ({
   editPath,
   label = '편집'
 }) => {
   const navigate = useNavigate();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { isAdmin } = usePermission();
 
-  if (!isAuthenticated) {
+  // 비-admin (일반 사용자·비로그인) 에겐 편집 버튼 자체 숨김.
+  // Owner + Admin 만 노출 (Admin 이 Owner 것 진입 시엔 editor 에서 readOnly 처리)
+  if (!isAdmin) {
     return null;
   }
 
   const handleClick = () => {
-    navigate(editPath);
+    // LINK_PREFIX 는 host 모드 '/container/resume', standalone '/resume'
+    // editPath 는 '/admin/skills' 처럼 / 로 시작 → 그대로 이어붙이면 맞음
+    navigate(`${LINK_PREFIX}${editPath}`);
   };
 
   return (

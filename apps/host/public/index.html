@@ -17,6 +17,85 @@
   <!-- 파비콘 (있는 경우) -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect x='20' y='2' width='8' height='16' rx='4' fill='%231E3A5F'/><rect x='6' y='16' width='36' height='6' rx='3' fill='%231E3A5F'/><ellipse cx='24' cy='36' rx='18' ry='12' fill='%231E3A5F'/></svg>">
 
+  <!-- ============================================
+       FOUT 방지: font CDN 미리 연결 + 폰트 preload
+       ============================================ -->
+  <!-- A: TLS/DNS 핸드쉐이크를 HTML 파싱 시점부터 병렬로 시작 → CSS 파싱 대기 없이 폰트 서버 준비 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <!-- B: Google Fonts 통합 스타일시트 preload (display=fallback: swap 보다 덜 눈에 띄게 교체) -->
+  <link
+    rel="preload"
+    as="style"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:ital,wght@0,400..800;1,400..800&display=fallback"
+  >
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:ital,wght@0,400..800;1,400..800&display=fallback"
+  >
+
+  <!-- Pretendard (한글 variable) preload -->
+  <link
+    rel="preload"
+    as="style"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css"
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css"
+  >
+
+  <!-- C: 폴백 폰트 metrics 조정 → Fraunces/Pretendard 로드 시 reflow 최소화
+       size-adjust: 폴백 폰트를 실제 폰트 크기에 맞춰 자동 조절
+       Georgia 는 Fraunces serif 계열, Apple SD Gothic Neo / Malgun Gothic 은 Pretendard 한글 대체 -->
+  <style>
+    @font-face {
+      font-family: 'FallbackFraunces';
+      src: local('Georgia'), local('Times New Roman');
+      size-adjust: 102%;
+      ascent-override: 92%;
+      descent-override: 22%;
+      line-gap-override: 0%;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'FallbackPretendard';
+      src: local('Apple SD Gothic Neo'), local('Malgun Gothic'), local('-apple-system'), local('BlinkMacSystemFont');
+      size-adjust: 100%;
+      ascent-override: 93%;
+      descent-override: 23%;
+      line-gap-override: 0%;
+      font-display: swap;
+    }
+    /* 전역 초기 폰트 스택 — Fraunces/Pretendard 로드 전 폴백이 동일 metrics 로 렌더 */
+    html {
+      font-family: 'Pretendard Variable', Pretendard, 'FallbackPretendard', -apple-system, system-ui, sans-serif;
+    }
+    /* 브라우저 초기 paint 에서 배경이 흰색으로 깜빡이지 않도록 */
+    html, body {
+      background: #F4EAD5;
+    }
+
+    /* Font Loading 상태 — Fraunces 준비 전에는 title/heading 숨김 (reflow 차단).
+       bootstrap.tsx 에서 document.fonts.ready 로 fonts-ready 클래스 붙이면 자연스레 drop-in. */
+    html.fonts-loading .hero-title,
+    html.fonts-loading .host-mypage-title,
+    html.fonts-loading .host-mypage-card-title {
+      visibility: hidden;
+    }
+    html.fonts-ready .hero-title,
+    html.fonts-ready .host-mypage-title,
+    html.fonts-ready .host-mypage-card-title {
+      animation: hostFontsFadeIn 0.35s cubic-bezier(.2, .7, .2, 1) both;
+    }
+    @keyframes hostFontsFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+  </style>
+
   <!-- 노스크립트 대비 스타일 -->
   <noscript>
     <style>

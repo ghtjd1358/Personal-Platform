@@ -41,8 +41,11 @@
     background: var(--p-bone);
 }
 
+/* header 를 본문 layout(820 content + 40 gap + 260 toc = 1120) 과 같은 폭으로 맞춰
+   "header 중앙 · 본문 왼쪽 꺾임" 시각 불균형 해소. 내부 텍스트 블록(title/excerpt)은
+   자연 좌측 정렬로 content 와 라인 맞춤. */
 .post-detail .post-header-content {
-    max-width: 820px;
+    max-width: 1120px;
     margin: 0 auto;
     padding: 0 clamp(24px, 5vw, 48px);
 }
@@ -98,13 +101,22 @@
 
 .post-detail .post-title {
     font-family: 'Fraunces', 'Pretendard Variable', serif;
-    font-size: clamp(36px, 5.5vw, 72px);
+    font-size: clamp(32px, 4.4vw, 56px);
     font-weight: 400;
-    line-height: 1.05;
-    letter-spacing: -0.035em;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
     color: var(--p-ink);
     margin: 0 0 24px;
     font-variation-settings: "opsz" 144, "SOFT" 100;
+
+    /* global.css 의 bare .post-title (flex/nowrap/ellipsis) cascade 방어 —
+       제목은 아무리 길어도 한국어 단어 단위로 줄바꿈되며 절대 ... 으로 잘리지 않음. */
+    display: block;
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 .post-detail .post-excerpt {
@@ -117,6 +129,11 @@
     margin: 0 0 32px;
     font-variation-settings: "WONK" 0;
     max-width: 640px;
+
+    /* 한국어 어절 단위 줄바꿈 — "정리했다" 가 "정/리했다" 로 글자 단위 깨지는 것 방지.
+       keep-all: CJK 는 어절 단위 유지 / overflow-wrap: 긴 URL·영단어만 마지막 수단으로 break. */
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 .post-detail .post-stats {

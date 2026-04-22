@@ -1,0 +1,261 @@
+/* PortfolioModal editorial skin.
+ * 기존 global.css 의 cool-gray(#f8fafc/#e2e8f0/white) 톤을 한지·먹·주홍으로 전면 override.
+ * specificity 를 `.modal .xxx` 로 상승시켜 cascade 순서 무관하게 항상 이기게.
+ */
+
+/* ===== 배경 — 검정 overlay → 먹 반투명 (mfa-lib modal 과 톤 통일) ===== */
+.modal {
+    background: rgba(43, 30, 20, 0.55) !important;
+}
+
+/* ===== Container — 흰색 → 한지 cream + 먹 border + offset shadow ===== */
+.modal .modal-container {
+    background: #FBF5E3;
+    border: 2px solid #2B1E14;
+    border-radius: 2px;
+    box-shadow:
+        6px 8px 0 rgba(43, 30, 20, 0.22),
+        14px 20px 40px rgba(43, 30, 20, 0.15);
+    position: relative;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    color: #2B1E14;
+}
+
+/* 종이 grain */
+.modal .modal-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(43, 30, 20, 0.045) 1px, transparent 1px);
+    background-size: 3px 3px;
+    pointer-events: none;
+    opacity: 0.5;
+    border-radius: 2px;
+    z-index: 0;
+}
+
+.modal .modal-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== Close button — 투명 + 먹 hover ===== */
+.modal .modal-close.no-cover {
+    background: transparent;
+    color: #8B7355;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.modal .modal-close.no-cover:hover {
+    color: #FBF5E3;
+    background: #8C1E1A;
+    border-color: #8C1E1A;
+}
+
+/* ===== Header — eyebrow 추가 + Fraunces italic 제목 ===== */
+.modal .modal-header {
+    padding: 32px 48px 0;
+}
+
+.modal .modal-header::before {
+    content: 'CASE · PORTFOLIO';
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: #8C1E1A;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.modal .modal-title {
+    margin: 0 0 12px;
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 30px;
+    color: #2B1E14;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+
+/* ===== Section title — 먹 대비 + 주홍 아이콘 ===== */
+.modal .modal-section-title {
+    color: #2B1E14;
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.modal .modal-section-title svg {
+    color: #8C1E1A;
+}
+
+/* ===== Description text — Fraunces italic serif ===== */
+.modal .modal-desc {
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #2B1E14;
+}
+
+/* ===== Lists — 주홍 bullet ===== */
+.modal .modal-list li::before {
+    background: #8C1E1A;
+}
+
+.modal .modal-list.results li::before {
+    background: #2B1E14;
+}
+
+/* ===== Info cards — 회색 fill → transparent + 먹 dashed ===== */
+.modal .modal-info-card {
+    background: transparent;
+    border: 1px dashed #D4C4A8;
+    border-radius: 2px;
+    padding: 16px;
+}
+
+.modal .modal-info-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: #8C1E1A;
+    text-transform: uppercase;
+}
+
+.modal .modal-info-title svg {
+    color: #8C1E1A;
+}
+
+.modal .modal-info-value {
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    color: #2B1E14;
+}
+
+/* ===== Tech icon badges — 흰색 fill 제거, border 만 ===== */
+.modal .modal-tech-grid .tech-icon {
+    background: transparent;
+    border: 1px solid #2B1E14;
+    border-radius: 2px;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.modal .modal-tech-grid .tech-icon:hover {
+    background: #2B1E14;
+    border-color: #2B1E14;
+    transform: scale(1.08) translate(-1px, -1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.22);
+}
+
+.modal .modal-tech-grid .tech-icon:hover svg {
+    filter: brightness(1.2) saturate(0.9);
+}
+
+.modal .modal-tech-grid .tech-icon-fallback {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: #2B1E14;
+}
+
+.modal .modal-tech-grid .tech-icon:hover .tech-icon-fallback {
+    color: #FBF5E3;
+}
+
+/* ===== Links — 흰색 fill 버리고 transparent + 먹 border + 정렬 fix ===== */
+.modal .modal-links {
+    gap: 8px;
+}
+
+.modal .modal-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;  /* was space-between — 아이콘 없을 때 텍스트 쏠림 문제 해결 */
+    gap: 8px;
+    padding: 10px 14px;
+    background: transparent;
+    border: 1px solid #2B1E14;
+    border-radius: 2px;
+    color: #2B1E14;
+    font-family: 'Pretendard Variable', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.modal .modal-link:hover {
+    background: #2B1E14;
+    color: #FBF5E3;
+    border-color: #2B1E14;
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.22);
+}
+
+/* external-link SVG 를 오른쪽 끝으로 밀어냄 (아이콘 유무 관계없이 일관 정렬) */
+.modal .modal-link > svg:last-child {
+    margin-left: auto;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.modal .modal-link:hover > svg:last-child {
+    opacity: 1;
+}
+
+.modal .modal-link-icon {
+    flex-shrink: 0;
+}
+
+/* ===== Notion-style sections — 먹 구분선 ===== */
+.modal .notion-divider {
+    background: #D4C4A8;
+    background-image: repeating-linear-gradient(
+        to right,
+        #D4C4A8 0,
+        #D4C4A8 4px,
+        transparent 4px,
+        transparent 8px
+    );
+}
+
+.modal .notion-heading {
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-weight: 500;
+    color: #2B1E14;
+}
+
+.modal .notion-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: #8C1E1A;
+    text-transform: uppercase;
+}
+
+.modal .notion-text {
+    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+    font-style: italic;
+    color: #2B1E14;
+    line-height: 1.7;
+}

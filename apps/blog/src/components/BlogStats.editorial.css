@@ -121,3 +121,40 @@
         font-size: clamp(36px, 10vw, 56px) !important;
     }
 }
+
+/* ==================================================================
+ * BlogStats loading — 데이터 fetch 전 3-dot editorial ink pulse
+ * 0 → 숫자 jump 대신 dots → count-up 부드러운 연결 (layout shift 없음)
+ * ================================================================== */
+.blog-stats-section .blog-stat-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    /* 숫자 자리 유지해 layout shift 방지 (font-size 와 같은 높이 확보) */
+    height: clamp(44px, 7vw, 64px);
+}
+
+.blog-stats-section .blog-stat-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--bs-ink);
+    border-radius: 50%;
+    animation: blog-stat-ink-pulse 1.2s ease-in-out infinite;
+}
+
+.blog-stats-section .blog-stat-dot:nth-child(1) { animation-delay: 0s; }
+.blog-stats-section .blog-stat-dot:nth-child(2) { animation-delay: 0.18s; }
+.blog-stats-section .blog-stat-dot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes blog-stat-ink-pulse {
+    0%, 100% {
+        opacity: 0.25;
+        transform: scale(0.7);
+        background: var(--bs-ink, #2B1E14);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+        background: var(--bs-accent, #8C1E1A);
+    }
+}

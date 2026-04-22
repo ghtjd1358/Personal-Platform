@@ -1,7 +1,10 @@
 /**
- * FarmerLoading - 볏짚 배경 + 농부가 곡괭이질하는 스피너
- * mfa-lib GlobalLoading 대체 (host 전용).
- * Redux state.app.isLoading 구독 — 기존 로직 그대로, 시각만 조선 농부 컨셉.
+ * FarmerLoading - Editorial Global Loading Overlay (host 전용).
+ * Redux state.app.isLoading 구독. 기존 농부 SVG 제거하고 editorial 단일 언어로 통일:
+ *  - 한지 미색 overlay + 먹 border card
+ *  - SVG arc spinner (먹 trailing + 주홍 head, cubic ease)
+ *  - JetBrains Mono 라벨 "LOADING · 불러오는 중"
+ * GlobalLoading (lib) 와 완전히 동일한 visual dialect.
  */
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -12,196 +15,116 @@ const FarmerLoading: React.FC = () => {
     if (!isLoading) return null;
 
     return (
-        <div className="farmer-loading-overlay">
-            <div className="farmer-loading-paper">
+        <div className="editorial-loading-overlay" role="status" aria-live="polite">
+            <div className="editorial-loading-card">
                 <svg
-                    className="farmer-svg"
-                    viewBox="0 0 220 220"
-                    xmlns="http://www.w3.org/2000/svg"
+                    className="editorial-loading-arc"
+                    viewBox="0 0 60 60"
+                    width="44"
+                    height="44"
                     aria-hidden
                 >
-                    <defs>
-                        <filter id="farmer-grain">
-                            <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="4" />
-                            <feDisplacementMap in="SourceGraphic" scale="1.2" />
-                        </filter>
-                    </defs>
-
-                    {/* 땅 (흙) */}
-                    <path
-                        d="M 15 180 Q 60 176 110 180 T 205 180"
-                        stroke="#2B1E14"
-                        strokeWidth="2.5"
+                    <circle
+                        cx="30" cy="30" r="24"
+                        stroke="rgba(43, 30, 20, 0.15)"
+                        strokeWidth="3"
                         fill="none"
-                        strokeLinecap="round"
-                        filter="url(#farmer-grain)"
                     />
-                    {/* 흙 덩어리 몇 개 */}
-                    <ellipse cx="40" cy="185" rx="6" ry="2" fill="#8B6B3F" opacity="0.7" />
-                    <ellipse cx="170" cy="186" rx="5" ry="2" fill="#8B6B3F" opacity="0.6" />
-                    <ellipse cx="130" cy="188" rx="4" ry="1.5" fill="#8B6B3F" opacity="0.5" />
-
-                    {/* 농부 몸체 */}
-                    <g className="farmer-body">
-                        {/* 삿갓(straw hat) — 원뿔 + 챙 */}
-                        <path d="M 80 58 L 105 30 L 130 58 Z" fill="#D9C286" stroke="#8B6B3F" strokeWidth="1.2" />
-                        <ellipse cx="105" cy="58" rx="34" ry="5" fill="#C8A35C" stroke="#8B6B3F" strokeWidth="1" />
-                        {/* 얼굴 */}
-                        <circle cx="105" cy="70" r="9" fill="#E6D4A3" stroke="#2B1E14" strokeWidth="1" />
-                        {/* 허리 살짝 굽힘 */}
-                        <path
-                            d="M 105 79 Q 102 105 97 135"
-                            stroke="#2B1E14"
-                            strokeWidth="7"
-                            fill="none"
-                            strokeLinecap="round"
-                        />
-                        {/* 다리 */}
-                        <line x1="97" y1="135" x2="87" y2="175" stroke="#2B1E14" strokeWidth="5" strokeLinecap="round" />
-                        <line x1="97" y1="135" x2="105" y2="175" stroke="#2B1E14" strokeWidth="5" strokeLinecap="round" />
-                    </g>
-
-                    {/* 팔 + 곡괭이 (애니메이션 그룹) */}
-                    <g className="farmer-arm">
-                        {/* 팔 (어깨→손) */}
-                        <line
-                            x1="105"
-                            y1="92"
-                            x2="150"
-                            y2="110"
-                            stroke="#2B1E14"
-                            strokeWidth="5"
-                            strokeLinecap="round"
-                        />
-                        {/* 곡괭이 자루 (handle) */}
-                        <line
-                            x1="150"
-                            y1="110"
-                            x2="180"
-                            y2="60"
-                            stroke="#8B6B3F"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                        />
-                        {/* 곡괭이 날 (pick head) — 먹색 날 */}
-                        <path
-                            d="M 173 52 L 195 48 L 188 68 L 180 64 Z"
-                            fill="#2B1E14"
-                            stroke="#2B1E14"
-                            strokeWidth="1"
-                        />
-                    </g>
-
-                    {/* 흙 튀기는 입자 (impact particles, pulse 애니) */}
-                    <g className="farmer-dust">
-                        <circle cx="130" cy="176" r="1.8" fill="#8B6B3F" />
-                        <circle cx="140" cy="172" r="1.3" fill="#8B6B3F" />
-                        <circle cx="124" cy="170" r="1.5" fill="#8B6B3F" />
-                        <circle cx="146" cy="178" r="1" fill="#8B6B3F" />
-                    </g>
+                    <circle
+                        cx="30" cy="30" r="24"
+                        stroke="#8C1E1A"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeDasharray="42 200"
+                        strokeLinecap="round"
+                        className="editorial-loading-arc-head"
+                    />
                 </svg>
+                <p className="editorial-loading-label">LOADING · 불러오는 중</p>
+                <div className="editorial-loading-dots" aria-hidden>
+                    <span /><span /><span />
+                </div>
             </div>
 
             <style>{`
-                .farmer-loading-overlay {
+                .editorial-loading-overlay {
                     position: fixed;
                     inset: 0;
-                    background:
-                        radial-gradient(ellipse 900px 600px at 25% 30%, rgba(200, 163, 92, 0.25) 0%, transparent 60%),
-                        radial-gradient(ellipse 700px 500px at 75% 70%, rgba(217, 194, 134, 0.2) 0%, transparent 65%),
-                        #E6D4A3;
+                    background: rgba(244, 234, 213, 0.82);
+                    backdrop-filter: blur(3px) saturate(1.05);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     z-index: 9999;
-                    backdrop-filter: blur(1.5px);
-                    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+                    animation: editorialLoadingFadeIn 0.25s ease-out;
                 }
-
-                /* 볏짚 섬유 질감 */
-                .farmer-loading-overlay::before {
-                    content: '';
-                    position: absolute;
-                    inset: 0;
-                    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Cfilter id='sf'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008 0.9' numOctaves='2' seed='41'/%3E%3CfeColorMatrix values='0 0 0 0 0.25  0 0 0 0 0.18  0 0 0 0 0.1  0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23sf)'/%3E%3C/svg%3E");
-                    background-size: cover;
-                    mix-blend-mode: multiply;
-                    opacity: 0.45;
-                    pointer-events: none;
+                @keyframes editorialLoadingFadeIn {
+                    from { opacity: 0; }
+                    to   { opacity: 1; }
                 }
-
-                .farmer-loading-paper {
-                    position: relative;
-                    z-index: 1;
+                .editorial-loading-card {
+                    background: #FBF5E3;
+                    border: 1px solid #2B1E14;
+                    box-shadow: 3px 5px 0 rgba(43, 30, 20, 0.12);
+                    padding: 28px 36px 22px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 20px;
+                    gap: 14px;
+                    min-width: 200px;
+                    position: relative;
                 }
-
-                .farmer-svg {
-                    width: 180px;
-                    height: 180px;
+                .editorial-loading-card::before {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='lg'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.85' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23lg)'/%3E%3C/svg%3E");
+                    mix-blend-mode: multiply;
+                    opacity: 0.5;
+                    pointer-events: none;
                 }
-
-                /* 팔+곡괭이 — 어깨 기준 회전 (밭 파는 동작) */
-                .farmer-arm {
-                    transform-origin: 105px 92px;
-                    animation: farmer-dig 1.5s cubic-bezier(.5, 0, .5, 1) infinite;
+                .editorial-loading-arc {
+                    position: relative;
+                    z-index: 1;
                 }
-
-                @keyframes farmer-dig {
-                    0%   { transform: rotate(0deg); }
-                    30%  { transform: rotate(-55deg); }
-                    48%  { transform: rotate(-55deg); }
-                    68%  { transform: rotate(18deg); }
-                    78%  { transform: rotate(18deg); }
-                    100% { transform: rotate(0deg); }
+                .editorial-loading-arc-head {
+                    transform-origin: 30px 30px;
+                    animation: editorialLoadingSpin 0.95s cubic-bezier(.55, .1, .5, .9) infinite;
                 }
-
-                /* 몸통도 미세하게 같이 움직 (실감) */
-                .farmer-body {
-                    transform-origin: 100px 140px;
-                    animation: farmer-bob 1.5s cubic-bezier(.5, 0, .5, 1) infinite;
+                @keyframes editorialLoadingSpin {
+                    from { transform: rotate(0deg); }
+                    to   { transform: rotate(360deg); }
                 }
-
-                @keyframes farmer-bob {
-                    0%, 30%, 100%  { transform: translateY(0) rotate(0deg); }
-                    48%, 68%       { transform: translateY(1.5px) rotate(-1deg); }
-                    78%            { transform: translateY(0) rotate(0deg); }
-                }
-
-                /* 흙먼지 — 곡괭이 내리치는 순간(68~78%)에 점멸 */
-                .farmer-dust {
-                    opacity: 0;
-                    animation: farmer-dust 1.5s ease-out infinite;
-                }
-
-                @keyframes farmer-dust {
-                    0%, 65% { opacity: 0; transform: translateY(0); }
-                    75%     { opacity: 1; transform: translateY(-3px); }
-                    90%     { opacity: 0; transform: translateY(-8px); }
-                    100%    { opacity: 0; }
-                }
-
-                .farmer-loading-message {
+                .editorial-loading-label {
                     margin: 0;
-                    font-family: 'Fraunces', 'Pretendard Variable', serif;
-                    font-size: 18px;
-                    font-weight: 350;
-                    font-style: italic;
-                    font-variation-settings: "opsz" 36, "SOFT" 100, "WONK" 1;
-                    color: #2B1E14;
-                    letter-spacing: -0.01em;
-                    text-shadow: 0 1px 0 rgba(251, 245, 227, 0.6);
+                    font-family: 'JetBrains Mono', ui-monospace, monospace;
+                    font-size: 10px;
+                    letter-spacing: 0.22em;
+                    color: #8B7355;
+                    text-transform: uppercase;
+                    font-weight: 500;
+                    position: relative;
+                    z-index: 1;
                 }
-
-                @media (prefers-reduced-motion: reduce) {
-                    .farmer-arm,
-                    .farmer-body,
-                    .farmer-dust {
-                        animation-duration: 3s;
-                    }
+                .editorial-loading-dots {
+                    display: inline-flex;
+                    gap: 6px;
+                    position: relative;
+                    z-index: 1;
+                }
+                .editorial-loading-dots span {
+                    width: 5px;
+                    height: 5px;
+                    border-radius: 50%;
+                    background: #2B1E14;
+                    opacity: 0.25;
+                    animation: editorialLoadingPulse 1.2s ease-in-out infinite;
+                }
+                .editorial-loading-dots span:nth-child(2) { animation-delay: 0.18s; }
+                .editorial-loading-dots span:nth-child(3) { animation-delay: 0.36s; }
+                @keyframes editorialLoadingPulse {
+                    0%, 100% { opacity: 0.25; transform: scale(0.7); background: #2B1E14; }
+                    50%      { opacity: 1;    transform: scale(1.1); background: #8C1E1A; }
                 }
             `}</style>
         </div>

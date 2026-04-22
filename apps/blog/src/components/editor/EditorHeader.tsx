@@ -4,11 +4,9 @@ import { Button } from '@/components';
 interface EditorHeaderProps {
   isEditMode: boolean;
   isSaving: boolean;
-  showSettings: boolean;
   lastSavedAt?: Date | null;
   hasUnsavedChanges?: boolean;
   onBack: () => void;
-  onToggleSettings: () => void;
   onSaveDraft: () => void;
   onPublish: () => void;
 }
@@ -27,11 +25,9 @@ const formatLastSaved = (date: Date | null) => {
 const EditorHeader: React.FC<EditorHeaderProps> = ({
   isEditMode,
   isSaving,
-  showSettings,
   lastSavedAt,
   hasUnsavedChanges,
   onBack,
-  onToggleSettings,
   onSaveDraft,
   onPublish,
 }) => {
@@ -48,13 +44,6 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
         )}
       </div>
       <div className="editor-header-right">
-        <button
-          type="button"
-          className={`btn-settings ${showSettings ? 'active' : ''}`}
-          onClick={onToggleSettings}
-        >
-          설정
-        </button>
         <Button variant="secondary" onClick={onSaveDraft} disabled={isSaving}>
           임시저장
         </Button>

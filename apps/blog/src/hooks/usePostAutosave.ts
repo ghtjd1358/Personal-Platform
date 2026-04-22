@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useToast } from '@sonhoseong/mfa-lib';
+import { useToast, useAsyncConfirm } from '@sonhoseong/mfa-lib';
 import type { PostFormData } from './usePostEditorData';
 
 /** 자동 저장 설정 */
@@ -43,6 +43,7 @@ export function usePostAutosave({
   setFormData,
 }: UsePostAutosaveOptions): UsePostAutosaveReturn {
   const toast = useToast();
+  const confirmDialog = useAsyncConfirm();
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -69,40 +70,44 @@ export function usePostAutosave({
     const savedData = localStorage.getItem(AUTOSAVE_CONFIG.key);
     if (!savedData) return;
 
-    try {
-      const parsed = JSON.parse(savedData);
-      const savedTime = new Date(parsed.savedAt);
-      const timeDiff = Date.now() - savedTime.getTime();
+    (async () => {
+      try {
+        const parsed = JSON.parse(savedData);
+        const savedTime = new Date(parsed.savedAt);
+        const timeDiff = Date.now() - savedTime.getTime();
 
-      // 설정된 시간 이내의 데이터만 복원
-      if (timeDiff < AUTOSAVE_CONFIG.maxAge) {
-        if (parsed.title || parsed.content) {
-          const confirmRestore = window.confirm(
-            `${savedTime.toLocaleString('ko-KR')}에 저장된 임시 글이 있습니다.\n복원하시겠습니까?`
-          );
-          if (confirmRestore) {
-            setFormData({
-              title: parsed.title || '',
-              content: parsed.content || '',
-              excerpt: parsed.excerpt || '',
-              tagIds: parsed.tagIds || [],
-              meta_title: parsed.meta_title || '',
-              meta_description: parsed.meta_description || '',
-              seriesId: parsed.seriesId || null,
+        if (timeDiff < AUTOSAVE_CONFIG.maxAge) {
+          if (parsed.title || parsed.content) {
+            const confirmRestore = await confirmDialog({
+              title: '임시 저장 글 복원',
+              message: `${savedTime.toLocaleString('ko-KR')}에 저장된 임시 글이 있습니다.\n복원하시겠습니까?`,
+              confirmText: '복원',
+              cancelText: '버리기',
             });
-            setLastSavedAt(savedTime);
-            toast.success('임시 저장된 글을 복원했습니다.');
-          } else {
-            localStorage.removeItem(AUTOSAVE_CONFIG.key);
+            if (confirmRestore) {
+              setFormData({
+                title: parsed.title || '',
+                content: parsed.content || '',
+                excerpt: parsed.excerpt || '',
+                tagIds: parsed.tagIds || [],
+                meta_title: parsed.meta_title || '',
+                meta_description: parsed.meta_description || '',
+                seriesId: parsed.seriesId || null,
+              });
+              setLastSavedAt(savedTime);
+              toast.success('임시 저장된 글을 복원했습니다.');
+            } else {
+              localStorage.removeItem(AUTOSAVE_CONFIG.key);
+            }
           }
+        } else {
+          localStorage.removeItem(AUTOSAVE_CONFIG.key);
         }
-      } else {
+      } catch {
         localStorage.removeItem(AUTOSAVE_CONFIG.key);
       }
-    } catch {
-      localStorage.removeItem(AUTOSAVE_CONFIG.key);
-    }
-  }, [isEditMode, setFormData, toast]);
+    })();
+  }, [isEditMode, setFormData, toast, confirmDialog]);
 
   // 주기적 자동 저장
   useEffect(() => {

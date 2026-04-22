@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getCurrentUser, useToast, selectAccessToken, Logo } from '@sonhoseong/mfa-lib';
+import { getCurrentUser, useToast, useAsyncConfirm, selectAccessToken, Logo } from '@sonhoseong/mfa-lib';
 import { resumesApi, experiencesApi, portfoliosApi } from '@/network';
 import type { ResumeProfile, ExperienceItem, ProjectItem } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
@@ -44,6 +44,7 @@ const MyResumeDetailPage: React.FC = () => {
   const { resumeId } = useParams<{ resumeId: string }>();
   const navigate = useNavigate();
   const toast = useToast();
+  const confirmDialog = useAsyncConfirm();
   const accessToken = useSelector(selectAccessToken);
   const user = getCurrentUser();
 
@@ -148,9 +149,13 @@ const MyResumeDetailPage: React.FC = () => {
   const handleDelete = useCallback(async () => {
     if (!resume) return;
 
-    if (!window.confirm(`"${resume.resume_name || '이력서'}"를 삭제하시겠습니까?\n\n연결된 경력과 프로젝트도 함께 삭제됩니다.`)) {
-      return;
-    }
+    const ok = await confirmDialog({
+      title: '이력서 삭제',
+      message: `"${resume.resume_name || '이력서'}"를 삭제하시겠습니까?\n\n연결된 경력과 프로젝트도 함께 삭제됩니다.`,
+      confirmText: '삭제',
+      cancelText: '취소',
+    });
+    if (!ok) return;
 
     try {
       setIsSaving(true);

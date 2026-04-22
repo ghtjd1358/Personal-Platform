@@ -18,9 +18,10 @@ const ResumeEditorPage = lazy(() => import('../mypage/ResumeEditorPage'))
 
 // 관리자 페이지
 const SkillsListPage = lazy(() => import('../admin/skills/SkillsListPage'))
+const SkillsEditorPage = lazy(() => import('../admin/skills/SkillsEditorPage'))
 const ExperienceListPage = lazy(() => import('../admin/experience/ExperienceListPage'))
 const ExperienceEditorPage = lazy(() => import('../admin/experience/ExperienceEditorPage'))
-const ProjectsListPage = lazy(() => import('../admin/projects/ProjectsListPage'))
+const PortfolioListPage = lazy(() => import('../admin/projects/PortfolioListPage'))
 const ProjectsEditorPage = lazy(() => import('../admin/projects/ProjectsEditorPage'))
 
 const LoadingFallback = () => (
@@ -52,16 +53,21 @@ function RoutesAuthPages() {
 
                 {/* Skills */}
                 <Route path={`${PREFIX}${RoutePath.AdminSkills}`} element={<SkillsListPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminSkillsNew}`} element={<SkillsListPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminSkillsEdit}`} element={<SkillsListPage />} />
+                <Route path={`${PREFIX}${RoutePath.AdminSkillsNew}`} element={<SkillsEditorPage />} />
+                <Route path={`${PREFIX}${RoutePath.AdminSkillsEdit}`} element={<SkillsEditorPage />} />
 
                 {/* Experience */}
                 <Route path={`${PREFIX}${RoutePath.AdminExperience}`} element={<ExperienceListPage />} />
                 <Route path={`${PREFIX}${RoutePath.AdminExperienceNew}`} element={<ExperienceEditorPage />} />
                 <Route path={`${PREFIX}${RoutePath.AdminExperienceEdit}`} element={<ExperienceEditorPage />} />
 
-                {/* Projects */}
-                <Route path={`${PREFIX}${RoutePath.AdminProjects}`} element={<ProjectsListPage />} />
+                {/* Portfolio — 전체 포폴(이력서 연결 + 전용) 통합 admin */}
+                <Route path={`${PREFIX}${RoutePath.AdminPortfolio}`} element={<PortfolioListPage />} />
+                <Route path={`${PREFIX}${RoutePath.AdminPortfolioNew}`} element={<ProjectsEditorPage />} />
+                <Route path={`${PREFIX}${RoutePath.AdminPortfolioEdit}`} element={<ProjectsEditorPage />} />
+
+                {/* Projects — legacy alias, 새 URL 로 redirect */}
+                <Route path={`${PREFIX}${RoutePath.AdminProjects}`} element={<PortfolioListPage />} />
                 <Route path={`${PREFIX}${RoutePath.AdminProjectsNew}`} element={<ProjectsEditorPage />} />
                 <Route path={`${PREFIX}${RoutePath.AdminProjectsEdit}`} element={<ProjectsEditorPage />} />
 

@@ -82,20 +82,22 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                     )}
                     {exp.tasks && exp.tasks.length > 0 && (
                       <>
-                        <div
+                        <button
+                          type="button"
                           className={`toggle-tasks ${expandedItem === exp.id ? 'active' : ''}`}
                           onClick={() => setExpandedItem(expandedItem === exp.id ? null : exp.id)}
+                          aria-expanded={expandedItem === exp.id}
                         >
                           <span className="toggle-icon">›</span>
                           <span>주요 업무 내용</span>
-                        </div>
-                        {expandedItem === exp.id && (
+                        </button>
+                        <div className={`timeline-tasks-collapsible ${expandedItem === exp.id ? 'is-open' : ''}`}>
                           <ul className="timeline-tasks">
-                            {exp.tasks.map((task) => (
-                              <li key={task.id}>{task.task}</li>
+                            {exp.tasks.map((task, i) => (
+                              <li key={task.id} style={{ ['--i' as any]: i }}>{task.task}</li>
                             ))}
                           </ul>
-                        )}
+                        </div>
                       </>
                     )}
                   </div>
@@ -144,20 +146,22 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                     )}
                     {proj.tasks && proj.tasks.length > 0 && (
                       <>
-                        <div
+                        <button
+                          type="button"
                           className={`toggle-tasks ${expandedItem === proj.id ? 'active' : ''}`}
                           onClick={() => setExpandedItem(expandedItem === proj.id ? null : proj.id)}
+                          aria-expanded={expandedItem === proj.id}
                         >
                           <span className="toggle-icon">›</span>
                           <span>주요 작업 내용</span>
-                        </div>
-                        {expandedItem === proj.id && (
+                        </button>
+                        <div className={`timeline-tasks-collapsible ${expandedItem === proj.id ? 'is-open' : ''}`}>
                           <ul className="timeline-tasks">
-                            {proj.tasks.map((task) => (
-                              <li key={task.id}>{task.task}</li>
+                            {proj.tasks.map((task, i) => (
+                              <li key={task.id} style={{ ['--i' as any]: i }}>{task.task}</li>
                             ))}
                           </ul>
-                        )}
+                        </div>
                       </>
                     )}
                   </div>
