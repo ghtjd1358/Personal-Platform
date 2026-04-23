@@ -1,4 +1,3 @@
-import './init'; // infra side-effect: host 플래그 제거 + Supabase 초기화
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';

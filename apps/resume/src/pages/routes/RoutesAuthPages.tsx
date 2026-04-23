@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react'
+import React, { lazy } from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import { PREFIX } from '@/config/constants'
 import { RoutePath } from './paths'
@@ -29,16 +29,9 @@ const ProjectsEditorPage = lazy(() => import('../admin/projects/ProjectsEditorPa
 const FeaturesListPage = lazy(() => import('../admin/features/FeaturesListPage'))
 const FeaturesEditorPage = lazy(() => import('../admin/features/FeaturesEditorPage'))
 
-const LoadingFallback = () => (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <div className="spinner-large" />
-    </div>
-)
-
 function RoutesAuthPages() {
     return (
-        <Suspense fallback={<LoadingFallback />}>
-            <Routes>
+        <Routes>
                 {/* 메인 페이지 = 포트폴리오 홈 (이력서는 /resumes, 본인 이력서는 /mypage) */}
                 <Route path="/" element={<HomePage />} />
                 {PREFIX && <Route path={PREFIX} element={<HomePage />} />}
@@ -83,7 +76,6 @@ function RoutesAuthPages() {
 
                 <Route path="*" element={<Navigate to={PREFIX || '/'} replace />} />
             </Routes>
-        </Suspense>
     )
 }
 

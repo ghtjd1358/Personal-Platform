@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { iconMap } from '../../../constants/iconMap';
-import { SkillCategoryDetail } from '../../../data';
+import type { SkillCategoryDetail } from '../../../types';
 import { SectionEditButton } from '../../../components/common';
 
 interface SkillsSectionProps {

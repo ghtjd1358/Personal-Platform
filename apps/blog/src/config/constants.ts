@@ -1,11 +1,14 @@
-import { storage } from '@sonhoseong/mfa-lib';
+import { storage, REMOTE_LINK_PREFIX, REMOTE_STANDALONE_PREFIX } from '@sonhoseong/mfa-lib';
 
-// KOMCA 패턴: Host에서 실행 시 PREFIX 빈 문자열, 단독 실행 시 /blog
+const isHost = storage.isHostApp();
+
 // PREFIX: 라우트 정의용 (상대 경로)
-export const PREFIX = storage.isHostApp() ? '' : '/blog';
+// Host에서: '' (부모 Route 가 이미 /container/blog/* 소비), 단독 실행: /blog
+export const PREFIX = isHost ? '' : REMOTE_STANDALONE_PREFIX.blog;
 
 // LINK_PREFIX: 링크용 (절대 경로)
-export const LINK_PREFIX = storage.isHostApp() ? '/container/blog' : '/blog';
+// Host에서: /container/blog, 단독 실행: /blog
+export const LINK_PREFIX = isHost ? REMOTE_LINK_PREFIX.blog : REMOTE_STANDALONE_PREFIX.blog;
 
 /** 파일 업로드 설정 */
 export const UPLOAD_CONFIG = {

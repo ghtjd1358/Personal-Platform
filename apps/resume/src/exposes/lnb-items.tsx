@@ -3,12 +3,13 @@
  * KOMCA 패턴: pathPrefix + hasPrefixList 구조
  */
 import React from 'react'
+import { REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib'
 
-// pathPrefix: Host(Container)가 라우트에 사용 - /container prefix 포함
-export const pathPrefix = '/container/resume'
+// pathPrefix: Host(Container)가 라우트에 사용 — lib 단일 소스
+export const pathPrefix = REMOTE_LINK_PREFIX.resume
 
-// Host에서 사용할 경로 PREFIX - /container prefix 포함
-const HOST_PREFIX = '/container/resume'
+// 내부 Host 링크용 alias (메뉴 path 구성)
+const HOST_PREFIX = REMOTE_LINK_PREFIX.resume
 
 export interface LnbItemData {
     id: string

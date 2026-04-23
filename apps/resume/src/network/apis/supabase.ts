@@ -101,7 +101,7 @@ export const experiencesApi = {
     },
 }
 
-// 프로젝트(= portfolios) 를 mockProjects 모양으로 쉐이핑한 타입
+// 프로젝트(= portfolios) 를 ProjectDetail 모양으로 쉐이핑한 타입
 export interface PortfolioWithDetails {
     id: string;
     user_id: string;

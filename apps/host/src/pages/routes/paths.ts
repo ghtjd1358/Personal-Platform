@@ -3,14 +3,16 @@
  * 모든 경로는 이 파일에서 정의하고 다른 곳에서 import하여 사용
  */
 
-/** 경로 상수 */
+import { REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib';
+
+/** 경로 상수 — remote 경로는 lib 의 REMOTE_LINK_PREFIX 단일 소스에서 가져옴 */
 export const RoutePath = {
   // Container 경로 (Remote 앱들)
   Dashboard: '/container/dashboard',
-  Resume: '/container/resume',
-  Blog: '/container/blog',
-  Portfolio: '/container/portfolio',
-  JobTracker: '/container/jobtracker',
+  Resume: REMOTE_LINK_PREFIX.resume,
+  Blog: REMOTE_LINK_PREFIX.blog,
+  Portfolio: REMOTE_LINK_PREFIX.portfolio,
+  JobTracker: REMOTE_LINK_PREFIX.jobtracker,
 
   // Auth 경로
   Login: '/login',

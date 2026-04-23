@@ -8,8 +8,10 @@ export interface LnbItem {
   subItems?: LnbItem[];
 }
 
-// pathPrefix: Host(Container)가 라우트에 사용
-export const pathPrefix = '/container/portfolio';
+import { REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib';
+
+// pathPrefix: Host(Container)가 라우트에 사용 — lib 단일 소스
+export const pathPrefix = REMOTE_LINK_PREFIX.portfolio;
 
 export const lnbItems: LnbItem[] = [
   {

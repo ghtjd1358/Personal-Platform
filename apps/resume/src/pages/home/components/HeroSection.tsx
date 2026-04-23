@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useToast } from '@sonhoseong/mfa-lib';
-import { ResumeProfileDetail } from '../../../data';
+import type { ResumeProfileDetail } from '../../../types';
 import { downloadResume } from '../../../network/apis/resume';
 import '../../../styles/editorial.css';
 
 interface HeroSectionProps {
   userName?: string;
-  resumeProfile: ResumeProfileDetail;
+  resumeProfile: ResumeProfileDetail | null;
 }
 
 const Grain: React.FC = () => (
@@ -84,7 +84,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ userName, resumeProfil
             {/* em(italic)→upright 전환 시 기울기로 인한 시각 충돌 방지용 여백 */}
             <em style={{ marginRight: '0.18em' }}>손호성</em>입니다.
           </h1>
-          <p className="editorial-sub">{resumeProfile.summary}</p>
+          <p className="editorial-sub">{resumeProfile?.summary ?? ''}</p>
         </div>
         <div className="editorial-side">
           <div className="editorial-meta-row">

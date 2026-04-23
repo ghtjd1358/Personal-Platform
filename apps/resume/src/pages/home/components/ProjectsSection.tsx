@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePortfolioModal } from '../../../components/modal';
-import { PortfolioItem } from '../../../data';
+import type { PortfolioItem } from '../../../types';
 import { iconMap } from '../../../constants/iconMap';
 import { FaGithub, FaExternalLinkAlt, FaBlog } from 'react-icons/fa';
 import { SectionEditButton } from '../../../components/common';

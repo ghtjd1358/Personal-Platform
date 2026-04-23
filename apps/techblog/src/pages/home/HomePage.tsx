@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isHostApp } from '@sonhoseong/mfa-lib';
 import { useDashboardStats } from '@/hooks';
 import { ApplicationStatus } from '@/types/job';
 import { HeroSection } from '@/components';
+import { LINK_PREFIX } from '@/config/constants';
 import './HomePage.editorial.css';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const LINK_PREFIX = isHostApp() ? '/container/jobtracker' : '/jobtracker';
 
   // Use hook for dashboard data
   const {

@@ -3,7 +3,7 @@
  */
 import React, { Suspense } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import { RemoteErrorBoundary } from '@sonhoseong/mfa-lib';
+import { RemoteErrorBoundary, REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './paths';
 import Dashboard from '../Dashboard';
 import MyPage from '../MyPage';
@@ -34,10 +34,11 @@ const JobTrackerApp = React.lazy(() =>
   }))
 );
 
-const resumePathPrefix = '/container/resume';
-const blogPathPrefix = '/container/blog';
-const portfolioPathPrefix = '/container/portfolio';
-const jobtrackerPathPrefix = '/container/jobtracker';
+// Remote URL prefix — lib 의 단일 소스에서 가져옴 (remote 의 LINK_PREFIX 와 동기화 보장)
+const resumePathPrefix = REMOTE_LINK_PREFIX.resume;
+const blogPathPrefix = REMOTE_LINK_PREFIX.blog;
+const portfolioPathPrefix = REMOTE_LINK_PREFIX.portfolio;
+const jobtrackerPathPrefix = REMOTE_LINK_PREFIX.jobtracker;
 
 // ============================================
 // 컴포넌트

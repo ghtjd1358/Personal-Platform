@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { iconMap } from '../../../constants/iconMap';
-import { ExperienceDetail, ProjectDetail } from '../../../data';
+import type { ExperienceDetail, ProjectDetail } from '../../../types';
 import { SectionEditButton } from '../../../components/common';
 
 interface ExperienceSectionProps {

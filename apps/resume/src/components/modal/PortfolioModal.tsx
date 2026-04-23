@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { ModalCommonProps } from './types';
 import { popModal } from './modal-manager';
-import { PortfolioItem, PortfolioSection } from '../../data';
+import type { PortfolioItem, PortfolioSection } from '../../types';
 import { iconMap } from '../../constants/iconMap';
 import { FaBlog, FaGlobe } from 'react-icons/fa';
 import './PortfolioModal.editorial.css';

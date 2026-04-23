@@ -1,7 +1,7 @@
 import React from 'react';
 import { SiGmail, SiGithub, SiVelog } from 'react-icons/si';
 import { FaLinkedin } from 'react-icons/fa6';
-import { ContactLink } from '../../../data';
+import type { ContactLink } from '../../../types';
 
 interface ContactSectionProps {
   links: ContactLink[];

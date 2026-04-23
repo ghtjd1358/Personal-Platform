@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { pushModal } from '../modal-manager';
 import { PortfolioModal } from '../PortfolioModal';
-import { PortfolioItem } from '../../../data';
+import type { PortfolioItem } from '../../../types';
 
 export function usePortfolioModal() {
   const openPortfolioModal = useCallback((portfolio: PortfolioItem) => {

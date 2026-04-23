@@ -1,8 +1,9 @@
 import React from 'react'
+import { REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib'
 import { RoutePath } from '@/pages/routes/paths'
 
-// pathPrefix: Host(Container)가 라우트에 사용 - /container prefix 포함
-export const pathPrefix = '/container/blog'
+// pathPrefix: Host(Container)가 라우트에 사용 — lib 단일 소스
+export const pathPrefix = REMOTE_LINK_PREFIX.blog
 
 export interface LnbItemData {
     id: string
