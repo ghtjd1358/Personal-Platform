@@ -4,11 +4,7 @@
  */
 
 :root {
-    /* App.css override — Dashboard의 --bone과 동일하게 통일 (user 요청: 전체 dashboard 배경 기준) */
-    --color-bg: #F4EAD5 !important;             /* 한지 미색 (Dashboard 기준) */
-    --color-bg-secondary: #F4EAD5 !important;   /* primary와 동일하게 — 배경 완전 일관화 */
-
-    /* 새 의미 토큰 — editorial 쪽에서도 일관성 위해 노출 */
+    /* 의미 토큰 — editorial 팔레트 별칭. --color-* 는 이제 App.css 에서 editorial 값으로 정의됨. */
     --hanji: #F4EAD5;
     --hanji-cream: #FBF5E3;
     --hanji-line: #D4C4A8;
@@ -35,39 +31,22 @@ html {
     overflow-x: hidden;
 }
 
-/* App.css line 80의 하드코딩된 #ffffff 덮어쓰기 (컨테이너 내부 흰 배경)
- * 실제 요소는 모르는 상태라 body 기준으로 통일 */
-
-/* === 일반적인 흰 bg 패턴 전부 한지로 === */
+/* host shell 컨테이너 — 맨 위 frame. remote 가 내부에서 자기 색을 overwrite 할 수 있음. */
 .app-container,
 .main-content,
 .content-wrapper {
     background: var(--hanji) !important;
 }
 
-/* 카드/패널류 — 흔히 쓰는 흰색 바탕을 크림 한지로 */
-.card,
-.panel,
-.surface,
-[class*="-card"]:not(.post-card):not([class*="card-title"]):not([class*="card-body"]):not([class*="card-footer"]):not([class*="card-thumbnail"]) {
-    background-color: var(--hanji-cream);
-}
-
-/* 입력 필드 — 흰 → 밝은 한지 */
-input,
-textarea,
-select {
-    background-color: var(--hanji-cream);
-    color: var(--sumi);
-    border-color: var(--hanji-line);
-}
-
-/* 모달/다이얼로그 컨테이너 (mfa-lib가 흰 bg일 수 있음) */
-.modal-content,
-.dialog-content,
-[class*="modal-body"] {
-    background-color: var(--hanji-cream) !important;
-}
+/* ⚠️ 제거된 remote 타겟 override (2026-04-23):
+ *   - `.card / .panel / .surface / [class*="-card"]` 카드 배경
+ *   - `input / textarea / select` 폼 엘리먼트 색
+ *   - `.modal-content / .dialog-content / [class*="modal-body"]` 모달 배경
+ *   이유: MFA 원칙 위반 — host 가 remote 의 DOM 을 간섭하면 remote 의
+ *   standalone 룩과 host 모드 룩이 달라짐. 각 remote 가 자기 CSS 에서
+ *   editorial defaults 를 직접 박아야 정상. lib 의 ModalContainer 등 공용
+ *   컴포넌트는 lib 레벨에서 editorial skin 주는 게 정석.
+ */
 
 /* 외부 스크롤바 색도 warm 톤으로 */
 ::-webkit-scrollbar {

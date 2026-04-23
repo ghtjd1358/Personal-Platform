@@ -1,0 +1,175 @@
+/**
+ * CommonButton — editorial (한지 + 먹 + 주홍) 팔레트.
+ * BEM: .common-btn__element / .common-btn--modifier
+ * 색/크기 전부 토큰화. 호출부에서 inline style 없음.
+ */
+
+/* ===== base ===== */
+.common-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease, color 0.15s ease,
+                border-color 0.15s ease, box-shadow 0.15s ease,
+                transform 0.15s ease;
+    white-space: nowrap;
+}
+
+.common-btn:focus-visible {
+    outline: 2px solid #8C1E1A;
+    outline-offset: 2px;
+}
+
+.common-btn:disabled,
+.common-btn[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.common-btn:not(:disabled):hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.15);
+}
+
+.common-btn:not(:disabled):active {
+    transform: translate(0, 0);
+    box-shadow: 1px 1px 0 rgba(43, 30, 20, 0.1);
+}
+
+/* ===== label + icon slots ===== */
+.common-btn__label {
+    display: inline-flex;
+    align-items: center;
+}
+
+.common-btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== variants ===== */
+/* primary — 먹 배경 + 한지 글자 (강한 CTA) */
+.common-btn--variant-primary {
+    background: #2B1E14;
+    color: #FBF5E3;
+    border-color: #2B1E14;
+}
+.common-btn--variant-primary:not(:disabled):hover {
+    background: #3a2a1c;
+    border-color: #3a2a1c;
+}
+
+/* secondary — 한지 cream 배경 + 먹 글자 + 먹 border (보조) */
+.common-btn--variant-secondary {
+    background: #FBF5E3;
+    color: #2B1E14;
+    border-color: #2B1E14;
+}
+.common-btn--variant-secondary:not(:disabled):hover {
+    background: #F4EAD5;
+}
+
+/* ghost — 투명 배경 + 먹 border (조용한 액션) */
+.common-btn--variant-ghost {
+    background: transparent;
+    color: #2B1E14;
+    border-color: #D4C4A8;
+}
+.common-btn--variant-ghost:not(:disabled):hover {
+    background: rgba(43, 30, 20, 0.04);
+    border-color: #2B1E14;
+}
+
+/* danger — 주홍 배경 + 한지 글자 (삭제/위험) */
+.common-btn--variant-danger {
+    background: #8C1E1A;
+    color: #FBF5E3;
+    border-color: #8C1E1A;
+}
+.common-btn--variant-danger:not(:disabled):hover {
+    background: #6B1512;
+    border-color: #6B1512;
+}
+
+/* text — border/bg 없음. 링크처럼 (가벼운 부수 액션) */
+.common-btn--variant-text {
+    background: transparent;
+    color: #2B1E14;
+    border-color: transparent;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+.common-btn--variant-text:not(:disabled):hover {
+    color: #8C1E1A;
+    transform: none;
+    box-shadow: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ===== sizes ===== */
+.common-btn--size-sm {
+    padding: 7px 12px;
+    font-size: 12px;
+}
+
+.common-btn--size-md {
+    padding: 10px 18px;
+    font-size: 14px;
+}
+
+.common-btn--size-lg {
+    padding: 14px 24px;
+    font-size: 16px;
+}
+
+/* ===== modifiers ===== */
+.common-btn--full {
+    width: 100%;
+}
+
+/* ===== loading ===== */
+.common-btn--loading {
+    color: transparent;
+    cursor: progress;
+}
+.common-btn--loading .common-btn__label,
+.common-btn--loading .common-btn__icon {
+    visibility: hidden;
+}
+.common-btn__spinner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: common-btn-spin 0.8s linear infinite;
+    color: inherit;
+    opacity: 0.8;
+}
+
+/* primary/danger 는 텍스트가 한지 색이라 spinner 도 한지 */
+.common-btn--variant-primary .common-btn__spinner,
+.common-btn--variant-danger .common-btn__spinner {
+    color: #FBF5E3;
+}
+
+@keyframes common-btn-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* loading 상태에선 spinner 가 정중앙 오게 하기 위해 버튼을 relative 로 */
+.common-btn--loading {
+    position: relative;
+}

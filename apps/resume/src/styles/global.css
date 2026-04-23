@@ -388,9 +388,12 @@ body.has-header {
 
 .feature-card {
   padding: 32px;
-  background: white;
+  /* editorial 팔레트 — 한지 cream. host 의 theme-editorial override 에 의존하지 않고
+     standalone 에서도 동일한 톤 유지. */
+  background: #FBF5E3;
+  border: 1px solid #D4C4A8;
   border-radius: var(--radius-xl);
-  box-shadow: 0 4px 24px rgba(30, 58, 95, 0.06);
+  box-shadow: 3px 5px 0 rgba(43, 30, 20, 0.08);
 }
 
 .feature-icon {

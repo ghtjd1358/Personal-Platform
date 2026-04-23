@@ -58,7 +58,7 @@
     animation: dashFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) forwards;
 }
 
-.hero-eyebrow {
+.dashboard-root .hero-eyebrow {
     display: block;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -90,7 +90,7 @@
     font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
 }
 
-.hero-sub {
+.dashboard-root .hero-sub {
     max-width: 520px;
     margin: 24px 0 0;
     font-family: 'Fraunces', 'Pretendard Variable', serif;
@@ -102,14 +102,14 @@
     font-variation-settings: "WONK" 0;
 }
 
-.hero-meta {
+.dashboard-root .hero-meta {
     min-width: 240px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     line-height: 1.5;
 }
 
-.meta-row {
+.dashboard-root .meta-row {
     display: flex;
     justify-content: space-between;
     gap: 32px;
@@ -117,17 +117,17 @@
     border-bottom: 1px dashed rgba(43, 30, 20, 0.2);
 }
 
-.meta-row:first-child {
+.dashboard-root .meta-row:first-child {
     border-top: 1px dashed rgba(43, 30, 20, 0.2);
 }
 
-.meta-label {
+.dashboard-root .meta-label {
     color: var(--mute);
     letter-spacing: 0.18em;
     font-weight: 500;
 }
 
-.meta-value {
+.dashboard-root .meta-value {
     color: var(--ink);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
@@ -162,7 +162,7 @@
 /* =================================================================
  * CHANNELS INDEX
  * ================================================================= */
-.channels-header {
+.dashboard-root .channels-header {
     display: flex;
     align-items: baseline;
     gap: 32px;
@@ -172,7 +172,7 @@
     animation: dashFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) forwards;
 }
 
-.channels-label {
+.dashboard-root .channels-label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.22em;
@@ -181,7 +181,7 @@
     font-weight: 500;
 }
 
-.channels-title {
+.dashboard-root .channels-title {
     font-family: 'Fraunces', 'Pretendard Variable', serif;
     font-size: clamp(32px, 4vw, 56px);
     font-weight: 400;
@@ -190,7 +190,7 @@
     margin: 0;
 }
 
-.channels-title em {
+.dashboard-root .channels-title em {
     font-style: italic;
     color: var(--mute);
     font-variation-settings: "WONK" 1;
@@ -199,7 +199,7 @@
 /* =================================================================
  * CHANNEL ROW
  * ================================================================= */
-.channel {
+.dashboard-root .channel {
     display: grid;
     grid-template-columns: 110px minmax(180px, 240px) 1fr 56px;
     align-items: center;
@@ -216,16 +216,16 @@
                 background 0.35s ease;
 }
 
-.channel:last-of-type {
+.dashboard-root .channel:last-of-type {
     border-bottom: 1px solid var(--ink);
 }
 
-.channel:hover {
+.dashboard-root .channel:hover {
     padding-left: 12px;
     background: rgba(140, 30, 26, 0.055);
 }
 
-.channel-num {
+.dashboard-root .channel-num {
     font-family: 'JetBrains Mono', monospace;
     font-size: 34px;
     font-weight: 300;
@@ -235,13 +235,13 @@
     font-variant-numeric: tabular-nums;
 }
 
-.channel-meta {
+.dashboard-root .channel-meta {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.channel-title {
+.dashboard-root .channel-title {
     font-family: 'Pretendard Variable', Pretendard, sans-serif;
     font-size: clamp(22px, 2.2vw, 30px);
     font-weight: 700;
@@ -251,7 +251,7 @@
     color: var(--ink);
 }
 
-.channel-sub {
+.dashboard-root .channel-sub {
     font-family: 'Fraunces', serif;
     font-style: italic;
     font-size: 16px;
@@ -260,14 +260,14 @@
     line-height: 1.2;
 }
 
-.channel-body {
+.dashboard-root .channel-body {
     display: flex;
     flex-direction: column;
     gap: 14px;
     min-width: 0;
 }
 
-.channel-desc {
+.dashboard-root .channel-desc {
     font-size: 15px;
     line-height: 1.55;
     color: var(--ink);
@@ -275,13 +275,13 @@
     max-width: 460px;
 }
 
-.channel-tags {
+.dashboard-root .channel-tags {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
 }
 
-.channel-tag {
+.dashboard-root .channel-tag {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
@@ -295,7 +295,7 @@
     white-space: nowrap;
 }
 
-.channel-arrow {
+.dashboard-root .channel-arrow {
     font-family: 'Fraunces', serif;
     font-weight: 300;
     font-size: 44px;
@@ -306,12 +306,12 @@
                 color 0.3s ease;
 }
 
-.channel:hover .channel-arrow {
+.dashboard-root .channel:hover .channel-arrow {
     transform: translateX(14px);
     color: var(--terra);
 }
 
-.channel-icon {
+.dashboard-root .channel-icon {
     position: absolute;
     right: 90px;
     top: 50%;
@@ -325,7 +325,7 @@
     z-index: 0;
 }
 
-.channel:hover .channel-icon {
+.dashboard-root .channel:hover .channel-icon {
     opacity: 0.28;
     color: var(--terra);
     transform: translateY(-50%) scale(1.12);
@@ -334,7 +334,7 @@
 /* =================================================================
  * STACK STRIP (footer)
  * ================================================================= */
-.stack-strip {
+.dashboard-root .stack-strip {
     margin-top: 120px;
     padding: 20px 0 0;
     border-top: 1px solid rgba(43, 30, 20, 0.25);
@@ -352,11 +352,11 @@
     animation: dashFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) forwards;
 }
 
-.stack-dot {
+.dashboard-root .stack-dot {
     opacity: 0.35;
 }
 
-.stack-strip-end {
+.dashboard-root .stack-strip-end {
     margin-left: auto;
     color: var(--terra);
     letter-spacing: 0.22em;

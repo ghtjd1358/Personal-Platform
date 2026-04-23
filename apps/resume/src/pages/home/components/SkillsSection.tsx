@@ -10,21 +10,9 @@ interface SkillsSectionProps {
 export const SkillsSection: React.FC<SkillsSectionProps> = ({ categories }) => {
   const [activeSkillTab, setActiveSkillTab] = useState<string>('');
 
-  if (categories.length === 0) {
-    return (
-      <section id="skills" className="section">
-        <div className="container">
-          <div className="section-header animate-on-scroll">
-            <div className="section-label">기술 스택</div>
-            <h2 className="section-title">사용하는 기술들</h2>
-          </div>
-          <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
-            기술 스택 정보가 없습니다.
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // 데이터 로딩 전에는 섹션 자체 렌더 안 함 → "기술 스택 정보가 없습니다" 플래시 제거.
+  // 데이터 오면 전체 섹션이 자연스럽게 등장.
+  if (categories.length === 0) return null;
 
   return (
     <section id="skills" className="section">
