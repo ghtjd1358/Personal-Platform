@@ -24,4 +24,4 @@ async function start() {
     )
 }
 
-start()
+start();
