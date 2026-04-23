@@ -32,51 +32,51 @@ const FeaturesEditorPage = lazy(() => import('../admin/features/FeaturesEditorPa
 function RoutesAuthPages() {
     return (
         <Routes>
-                {/* 메인 페이지 = 포트폴리오 홈 (이력서는 /resumes, 본인 이력서는 /mypage) */}
-                <Route path="/" element={<HomePage />} />
-                {PREFIX && <Route path={PREFIX} element={<HomePage />} />}
+            {/* 메인 페이지 = 포트폴리오 홈 (이력서는 /resumes, 본인 이력서는 /mypage) */}
+            <Route path="/" element={<HomePage />} />
+            {PREFIX && <Route path={PREFIX} element={<HomePage />} />}
 
-                {/* 이력서 둘러보기 (공개) */}
-                <Route path={`${PREFIX}${RoutePath.Resumes}`} element={<ResumeBrowsePage />} />
-                <Route path={`${PREFIX}${RoutePath.ResumeDetail}`} element={<ResumeDetailPage />} />
+            {/* 이력서 둘러보기 (공개) */}
+            <Route path={`${PREFIX}${RoutePath.Resumes}`} element={<ResumeBrowsePage />} />
+            <Route path={`${PREFIX}${RoutePath.ResumeDetail}`} element={<ResumeDetailPage />} />
 
-                {/* 개인 이력서 페이지 (user_id로 조회 - 대표 이력서) */}
-                <Route path={`${PREFIX}${RoutePath.UserResume}`} element={<UserResumePage />} />
+            {/* 개인 이력서 페이지 (user_id로 조회 - 대표 이력서) */}
+            <Route path={`${PREFIX}${RoutePath.UserResume}`} element={<UserResumePage />} />
 
-                {/* 마이페이지 - 다중 이력서 관리 (로그인 필요) */}
-                <Route path={`${PREFIX}${RoutePath.MyResumes}`} element={<MyResumesPage />} />
-                <Route path={`${PREFIX}${RoutePath.MyResumeCreate}`} element={<ResumeEditorPage />} />
-                <Route path={`${PREFIX}${RoutePath.MyResumeDetail}`} element={<MyResumeDetailPage />} />
-                <Route path={`${PREFIX}${RoutePath.MyResumeEdit}`} element={<ResumeEditorPage />} />
+            {/* 마이페이지 - 다중 이력서 관리 (로그인 필요) */}
+            <Route path={`${PREFIX}${RoutePath.MyResumes}`} element={<MyResumesPage />} />
+            <Route path={`${PREFIX}${RoutePath.MyResumeCreate}`} element={<ResumeEditorPage />} />
+            <Route path={`${PREFIX}${RoutePath.MyResumeDetail}`} element={<MyResumeDetailPage />} />
+            <Route path={`${PREFIX}${RoutePath.MyResumeEdit}`} element={<ResumeEditorPage />} />
 
-                {/* Skills */}
-                <Route path={`${PREFIX}${RoutePath.AdminSkills}`} element={<SkillsListPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminSkillsNew}`} element={<SkillsEditorPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminSkillsEdit}`} element={<SkillsEditorPage />} />
+            {/* Skills */}
+            <Route path={`${PREFIX}${RoutePath.AdminSkills}`} element={<SkillsListPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminSkillsNew}`} element={<SkillsEditorPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminSkillsEdit}`} element={<SkillsEditorPage />} />
 
-                {/* Experience */}
-                <Route path={`${PREFIX}${RoutePath.AdminExperience}`} element={<ExperienceListPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminExperienceNew}`} element={<ExperienceEditorPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminExperienceEdit}`} element={<ExperienceEditorPage />} />
+            {/* Experience */}
+            <Route path={`${PREFIX}${RoutePath.AdminExperience}`} element={<ExperienceListPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminExperienceNew}`} element={<ExperienceEditorPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminExperienceEdit}`} element={<ExperienceEditorPage />} />
 
-                {/* Portfolio — 전체 포폴(이력서 연결 + 전용) 통합 admin */}
-                <Route path={`${PREFIX}${RoutePath.AdminPortfolio}`} element={<PortfolioListPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminPortfolioNew}`} element={<ProjectsEditorPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminPortfolioEdit}`} element={<ProjectsEditorPage />} />
+            {/* Portfolio — 전체 포폴(이력서 연결 + 전용) 통합 admin */}
+            <Route path={`${PREFIX}${RoutePath.AdminPortfolio}`} element={<PortfolioListPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminPortfolioNew}`} element={<ProjectsEditorPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminPortfolioEdit}`} element={<ProjectsEditorPage />} />
 
-                {/* Projects — legacy alias, 새 URL 로 redirect */}
-                <Route path={`${PREFIX}${RoutePath.AdminProjects}`} element={<PortfolioListPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminProjectsNew}`} element={<ProjectsEditorPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminProjectsEdit}`} element={<ProjectsEditorPage />} />
+            {/* Projects — legacy alias, 새 URL 로 redirect */}
+            <Route path={`${PREFIX}${RoutePath.AdminProjects}`} element={<PortfolioListPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminProjectsNew}`} element={<ProjectsEditorPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminProjectsEdit}`} element={<ProjectsEditorPage />} />
 
-                {/* Features — "이런 개발자입니다" 카드 CRUD */}
-                <Route path={`${PREFIX}${RoutePath.AdminFeatures}`} element={<FeaturesListPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminFeaturesNew}`} element={<FeaturesEditorPage />} />
-                <Route path={`${PREFIX}${RoutePath.AdminFeaturesEdit}`} element={<FeaturesEditorPage />} />
+            {/* Features — "이런 개발자입니다" 카드 CRUD */}
+            <Route path={`${PREFIX}${RoutePath.AdminFeatures}`} element={<FeaturesListPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminFeaturesNew}`} element={<FeaturesEditorPage />} />
+            <Route path={`${PREFIX}${RoutePath.AdminFeaturesEdit}`} element={<FeaturesEditorPage />} />
 
-                <Route path="*" element={<Navigate to={PREFIX || '/'} replace />} />
-            </Routes>
-    )
+            <Route path="*" element={<Navigate to={PREFIX || '/'} replace />} />
+        </Routes>
+    );
 }
 
 export { RoutesAuthPages }
