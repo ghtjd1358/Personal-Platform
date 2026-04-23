@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast, useAsyncConfirm, usePermission } from '@sonhoseong/mfa-lib';
+import { useToast, useAsyncConfirm, usePermission, CommonButton } from '@sonhoseong/mfa-lib';
 import { iconMap } from '../../../constants/iconMap';
 import { LINK_PREFIX } from '@/config/constants';
 import {
@@ -169,12 +169,9 @@ const SkillsListPage: React.FC = () => {
                     <p className="skills-admin-sub">카테고리 만들고, 아래 뱃지에서 원하는 기술을 클릭해서 넣으세요.</p>
                 </div>
                 {!isEmpty && isOwner && (
-                    <button
-                        className="skills-btn skills-btn--primary"
-                        onClick={() => setCreatingCategory(true)}
-                    >
+                    <CommonButton variant="primary" onClick={() => setCreatingCategory(true)}>
                         + 카테고리 추가
-                    </button>
+                    </CommonButton>
                 )}
             </header>
 
@@ -190,12 +187,9 @@ const SkillsListPage: React.FC = () => {
                         <>
                             <p className="skills-empty-sub">먼저 카테고리(예: 프론트엔드, 상태관리)를 만들어보세요.</p>
                             <div className="skills-empty-actions">
-                                <button
-                                    className="skills-btn skills-btn--primary"
-                                    onClick={() => setCreatingCategory(true)}
-                                >
+                                <CommonButton variant="primary" onClick={() => setCreatingCategory(true)}>
                                     카테고리 추가
-                                </button>
+                                </CommonButton>
                             </div>
                         </>
                     ) : (
@@ -221,16 +215,16 @@ const SkillsListPage: React.FC = () => {
                             }
                         }}
                     />
-                    <button className="skills-btn skills-btn--primary" onClick={handleCreateCategory}>저장</button>
-                    <button
-                        className="skills-btn skills-btn--ghost"
+                    <CommonButton variant="primary" onClick={handleCreateCategory}>저장</CommonButton>
+                    <CommonButton
+                        variant="ghost"
                         onClick={() => {
                             setCreatingCategory(false);
                             setNewCategoryName('');
                         }}
                     >
                         취소
-                    </button>
+                    </CommonButton>
                 </div>
             )}
 
@@ -256,37 +250,39 @@ const SkillsListPage: React.FC = () => {
                                                 }
                                             }}
                                         />
-                                        <button className="skills-btn skills-btn--primary" onClick={() => handleUpdateCategory(category.id)}>저장</button>
-                                        <button
-                                            className="skills-btn skills-btn--ghost"
+                                        <CommonButton variant="primary" onClick={() => handleUpdateCategory(category.id)}>저장</CommonButton>
+                                        <CommonButton
+                                            variant="ghost"
                                             onClick={() => {
                                                 setEditingCategoryId(null);
                                                 setEditingCategoryName('');
                                             }}
                                         >
                                             취소
-                                        </button>
+                                        </CommonButton>
                                     </>
                                 ) : (
                                     <>
                                         <h2 className="skills-category-name">{category.label}</h2>
                                         {isOwner && (
                                             <div className="skills-category-actions">
-                                                <button
-                                                    className="skills-btn skills-btn--ghost skills-btn--small"
+                                                <CommonButton
+                                                    variant="ghost"
+                                                    size="sm"
                                                     onClick={() => {
                                                         setEditingCategoryId(category.id);
                                                         setEditingCategoryName(category.label);
                                                     }}
                                                 >
                                                     이름 수정
-                                                </button>
-                                                <button
-                                                    className="skills-btn skills-btn--danger skills-btn--small"
+                                                </CommonButton>
+                                                <CommonButton
+                                                    variant="danger"
+                                                    size="sm"
                                                     onClick={() => handleDeleteCategory(category.id, category.label)}
                                                 >
                                                     삭제
-                                                </button>
+                                                </CommonButton>
                                             </div>
                                         )}
                                     </>
@@ -307,17 +303,21 @@ const SkillsListPage: React.FC = () => {
                                         <span className="skills-item-name">{skill.name}</span>
                                         {isOwner && (
                                             <div className="skills-item-actions">
-                                                <button
-                                                    className="skills-btn skills-btn--danger skills-btn--tiny"
+                                                <CommonButton
+                                                    variant="danger"
+                                                    size="sm"
                                                     onClick={() => handleDeleteSkill(skill.id, skill.name)}
                                                     title="삭제"
+                                                    aria-label={`${skill.name} 삭제`}
                                                 >
                                                     ×
-                                                </button>
+                                                </CommonButton>
                                             </div>
                                         )}
                                     </div>
                                 ))}
+                                {/* grid 안에 들어가는 add-card 타일 — 일반 CommonButton 으로 치환 시 grid 레이아웃이
+                                    버튼 기본 padding 에 맞지 않음. 고유 .skills-add-card 스타일 유지. */}
                                 {isOwner && (
                                     <button
                                         type="button"
@@ -340,25 +340,28 @@ const SkillsListPage: React.FC = () => {
                                             onChange={(e) => setPickerSearch(e.target.value)}
                                             autoFocus
                                         />
-                                        <button
-                                            type="button"
-                                            className="skills-btn skills-btn--ghost skills-btn--small"
+                                        <CommonButton
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => navigate(`${LINK_PREFIX}/admin/skills/new?category=${category.id}`)}
                                             title="iconMap 에 없는 기술은 여기서 수동으로 아이콘/이모지 지정"
                                         >
                                             + 커스텀 아이콘
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="skills-picker-close"
+                                        </CommonButton>
+                                        <CommonButton
+                                            variant="text"
+                                            size="sm"
                                             onClick={() => setPickerOpenFor(null)}
                                             title="닫기"
                                             aria-label="닫기"
                                         >
                                             ✕
-                                        </button>
+                                        </CommonButton>
                                     </div>
 
+                                    {/* picker-grid 안 뱃지들 — button role 이지만 시각은 tech-icon tile.
+                                        CommonButton 의 paddin/border/font 와 완전 다른 디자인 영역.
+                                        고유 .skills-picker-badge 스타일 유지. */}
                                     <div className="skills-picker-grid">
                                         {filteredBadges.map((name) => {
                                             const inCategory = category.skills.some((s) => s.name === name);

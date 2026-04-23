@@ -6,28 +6,21 @@
 
 import React, { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { LoginPage } from '@sonhoseong/mfa-lib';
 import { PREFIX } from '@/config/constants';
 
 const HomePage = lazy(() => import('../home/HomePage'));
 const ProjectDetail = lazy(() => import('../project/ProjectDetail'));
 
+/**
+ * Standalone(remote3 단독) 라우트 — 공개 포트폴리오 뷰.
+ * 편집/관리/로그인 흐름은 host 모드 전용 → standalone 에서 login 라우트 제거.
+ */
 function RoutesGuestPages() {
     return (
         <Routes>
-            {/* 메인 */}
             <Route path="/" element={<HomePage />} />
             {PREFIX && <Route path={PREFIX} element={<HomePage />} />}
-
-            {/* 프로젝트 상세 */}
             <Route path={`${PREFIX}/project/:slug`} element={<ProjectDetail />} />
-
-            {/* 로그인 */}
-            <Route
-                path={`${PREFIX}/login`}
-                element={<LoginPage appName="Portfolio" redirectPath={PREFIX || '/'} />}
-            />
-
             <Route path="*" element={<HomePage />} />
         </Routes>
     );
