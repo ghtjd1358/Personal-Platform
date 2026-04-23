@@ -1,6 +1,5 @@
 export * from './Button';
 export * from './PostCard';
-export * from './PostCardSkeleton';
 export * from './PostsSection';
 export * from './HeroSection';
 export * from './BlogStats';

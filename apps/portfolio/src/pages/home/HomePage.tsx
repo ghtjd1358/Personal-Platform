@@ -104,14 +104,8 @@ const HomePage: React.FC = () => {
     setSelectedPortfolioId(null);
   };
 
-  if (loading) {
-    return (
-      <div className="portfolio-loading">
-        <div className="loading-spinner"></div>
-        <p>포트폴리오를 불러오는 중...</p>
-      </div>
-    );
-  }
+  // 로딩 상태 UI 제거 — host FarmerLoading(전역 오버레이)에 맡기고,
+  // 데이터 fetch 중엔 빈 구조만 렌더 → 데이터 준비되면 자연 교체.
 
   // 필터링 여부에 따라 다른 데이터 사용
   const heroProjects = isFiltering ? [] : featuredProjects.slice(0, 2);

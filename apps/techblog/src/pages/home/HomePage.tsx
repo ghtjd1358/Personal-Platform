@@ -16,7 +16,6 @@ const HomePage: React.FC = () => {
     monthlyTrend,
     upcomingEvents,
     recentApplications,
-    isLoading,
   } = useDashboardStats();
 
   const statusLabels: Record<ApplicationStatus, string> = {
@@ -26,23 +25,7 @@ const HomePage: React.FC = () => {
     result: '결과'
   };
 
-  if (isLoading) {
-    return (
-      <>
-        <HeroSection />
-        <div className="job-tracker-app">
-          <div className="page-header">
-            <h1>취업 관리 대시보드</h1>
-            <p>지원 현황을 한눈에 확인하세요</p>
-          </div>
-          <div className="empty-state">
-            <div className="empty-state-icon">⏳</div>
-            <div className="empty-state-title">로딩 중...</div>
-          </div>
-        </div>
-      </>
-    );
-  }
+  // 로딩 상태 UI 제거 — host FarmerLoading 에 맡김. 데이터 fetch 중 빈 구조만 렌더.
 
   return (
     <>

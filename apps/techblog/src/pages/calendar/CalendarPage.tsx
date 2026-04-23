@@ -14,7 +14,6 @@ const CalendarPage: React.FC = () => {
 
   // Use hook for calendar events
   const {
-    isLoading,
     monthEvents,
     getEventsForDate,
     create,
@@ -69,20 +68,7 @@ const CalendarPage: React.FC = () => {
 
   const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
 
-  if (isLoading) {
-    return (
-      <div className="job-tracker-app">
-        <div className="page-header">
-          <h1>일정 캘린더</h1>
-          <p>면접 일정과 마감일을 확인하세요</p>
-        </div>
-        <div className="empty-state">
-          <div className="empty-state-icon">⏳</div>
-          <div className="empty-state-title">로딩 중...</div>
-        </div>
-      </div>
-    );
-  }
+  // 로딩 상태 UI 제거 — host FarmerLoading 에 맡김.
 
   return (
     <div className="job-tracker-app">

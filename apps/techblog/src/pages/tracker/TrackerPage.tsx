@@ -8,7 +8,6 @@ import './TrackerPage.editorial.css';
 
 const TrackerPage: React.FC = () => {
   const {
-    isLoading,
     create,
     updateStatus,
     updateResult,
@@ -73,20 +72,7 @@ const TrackerPage: React.FC = () => {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="job-tracker-app">
-        <div className="page-header">
-          <h1>지원 현황</h1>
-          <p>드래그앤드롭으로 지원 상태를 관리하세요</p>
-        </div>
-        <div className="empty-state">
-          <div className="empty-state-icon">⏳</div>
-          <div className="empty-state-title">로딩 중...</div>
-        </div>
-      </div>
-    );
-  }
+  // 로딩 상태 UI 제거 — host FarmerLoading 에 맡김.
 
   return (
     <div className="job-tracker-app">

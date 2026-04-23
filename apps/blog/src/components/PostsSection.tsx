@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import {PostSummary} from "@/network";
-import {PostCardSkeleton} from "@/components/PostCardSkeleton";
 import {PostCard} from "@/components/PostCard";
-import {DeferredComponent} from "@/components/DeferredComponent";
 
 
 interface PostsSectionProps {
@@ -85,12 +83,11 @@ const PostsSection: React.FC<PostsSectionProps> = ({
           <h2 className="section-title">블로그 글 목록</h2>
         </div>
 
+        {/* 로딩 상태 UI 제거 — host FarmerLoading(전역 오버레이)이 담당.
+           데이터 fetch 중엔 빈 grid 유지, 데이터 도착 순간 카드가 자연 채움.
+           빈 목록일 때만 empty-state 표시. */}
         <div className="blog-grid">
-          {isLoading ? (
-            <DeferredComponent>
-              <PostCardSkeleton count={20} />
-            </DeferredComponent>
-          ) : posts.length === 0 ? (
+          {!isLoading && posts.length === 0 ? (
             <div className="empty-state">
               <p>아직 게시된 글이 없습니다.</p>
             </div>
