@@ -5,7 +5,6 @@ import { selectUser, Logo } from '@sonhoseong/mfa-lib';
 import { resumesApi } from '@/network';
 import type { ResumeWithUser } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
-import '@/styles/global.css';
 
 const ITEMS_PER_PAGE = 12;
 

@@ -6,7 +6,6 @@ import { resumesApi } from '@/network';
 import type { ResumeDetail } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
 import { iconMap } from '@/constants/iconMap';
-import '@/styles/global.css';
 
 const formatDate = (dateStr: string | null, isEnd = false, isCurrent = false) => {
   if (isCurrent && isEnd) return '현재';

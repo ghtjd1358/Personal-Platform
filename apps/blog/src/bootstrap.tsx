@@ -1,27 +1,14 @@
+import './init' // infra side-effect: host 플래그 제거 + Supabase 초기화
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
-import { createAppStore, ToastProvider, ModalProvider, storage, initSupabase } from '@sonhoseong/mfa-lib'
+import { store, ToastProvider, ModalProvider } from '@sonhoseong/mfa-lib'
 import Root from '@/Root'
-import './styles/global.css'
-
-// Supabase 초기화 (싱글톤)
-initSupabase({
-    supabaseUrl: process.env.REACT_APP_SUPABASE_URL || '',
-    supabaseAnonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || '',
-})
-
-const store = createAppStore()
 
 async function start() {
     const rootElement = document.getElementById('root')
     if (!rootElement) throw new Error('Root element not found')
-
-    // 단독 실행 시 body에 standalone 클래스 추가
-    if (!storage.isHostApp()) {
-        document.body.classList.add('standalone')
-    }
 
     ReactDOM.createRoot(rootElement).render(
         <React.StrictMode>

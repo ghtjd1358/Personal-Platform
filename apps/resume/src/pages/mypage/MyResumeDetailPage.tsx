@@ -6,7 +6,6 @@ import { resumesApi, experiencesApi, portfoliosApi } from '@/network';
 import type { ResumeProfile, ExperienceItem, ProjectItem } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
 import { iconMap } from '@/constants/iconMap';
-import '@/styles/global.css';
 
 // 타입 정의 (HomePage 컴포넌트와 호환)
 interface ExperienceDetail {

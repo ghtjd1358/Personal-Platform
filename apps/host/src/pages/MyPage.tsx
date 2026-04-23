@@ -144,7 +144,7 @@ const MyPage: React.FC = () => {
 
                         {/* Stage 2: lazy-loaded data slot */}
                         {/*
-                        <Suspense fallback={<div className="host-mypage-card-loading">불러오는 중…</div>}>
+                        <Suspense fallback="">
                           {card.key === 'resume' && <ResumeSummary userId={userId} />}
                           {card.key === 'blog' && <BlogSummary userId={userId} />}
                           ...

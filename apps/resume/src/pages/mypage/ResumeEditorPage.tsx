@@ -6,7 +6,6 @@ import { resumesApi, uploadProfileImage, experiencesApi, portfoliosApi } from '@
 import type { ResumeProfile, ResumeVisibility } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
 import { ExperienceEditor, ProjectEditor, SkillsSelector, type ExperienceFormData, type ProjectFormData } from './components';
-import '@/styles/global.css';
 
 interface FormData {
   resume_name: string;

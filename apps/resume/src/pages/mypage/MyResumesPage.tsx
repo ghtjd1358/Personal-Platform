@@ -5,7 +5,6 @@ import { getCurrentUser, useToast, selectAccessToken } from '@sonhoseong/mfa-lib
 import { resumesApi, experiencesApi, portfoliosApi } from '@/network';
 import type { ResumeProfile } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
-import '@/styles/global.css';
 
 interface ResumeCardData extends ResumeProfile {
   experienceCount: number;

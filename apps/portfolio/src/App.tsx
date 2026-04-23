@@ -11,18 +11,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './styles/global.css';
 
-// 라우트 로딩 fallback
-const RouteFallback = () => (
-    <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '50vh'
-    }}>
-        <div className="spinner-large" />
-    </div>
-);
-
+// Suspense 유지, fallback 빈값 — 중복 스피너 방지. 추후 editorial 컴포넌트 끼울 slot 유지.
 function App() {
     const accessToken = useSelector(selectAccessToken);
     const isAuthenticated = useMemo(() => !!accessToken, [accessToken]);
@@ -37,9 +26,8 @@ function App() {
         });
     }, []);
 
-    // host 모드에선 host의 <main className="main-content">가 이미 감싸고 있으므로 중첩 피함
     return (
-        <Suspense fallback={<RouteFallback />}>
+        <Suspense fallback="">
             {!isAuthenticated && <RoutesGuestPages />}
             {isAuthenticated && <RoutesAuthPages />}
         </Suspense>

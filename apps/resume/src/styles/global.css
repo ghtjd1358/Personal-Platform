@@ -3097,32 +3097,12 @@ body.has-header {
 }
 
 /* 단독 실행 시 block으로 변경 */
-body.standalone .app-container {
-  display: block;
-}
-
-/* Lnb가 있을 때 margin-left 적용 */
-.app-lnb + .main-content {
-  flex: 1;
-  margin-left: 260px;
-  transition: margin-left 0.3s ease;
-}
-
-/* Host에서 로드될 때 */
+/* Lnb 가 sibling 으로 있을 때는 flex: 1 만으로 남은 공간 자동 차지.
+   margin-left 하드코딩 제거 — 사이드바 나중에 추가될 때도 position: fixed 로 z-index overlay 로 덮는 방식 전제.
+   이 방식이면 main-content 는 항상 full width 로 hero 까지 자연스럽게 꽉 참. */
+.app-lnb + .main-content,
 .app-container .main-content {
   flex: 1;
-  margin-left: 260px;
-  transition: margin-left 0.3s ease;
-}
-
-/* 단독 실행 시 Lnb 없으면 중앙 정렬 */
-body.standalone .app-container .main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.app-lnb.collapsed + .main-content {
-  margin-left: 72px;
 }
 
 @media (max-width: 768px) {

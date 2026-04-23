@@ -12,19 +12,6 @@ import {
 import { lnbItems } from './exposes/lnb-items'
 import App from './exposes/App'
 
-// 초기화 로딩 컴포넌트
-const InitLoading = () => (
-    <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: '#F8FAFC'
-    }}>
-        <div className="spinner-large" />
-    </div>
-)
-
 function Root() {
     const accessToken = useSelector(selectAccessToken)
     const isAuthenticated = useMemo(() => !!accessToken, [accessToken])
@@ -34,12 +21,7 @@ function Root() {
         return isAuthenticated ? lnbItems.hasPrefixAuthList : lnbItems.hasPrefixList
     }, [isAuthenticated])
 
-    // 초기화 완료 전까지 로딩 표시
-    if (!initialized) {
-        return <InitLoading />
-    }
-
-    return (
+    return  initialized ? (
         <>
             <ModalContainer />
             <ToastContainer />
@@ -53,6 +35,8 @@ function Root() {
                 </ErrorBoundary>
             </Container>
         </>
+    ) : (
+        <></>
     )
 }
 
