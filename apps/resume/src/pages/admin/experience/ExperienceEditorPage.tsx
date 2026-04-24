@@ -5,8 +5,13 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useToast, getCurrentUser } from '@sonhoseong/mfa-lib'
-import { experiencesApi } from '../../../network'
 import { LINK_PREFIX } from '@/config/constants'
+import {
+    useFetchExperienceByIdWithDetails,
+    useCreateExperience,
+    useUpdateExperience,
+    useReplaceExperienceChildren,
+} from '../../../network/hooks'
 import './ExperienceEditor.editorial.css'
 
 const ExperienceEditorPage: React.FC = () => {
@@ -17,6 +22,11 @@ const ExperienceEditorPage: React.FC = () => {
     const toast = useToast()
     const user = getCurrentUser()
     const isEdit = !!id
+
+    const { experience: loadedExp } = useFetchExperienceByIdWithDetails(id)
+    const createExperience = useCreateExperience({ silent: false })
+    const updateExperience = useUpdateExperience({ silent: false })
+    const replaceChildren = useReplaceExperienceChildren()
 
     const [form, setForm] = useState({
         company: '',
@@ -29,40 +39,24 @@ const ExperienceEditorPage: React.FC = () => {
     const [tasksText, setTasksText] = useState('')
     const [tagsText, setTagsText] = useState('')
 
-    const [loading, setLoading] = useState(isEdit)
-    const [saving, setSaving] = useState(false)
-
     const listUrl = resumeId
         ? `${LINK_PREFIX}/admin/experience?resumeId=${resumeId}`
         : `${LINK_PREFIX}/admin/experience`
 
+    // edit 모드 로드된 data 를 form state 에 반영
     useEffect(() => {
-        if (!isEdit || !id) return
-        let cancelled = false
-        ;(async () => {
-            try {
-                const data = await experiencesApi.getByIdWithDetails(id)
-                if (cancelled || !data) return
-                setForm({
-                    company: data.company || '',
-                    position: data.position || '',
-                    start_date: data.start_date || '',
-                    end_date: data.end_date || '',
-                    is_current: data.is_current || false,
-                    is_dev: data.is_dev ?? true,
-                })
-                setTasksText(data.tasks.map((t) => t.task).join('\n'))
-                setTagsText(data.tags.join(', '))
-            } catch (err) {
-                toast.error('경력 로드 실패: ' + (err as Error).message)
-            } finally {
-                if (!cancelled) setLoading(false)
-            }
-        })()
-        return () => {
-            cancelled = true
-        }
-    }, [id, isEdit])
+        if (!isEdit || !loadedExp) return
+        setForm({
+            company: loadedExp.company || '',
+            position: loadedExp.position || '',
+            start_date: loadedExp.start_date || '',
+            end_date: loadedExp.end_date || '',
+            is_current: loadedExp.is_current || false,
+            is_dev: loadedExp.is_dev ?? true,
+        })
+        setTasksText(loadedExp.tasks.map((t) => t.task).join('\n'))
+        setTagsText(loadedExp.tags.join(', '))
+    }, [isEdit, loadedExp])
 
     const parsedTags = useMemo(
         () => tagsText.split(',').map((s) => s.trim()).filter(Boolean),
@@ -81,41 +75,26 @@ const ExperienceEditorPage: React.FC = () => {
             .map((s) => s.trim())
             .filter(Boolean)
 
-        setSaving(true)
-        try {
-            let expId = id
-            if (isEdit && id) {
-                const { error } = await experiencesApi.update(id, form)
-                if (error) throw error
-            } else {
-                const { data, error } = await experiencesApi.create({
-                    ...form,
-                    user_id: user?.id,
-                    resume_id: resumeId || undefined,
-                })
-                if (error) throw error
-                expId = data?.id
-            }
-
-            if (expId) {
-                await experiencesApi.replaceChildren(expId, parsedTasks, parsedTags)
-            }
-
-            toast.success(isEdit ? '경력을 수정했어요.' : '경력을 추가했어요.')
-            navigate(listUrl)
-        } catch (err) {
-            toast.error('저장 실패: ' + (err as Error).message)
-        } finally {
-            setSaving(false)
+        let expId: string | undefined = id
+        if (isEdit && id) {
+            const res = await updateExperience(id, form)
+            if (!res) return
+        } else {
+            const res = await createExperience({
+                ...form,
+                user_id: user?.id,
+                resume_id: resumeId || undefined,
+            })
+            if (!res) return
+            expId = (res as { id: string }).id
         }
-    }
 
-    if (loading) {
-        return (
-            <div className="exp-editor">
-                <div className="exp-editor-loading">불러오는 중…</div>
-            </div>
-        )
+        if (expId) {
+            const replaced = await replaceChildren(expId, parsedTasks, parsedTags)
+            if (!replaced) return
+        }
+
+        navigate(listUrl)
     }
 
     return (
@@ -265,16 +244,14 @@ const ExperienceEditorPage: React.FC = () => {
                         type="button"
                         className="exp-editor-btn exp-editor-btn--ghost"
                         onClick={() => navigate(listUrl)}
-                        disabled={saving}
                     >
                         취소
                     </button>
                     <button
                         type="submit"
                         className="exp-editor-btn exp-editor-btn--primary"
-                        disabled={saving}
                     >
-                        {saving ? '저장 중…' : isEdit ? '수정 저장' : '경력 추가'}
+                        {isEdit ? '수정 저장' : '경력 추가'}
                     </button>
                 </div>
             </form>

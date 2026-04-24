@@ -12,7 +12,6 @@ import { getSupabase } from '@sonhoseong/mfa-lib';
 import { skillsApi, type SkillCategoryWithSkills } from '../../../network/apis/supabase';
 import type { Feature } from '../../../network/apis/types';
 import type {
-    ResumeProfileDetail,
     SkillCategoryDetail,
     ExperienceDetail,
     ProjectDetail,
@@ -22,7 +21,6 @@ import type {
 } from '../../../types';
 
 type HomeData = {
-    profile: ResumeProfileDetail | null;
     skillCategories: SkillCategoryDetail[];
     experiences: ExperienceDetail[];
     projects: ProjectDetail[];
@@ -134,7 +132,6 @@ const mapPortfolios = (rows: PortfolioRow[]): PortfolioItem[] =>
 
 export const useHomePageData = (): HomeData => {
     const [loading, setLoading] = useState(true);
-    const [profile, setProfile] = useState<ResumeProfileDetail | null>(null);
     const [skillCategories, setSkillCategories] = useState<SkillCategoryDetail[]>([]);
     const [experiences, setExperiences] = useState<ExperienceDetail[]>([]);
     const [projects, setProjects] = useState<ProjectDetail[]>([]);
@@ -150,13 +147,9 @@ export const useHomePageData = (): HomeData => {
                 console.log('[useHomePageData] start (public fetch, no user filter)');
                 const sb = getSupabase();
 
+                // resume_profile fetch 제거 — Hero summary 는 하드코딩으로 전환 (FOUC 제거).
                 // 모든 read 에 user_id 필터 없음. DB 에 존재하는 데이터를 그대로 읽음.
-                const [profileResp, skillsResp, expResp, portfolioResp, featuresResp] = await Promise.all([
-                    sb.from('resume_profile')
-                        .select('*')
-                        .order('created_at', { ascending: true })
-                        .limit(1)
-                        .maybeSingle(),
+                const [skillsResp, expResp, portfolioResp, featuresResp] = await Promise.all([
                     skillsApi.getCategories().catch(() => [] as SkillCategoryWithSkills[]),
                     sb.from('experiences')
                         .select('*, experience_tasks(id, task, order_index), experience_tags(tag)')
@@ -179,7 +172,6 @@ export const useHomePageData = (): HomeData => {
                 if (cancelled) return;
 
                 console.log('[useHomePageData] fetched', {
-                    profile: !!profileResp.data,
                     skillsCount: skillsResp.length,
                     expCount: expResp.length,
                     portfolioCount: portfolioResp.length,
@@ -187,11 +179,6 @@ export const useHomePageData = (): HomeData => {
                 });
 
                 let gotAnyLiveData = false;
-
-                if (profileResp.data) {
-                    setProfile(profileResp.data as ResumeProfileDetail);
-                    gotAnyLiveData = true;
-                }
 
                 if (skillsResp.length > 0) {
                     setSkillCategories(mapSkillCategories(skillsResp));
@@ -244,7 +231,6 @@ export const useHomePageData = (): HomeData => {
     }, []);
 
     return {
-        profile,
         skillCategories,
         experiences,
         projects,

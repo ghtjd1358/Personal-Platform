@@ -1,29 +1,48 @@
 /**
- * GlobalLoading — Editorial global loading overlay.
- * Redux state.app.isLoading 가 true 일 때만 표시. host/FarmerLoading 과 동일한 visual
- * dialect (한지 bone overlay + cream card + 먹 arc + 주홍 head + mono 라벨).
+ * GlobalLoading — Editorial global loading overlay (KOMCA 패턴 포팅).
+ *
+ * 구독 대상: `react-promise-tracker` 의 `usePromiseTracker({ area: 'GLOBAL' })`.
+ * `useShowGlobalLoading()(promise)` 로 감싼 promise 가 진행중이면 true 가 됨.
+ * 중첩 호출 counter 는 라이브러리가 자동 관리 → 마지막 promise 해제 시에만 꺼짐.
+ *
+ * + **500ms debounce on hide** — 연속 API 호출 시 스피너 깜빡임 방지 (KOMCA home-front 패턴).
+ * + title 은 Redux state.app.globalLoadingTitle 에서 읽어와 표시.
+ * + Host 모드에서는 host 의 FarmerLoading 이 띄우므로 isHostApp gate 로 이중 overlay 방지.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { usePromiseTracker } from 'react-promise-tracker';
 import { useSelector } from 'react-redux';
+import { LOADING_AREA_GLOBAL } from '../../hooks/use-global-loading';
 
 interface GlobalLoadingProps {
     /** 커스텀 로딩 메시지 */
     message?: string;
 }
 
+const GLOBAL_AREA_CONFIG = { area: LOADING_AREA_GLOBAL };
+
 const GlobalLoading: React.FC<GlobalLoadingProps> = ({ message }) => {
-    const isLoading = useSelector((state: any) => state.app?.isLoading);
+    const { promiseInProgress } = usePromiseTracker(GLOBAL_AREA_CONFIG);
     const globalLoadingTitle = useSelector((state: any) => state.app?.globalLoadingTitle);
 
-    // Host 모드에서는 host 앱이 자체 overlay(FarmerLoading) 를 띄운다.
-    // remote Root.tsx 에서 GlobalLoading 을 마운트한 채 host 에 embed 되어도
-    // 이 가드로 이중 overlay 를 방지. Standalone 모드에서는 정상 동작.
+    // 500ms debounce on hide — 연속 호출 시 깜빡임 방지
+    const [visible, setVisible] = useState(false);
+    useEffect(() => {
+        if (promiseInProgress) {
+            setVisible(true);
+        } else {
+            const timer = setTimeout(() => setVisible(false), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [promiseInProgress]);
+
+    // Host 모드에서는 host 앱의 FarmerLoading 이 띄움 → 이중 overlay 방지
     const isHostApp = typeof window !== 'undefined'
         && window.sessionStorage?.getItem('isHostApp') === 'true';
     if (isHostApp) return null;
 
-    if (!isLoading) return null;
+    if (!visible) return null;
 
     const displayMessage = message || globalLoadingTitle || '불러오는 중';
 

@@ -20,7 +20,6 @@ import recentMenuReducer from './recent-menu-slice';
 const initialAppState: AppState = {
     accessToken: '',
     user: null,
-    isLoading: false,
     globalLoadingTitle: '',
     service: '',
     selectedGnb: '',
@@ -38,9 +37,6 @@ export const appSlice = createSlice({
         // User 정보도 메모리(Redux)에만 저장
         setUser: (state, action: PayloadAction<User | null>) => {
             state.user = action.payload;
-        },
-        setLoading: (state, action: PayloadAction<boolean>) => {
-            state.isLoading = action.payload;
         },
         setGlobalLoadingTitle: (state, action: PayloadAction<string>) => {
             state.globalLoadingTitle = action.payload;
@@ -62,7 +58,6 @@ export const appSlice = createSlice({
 export const {
     setAccessToken,
     setUser,
-    setLoading,
     setGlobalLoadingTitle,
     setService,
     setSelectedGnb,
@@ -75,7 +70,6 @@ export const {
 export const selectAppState = (state: { app: AppState }) => state.app;
 export const selectAccessToken = (state: { app: AppState }) => state.app.accessToken;
 export const selectUser = (state: { app: AppState }) => state.app.user;
-export const selectIsLoading = (state: { app: AppState }) => state.app.isLoading;
 export const selectGlobalLoadingTitle = (state: { app: AppState }) => state.app.globalLoadingTitle;
 export const selectService = (state: { app: AppState }) => state.app.service;
 export const selectAppSelectedGnb = (state: { app: AppState }) => state.app.selectedGnb;
@@ -108,11 +102,6 @@ export const selectUserPermissions = createSelector(
     (user) => user?.permissions || []
 );
 
-/** 로딩 상태 (제목 포함) */
-export const selectLoadingState = createSelector(
-    [selectIsLoading, selectGlobalLoadingTitle],
-    (isLoading, title) => ({ isLoading, title })
-);
 
 // ============================================
 // Store 생성

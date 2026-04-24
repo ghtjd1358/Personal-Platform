@@ -3,6 +3,7 @@ import { JobApplication, ApplicationStatus, ApplicationResult } from '@/types/jo
 import { useApplications } from '@/hooks';
 import ApplicationDetailModal from '@/components/ApplicationDetailModal';
 import CreateApplicationModal from '@/components/CreateApplicationModal';
+import ApplicationCardSkeleton from '@/components/ApplicationCardSkeleton';
 import '../home/HomePage.editorial.css';
 import './TrackerPage.editorial.css';
 
@@ -12,6 +13,7 @@ const TrackerPage: React.FC = () => {
     updateStatus,
     updateResult,
     getByStatus,
+    isLoading,
   } = useApplications();
 
   const [draggedCard, setDraggedCard] = useState<JobApplication | null>(null);
@@ -99,7 +101,12 @@ const TrackerPage: React.FC = () => {
               </div>
 
               <div className="kanban-cards">
-                {columnApps.length === 0 ? (
+                {isLoading && columnApps.length === 0 ? (
+                  <>
+                    <ApplicationCardSkeleton />
+                    <ApplicationCardSkeleton />
+                  </>
+                ) : !isLoading && columnApps.length === 0 ? (
                   <div style={{
                     padding: '20px',
                     textAlign: 'center',

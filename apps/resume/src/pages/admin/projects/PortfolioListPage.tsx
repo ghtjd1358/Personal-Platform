@@ -5,11 +5,11 @@
  *   (2) 포폴 전용 (resume_id null)
  * 각 행의 ✎ → /admin/portfolio/edit/:id, × → 삭제 confirm.
  */
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useToast, useAsyncConfirm, usePermission } from '@sonhoseong/mfa-lib'
-import { portfoliosApi } from '../../../network'
+import { useAsyncConfirm, usePermission } from '@sonhoseong/mfa-lib'
 import type { Portfolio } from '../../../network/apis/types'
+import { useFetchPortfolios, useDeletePortfolio } from '../../../network/hooks'
 import { LINK_PREFIX } from '@/config/constants'
 import '../experience/ExperienceList.editorial.css'
 
@@ -20,33 +20,20 @@ const formatPeriod = (start: string | null, end: string | null, isCurrent: boole
 }
 
 const PortfolioListPage: React.FC = () => {
-    const toast = useToast()
     const confirmDialog = useAsyncConfirm()
     const { canEditResource } = usePermission()
-    const [items, setItems] = useState<Portfolio[]>([])
-    const [loading, setLoading] = useState(true)
 
-    const fetchAll = useCallback(async () => {
-        setLoading(true)
-        const { data, error } = await portfoliosApi.getAll()
-        if (data) setItems(data as Portfolio[])
-        if (error) console.error('[PortfolioList] fetch', error)
-        setLoading(false)
-    }, [])
+    const [updater, setUpdater] = useState(0)
+    const { portfolios } = useFetchPortfolios(updater)
+    const deletePortfolio = useDeletePortfolio()
 
-    useEffect(() => {
-        fetchAll()
-    }, [fetchAll])
+    const items = portfolios as Portfolio[]
 
     const handleDelete = async (item: Portfolio) => {
         const ok = await confirmDialog(`"${item.title}" 을 삭제할까요?`, '삭제')
         if (!ok) return
-        const { error } = await portfoliosApi.delete(item.id)
-        if (error) toast.error('삭제 실패: ' + (error.message || '알 수 없는 오류'))
-        else {
-            toast.success('삭제되었어요.')
-            fetchAll()
-        }
+        const done = await deletePortfolio(item.id)
+        if (done) setUpdater((n) => n + 1)
     }
 
     const resumeLinked = items.filter((p) => p.resume_id)
@@ -99,14 +86,6 @@ const PortfolioListPage: React.FC = () => {
             </div>
         </li>
     )
-
-    if (loading) {
-        return (
-            <div className="admin-list-page exp-admin">
-                <div className="exp-admin-loading">불러오는 중…</div>
-            </div>
-        )
-    }
 
     return (
         <div className="admin-list-page exp-admin">

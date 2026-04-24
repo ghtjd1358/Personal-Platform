@@ -23,22 +23,22 @@ const HomePage: React.FC = () => {
 
     useScrollAnimation();
     const {
-        profile,
         skillCategories,
         experiences,
         projects,
         portfolioData,
         features,
         contactLinks,
+        loading,
     } = useHomePageData();
 
     return (
         <>
-            <HeroSection userName={user?.name} resumeProfile={profile} />
-            <FeaturesSection features={features} />
+            <HeroSection userName={user?.name} />
+            <FeaturesSection features={features} isLoading={loading} />
             <SkillsSection categories={skillCategories} />
             <ExperienceSection experiences={experiences} projects={projects} />
-            <ProjectsSection portfolioData={portfolioData} />
+            <ProjectsSection portfolioData={portfolioData} isLoading={loading} />
             <ContactSection links={contactLinks} />
             <ModalContainer />
         </>

@@ -12,7 +12,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useToast, getCurrentUser, getSupabase } from '@sonhoseong/mfa-lib'
-import { portfoliosApi } from '../../../network'
+import {
+    useFetchPortfolioByIdWithDetails,
+    useCreatePortfolio,
+    useUpdatePortfolio,
+    useReplacePortfolioChildren,
+} from '../../../network/hooks'
 import { LINK_PREFIX } from '@/config/constants'
 import '../experience/ExperienceEditor.editorial.css'
 
@@ -24,6 +29,11 @@ const ProjectsEditorPage: React.FC = () => {
     const toast = useToast()
     const user = getCurrentUser()
     const isEdit = !!id
+
+    const { portfolio: loadedPortfolio } = useFetchPortfolioByIdWithDetails(id)
+    const createPortfolio = useCreatePortfolio()
+    const updatePortfolio = useUpdatePortfolio()
+    const replaceChildren = useReplacePortfolioChildren()
 
     // 필수 + 선택 필드 통합 form
     const [form, setForm] = useState({
@@ -46,47 +56,32 @@ const ProjectsEditorPage: React.FC = () => {
     const [tasksText, setTasksText] = useState('')
     const [tagsText, setTagsText] = useState('')
 
-    const [loading, setLoading] = useState(isEdit)
-    const [saving, setSaving] = useState(false)
-
     // 저장/취소 후 복귀: fromResume 쿼리 있거나 이미 이력서 연결된 row 면 경력&프로젝트 로, 아니면 포폴 리스트로
     const listUrl = form.link_to_resume || fromResume
         ? `${LINK_PREFIX}/admin/experience`
         : `${LINK_PREFIX}/admin/portfolio`
 
+    // edit 모드: 로드된 portfolio 를 form state 에 반영
     useEffect(() => {
-        if (!isEdit || !id) return
-        let cancelled = false
-        ;(async () => {
-            try {
-                const data = await portfoliosApi.getByIdWithDetails(id)
-                if (cancelled || !data) return
-                setForm({
-                    title: data.title || '',
-                    role: data.role || '',
-                    start_date: data.start_date || '',
-                    end_date: data.end_date || '',
-                    is_current: data.is_current || false,
-                    link_to_resume: !!data.resume_id,
-                    short_description: (data as any).short_description || '',
-                    description: (data as any).description || '',
-                    demo_url: (data as any).demo_url || '',
-                    github_url: (data as any).github_url || '',
-                    figma_url: (data as any).figma_url || '',
-                    cover_image: (data as any).cover_image || '',
-                })
-                setTasksText(data.tasks.map((t) => t.task).join('\n'))
-                setTagsText(data.tags.join(', '))
-            } catch (err) {
-                toast.error('포트폴리오 로드 실패: ' + (err as Error).message)
-            } finally {
-                if (!cancelled) setLoading(false)
-            }
-        })()
-        return () => {
-            cancelled = true
-        }
-    }, [id, isEdit])
+        if (!isEdit || !loadedPortfolio) return
+        const data = loadedPortfolio
+        setForm({
+            title: data.title || '',
+            role: data.role || '',
+            start_date: data.start_date || '',
+            end_date: data.end_date || '',
+            is_current: data.is_current || false,
+            link_to_resume: !!data.resume_id,
+            short_description: (data as any).short_description || '',
+            description: (data as any).description || '',
+            demo_url: (data as any).demo_url || '',
+            github_url: (data as any).github_url || '',
+            figma_url: (data as any).figma_url || '',
+            cover_image: (data as any).cover_image || '',
+        })
+        setTasksText(data.tasks.map((t) => t.task).join('\n'))
+        setTagsText(data.tags.join(', '))
+    }, [isEdit, loadedPortfolio])
 
     const parsedTags = useMemo(
         () => tagsText.split(',').map((s) => s.trim()).filter(Boolean),
@@ -105,68 +100,51 @@ const ProjectsEditorPage: React.FC = () => {
             .map((s) => s.trim())
             .filter(Boolean)
 
-        setSaving(true)
-        try {
-            // resume_id 결정: 토글 on 이면 현재 유저의 대표 이력서 id 찾아서 붙이기, off 면 null
-            let resumeIdToSet: string | null = null
-            if (form.link_to_resume && user?.id) {
-                const { data: primary } = await getSupabase()
-                    .from('resume_profile')
-                    .select('id')
-                    .eq('user_id', user.id)
-                    .order('created_at', { ascending: true })
-                    .limit(1)
-                    .maybeSingle()
-                resumeIdToSet = primary?.id ?? null
-            }
-
-            const payload = {
-                title: form.title.trim(),
-                role: form.role.trim(),
-                start_date: form.start_date,
-                end_date: form.end_date || null,
-                is_current: form.is_current,
-                resume_id: resumeIdToSet,
-                short_description: form.short_description || undefined,
-                description: form.description || undefined,
-                demo_url: form.demo_url || undefined,
-                github_url: form.github_url || undefined,
-                figma_url: form.figma_url || undefined,
-                cover_image: form.cover_image || undefined,
-            }
-
-            let projId = id
-            if (isEdit && id) {
-                const { error } = await portfoliosApi.update(id, payload)
-                if (error) throw error
-            } else {
-                const { data, error } = await portfoliosApi.create({
-                    ...payload,
-                    user_id: user?.id,
-                })
-                if (error) throw error
-                projId = data?.id
-            }
-
-            if (projId) {
-                await portfoliosApi.replaceChildren(projId, parsedTasks, parsedTags)
-            }
-
-            toast.success(isEdit ? '포트폴리오를 수정했어요.' : '포트폴리오를 추가했어요.')
-            navigate(listUrl)
-        } catch (err) {
-            toast.error('저장 실패: ' + (err as Error).message)
-        } finally {
-            setSaving(false)
+        // resume_id 결정: 토글 on 이면 현재 유저의 대표 이력서 id 찾아서 붙이기, off 면 null
+        // 이 쿼리는 resume_profile 테이블 lookup 으로 resume 훅 계층엔 없음 — 직접 호출 유지
+        let resumeIdToSet: string | null = null
+        if (form.link_to_resume && user?.id) {
+            const { data: primary } = await getSupabase()
+                .from('resume_profile')
+                .select('id')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: true })
+                .limit(1)
+                .maybeSingle()
+            resumeIdToSet = primary?.id ?? null
         }
-    }
 
-    if (loading) {
-        return (
-            <div className="exp-editor">
-                <div className="exp-editor-loading">불러오는 중…</div>
-            </div>
-        )
+        const payload = {
+            title: form.title.trim(),
+            role: form.role.trim(),
+            start_date: form.start_date,
+            end_date: form.end_date || null,
+            is_current: form.is_current,
+            resume_id: resumeIdToSet,
+            short_description: form.short_description || undefined,
+            description: form.description || undefined,
+            demo_url: form.demo_url || undefined,
+            github_url: form.github_url || undefined,
+            figma_url: form.figma_url || undefined,
+            cover_image: form.cover_image || undefined,
+        }
+
+        let projId: string | undefined = id
+        if (isEdit && id) {
+            const res = await updatePortfolio(id, payload)
+            if (!res) return
+        } else {
+            const res = await createPortfolio({ ...payload, user_id: user?.id })
+            if (!res) return
+            projId = (res as { id: string }).id
+        }
+
+        if (projId) {
+            const replaced = await replaceChildren(projId, parsedTasks, parsedTags)
+            if (!replaced) return
+        }
+
+        navigate(listUrl)
     }
 
     return (
@@ -410,16 +388,14 @@ const ProjectsEditorPage: React.FC = () => {
                         type="button"
                         className="exp-editor-btn exp-editor-btn--ghost"
                         onClick={() => navigate(listUrl)}
-                        disabled={saving}
                     >
                         취소
                     </button>
                     <button
                         type="submit"
                         className="exp-editor-btn exp-editor-btn--primary"
-                        disabled={saving}
                     >
-                        {saving ? '저장 중…' : isEdit ? '수정 저장' : '포트폴리오 추가'}
+                        {isEdit ? '수정 저장' : '포트폴리오 추가'}
                     </button>
                 </div>
             </form>

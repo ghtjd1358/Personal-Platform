@@ -209,6 +209,7 @@
     margin: 0 0 4px;
     word-break: keep-all;
     overflow-wrap: break-word;
+    white-space: pre-line;
 }
 
 /* Tech chips */
@@ -234,7 +235,7 @@
     font-weight: 500 !important;
 }
 
-/* 상세 설명 (HTML) */
+/* 상세 설명 (plain text + \n, pre-line) */
 .modal-info .modal-description-content {
     font-family: 'Pretendard Variable', sans-serif;
     font-size: 14.5px;
@@ -242,6 +243,7 @@
     color: #3a2a1c;
     word-break: keep-all;
     overflow-wrap: break-word;
+    white-space: pre-line;
 }
 
 /* ===== 링크 CTAs ===== */

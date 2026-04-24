@@ -9,6 +9,7 @@ import { ScrollTopButton, getCurrentUser, storage, usePermission } from '@sonhos
 import { usePortfolios } from './hooks';
 import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
+import PortfolioCardSkeleton from '@/components/PortfolioCardSkeleton';
 import { HeroSection } from '@/components';
 import AOS from 'aos';
 import './HomePage.editorial.css';
@@ -217,7 +218,13 @@ const HomePage: React.FC = () => {
             )}
           </div>
 
-          {gridProjects.length === 0 && heroProjects.length === 0 ? (
+          {loading && gridProjects.length === 0 && heroProjects.length === 0 ? (
+            <div className="insta-grid">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <PortfolioCardSkeleton key={`skeleton-${i}`} />
+              ))}
+            </div>
+          ) : !loading && gridProjects.length === 0 && heroProjects.length === 0 ? (
             <div className="empty-state" data-aos="fade-up">
               <div className="empty-state-icon">📁</div>
               <p className="empty-state-text">아직 등록된 포트폴리오가 없습니다.</p>

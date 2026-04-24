@@ -4,27 +4,38 @@
  * - 스킬: iconMap 전체를 badge grid 로 펼쳐 클릭-토글 (추가/제거)
  * - iconMap 에 없는 커스텀 아이콘/이모지는 "+ 커스텀 아이콘" 링크로 editor 페이지로 fallback
  */
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast, useAsyncConfirm, usePermission, CommonButton } from '@sonhoseong/mfa-lib';
+import { useAsyncConfirm, usePermission, CommonButton } from '@sonhoseong/mfa-lib';
 import { iconMap } from '../../../constants/iconMap';
 import { LINK_PREFIX } from '@/config/constants';
+import type { SkillCategoryWithSkills } from '../../../network/apis/supabase';
 import {
-    skillsApi,
-    type SkillCategoryWithSkills,
-} from '../../../network/apis/supabase';
+    useFetchSkillCategories,
+    useCreateSkillCategory,
+    useUpdateSkillCategory,
+    useDeleteSkillCategory,
+    useCreateSkill,
+    useDeleteSkill,
+} from '../../../network/hooks';
 import './Skills.editorial.css';
 
 const SkillsListPage: React.FC = () => {
     const navigate = useNavigate();
-    const toast = useToast();
     const confirmDialog = useAsyncConfirm();
     // 현재 SkillCategoryWithSkills 는 user_id 를 포함하지 않아 row-level gating 이 어려움.
-    // 단일-Owner 운영 가정 하에 isOwner 로 전체 편집 UI gating. 추후 multi-user 지원 시
-    // API response 에 user_id 포함 + canEditResource 세분화 리팩토링.
+    // 단일-Owner 운영 가정 하에 isOwner 로 전체 편집 UI gating.
     const { isOwner } = usePermission();
-    const [categories, setCategories] = useState<SkillCategoryWithSkills[]>([]);
-    const [loading, setLoading] = useState(true);
+
+    // updater 증가 = 전체 재조회 트리거 (React Query invalidate 대용)
+    const [updater, setUpdater] = useState(0);
+    const { categories } = useFetchSkillCategories(updater);
+    const createCategory = useCreateSkillCategory();
+    const updateCategory = useUpdateSkillCategory();
+    const deleteCategory = useDeleteSkillCategory();
+    const createSkill = useCreateSkill();
+    const deleteSkill = useDeleteSkill();
+
     const [newCategoryName, setNewCategoryName] = useState('');
     const [creatingCategory, setCreatingCategory] = useState(false);
     const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
@@ -42,78 +53,43 @@ const SkillsListPage: React.FC = () => {
         return allBadgeNames.filter((n) => n.toLowerCase().includes(q));
     }, [allBadgeNames, pickerSearch]);
 
-    const refresh = useCallback(async () => {
-        try {
-            const data = await skillsApi.getCategories();
-            setCategories(data);
-        } catch (err) {
-            console.error('[SkillsList] fetch 실패:', err);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        refresh();
-    }, [refresh]);
+    const refresh = () => setUpdater((n) => n + 1);
 
     const handleCreateCategory = async () => {
         const name = newCategoryName.trim();
         if (!name) return;
-        const nextOrder = categories.length;
-        try {
-            const { error } = await skillsApi.createCategory({
-                label: name,
-                order_index: nextOrder,
-            });
-            if (error) throw error;
-            setNewCategoryName('');
-            setCreatingCategory(false);
-            await refresh();
-        } catch (err) {
-            toast.error('카테고리 추가 실패: ' + (err as Error).message);
-        }
+        const res = await createCategory({ label: name, order_index: categories.length });
+        if (!res) return;
+        setNewCategoryName('');
+        setCreatingCategory(false);
+        refresh();
     };
 
     const handleUpdateCategory = async (id: string) => {
         const name = editingCategoryName.trim();
         if (!name) return;
-        try {
-            const { error } = await skillsApi.updateCategory(id, { label: name });
-            if (error) throw error;
-            setEditingCategoryId(null);
-            setEditingCategoryName('');
-            await refresh();
-        } catch (err) {
-            toast.error('카테고리 수정 실패: ' + (err as Error).message);
-        }
+        const res = await updateCategory(id, { label: name });
+        if (!res) return;
+        setEditingCategoryId(null);
+        setEditingCategoryName('');
+        refresh();
     };
 
     const handleDeleteCategory = async (id: string, label: string) => {
         const ok = await confirmDialog(
             `"${label}" 카테고리를 삭제할까요?\n하위 스킬도 모두 삭제됩니다.`,
-            '카테고리 삭제'
+            '카테고리 삭제',
         );
         if (!ok) return;
-        try {
-            const { error } = await skillsApi.deleteCategory(id);
-            if (error) throw error;
-            await refresh();
-        } catch (err) {
-            toast.error('카테고리 삭제 실패: ' + (err as Error).message);
-        }
+        const done = await deleteCategory(id);
+        if (done) refresh();
     };
 
     const handleDeleteSkill = async (id: string, name: string) => {
         const ok = await confirmDialog(`"${name}" 스킬을 삭제할까요?`, '스킬 삭제');
         if (!ok) return;
-        try {
-            const { error } = await skillsApi.deleteSkill(id);
-            if (error) throw error;
-            await refresh();
-        } catch (err) {
-            toast.error('스킬 삭제 실패: ' + (err as Error).message);
-        }
+        const done = await deleteSkill(id);
+        if (done) refresh();
     };
 
     /** badge 클릭: 이미 카테고리에 있으면 제거, 없으면 추가 */
@@ -124,23 +100,19 @@ const SkillsListPage: React.FC = () => {
         try {
             const existing = category.skills.find((s) => s.name === badgeName);
             if (existing) {
-                const { error } = await skillsApi.deleteSkill(existing.id);
-                if (error) throw error;
-                toast.success(`${badgeName} 제거됨`);
+                const done = await deleteSkill(existing.id);
+                if (!done) return;
             } else {
-                const { error } = await skillsApi.createSkill({
+                const row = await createSkill({
                     category_id: category.id,
                     name: badgeName,
                     icon: badgeName,
                     icon_color: '#2B1E14',
                     order_index: category.skills.length,
                 });
-                if (error) throw error;
-                toast.success(`${badgeName} 추가됨`);
+                if (!row) return;
             }
-            await refresh();
-        } catch (err) {
-            toast.error('변경 실패: ' + (err as Error).message);
+            refresh();
         } finally {
             setBusyBadge(null);
         }
@@ -150,14 +122,6 @@ const SkillsListPage: React.FC = () => {
         setPickerOpenFor(pickerOpenFor === categoryId ? null : categoryId);
         setPickerSearch('');
     };
-
-    if (loading) {
-        return (
-            <div className="admin-list-page skills-admin">
-                <div className="skills-admin-loading">불러오는 중…</div>
-            </div>
-        );
-    }
 
     const isEmpty = categories.length === 0;
 
@@ -360,7 +324,6 @@ const SkillsListPage: React.FC = () => {
                                     </div>
 
                                     {/* picker-grid 안 뱃지들 — button role 이지만 시각은 tech-icon tile.
-                                        CommonButton 의 paddin/border/font 와 완전 다른 디자인 영역.
                                         고유 .skills-picker-badge 스타일 유지. */}
                                     <div className="skills-picker-grid">
                                         {filteredBadges.map((name) => {

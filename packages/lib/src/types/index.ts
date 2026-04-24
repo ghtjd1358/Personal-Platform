@@ -92,7 +92,6 @@ export interface RemoteLnbItems {
 export interface AppState {
   accessToken: string;
   user: User | null;
-  isLoading: boolean;
   globalLoadingTitle: string;
   service: string;
   selectedGnb: string;

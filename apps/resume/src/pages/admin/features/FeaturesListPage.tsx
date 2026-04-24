@@ -3,58 +3,43 @@
  * - 내 features 만 표시 (권한: owner 본인 전체 CRUD, 다른 사람은 열람만)
  * - 썸네일 + 제목 + 설명 요약 + ✎ / × 인라인 액션
  */
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useToast, useAsyncConfirm, usePermission, getCurrentUser } from '@sonhoseong/mfa-lib'
-import { featuresApi } from '../../../network/apis/supabase'
+import { useAsyncConfirm, usePermission, getCurrentUser } from '@sonhoseong/mfa-lib'
 import type { Feature } from '../../../network/apis/types'
+import {
+    useFetchFeatures,
+    useFetchFeaturesByUserId,
+    useDeleteFeature,
+    useDeleteFeatureImage,
+} from '../../../network/hooks'
 import { LINK_PREFIX } from '@/config/constants'
 import '../experience/ExperienceList.editorial.css'
 
 const FeaturesListPage: React.FC = () => {
-    const toast = useToast()
     const confirmDialog = useAsyncConfirm()
     const { canEditResource } = usePermission()
     const currentUser = getCurrentUser()
-    const [items, setItems] = useState<Feature[]>([])
-    const [loading, setLoading] = useState(true)
 
-    const fetchAll = useCallback(async () => {
-        setLoading(true)
-        // 로그인 유저 것만 (필요 시 getAll 로 전체)
-        const { data, error } = currentUser?.id
-            ? await featuresApi.getByUserId(currentUser.id)
-            : await featuresApi.getAll()
-        if (data) setItems(data as Feature[])
-        if (error) console.error('[FeaturesList] fetch', error)
-        setLoading(false)
-    }, [currentUser?.id])
+    const [updater, setUpdater] = useState(0)
+    // 로그인 유저면 본인 것만, 아니면 전체. 두 훅 모두 mount 되지만 데이터는 하나만 사용.
+    const { features: myFeatures } = useFetchFeaturesByUserId(currentUser?.id, updater)
+    const { features: allFeatures } = useFetchFeatures(currentUser?.id ? -1 : updater)
+    const deleteFeature = useDeleteFeature()
+    const deleteFeatureImage = useDeleteFeatureImage()
 
-    useEffect(() => {
-        fetchAll()
-    }, [fetchAll])
+    const items = useMemo(
+        () => (currentUser?.id ? (myFeatures as Feature[]) : (allFeatures as Feature[])),
+        [currentUser?.id, myFeatures, allFeatures],
+    )
 
     const handleDelete = async (item: Feature) => {
         const ok = await confirmDialog(`"${item.title}" 카드를 삭제할까요?`, '카드 삭제')
         if (!ok) return
         // Storage 이미지도 같이 정리 (orphan 방지)
-        if (item.image_url) {
-            await featuresApi.deleteImageByUrl(item.image_url)
-        }
-        const { error } = await featuresApi.delete(item.id)
-        if (error) toast.error('삭제 실패: ' + (error.message || '알 수 없는 오류'))
-        else {
-            toast.success('삭제되었어요.')
-            fetchAll()
-        }
-    }
-
-    if (loading) {
-        return (
-            <div className="admin-list-page exp-admin">
-                <div className="exp-admin-loading">불러오는 중…</div>
-            </div>
-        )
+        if (item.image_url) await deleteFeatureImage(item.image_url)
+        const done = await deleteFeature(item.id)
+        if (done) setUpdater((n) => n + 1)
     }
 
     return (

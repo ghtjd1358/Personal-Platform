@@ -82,18 +82,6 @@ export const getCurrentService = (): string => {
 };
 
 /**
- * 로딩 상태 확인
- */
-export const isLoading = (): boolean => {
-  try {
-    const state = getHostState();
-    return state?.app?.isLoading || false;
-  } catch {
-    return false;
-  }
-};
-
-/**
  * Host Store에 액션 디스패치
  */
 export const dispatchToHost = (action: any): void => {

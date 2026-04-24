@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { skillsApi, type SkillCategoryWithSkills } from '@/network/apis/supabase';
+import { useFetchSkillCategories } from '@/network/hooks';
 
 interface SkillsSelectorProps {
   selectedSkills: string[]; // skill names (not IDs)
@@ -12,25 +12,15 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
   onChange,
   disabled = false,
 }) => {
-  const [categories, setCategories] = useState<SkillCategoryWithSkills[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { categories } = useFetchSkillCategories();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
+  // 카테고리 fetch 되면 기본 전부 펼침
   useEffect(() => {
-    const loadSkills = async () => {
-      try {
-        const data = await skillsApi.getCategories();
-        setCategories(data);
-        // 기본적으로 모든 카테고리 펼침
-        setExpandedCategories(new Set(data.map((c) => c.id)));
-      } catch (err) {
-        console.error('Failed to load skills:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadSkills();
-  }, []);
+    if (categories.length > 0) {
+      setExpandedCategories(new Set(categories.map((c) => c.id)));
+    }
+  }, [categories]);
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories((prev) => {
@@ -68,27 +58,6 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
       onChange(Array.from(newSkills));
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="skills-selector">
-        <div className="skills-selector-header">
-          <h4 className="skills-selector-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
-            기술 스택
-          </h4>
-        </div>
-        <div className="skills-selector-loading">
-          <div className="spinner-small" />
-          <span>기술 스택을 불러오는 중...</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="skills-selector">

@@ -4,14 +4,20 @@ import type { PortfolioItem } from '../../../types';
 import { iconMap } from '../../../constants/iconMap';
 import { FaGithub, FaExternalLinkAlt, FaBlog } from 'react-icons/fa';
 import { SectionEditButton } from '../../../components/common';
+import { ProjectCardSkeleton } from './ProjectCardSkeleton';
 
 interface ProjectsSectionProps {
   portfolioData: PortfolioItem[];
+  /** true 이면서 portfolioData 비어있을 때 skeleton 3개 렌더. */
+  isLoading?: boolean;
 }
 
-export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData }) => {
+const SKELETON_COUNT = 3;
+
+export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData, isLoading = false }) => {
   const [showAllProjects, setShowAllProjects] = useState(false);
   const { openPortfolioModal } = usePortfolioModal();
+  const showSkeleton = isLoading && portfolioData.length === 0;
 
   return (
     <section id="projects" className="section">
@@ -21,7 +27,11 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData 
           <h2 className="section-title">주요 작업물</h2>
         </div>
         <div className="project-grid">
-          {(showAllProjects ? portfolioData : portfolioData.slice(0, 3)).map((portfolio, index) => (
+          {showSkeleton
+            ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+                <ProjectCardSkeleton key={`skeleton-${i}`} />
+              ))
+            : (showAllProjects ? portfolioData : portfolioData.slice(0, 3)).map((portfolio, index) => (
             <div
               key={portfolio.id}
               className={`card22 ${index < 3 ? 'animate-on-scroll delay-' + (index + 1) : 'animate-visible'}`}
@@ -72,7 +82,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData 
           ))}
         </div>
 
-        <div className="project-more animate-on-scroll">
+        <div className="project-more animate-on-scroll" style={{ display: showSkeleton ? 'none' : undefined }}>
           {portfolioData.length > 3 && (
             <button
               className={`show-more-btn ${showAllProjects ? 'collapsed' : ''}`}

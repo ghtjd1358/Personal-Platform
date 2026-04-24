@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import {PostSummary} from "@/network";
 import {PostCard} from "@/components/PostCard";
+import {PostCardSkeleton} from "@/components/PostCardSkeleton";
+
+const SKELETON_COUNT = 8;
 
 
 interface PostsSectionProps {
@@ -83,11 +86,16 @@ const PostsSection: React.FC<PostsSectionProps> = ({
           <h2 className="section-title">블로그 글 목록</h2>
         </div>
 
-        {/* 로딩 상태 UI 제거 — host FarmerLoading(전역 오버레이)이 담당.
-           데이터 fetch 중엔 빈 grid 유지, 데이터 도착 순간 카드가 자연 채움.
-           빈 목록일 때만 empty-state 표시. */}
+        {/* 초기 로딩: 카드 쉐입 skeleton 으로 "쉘은 존재하고 내용만 채워진다" 느낌.
+           데이터 도착 후: 실제 PostCard 로 교체.
+           빈 목록: empty-state.
+           host FarmerLoading(전역 오버레이) 은 mutation / detail fetch 전용이라 리스트에선 skip. */}
         <div className="blog-grid">
-          {!isLoading && posts.length === 0 ? (
+          {isLoading && posts.length === 0 ? (
+            Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+              <PostCardSkeleton key={`skeleton-${i}`} />
+            ))
+          ) : !isLoading && posts.length === 0 ? (
             <div className="empty-state">
               <p>아직 게시된 글이 없습니다.</p>
             </div>

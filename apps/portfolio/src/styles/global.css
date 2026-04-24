@@ -1561,6 +1561,7 @@ body.has-header {
   opacity: 0.9;
   max-width: 700px;
   margin-bottom: 24px;
+  white-space: pre-line;
 }
 
 .project-stats {

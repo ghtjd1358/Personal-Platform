@@ -1,13 +1,19 @@
 /**
  * FeaturesEditorPage — 핵심 역량 카드 생성/수정.
  * 기존 이미지가 있으면 미리보기로 노출, 새 파일 선택 시 교체.
- * 업로드는 Supabase Storage `resume-features` 버킷 (featuresApi.uploadImage).
+ * 업로드는 Supabase Storage `resume-features` 버킷 (useUploadFeatureImage).
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useToast, getCurrentUser } from '@sonhoseong/mfa-lib'
-import { featuresApi } from '../../../network/apis/supabase'
-import type { Feature, FeatureInput } from '../../../network/apis/types'
+import type { FeatureInput } from '../../../network/apis/types'
+import {
+    useFetchFeatureById,
+    useCreateFeature,
+    useUpdateFeature,
+    useUploadFeatureImage,
+    useDeleteFeatureImage,
+} from '../../../network/hooks'
 import { LINK_PREFIX } from '@/config/constants'
 import '../experience/ExperienceEditor.editorial.css'
 
@@ -22,39 +28,32 @@ const FeaturesEditorPage: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const isEdit = Boolean(id)
 
+    const { feature: loadedFeature } = useFetchFeatureById(id)
+    const createFeature = useCreateFeature()
+    const updateFeature = useUpdateFeature()
+    const uploadImage = useUploadFeatureImage()
+    const deleteImage = useDeleteFeatureImage()
+
     const [form, setForm] = useState<FeatureInput>({
         title: '',
         description: '',
         image_url: null,
         order_index: 0,
     })
-    const [loading, setLoading] = useState(isEdit)
-    const [saving, setSaving] = useState(false)
-    const [uploading, setUploading] = useState(false)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null) // 업로드 전 로컬 blob
     const [existingUrl, setExistingUrl] = useState<string | null>(null) // 이전 Storage URL (교체 시 삭제 대상)
 
     // 기존 데이터 로드
     useEffect(() => {
-        if (!isEdit || !id) return
-        ;(async () => {
-            const { data, error } = await featuresApi.getById(id)
-            if (error) {
-                toast.error('데이터를 불러오지 못했어요: ' + error.message)
-                setLoading(false)
-                return
-            }
-            const row = data as Feature
-            setForm({
-                title: row.title,
-                description: row.description,
-                image_url: row.image_url,
-                order_index: row.order_index,
-            })
-            setExistingUrl(row.image_url ?? null)
-            setLoading(false)
-        })()
-    }, [id, isEdit, toast])
+        if (!isEdit || !loadedFeature) return
+        setForm({
+            title: loadedFeature.title,
+            description: loadedFeature.description,
+            image_url: loadedFeature.image_url,
+            order_index: loadedFeature.order_index,
+        })
+        setExistingUrl(loadedFeature.image_url ?? null)
+    }, [isEdit, loadedFeature])
 
     const setField = <K extends keyof FeatureInput>(key: K, value: FeatureInput[K]) =>
         setForm((prev) => ({ ...prev, [key]: value }))
@@ -63,15 +62,8 @@ const FeaturesEditorPage: React.FC = () => {
      * 파일 선택 시 처리 흐름:
      *   1) 파일 검증 (타입 / 크기) — 실패 시 toast + return
      *   2) 로컬 preview URL 생성 (URL.createObjectURL) — 업로드 기다리지 않고 즉시 미리보기
-     *   3) Storage 업로드 (featuresApi.uploadImage) — 성공 시 form.image_url 에 public URL 세팅
+     *   3) Storage 업로드 (useUploadFeatureImage) — 성공 시 form.image_url 에 public URL 세팅
      *   4) 이전 이미지 URL 이 다른 Storage 파일이면 Storage 에서 삭제 (orphan 방지)
-     *
-     * 이 함수를 TODO(human) 에서 완성해주세요. 힌트:
-     *   - try/finally 로 setUploading 토글
-     *   - 파일 검증 상수 MAX_IMAGE_BYTES, ALLOWED_TYPES 재사용
-     *   - 업로드 성공 시 previousUrl = existingUrl 을 기억해두고 deleteImageByUrl 호출
-     *   - 교체가 성공하면 setExistingUrl(newUrl)
-     *   - 에러는 toast.error, 성공은 toast.success
      */
     const handleImageSelect = useCallback(async (file: File) => {
         if (!currentUser?.id) {
@@ -90,9 +82,7 @@ const FeaturesEditorPage: React.FC = () => {
     const handleRemoveImage = async () => {
         if (previewUrl) URL.revokeObjectURL(previewUrl)
         setPreviewUrl(null)
-        if (form.image_url) {
-            await featuresApi.deleteImageByUrl(form.image_url)
-        }
+        if (form.image_url) await deleteImage(form.image_url)
         setField('image_url', null)
         setExistingUrl(null)
     }
@@ -102,35 +92,18 @@ const FeaturesEditorPage: React.FC = () => {
         if (!form.title.trim()) { toast.warning('제목을 입력해주세요.'); return }
         if (!form.description.trim()) { toast.warning('설명을 입력해주세요.'); return }
 
-        setSaving(true)
-        try {
-            if (isEdit && id) {
-                const { error } = await featuresApi.update(id, form)
-                if (error) throw error
-                toast.success('저장되었어요.')
-            } else {
-                if (!currentUser?.id) { toast.error('로그인이 필요합니다.'); return }
-                const { error } = await featuresApi.create({ ...form, user_id: currentUser.id })
-                if (error) throw error
-                toast.success('추가되었어요.')
-            }
-            navigate(`${LINK_PREFIX}/admin/features`)
-        } catch (err: any) {
-            toast.error('저장 실패: ' + (err?.message || '알 수 없는 오류'))
-        } finally {
-            setSaving(false)
+        if (isEdit && id) {
+            const res = await updateFeature(id, form)
+            if (!res) return
+        } else {
+            if (!currentUser?.id) { toast.error('로그인이 필요합니다.'); return }
+            const res = await createFeature({ ...form, user_id: currentUser.id })
+            if (!res) return
         }
+        navigate(`${LINK_PREFIX}/admin/features`)
     }
 
     const currentImage = previewUrl || form.image_url || null
-
-    if (loading) {
-        return (
-            <div className="admin-editor-page exp-editor">
-                <div className="exp-editor-loading">불러오는 중…</div>
-            </div>
-        )
-    }
 
     return (
         <div className="admin-editor-page exp-editor">
@@ -158,7 +131,6 @@ const FeaturesEditorPage: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        disabled={uploading || saving}
                                         className="exp-btn exp-btn--ghost"
                                     >
                                         교체
@@ -166,7 +138,6 @@ const FeaturesEditorPage: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={handleRemoveImage}
-                                        disabled={uploading || saving}
                                         className="exp-btn exp-btn--ghost"
                                     >
                                         제거
@@ -177,10 +148,9 @@ const FeaturesEditorPage: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                disabled={uploading || saving}
                                 className="feature-image-picker"
                             >
-                                {uploading ? '업로드 중…' : '+ 이미지 선택 (PNG · JPG · WEBP, 최대 5MB)'}
+                                + 이미지 선택 (PNG · JPG · WEBP, 최대 5MB)
                             </button>
                         )}
                         <input
@@ -233,16 +203,14 @@ const FeaturesEditorPage: React.FC = () => {
                         type="button"
                         className="exp-btn exp-btn--ghost"
                         onClick={() => navigate(`${LINK_PREFIX}/admin/features`)}
-                        disabled={saving}
                     >
                         취소
                     </button>
                     <button
                         type="submit"
                         className="exp-btn exp-btn--primary"
-                        disabled={saving || uploading}
                     >
-                        {saving ? '저장 중…' : '저장'}
+                        저장
                     </button>
                 </footer>
             </form>

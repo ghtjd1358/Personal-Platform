@@ -1,18 +1,35 @@
 /**
  * FarmerLoading - Editorial Global Loading Overlay (host 전용).
- * Redux state.app.isLoading 구독. 기존 농부 SVG 제거하고 editorial 단일 언어로 통일:
- *  - 한지 미색 overlay + 먹 border card
- *  - SVG arc spinner (먹 trailing + 주홍 head, cubic ease)
- *  - JetBrains Mono 라벨 "LOADING · 불러오는 중"
- * GlobalLoading (lib) 와 완전히 동일한 visual dialect.
+ *
+ * KOMCA 패턴: `react-promise-tracker` 의 'GLOBAL' area 구독.
+ * remote 의 `useShowGlobalLoading` 이 trackPromise 로 감싼 promise 가 진행중이면 표시.
+ * 중첩 호출 counter 자동 관리 + 500ms debounce 로 깜빡임 방지.
+ *
+ * Visual dialect 는 lib 의 GlobalLoading 과 동일 (한지 bone + 먹 arc + 주홍 head + mono 라벨).
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { usePromiseTracker } from 'react-promise-tracker';
 import { useSelector } from 'react-redux';
 
-const FarmerLoading: React.FC = () => {
-    const isLoading = useSelector((state: any) => state.app?.isLoading);
+const GLOBAL_AREA_CONFIG = { area: 'GLOBAL' };
 
-    if (!isLoading) return null;
+const FarmerLoading: React.FC = () => {
+    const { promiseInProgress } = usePromiseTracker(GLOBAL_AREA_CONFIG);
+    const title = useSelector((state: any) => state.app?.globalLoadingTitle);
+
+    const [visible, setVisible] = useState(false);
+    useEffect(() => {
+        if (promiseInProgress) {
+            setVisible(true);
+        } else {
+            const timer = setTimeout(() => setVisible(false), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [promiseInProgress]);
+
+    if (!visible) return null;
+
+    const label = title ? `LOADING · ${title}` : 'LOADING · 불러오는 중';
 
     return (
         <div className="editorial-loading-overlay" role="status" aria-live="polite">
@@ -40,7 +57,7 @@ const FarmerLoading: React.FC = () => {
                         className="editorial-loading-arc-head"
                     />
                 </svg>
-                <p className="editorial-loading-label">LOADING · 불러오는 중</p>
+                <p className="editorial-loading-label">{label}</p>
                 <div className="editorial-loading-dots" aria-hidden>
                     <span /><span /><span />
                 </div>

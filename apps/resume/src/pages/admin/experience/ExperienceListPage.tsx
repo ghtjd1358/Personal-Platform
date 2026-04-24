@@ -4,11 +4,16 @@
  * - 프로젝트 (portfolios 테이블, resume_id 필터)
  * 두 섹션을 같은 페이지에서 나란히 CRUD.
  */
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useToast, useAsyncConfirm, usePermission } from '@sonhoseong/mfa-lib'
-import { experiencesApi, portfoliosApi } from '../../../network'
+import { useAsyncConfirm, usePermission } from '@sonhoseong/mfa-lib'
 import type { Experience, Portfolio } from '../../../network/apis/types'
+import {
+    useFetchExperiences,
+    useFetchPortfolios,
+    useDeleteExperience,
+    useDeletePortfolio,
+} from '../../../network/hooks'
 import { LINK_PREFIX } from '@/config/constants'
 import './ExperienceList.editorial.css'
 
@@ -19,66 +24,44 @@ const formatPeriod = (start: string | null, end: string | null, isCurrent: boole
 }
 
 const ExperienceListPage: React.FC = () => {
-    const toast = useToast()
     const confirmDialog = useAsyncConfirm()
     const { canEditResource } = usePermission()
     const [searchParams] = useSearchParams()
     const resumeId = searchParams.get('resumeId')
 
-    const [experiences, setExperiences] = useState<Experience[]>([])
-    const [projects, setProjects] = useState<Portfolio[]>([])
-    const [loading, setLoading] = useState(true)
+    const [updater, setUpdater] = useState(0)
+    const { experiences: allExp } = useFetchExperiences(updater)
+    const { portfolios: allProj } = useFetchPortfolios(updater)
+    const deleteExperience = useDeleteExperience()
+    const deletePortfolio = useDeletePortfolio()
+
+    // resumeId 쿼리 있으면 client-side 필터 — getByResumeId 쿼리 별도 발사 대신 이미 fetched 된 전체에서 걸러내는 게 단순.
+    const experiences = useMemo(
+        () => (resumeId ? allExp.filter((e) => (e as Experience).resume_id === resumeId) : allExp) as Experience[],
+        [allExp, resumeId],
+    )
+    const projects = useMemo(
+        () => (resumeId ? allProj.filter((p) => (p as Portfolio).resume_id === resumeId) : allProj) as Portfolio[],
+        [allProj, resumeId],
+    )
 
     const withResumeId = useCallback(
         (path: string) => (resumeId ? `${path}?resumeId=${resumeId}` : path),
         [resumeId],
     )
 
-    const fetchAll = useCallback(async () => {
-        setLoading(true)
-        const [expResp, projResp] = await Promise.all([
-            resumeId ? experiencesApi.getByResumeId(resumeId) : experiencesApi.getAll(),
-            resumeId ? portfoliosApi.getByResumeId(resumeId) : portfoliosApi.getAll(),
-        ])
-        if (expResp.data) setExperiences(expResp.data)
-        if (expResp.error) console.error('[ExperienceList] exp fetch', expResp.error)
-        if (projResp.data) setProjects(projResp.data)
-        if (projResp.error) console.error('[ExperienceList] proj fetch', projResp.error)
-        setLoading(false)
-    }, [resumeId])
-
-    useEffect(() => {
-        fetchAll()
-    }, [fetchAll])
-
     const handleDeleteExperience = async (exp: Experience) => {
         const ok = await confirmDialog(`"${exp.company}" 경력을 삭제할까요?`, '경력 삭제')
         if (!ok) return
-        const { error } = await experiencesApi.delete(exp.id)
-        if (error) toast.error('삭제 실패: ' + (error.message || '알 수 없는 오류'))
-        else {
-            toast.success('삭제되었어요.')
-            fetchAll()
-        }
+        const done = await deleteExperience(exp.id)
+        if (done) setUpdater((n) => n + 1)
     }
 
     const handleDeleteProject = async (proj: Portfolio) => {
         const ok = await confirmDialog(`"${proj.title}" 프로젝트를 삭제할까요?`, '프로젝트 삭제')
         if (!ok) return
-        const { error } = await portfoliosApi.delete(proj.id)
-        if (error) toast.error('삭제 실패: ' + (error.message || '알 수 없는 오류'))
-        else {
-            toast.success('삭제되었어요.')
-            fetchAll()
-        }
-    }
-
-    if (loading) {
-        return (
-            <div className="admin-list-page exp-admin">
-                <div className="exp-admin-loading">불러오는 중…</div>
-            </div>
-        )
+        const done = await deletePortfolio(proj.id)
+        if (done) setUpdater((n) => n + 1)
     }
 
     return (

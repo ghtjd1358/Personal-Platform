@@ -101,6 +101,7 @@
     font-size: 15px;
     line-height: 1.75;
     color: #2B1E14;
+    white-space: pre-line;
 }
 
 /* ===== Lists — 주홍 bullet ===== */
