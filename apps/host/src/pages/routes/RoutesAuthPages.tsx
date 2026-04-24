@@ -3,10 +3,24 @@
  */
 import React, { Suspense } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import { RemoteErrorBoundary, REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib';
+import { useSelector } from 'react-redux';
+import { RemoteErrorBoundary, REMOTE_LINK_PREFIX, selectUser } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './paths';
 import Dashboard from '../Dashboard';
 import MyPage from '../MyPage';
+
+/**
+ * MyPageGuard — admin 은 MyPage 접근 불가 (운영 원칙).
+ * admin 은 /admin/* 경로로 직접 CRUD 하므로 MyPage 중계가 불필요.
+ * MyPage 는 일반 user 전용 대시보드.
+ */
+const MyPageGuard: React.FC = () => {
+  const user = useSelector(selectUser);
+  if (user?.role === 'admin') {
+    return <Navigate to={RoutePath.Dashboard} replace />;
+  }
+  return <MyPage />;
+};
 
 
 // Remote App lazy imports with fallback
@@ -98,12 +112,13 @@ function RoutesAuthPages() {
         }
       />
 
-      {/* 마이페이지 (Host-level 통합 — 4 remote 도메인을 하나의 editorial 대시보드로) */}
+      {/* 마이페이지 (Host-level 통합 — 4 remote 도메인을 하나의 editorial 대시보드로).
+          admin 은 MyPageGuard 에서 Dashboard 로 redirect (admin 은 /admin/* 로 직접 관리). */}
       <Route
         path="/container/user/:userId"
         element={
           <RemoteErrorBoundary remoteName="마이페이지">
-            <MyPage />
+            <MyPageGuard />
           </RemoteErrorBoundary>
         }
       />
