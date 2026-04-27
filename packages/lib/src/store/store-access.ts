@@ -3,8 +3,9 @@
  * Remote 앱에서 Host의 Redux Store에 접근
  */
 
-import { User, HostStore, HostRootState } from '../types';
-import { Reducer } from '@reduxjs/toolkit';
+import { User, HostRootState } from '../types';
+import { Reducer, UnknownAction } from '@reduxjs/toolkit';
+import type { HostStore } from './app-store';
 
 /**
  * Host Store 가져오기
@@ -84,7 +85,7 @@ export const getCurrentService = (): string => {
 /**
  * Host Store에 액션 디스패치
  */
-export const dispatchToHost = (action: any): void => {
+export const dispatchToHost = (action: UnknownAction): void => {
   try {
     const store = getHostStore();
     if (store) {

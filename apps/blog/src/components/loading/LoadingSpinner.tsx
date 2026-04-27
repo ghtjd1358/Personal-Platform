@@ -7,7 +7,7 @@ interface LoadingSpinnerProps {
   fullPage?: boolean;
 }
 
-// FarmerLoading 과 동일한 editorial 언어로 통일 — 주홍 arc head + 한지 카드 + JetBrains Mono 라벨.
+// GlobalLoading 과 동일한 editorial 언어로 통일 — 주홍 arc head + 한지 카드 + JetBrains Mono 라벨.
 // delay(기본 200ms) 동안 빈 렌더로 짧은 fetch 의 플리커 방지.
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = '불러오는 중',

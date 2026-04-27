@@ -68,7 +68,7 @@ const CalendarPage: React.FC = () => {
 
   const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
 
-  // 로딩 상태 UI 제거 — host FarmerLoading 에 맡김.
+  // 로딩 상태 UI 제거 — host GlobalLoading 에 맡김.
 
   return (
     <div className="job-tracker-app">

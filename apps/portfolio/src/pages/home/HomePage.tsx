@@ -105,7 +105,7 @@ const HomePage: React.FC = () => {
     setSelectedPortfolioId(null);
   };
 
-  // 로딩 상태 UI 제거 — host FarmerLoading(전역 오버레이)에 맡기고,
+  // 로딩 상태 UI 제거 — host GlobalLoading(전역 오버레이)에 맡기고,
   // 데이터 fetch 중엔 빈 구조만 렌더 → 데이터 준비되면 자연 교체.
 
   // 필터링 여부에 따라 다른 데이터 사용

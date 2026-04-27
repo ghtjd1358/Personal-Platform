@@ -7,24 +7,28 @@
  *
  * + **500ms debounce on hide** — 연속 API 호출 시 스피너 깜빡임 방지 (KOMCA home-front 패턴).
  * + title 은 Redux state.app.globalLoadingTitle 에서 읽어와 표시.
- * + Host 모드에서는 host 의 FarmerLoading 이 띄우므로 isHostApp gate 로 이중 overlay 방지.
+ * + Host 모드에선 isHostApp gate 로 자동 null (이중 overlay 방지).
+ *   host 자신이 마운트할 때만 `force` prop 으로 gate 우회.
  */
 
 import React, { useEffect, useState } from 'react';
 import { usePromiseTracker } from 'react-promise-tracker';
 import { useSelector } from 'react-redux';
 import { LOADING_AREA_GLOBAL } from '../../hooks/use-global-loading';
+import { HostRootState } from '../../types';
 
 interface GlobalLoadingProps {
     /** 커스텀 로딩 메시지 */
     message?: string;
+    /** Host 가 직접 마운트할 때 사용 — isHostApp gate 우회 */
+    force?: boolean;
 }
 
 const GLOBAL_AREA_CONFIG = { area: LOADING_AREA_GLOBAL };
 
-const GlobalLoading: React.FC<GlobalLoadingProps> = ({ message }) => {
+const GlobalLoading: React.FC<GlobalLoadingProps> = ({ message, force }) => {
     const { promiseInProgress } = usePromiseTracker(GLOBAL_AREA_CONFIG);
-    const globalLoadingTitle = useSelector((state: any) => state.app?.globalLoadingTitle);
+    const globalLoadingTitle = useSelector((state: HostRootState) => state.app?.globalLoadingTitle);
 
     // 500ms debounce on hide — 연속 호출 시 깜빡임 방지
     const [visible, setVisible] = useState(false);
@@ -37,10 +41,10 @@ const GlobalLoading: React.FC<GlobalLoadingProps> = ({ message }) => {
         }
     }, [promiseInProgress]);
 
-    // Host 모드에서는 host 앱의 FarmerLoading 이 띄움 → 이중 overlay 방지
+    // Host 모드 + force=false → host 자신이 force=true 로 별도 마운트 → 이중 overlay 방지
     const isHostApp = typeof window !== 'undefined'
         && window.sessionStorage?.getItem('isHostApp') === 'true';
-    if (isHostApp) return null;
+    if (!force && isHostApp) return null;
 
     if (!visible) return null;
 

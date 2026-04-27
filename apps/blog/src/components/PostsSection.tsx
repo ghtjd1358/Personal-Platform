@@ -89,7 +89,7 @@ const PostsSection: React.FC<PostsSectionProps> = ({
         {/* 초기 로딩: 카드 쉐입 skeleton 으로 "쉘은 존재하고 내용만 채워진다" 느낌.
            데이터 도착 후: 실제 PostCard 로 교체.
            빈 목록: empty-state.
-           host FarmerLoading(전역 오버레이) 은 mutation / detail fetch 전용이라 리스트에선 skip. */}
+           host GlobalLoading(전역 오버레이) 은 mutation / detail fetch 전용이라 리스트에선 skip. */}
         <div className="blog-grid">
           {isLoading && posts.length === 0 ? (
             Array.from({ length: SKELETON_COUNT }).map((_, i) => (

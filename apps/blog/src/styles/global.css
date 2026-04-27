@@ -1671,7 +1671,7 @@ body.has-header {
   height: 12px;
 }
 
-/* Skeleton UI 삭제 — FarmerLoading(host 전역 오버레이)로 일원화.
+/* Skeleton UI 삭제 — GlobalLoading(host 전역 오버레이)로 일원화.
    PostCardSkeleton / PageLoadingFallback / DeferredComponent 전부 제거됨. */
 
 /* Blog Stats Section */

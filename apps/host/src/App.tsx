@@ -1,8 +1,9 @@
 /**
- * App - Host Container
+ * App — Host Container
  *
  * 순수 컴포넌트: 인증 상태에 따라 Guest/Auth 라우팅 분기.
- * 초기화/부트스트랩 코드는 모두 bootstrap.tsx로 이동 (Composition Root).
+ * 초기화/부트스트랩은 모두 bootstrap.tsx 로 (Composition Root).
+ * 공용 chrome (Modal/Toast/GlobalLoading) 은 HostShell.
  */
 import { Suspense, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -12,35 +13,24 @@ import {
     usePermission,
     getCurrentUser,
     ErrorBoundary,
-    ToastContainer,
-    ModalContainer,
     Container,
     Lnb,
     Logo,
 } from '@sonhoseong/mfa-lib';
 import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
 import { lnbItems } from './lnb-items';
-import FarmerLoading from './components/FarmerLoading';
+import { MyPageIcon } from './components/icons';
+import HostShell from './components/HostShell';
 import FloatingNav from './components/FloatingNav';
 import './App.css';
 import './sidebar-editorial.css';
 import './theme-editorial.css';
-
-// 마이페이지 아이콘 — 로그인 시 동적으로 LNB에 추가
-const mypageIcon = (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-    </svg>
-);
 
 const App = () => {
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const { initialized } = useSupabaseInitialize();
     const { filterMenus } = usePermission();
 
-    // 권한 기반 메뉴 필터링 + 로그인 시 마이페이지 동적 추가
-    // (유저별 path: /container/user/:userId — lnb-items static으로는 표현 불가라 여기서 병합)
     const filteredLnbItems = useMemo(() => {
         const currentUser = getCurrentUser();
         const baseItems = currentUser
@@ -50,35 +40,17 @@ const App = () => {
                       id: 'mypage',
                       title: '마이페이지',
                       path: `/container/user/${currentUser.id}`,
-                      icon: mypageIcon,
+                      icon: MyPageIcon,
                   },
               ]
             : lnbItems;
         return filterMenus(baseItems);
     }, [filterMenus, isAuthenticated]);
 
-    if (!initialized) {
-        return null;
-    }
+    if (!initialized) return null;
 
-    // 비로그인: 로그인 페이지만
-    if (!isAuthenticated) {
-        return (
-            <>
-                <ModalContainer />
-                <ToastContainer position="top-right" />
-                <RoutesGuestPages />
-                <FarmerLoading />
-            </>
-        );
-    }
-
-    // 로그인: Lnb + 콘텐츠 (FarmerLoading 은 Container 밖 최상위에 1회만 마운트해
-    // StrictMode/HMR 하에서도 overlay 중복 가능성을 원천 차단)
-    return (
-        <>
-            <ModalContainer />
-            <ToastContainer position="top-right" />
+    return  isAuthenticated ? (
+        <HostShell>
             <Container>
                 <ErrorBoundary>
                     <Lnb
@@ -100,8 +72,11 @@ const App = () => {
                 </ErrorBoundary>
             </Container>
             <FloatingNav />
-            <FarmerLoading />
-        </>
+        </HostShell>
+    ): (
+        <HostShell>
+            <RoutesGuestPages />
+        </HostShell>
     );
 };
 

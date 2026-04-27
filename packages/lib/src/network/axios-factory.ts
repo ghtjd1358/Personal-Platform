@@ -41,17 +41,14 @@ export interface ExtendedAxiosError extends AxiosError {
 }
 
 // API 에러 여부 확인
-export function isApiError(error: any): error is ExtendedAxiosError {
+export function isApiError(error: unknown): error is ExtendedAxiosError {
+  if (!isAxiosError(error)) return false;
   const data = error.response?.data as ApiErrorResponse | undefined;
-  return (
-    isAxiosError(error) &&
-    data?.code !== undefined &&
-    data?.statusCode !== undefined
-  );
+  return data?.code !== undefined && data?.statusCode !== undefined;
 }
 
 // 에러 상세 정보 확인
-export function hasErrorDetails(error: any): ErrorDetail[] | undefined {
+export function hasErrorDetails(error: unknown): ErrorDetail[] | undefined {
   if (isApiError(error) && error.response?.data?.errorDetails?.length) {
     return error.response.data.errorDetails;
   }
@@ -59,7 +56,8 @@ export function hasErrorDetails(error: any): ErrorDetail[] | undefined {
 }
 
 // Axios 에러 여부 확인
-export function isAxiosError(error: any): error is AxiosError {
+export function isAxiosError(error: unknown): error is AxiosError {
+  if (!error || typeof error !== 'object') return false;
   return Boolean((error as AxiosError).isAxiosError);
 }
 
