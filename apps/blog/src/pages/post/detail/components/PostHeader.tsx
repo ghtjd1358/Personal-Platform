@@ -40,10 +40,10 @@ const PostHeader: React.FC<PostHeaderProps> = ({ post }) => {
             <p className="post-excerpt">{post.excerpt}</p>
           )}
 
-          {/* 통계 — brutalist key=value */}
+          {/* 통계 — LikeButton 가장 왼쪽 + brutalist key=value */}
           <div className="post-stats">
-            <span className="stat-item">views=[{post.view_count.toLocaleString()}]</span>
             <LikeButton postId={post.id} initialLikeCount={post.like_count} />
+            <span className="stat-item">views=[{post.view_count.toLocaleString()}]</span>
             <span className="stat-item">comments=[{post.comment_count}]</span>
           </div>
         </div>

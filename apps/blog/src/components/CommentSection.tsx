@@ -370,7 +370,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
         ) : comments.length === 0 ? (
           <div className="comment-empty">
             <p>아직 댓글이 없습니다.</p>
-            <p>첫 번째 댓글을 남겨보세요!</p>
           </div>
         ) : (
           comments.map((comment) => (

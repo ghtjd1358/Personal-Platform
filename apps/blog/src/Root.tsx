@@ -12,7 +12,6 @@ import {
     setAccessToken,
     setUser,
 } from '@sonhoseong/mfa-lib'
-import { BlogHeader } from '@/components'
 import App from '@/App'
 
 function useLocalInitialize() {
@@ -95,8 +94,7 @@ function Root() {
             <ToastContainer />
             <Container>
                 <ErrorBoundary>
-                    <BlogHeader />
-                    <main className="blog-main-content">
+                    <main className="main-content">
                         <App />
                     </main>
                     <GlobalLoading />

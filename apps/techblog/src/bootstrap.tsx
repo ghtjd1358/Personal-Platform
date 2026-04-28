@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { store, ToastProvider, ModalProvider } from '@sonhoseong/mfa-lib';
-import App from './App';
+import Root from './Root';
 
 async function start() {
   const rootElement = document.getElementById('root');
@@ -15,7 +15,7 @@ async function start() {
         <ToastProvider>
           <ModalProvider>
             <BrowserRouter>
-              <App />
+              <Root />
             </BrowserRouter>
           </ModalProvider>
         </ToastProvider>

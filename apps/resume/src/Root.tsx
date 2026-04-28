@@ -6,6 +6,7 @@ import {
     ToastContainer,
     ErrorBoundary,
     GlobalLoading,
+    ScrollTopButton,
     useSimpleInitialize,
     selectAccessToken
 } from '@sonhoseong/mfa-lib'
@@ -34,6 +35,7 @@ function Root() {
                     <GlobalLoading />
                 </ErrorBoundary>
             </Container>
+            <ScrollTopButton />
         </>
     ) : (
         <></>

@@ -48,7 +48,6 @@ const JobSearchPage: React.FC = () => {
         </div>
         <select
           className="input"
-          style={{ width: '150px' }}
           value={currentLocation}
           onChange={(e) => setLocation(e.target.value)}
         >

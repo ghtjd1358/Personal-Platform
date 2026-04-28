@@ -94,6 +94,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData,
               </div>
             </button>
           )}
+        </div>
+        <div style={{ display: showSkeleton ? 'none' : 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
           <SectionEditButton editPath="/admin/projects" label="프로젝트 편집" />
         </div>
       </div>

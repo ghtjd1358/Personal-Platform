@@ -36,9 +36,19 @@
  * ============================================================== */
 .post-detail .post-header {
     padding: clamp(56px, 8vw, 120px) 0 clamp(32px, 4vw, 56px);
-    border-bottom: 1px solid var(--p-ink);
-    margin-bottom: clamp(48px, 6vw, 80px);
+    margin-bottom: clamp(32px, 4vw, 56px);
     background: var(--p-bone);
+    border-bottom: none;  /* global.css 의 brutal-rule 2px 보더 제거 */
+}
+
+/* global.css 의 ::after dashed 장식 라인 제거 */
+.post-detail .post-header::after {
+    content: none;
+}
+
+/* 헤더 내부 container 폭을 본문(1120) 과 동일하게 — 기본 .container 의 1100 제한 우회 */
+.post-detail .post-header > .container {
+    max-width: 1120px;
 }
 
 /* header 를 본문 layout(820 content + 40 gap + 260 toc = 1120) 과 같은 폭으로 맞춰
@@ -107,6 +117,8 @@
     letter-spacing: -0.03em;
     color: var(--p-ink);
     margin: 0 0 24px;
+    padding-left: 0 !important;
+    border-left: none !important;  /* global brutal-accent 4px 노란 막대 제거 */
     font-variation-settings: "opsz" 144, "SOFT" 100;
 
     /* global.css 의 bare .post-title (flex/nowrap/ellipsis) cascade 방어 —
@@ -127,8 +139,9 @@
     font-weight: 350;
     color: var(--p-mute);
     margin: 0 0 32px;
+    padding-left: 0;
+    border-left: none;  /* global dashed 라인 제거 */
     font-variation-settings: "WONK" 0;
-    max-width: 640px;
 
     /* 한국어 어절 단위 줄바꿈 — "정리했다" 가 "정/리했다" 로 글자 단위 깨지는 것 방지.
        keep-all: CJK 는 어절 단위 유지 / overflow-wrap: 긴 URL·영단어만 마지막 수단으로 break. */
@@ -139,8 +152,9 @@
 .post-detail .post-stats {
     display: flex;
     gap: 20px;
-    padding-top: 24px;
-    border-top: 1px dashed rgba(43, 30, 20, 0.2);
+    padding: 8px 0;
+    border-top: none;     /* global.css 의 양쪽 hr 제거 */
+    border-bottom: none;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.15em;
@@ -161,7 +175,7 @@
  * POST CONTENT — 본문 typography
  * ============================================================== */
 .post-detail .post-content {
-    max-width: 760px;
+    max-width: 1120px;
     margin: 0 auto;
     padding: 0 clamp(24px, 5vw, 48px);
     font-family: 'Pretendard Variable', Pretendard, sans-serif;
@@ -187,11 +201,26 @@
 .post-detail .post-content h1 { font-size: 2.1em; }
 .post-detail .post-content h2 {
     font-size: 1.65em;
-    padding-top: 0.3em;
-    border-top: 1px solid var(--p-line);
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top: none;
+    border-bottom: none;  /* global.css 의 brutal-rule 2px 보더 제거 */
 }
 .post-detail .post-content h3 { font-size: 1.3em; }
 .post-detail .post-content h4 { font-size: 1.1em; }
+
+/* h1/h2/h3/h4 의 markdown 접두사 (# ## ### ####) pseudo 제거 — 본문에 코드처럼 보이게 만드는 trope */
+.post-detail .post-content h1::before,
+.post-detail .post-content h2::before,
+.post-detail .post-content h3::before,
+.post-detail .post-content h4::before {
+    content: none !important;
+}
+
+/* post-excerpt 의 "> " 인용 prefix 도 제거 (global brutalist trope) */
+.post-detail .post-excerpt::before {
+    content: none !important;
+}
 
 .post-detail .post-content p {
     margin: 0 0 1.3em;
@@ -309,25 +338,85 @@
     border-bottom: 1px solid var(--p-ink);
 }
 
+/* 본문 내 hr 전부 숨김 — global.css 의 "// · · ·" 모노 장식 + 라인까지 제거 */
+.post-detail .post-content hr,
+.post-detail .post-content hr::before,
+.post-detail .post-content hr::after {
+    display: none !important;
+}
+
+/* code-copy-btn — global.css 가 one-dark 가정해 흰 글씨라 cream 코드블록 위에선 안 보임.
+ * editorial 톤(ink + 주홍 hover) 으로 색상 reverse */
+.post-detail .post-content .code-copy-btn {
+    color: var(--p-mute) !important;
+    background: rgba(43, 30, 20, 0.06) !important;
+}
+
+.post-detail .post-content .code-copy-btn:hover {
+    color: var(--p-accent) !important;
+    background: rgba(43, 30, 20, 0.1) !important;
+}
+
+.post-detail .post-content .code-copy-btn.copied {
+    color: #5b7a3a !important;        /* moss green — 완료 시그널 */
+    background: rgba(91, 122, 58, 0.12) !important;
+}
+
+/* LikeButton 예외 처리 —
+ *  ① 일괄 svg hide(.post-detail svg) 에서 하트만 복원
+ *  ② 둘러싼 검은 brutal-rule 보더 / hover 색 변화 모두 제거 → 텍스트+하트만 남는 깔끔한 ink 톤 */
+.post-detail .like-button svg {
+    display: inline-block !important;
+}
+
+.post-detail .like-button,
+.post-detail .post-stats .like-button {
+    border: none !important;
+    background: transparent !important;
+    padding: 4px 8px !important;
+    color: var(--p-ink) !important;
+}
+
+.post-detail .like-button:hover,
+.post-detail .post-stats .like-button:hover {
+    background: transparent !important;
+    color: var(--p-accent) !important;
+    border: none !important;
+}
+
+.post-detail .like-button.liked,
+.post-detail .post-stats .like-button.liked {
+    background: transparent !important;
+    color: var(--p-accent) !important;
+    border: none !important;
+}
+
 /* ==============================================================
  * SERIES / COMMENTS / FOOTER — 구분선과 톤 조정
+ * 모든 wrapper 폭을 본문 1120 으로 통일 → 페이지 한 column 일관성
  * ============================================================== */
-.post-detail .post-series-wrapper,
-.post-detail .post-comments-wrapper {
-    max-width: 820px;
+.post-detail .post-series-wrapper {
+    max-width: 1120px;
     margin: clamp(48px, 6vw, 80px) auto 0;
-    padding: clamp(32px, 4vw, 48px) clamp(24px, 5vw, 48px) 0;
-    border-top: 1px solid var(--p-ink);
+    padding: clamp(24px, 3vw, 36px) clamp(24px, 5vw, 48px) 0;
 }
 
 .post-detail .post-comments-wrapper {
-    margin-bottom: clamp(48px, 6vw, 96px);
+    max-width: 1120px;
+    margin: clamp(48px, 6vw, 80px) auto clamp(48px, 6vw, 96px);
+    padding: clamp(32px, 4vw, 48px) clamp(24px, 5vw, 48px) clamp(40px, 5vw, 64px);
+    background: transparent !important;
 }
 
 .post-detail .post-footer {
-    max-width: 820px;
+    max-width: 1120px;
     margin: clamp(32px, 4vw, 48px) auto 0;
     padding: clamp(24px, 3vw, 32px) clamp(24px, 5vw, 48px);
+}
+
+/* 모든 .post-detail 안 .container 의 1100 제한도 1120 으로 확장 (header/footer/comments 내부) */
+.post-detail .container {
+    max-width: 1120px;
 }
 
 /* 에러/로딩 상태 — 톤 통일 */
@@ -369,9 +458,8 @@
  * Post Footer — 목록으로 / 공유 / 수정 / 삭제 버튼 editorial
  * ========================================================= */
 .post-detail .post-footer {
-    padding: clamp(32px, 5vw, 56px) 0;
-    margin-top: clamp(48px, 6vw, 80px);
-    border-top: 1px solid var(--p-line);
+    padding: clamp(24px, 4vw, 40px) 0;
+    margin-top: clamp(32px, 5vw, 56px);
     background: transparent;
 }
 
@@ -383,9 +471,9 @@
 
 .post-detail .post-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;  /* 좌측 정렬 — 목록/share/edit/delete 한 묶음으로 왼쪽에 */
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     flex-wrap: wrap;
 }
 

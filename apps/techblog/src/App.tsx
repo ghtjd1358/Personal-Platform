@@ -1,5 +1,4 @@
 import React from 'react';
-import { storage } from '@sonhoseong/mfa-lib';
 import Routes from './pages/routes/Routes';
 import './styles/global.css';
 import './styles/editorial.css';

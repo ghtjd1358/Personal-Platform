@@ -49,12 +49,13 @@
 .blog-stats-section .blog-stat {
     display: flex !important;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 6px;
     padding: 0 !important;
     background: none !important;
     border: none !important;
     position: relative;
+    text-align: center;
 }
 
 /* 숫자 — 거대 Fraunces italic WONK=1 먹색 */

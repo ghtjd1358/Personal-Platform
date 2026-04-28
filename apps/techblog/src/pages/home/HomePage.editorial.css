@@ -86,7 +86,6 @@
     margin-bottom: clamp(32px, 4vw, 48px) !important;
     padding: clamp(32px, 4vw, 56px) clamp(24px, 4vw, 48px) !important;
     background: var(--jt-cream) !important;
-    border: 1px solid var(--jt-ink) !important;
     box-shadow: 3px 4px 0 rgba(43, 30, 20, 0.08);
 }
 
@@ -98,7 +97,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .job-tracker-app .stat-value {
@@ -205,13 +204,16 @@
 }
 
 .job-tracker-app .btn-secondary {
-    background: transparent !important;
+    background: var(--jt-cream) !important;
     color: var(--jt-ink) !important;
+    border: none !important;
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.12);
 }
 .job-tracker-app .btn-secondary:hover {
     background: var(--jt-bone) !important;
     color: var(--jt-accent) !important;
-    border-color: var(--jt-accent) !important;
+    box-shadow: 3px 4px 0 rgba(43, 30, 20, 0.18);
+    transform: translateY(-1px);
 }
 
 .job-tracker-app .btn-sm {

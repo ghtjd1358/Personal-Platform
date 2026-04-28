@@ -82,12 +82,12 @@
 
 /* ===== 본문 컨테이너 ===== */
 .post-editor-page .editor-main {
-    max-width: 920px !important;
+    max-width: 1120px !important;
 }
 
 .post-editor-page .editor-content-area {
     padding: 56px 48px !important;
-    max-width: 920px !important;
+    max-width: 1120px !important;
 }
 
 /* ===== 제목 입력 — Fraunces italic display ===== */

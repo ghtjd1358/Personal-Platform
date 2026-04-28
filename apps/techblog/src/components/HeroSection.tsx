@@ -52,6 +52,14 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
       </div>
+      <div className="techblog-hero-notice">
+        <span className="techblog-hero-notice__eyebrow">SECTION · UNDER CONSTRUCTION</span>
+        <h2 className="techblog-hero-notice__title">준비 중입니다…</h2>
+        <p className="techblog-hero-notice__sub">
+          취업관리 섹션은 지금 설계를 다듬는 중입니다.<br />
+          대시보드 · 이력서 · 포트폴리오 · 마이페이지를 먼저 완성한 뒤 이어서 작업할 예정입니다.
+        </p>
+      </div>
     </section>
   );
 };

@@ -87,7 +87,6 @@
 }
 .common-btn--variant-ghost:not(:disabled):hover {
     background: rgba(43, 30, 20, 0.04);
-    border-color: #2B1E14;
 }
 
 /* danger — 주홍 배경 + 한지 글자 (삭제/위험) */

@@ -53,10 +53,11 @@ const useBlogData = (limitOrOptions: number | BlogDataOptions = 20): BlogData =>
   const loadingLockRef = useRef(false);
 
   // 초기 데이터 로드 (필터/정렬 변경 시 재-fetch)
-  // ⚠️ setPosts([]) 로 즉시 비우지 않음 — 스크롤 위치 jump 방지. fetch 완료 후 교체.
+  // sort/filter 변경 시 posts 즉시 리셋 — loadMore race 와 stale display 차단.
   useEffect(() => {
     setIsLoading(true);
     setError(null);
+    setPosts([]);
     setPage(1);
     setHasMore(true);
     // loadingLockRef 리셋 — 이전 fetch 가 진행 중이던 경우에도 새 정렬 fetch 가 막히지 않게
@@ -81,14 +82,20 @@ const useBlogData = (limitOrOptions: number | BlogDataOptions = 20): BlogData =>
           setStats(postsRes.data.stats);
           setHasMore(postsRes.data.page < postsRes.data.totalPages);
         } else {
+          console.error('[useBlogData] getPosts 실패:', { params: searchParams, error: postsRes.error });
           setError(postsRes.error || '블로그 데이터를 불러올 수 없습니다.');
         }
         if (seriesRes.success && seriesRes.data) {
           setSeries(seriesRes.data);
+        } else if (!seriesRes.success) {
+          console.error('[useBlogData] getSeries 실패:', seriesRes.error);
         }
       })
-      .catch(() => {
-        if (!cancelled) setError('블로그 데이터 로딩 중 오류가 발생했습니다.');
+      .catch((err) => {
+        if (!cancelled) {
+          console.error('[useBlogData] Promise.all reject:', err);
+          setError('블로그 데이터 로딩 중 오류가 발생했습니다.');
+        }
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);

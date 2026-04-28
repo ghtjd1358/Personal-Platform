@@ -285,6 +285,10 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* editorial cursor — 한지 cream 위에서 흰 OS 커서가 안 보이는 문제 해결.
+   * 먹(#2B1E14) fill + 한지 cream(#FBF5E3) 1.5px stroke → 모든 배경에서 또렷.
+   * input/button/link 의 의미적 커서(text/pointer)는 UA stylesheet 가 자동 유지. */
+  cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 3 L4 18 L8.5 14.5 L11.5 21 L14.5 19.5 L11.5 13 L17 13 Z' fill='%232B1E14' stroke='%23FBF5E3' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 4 3, default;
 }
 
 a {
@@ -1512,20 +1516,22 @@ body.has-header {
   background: white;
   border-radius: 12px;
   transition: all 0.25s ease;
+  /* tight ring + drop shadow 조합 — 보더 없이 사방 가장자리 정의 회복 */
   box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.07),
-    0 10px 20px rgba(0, 0, 0, 0.1),
-    0 1px 4px rgba(0, 0, 0, 0.08);
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.08),
+    0 16px 32px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .post-card:hover {
   transform: translateY(-8px);
   box-shadow:
-    0 8px 16px rgba(0, 0, 0, 0.1),
-    0 20px 40px rgba(0, 0, 0, 0.15),
-    0 4px 8px rgba(0, 0, 0, 0.1);
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 12px 24px rgba(0, 0, 0, 0.12),
+    0 24px 48px rgba(0, 0, 0, 0.12);
 }
 
 .post-card-link {
@@ -1869,7 +1875,6 @@ body.has-header {
 }
 
 .category-card.selected {
-  border: 2px solid var(--color-accent);
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(30, 58, 95, 0.05));
   transform: translateY(-4px);
   box-shadow: 0 12px 36px rgba(14, 165, 233, 0.2);
@@ -2191,7 +2196,7 @@ body.has-header {
 .scroll-top-btn {
   position: fixed;
   right: 24px;
-  bottom: 150px;
+  bottom: 32px;
   width: 48px;
   height: 48px;
   background: var(--color-primary);
@@ -2408,21 +2413,6 @@ body.has-header {
   border-bottom: 2px solid var(--brutal-rule);
   background: var(--color-bg);
   position: relative;
-}
-
-.post-header::before {
-  content: "// POST_DETAIL.md";
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  max-width: calc(100% - 40px);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
 }
 
 .post-header::after {
@@ -3664,29 +3654,7 @@ body.has-header {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* Mac 스타일 헤더 바 */
-.post-content pre::before,
-.editor-content .tiptap pre::before {
-  content: '';
-  display: block;
-  height: 36px;
-  background: linear-gradient(180deg, #3c4049 0%, #343840 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-/* Mac 트래픽 라이트 버튼 */
-.post-content pre::after,
-.editor-content .tiptap pre::after {
-  content: '';
-  position: absolute;
-  top: 12px;
-  left: 16px;
-  width: 12px;
-  height: 12px;
-  background: #ff5f56;
-  border-radius: 50%;
-  box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
-}
+/* Mac 스타일 헤더/트래픽 라이트 제거됨 — 글쓰기 흐름 방해 + editorial 톤 불일치 */
 
 .post-content pre code,
 .editor-content .tiptap pre code {
@@ -3796,37 +3764,32 @@ pre.shiki:hover .code-copy-btn,
 }
 
 /* ===== Tistory Style TOC (Table of Contents) ===== */
-/* post-content-wrapper 부모 안에서만 TOC 가 존재하도록 sticky-flex 레이아웃.
-   기존 position:fixed 는 뷰포트 절대좌표라 부모 경계를 넘어가던 문제 해결. */
-.post-detail-layout {
-  max-width: 1120px;   /* 820 content + 40 gap + 260 toc = 1120 */
-  margin: 0 auto;
-  display: flex;
-  align-items: flex-start;
-  gap: 40px;
+/* TOC 제거 후 단순 wide-centered 본문 — ReadingProgress 가 상단 고정 바로 진행률 담당 */
+
+/* === ReadingProgress — 상단 고정 진행률 바 === */
+/* === 블로그 콘텐츠 영역 아이콘 일괄 제거 — 텍스트-only minimalist 톤 ===
+ * 적용: post-card (목록), post-detail (상세 + 댓글). 필터 UI(search-bar/segmented-control)는 유지. */
+.post-card svg,
+.post-detail svg {
+  display: none !important;
 }
 
-.post-detail-main {
-  flex: 1 1 auto;
-  min-width: 0;        /* flex 자식이 콘텐츠로 overflow 되는 것 방지 */
-  max-width: 820px;
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(43, 30, 20, 0.08);   /* 한지 톤 옅은 트랙 */
+  z-index: 9999;
+  pointer-events: none;
 }
 
-.post-toc-wrapper {
-  position: sticky;
-  top: 100px;
-  flex: 0 0 260px;     /* sticky 는 부모 안에서만 동작 → 부모 경계 넘어가지 않음 */
-  align-self: flex-start;
-  max-height: calc(100vh - 140px);
-  z-index: 10;
-}
-
-/* 공간 부족하면 레이아웃 column 으로 전환 (TOC 는 본문 위로) */
-@media (max-width: 1200px) {
-  .post-detail-layout {
-    max-width: 820px;
-    flex-direction: column;
-  }
+.reading-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #8C1E1A 0%, #2B1E14 100%); /* 인장 주홍 → 먹색 */
+  transition: width 0.1s ease-out;
+  box-shadow: 0 0 8px rgba(140, 30, 26, 0.3);
 }
 
 .post-toc {
@@ -4260,46 +4223,175 @@ pre.shiki:hover .code-copy-btn,
   margin-bottom: 16px;
 }
 
-.search-bar {
-  display: flex;
-  gap: 12px;
-  max-width: 500px;
-  margin: 0 auto;
+/* =========================================================
+ * Filter Section — 섹션 자체 정체성 부여 (이전엔 무규칙 floating 컨트롤로 보였던 문제 해결).
+ * Hero / Stats / Posts 와 같은 섹션 단위 padding + 상하 dashed 계선 + eyebrow + 작은 italic 타이틀.
+ * BlogStats 의 ink border 패턴을 더 부드러운 brushstroke 로 변주 (인터랙티브 영역이라 더 가볍게).
+ * ========================================================= */
+.filter-section {
+    position: relative;
+    padding: clamp(40px, 6vw, 72px) 0 clamp(48px, 6vw, 80px);
+    /* 상하 brushstroke 계선 — 섹션 경계 표시 */
 }
 
-.search-bar.focused .search-input-wrapper {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+.filter-section::before,
+.filter-section::after {
+    content: '';
+    position: absolute;
+    left: clamp(24px, 5vw, 80px);
+    right: clamp(24px, 5vw, 80px);
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0,
+        rgba(43, 30, 20, 0) 4%,
+        rgba(43, 30, 20, 0.22) 12%,
+        rgba(43, 30, 20, 0.36) 50%,
+        rgba(43, 30, 20, 0.22) 88%,
+        rgba(43, 30, 20, 0) 96%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+.filter-section::before { top: 0; }
+.filter-section::after { bottom: 0; }
+
+/* =========================================================
+ * Editorial Search Bar — 조선 ledger 검색대 (techblog 패턴 이식).
+ * input + submit 을 한 종이판 위 두 칸으로 통합. cream fill + 먹색 offset shadow.
+ * 안쪽은 한지색 dashed 경계로 영역 분리. focus-within 시 카드 전체 lift.
+ * ========================================================= */
+.search-bar {
+  --search-rotation: -0.3deg;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  margin: 0 auto;
+
+  /* 한지 책장의 한 행(行) — Hero/Stats 와 같은 종이 DNA. fiber overlay 로 표면이 페이지 본체와
+   * 같은 결을 갖도록. cream 톤은 살짝 유지하되 multiply 블렌드로 bone 페이지 위에 자연스럽게 녹음. */
+  background-color: #FBF5E3;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='80'%3E%3Cfilter id='sbf'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.78' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23sbf)'/%3E%3C/svg%3E");
+  background-size: 420px 80px;
+  background-repeat: repeat;
+  background-blend-mode: multiply;
+
+  border-radius: 1px;
+  position: relative;
+  overflow: hidden;
+
+  /* hard offset → 3단 ambient soft drop. "스탬프 sticker" 인상 → "한지 paper depth" 인상 */
+  box-shadow:
+    0 1px 0 rgba(43, 30, 20, 0.04),
+    0 4px 12px -4px rgba(43, 30, 20, 0.10),
+    0 14px 28px -10px rgba(43, 30, 20, 0.16);
+
+  /* 약간 비뚤어진 paper row — post-card dialect 의 1/4 진폭 (인터랙션 깨지지 않을 만큼만) */
+  transform: rotate(var(--search-rotation));
+
+  transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+              box-shadow 0.35s ease;
+}
+
+.search-bar:focus-within,
+.search-bar.focused {
+  /* focus → 행을 똑바로 세우고 살짝 lift, shadow 깊이 강화 */
+  transform: rotate(0deg) translateY(-3px);
+  box-shadow:
+    0 2px 0 rgba(43, 30, 20, 0.06),
+    0 10px 18px -4px rgba(43, 30, 20, 0.18),
+    0 18px 36px -10px rgba(43, 30, 20, 0.22);
+}
+
+/* 책 page 의 상단 계선(界線) — brushstroke ruling. 양 끝이 페이드되는 hand-drawn 느낌 */
+.search-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(43, 30, 20, 0) 3%,
+    rgba(43, 30, 20, 0.32) 12%,
+    rgba(43, 30, 20, 0.48) 50%,
+    rgba(43, 30, 20, 0.32) 88%,
+    rgba(43, 30, 20, 0) 97%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* 책 page 의 하단 계선 — 더 옅은 mute brown 으로 위계 부여 */
+.search-bar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(139, 115, 85, 0) 4%,
+    rgba(139, 115, 85, 0.42) 14%,
+    rgba(43, 30, 20, 0.4) 50%,
+    rgba(139, 115, 85, 0.42) 86%,
+    rgba(139, 115, 85, 0) 96%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .search-input-wrapper {
   flex: 1;
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  transition: all 0.2s ease;
+  min-width: 0;
+  padding: 0 18px 0 50px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
 }
 
 .search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   flex-shrink: 0;
-  color: var(--color-text-muted);
+  color: #8B7355;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.search-bar:focus-within .search-icon,
+.search-bar.focused .search-icon {
+  color: #8C1E1A;
+  transform: translateY(-50%) scale(1.05);
 }
 
 .search-input {
   flex: 1;
+  width: 100%;
+  padding: 16px 0;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #2B1E14;
+  background: transparent;
   border: none;
   outline: none;
-  font-size: 16px;
-  color: var(--color-text);
-  background: transparent;
 }
 
 .search-input::placeholder {
-  color: var(--color-text-muted);
+  color: rgba(43, 30, 20, 0.4);
+  font-weight: 400;
 }
 
 .search-clear-btn {
@@ -4309,28 +4401,50 @@ pre.shiki:hover .code-copy-btn,
   justify-content: center;
   width: 24px;
   height: 24px;
+  margin-left: 8px;
   border-radius: 50%;
-  background: var(--color-bg-secondary);
-  color: var(--color-text-muted);
-  transition: all 0.2s;
+  background: rgba(43, 30, 20, 0.08);
+  color: #8B7355;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .search-clear-btn:hover {
-  background: var(--color-border);
-  color: var(--color-text);
+  background: rgba(140, 30, 26, 0.12);
+  color: #8C1E1A;
 }
 
 .search-submit-btn {
-  padding: 12px 24px;
-  background: var(--color-primary);
-  color: white;
-  border-radius: var(--radius-lg);
-  font-weight: 500;
-  transition: all 0.2s ease;
+  flex-shrink: 0;
+  padding: 16px 28px;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #2B1E14;
+  background: transparent;
+  border: none;
+  border-left: 1px dashed rgba(43, 30, 20, 0.32);
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 .search-submit-btn:hover {
-  background: var(--color-accent);
+  background: rgba(43, 30, 20, 0.04);
+  color: #8C1E1A;
+}
+
+@media (max-width: 640px) {
+  .search-bar {
+    flex-direction: column;
+  }
+  .search-submit-btn {
+    width: 100%;
+    border-left: none;
+    border-top: 1px dashed rgba(43, 30, 20, 0.32);
+  }
 }
 
 .search-reset-btn {
@@ -4576,6 +4690,7 @@ pre.shiki:hover .code-copy-btn,
 .comment-author-input {
   width: 100%;
   padding: 12px 16px;
+  background: var(--color-bg-secondary); /* cream 한지 — 순수 white 의 차가운 톤 회피 */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 14px;
@@ -4591,6 +4706,7 @@ pre.shiki:hover .code-copy-btn,
 .comment-textarea {
   width: 100%;
   padding: 16px;
+  background: var(--color-bg-secondary); /* cream 한지 톤 통일 */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 14px;
@@ -4809,7 +4925,6 @@ pre.shiki:hover .code-copy-btn,
   background: var(--color-bg);
   border-radius: var(--radius-lg);
   padding: 20px 24px 24px;
-  border: 1px solid var(--color-border);
 }
 
 .manage-form-card h3 {
@@ -6728,25 +6843,105 @@ pre.shiki:hover .code-copy-btn,
   }
 }
 
-/* ====== Blog sort / page-size row (editorial) ====== */
+/* ====== Blog sort / page-size row — search-bar 와 페어 dialect ======
+ * 같은 한지 + fiber + 계선 + ambient shadow. 회전은 반대 방향(+0.3deg)으로 두 카드가 살짝 마주봄.
+ */
 .blog-sort-row {
+    --sort-rotation: 0.3deg;
     display: flex !important;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 14px 18px;
-    margin-bottom: 16px;
-    background: #FBF5E3;
-    border: 1px solid #D4C4A8;
-    border-radius: 2px;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    margin: 0 auto 20px;
+    width: 100%;
+
+    background-color: #FBF5E3;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='80'%3E%3Cfilter id='srf'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014 0.82' numOctaves='2' seed='13'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23srf)'/%3E%3C/svg%3E");
+    background-size: 420px 80px;
+    background-repeat: repeat;
+    background-blend-mode: multiply;
+
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+
+    box-shadow:
+        0 1px 0 rgba(43, 30, 20, 0.04),
+        0 4px 12px -4px rgba(43, 30, 20, 0.10),
+        0 14px 28px -10px rgba(43, 30, 20, 0.16);
+
+    transform: rotate(var(--sort-rotation));
+
+    transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+                box-shadow 0.35s ease;
+}
+
+.blog-sort-row:focus-within {
+    transform: rotate(0deg) translateY(-3px);
+    box-shadow:
+        0 2px 0 rgba(43, 30, 20, 0.06),
+        0 10px 18px -4px rgba(43, 30, 20, 0.18),
+        0 18px 36px -10px rgba(43, 30, 20, 0.22);
+}
+
+/* 책 page 상단 계선 — search-bar 와 동일 brushstroke */
+.blog-sort-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: linear-gradient(
+        90deg,
+        transparent 0,
+        rgba(43, 30, 20, 0) 3%,
+        rgba(43, 30, 20, 0.32) 12%,
+        rgba(43, 30, 20, 0.48) 50%,
+        rgba(43, 30, 20, 0.32) 88%,
+        rgba(43, 30, 20, 0) 97%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+/* 책 page 하단 계선 */
+.blog-sort-row::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0,
+        rgba(139, 115, 85, 0) 4%,
+        rgba(139, 115, 85, 0.42) 14%,
+        rgba(43, 30, 20, 0.4) 50%,
+        rgba(139, 115, 85, 0.42) 86%,
+        rgba(139, 115, 85, 0) 96%,
+        transparent 100%
+    );
+    pointer-events: none;
 }
 
 .blog-sort-field {
-    display: inline-flex;
+    flex: 1;
+    display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
+    padding: 16px 22px;
+    min-width: 0;
+}
+
+/* 두 번째 이후 필드 앞에 dashed divider — 검색바 안 select 분리 패턴과 동일 */
+.blog-sort-field + .blog-sort-field {
+    border-left: 1px dashed rgba(43, 30, 20, 0.32);
 }
 
 .blog-sort-field .filter-label {
+    flex-shrink: 0;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.18em;
@@ -6756,28 +6951,204 @@ pre.shiki:hover .code-copy-btn,
 }
 
 .blog-sort-field .editorial-select {
-    padding: 8px 36px 8px 14px;
+    flex: 1;
+    min-width: 0;
+    padding: 4px 32px 4px 0;
     font-family: 'Pretendard Variable', Pretendard, sans-serif;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     color: #2B1E14;
-    background: #FBF5E3;
-    border: 1px solid #2B1E14;
-    border-radius: 2px;
-    cursor: pointer;
+    background-color: transparent;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232B1E14' stroke-width='1.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
+    background-position: right 4px center;
     background-size: 14px 14px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     appearance: none;
     -webkit-appearance: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    transition: color 0.2s ease;
 }
 
 .blog-sort-field .editorial-select:hover {
-    border-color: #8C1E1A;
+    color: #8C1E1A;
 }
+
 .blog-sort-field .editorial-select:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(43, 30, 20, 0.12);
+    color: #8C1E1A;
+}
+
+.blog-sort-field .editorial-select option {
+    font-weight: 500;
+    color: #2B1E14;
+    background-color: #FBF5E3;
+}
+
+@media (max-width: 640px) {
+    .blog-sort-row {
+        flex-direction: column;
+    }
+    .blog-sort-field + .blog-sort-field {
+        border-left: none;
+        border-top: 1px dashed rgba(43, 30, 20, 0.32);
+    }
+}
+
+/* === Segmented Control — sort / cols 아이콘 버튼 그룹 === */
+.segmented-control {
+    display: inline-flex;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.segmented-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #8B7355;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* 버튼 사이에 한지색 dashed divider — 통합 카드 내 자연스러운 분리 */
+.segmented-btn + .segmented-btn {
+    border-left: 1px dashed rgba(43, 30, 20, 0.18);
+}
+
+.segmented-btn:hover {
+    background: rgba(43, 30, 20, 0.04);
+    color: #2B1E14;
+}
+
+.segmented-btn.active {
+    background: rgba(140, 30, 26, 0.08);
+    color: #8C1E1A;
+}
+
+.segmented-btn svg {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.segmented-btn:hover svg {
+    transform: scale(1.05);
+}
+
+/* === Cols picker — 등사판 도장 + 인장 metaphor ===
+ * icon 위 / mono 숫자 아래 vertical stack. 활성화시 bone-tint bg + 텍스트 ink + 우상단 인장 도트 stamp.
+ * 옆 옵션과 거리감 확보: 큰 padding + 큰 SVG (32×24) → 시각 호흡 회복.
+ */
+.segmented-control--cols .cols-btn {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 24px;
+    min-width: 78px;
+    position: relative;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+
+.segmented-control--cols .cols-btn svg {
+    width: 32px;
+    height: 24px;
+    color: inherit;
+    opacity: 0.72;
+    transition: opacity 0.2s ease, transform 0.25s ease;
+}
+
+.segmented-control--cols .cols-btn:hover svg {
+    opacity: 0.95;
+    transform: scale(1.04);
+}
+
+.segmented-control--cols .cols-btn .cols-btn-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.segmented-control--cols .cols-btn:hover .cols-btn-num {
+    opacity: 1;
+}
+
+/* 활성 — bone gradient bg + ink 텍스트 + 인장 도트 우상단 stamp */
+.segmented-control--cols .cols-btn.active {
+    background: linear-gradient(135deg,
+        rgba(244, 234, 213, 0.55) 0%,
+        rgba(244, 234, 213, 0.85) 100%);
+    color: #2B1E14;
+}
+
+.segmented-control--cols .cols-btn.active svg {
+    color: #8C1E1A;
+    opacity: 1;
+}
+
+.segmented-control--cols .cols-btn.active .cols-btn-num {
+    color: #8C1E1A;
+    opacity: 1;
+}
+
+/* 인장 도트 — "선택됐음" tactile 시그널. 기울어진 작은 사각 도장 */
+.segmented-control--cols .cols-btn.active::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 9px;
+    width: 6px;
+    height: 6px;
+    background: #8C1E1A;
+    transform: rotate(-12deg);
+    box-shadow:
+        0 1px 0 rgba(43, 30, 20, 0.18),
+        inset 0 0 0 0.5px rgba(43, 30, 20, 0.35);
+    pointer-events: none;
+    animation: cols-stamp-press 0.35s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+@keyframes cols-stamp-press {
+    0%   { transform: rotate(-12deg) scale(0); opacity: 0; }
+    60%  { transform: rotate(-12deg) scale(1.25); opacity: 1; }
+    100% { transform: rotate(-12deg) scale(1); opacity: 1; }
+}
+
+/* 모바일 — column stack 그대로, padding만 조금 줄임 */
+@media (max-width: 540px) {
+    .segmented-control--cols .cols-btn {
+        padding: 12px 18px;
+        min-width: 64px;
+    }
+}
+
+/* 모바일에선 정렬 버튼 라벨 숨김 (icon-only) — 카드 폭 절약 */
+@media (max-width: 540px) {
+    .blog-sort-field .segmented-btn span:not(.cols-btn-num) {
+        display: none;
+    }
+    .blog-sort-field .segmented-btn {
+        padding: 10px 12px;
+    }
 }

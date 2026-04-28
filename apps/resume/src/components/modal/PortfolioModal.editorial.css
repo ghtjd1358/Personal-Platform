@@ -116,7 +116,6 @@
 /* ===== Info cards — 회색 fill → transparent + 먹 dashed ===== */
 .modal .modal-info-card {
     background: transparent;
-    border: 1px dashed #D4C4A8;
     border-radius: 2px;
     padding: 16px;
 }

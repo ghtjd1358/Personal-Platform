@@ -339,7 +339,6 @@ select.skills-input {
     justify-content: center;
     padding: 12px;
     background: transparent;
-    border: 1px dashed var(--sk-ink);
     border-radius: 2px;
     font-family: 'Pretendard Variable', sans-serif;
     font-size: 13px;

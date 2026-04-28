@@ -386,14 +386,85 @@ body.has-header {
   gap: 24px;
 }
 
+/* editorial: card22 와 동일한 종이 카드 언어 (한지 cream + offset shadow + 회전 + paper tape).
+ * 단, image/title/desc 구조는 그대로 — 번호 counter 는 사용 안 함. */
 .feature-card {
+  --rest-angle: 0deg;
+  position: relative;
   padding: 32px;
-  /* editorial 팔레트 — 한지 cream. host 의 theme-editorial override 에 의존하지 않고
-     standalone 에서도 동일한 톤 유지. */
   background: #FBF5E3;
-  border: 1px solid #D4C4A8;
-  border-radius: var(--radius-xl);
-  box-shadow: 3px 5px 0 rgba(43, 30, 20, 0.08);
+  border-radius: 3px;
+  overflow: visible;               /* paper tape 가 top 위로 삐져나오게 */
+  box-shadow: 3px 6px 0 rgba(43, 30, 20, 0.22);
+  transform: rotate(var(--rest-angle));
+  transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+              box-shadow 0.35s ease,
+              z-index 0s linear 0.35s;
+  z-index: 1;
+}
+
+/* 카드마다 다른 rest angle — 4n 주기 (card22 와 동일) */
+.feature-card:nth-child(4n+1) { --rest-angle: -0.6deg; }
+.feature-card:nth-child(4n+2) { --rest-angle: 0.45deg; }
+.feature-card:nth-child(4n+3) { --rest-angle: -0.25deg; }
+.feature-card:nth-child(4n)   { --rest-angle: 0.55deg; }
+
+/* 종이테이프 — card22 와 동일 마크업, 위치만 살짝 변주 */
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-4deg);
+  width: 64px;
+  height: 18px;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(140, 30, 26, 0.22) 0 3px,
+      rgba(140, 30, 26, 0.32) 3px 6px
+    );
+  border-left: 1px dashed rgba(43, 30, 20, 0.28);
+  border-right: 1px dashed rgba(43, 30, 20, 0.28);
+  box-shadow: 0 1px 2px rgba(43, 30, 20, 0.15);
+  opacity: 0.7;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.feature-card:nth-child(3n+2)::before {
+  transform: translateX(-50%) rotate(3deg);
+  left: 40%;
+}
+
+.feature-card:nth-child(3n)::before {
+  transform: translateX(-50%) rotate(-6deg);
+  left: 60%;
+}
+
+.feature-card:hover {
+  transform: rotate(0deg) translateY(-10px) scale(1.03);
+  box-shadow:
+    6px 14px 0 rgba(43, 30, 20, 0.3),
+    12px 22px 36px rgba(43, 30, 20, 0.15);
+  z-index: 5;
+  transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+              box-shadow 0.35s ease,
+              z-index 0s linear;
+}
+
+/* 스크롤 등장 시 sway-in (card22 와 동일 키프레임) */
+.feature-card.animate-on-scroll.animate-visible {
+  animation: feature-card-sway-in 0.75s cubic-bezier(.25, .8, .3, 1.08) forwards;
+}
+
+@keyframes feature-card-sway-in {
+  0%   { transform: translateY(24px) rotate(var(--rest-angle)); }
+  28%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 1.7deg)); }
+  48%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 1.1deg)); }
+  68%  { transform: translateY(0) rotate(calc(var(--rest-angle) - 0.6deg)); }
+  84%  { transform: translateY(0) rotate(calc(var(--rest-angle) + 0.3deg)); }
+  100% { transform: translateY(0) rotate(var(--rest-angle)); }
 }
 
 .feature-icon {
@@ -415,8 +486,6 @@ body.has-header {
   width: 160px;
   height: 160px;
   object-fit: contain;
-  /* 흰 배경 이미지(PNG/JPG)를 한지 톤에 녹여 사실상 투명처럼 보이게.
-     어두운 로고·일러스트 부분은 그대로 유지. */
   mix-blend-mode: multiply;
 }
 
@@ -461,7 +530,6 @@ body.has-header {
 .skill-tab.active {
   background: var(--color-bg);
   color: var(--color-primary);
-  border: 1px solid var(--color-primary);
   box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.12);
 }
 
@@ -836,7 +904,15 @@ body.has-header {
   flex-direction: column;
   align-items: center;
   gap: 0;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.show-more-btn:hover .chevron-wave {
+  transform: translateY(3px);
+}
+
+.show-more-btn.collapsed:hover .chevron-wave {
+  transform: translateY(-3px);
 }
 
 .show-more-btn:active .chevron-wave {
@@ -866,7 +942,8 @@ body.has-header {
   width: 10px;
   background: var(--color-primary);
   border-radius: 1px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.3s ease;
 }
 
 .show-more-btn .chevron::before {
@@ -886,26 +963,26 @@ body.has-header {
   background: var(--color-accent);
 }
 
-/* 미세한 물결 애니메이션 */
+/* 부드러운 슬라이드 물결 — 진폭을 키워 시각적으로 "흐름"이 잡히게 */
 @keyframes subtleWave {
   0%, 100% {
-    opacity: 0.9;
+    opacity: 0.85;
     transform: translateY(0);
   }
   50% {
     opacity: 1;
-    transform: translateY(0.5px);
+    transform: translateY(3px);
   }
 }
 
 @keyframes subtleWaveUp {
   0%, 100% {
-    opacity: 0.9;
+    opacity: 0.85;
     transform: translateY(0);
   }
   50% {
     opacity: 1;
-    transform: translateY(-0.5px);
+    transform: translateY(-3px);
   }
 }
 
@@ -961,7 +1038,6 @@ body.has-header {
   background: white;
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -1201,10 +1277,9 @@ body.has-header {
   --rest-angle: 0deg;
   position: relative;
   background: #FBF5E3;
-  border: 1px solid #2B1E14;
   border-radius: 3px;
   overflow: visible;               /* paper tape 가 top 위로 삐져나오게 */
-  box-shadow: 2px 4px 0 rgba(43, 30, 20, 0.1);
+  box-shadow: 3px 6px 0 rgba(43, 30, 20, 0.22);
   cursor: pointer;
   counter-increment: card-counter;
   height: 280px;
@@ -1626,7 +1701,7 @@ body.has-header {
 .scroll-top-btn {
   position: fixed;
   right: 24px;
-  bottom: 100px;
+  bottom: 32px;
   width: 48px;
   height: 48px;
   background: var(--color-primary);
@@ -1712,6 +1787,27 @@ body.has-header {
 
 .scroll-top-btn--ghost:hover {
   background: rgba(30, 58, 95, 0.15);
+}
+
+/* 설명 텍스트 일괄 weight 보강 — 색상은 그대로(--color-text-secondary), 굵기만 500 으로
+ * stroke 만 두꺼워져 가독성 향상. UI control(버튼/탭) 은 자체 font-weight 가 있어 영향 없음. */
+.hero-desc,
+.section-subtitle,
+.timeline-content p,
+.timeline-tasks li,
+.project-desc,
+.project-role,
+.contact-desc,
+.blog-card-desc,
+.profile-summary,
+.exp-position {
+  font-weight: 500;
+}
+
+/* cream(#FBF5E3) 카드 위에 얹히는 desc 는 warm-on-warm 으로 contrast 떨어짐 → 600 으로 한 단계 더 보강 */
+.feature-desc,
+.card-desc22 {
+  font-weight: 600;
 }
 
 /* ===== Responsive ===== */
@@ -2430,7 +2526,6 @@ body.has-header {
   background: #f8fafc;
   border-radius: 12px;
   padding: 16px;
-  border: 1px solid #e2e8f0;
 }
 
 .modal-info-title {
@@ -3597,7 +3692,6 @@ body.has-header {
   background: white;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--color-border);
 }
 
 .skeleton-image {
@@ -3654,7 +3748,6 @@ body.has-header {
   background: white;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--color-border);
   transition: all 0.3s ease;
 }
 
@@ -4981,7 +5074,6 @@ body.has-header {
 /* Resume Card - Glass Morphism Style */
 .resume-card-v2 {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -5239,7 +5331,6 @@ body.has-header {
 
 .browse-skeleton-card {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
   border-radius: 16px;
   overflow: hidden;
 }
@@ -5473,7 +5564,6 @@ body.has-header {
 /* My Resume Card */
 .my-resume-card {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 24px;
   display: flex;

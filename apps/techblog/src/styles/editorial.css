@@ -168,6 +168,52 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* 준비중 배너 — editorial-hero 안 editorial-inner(hr) 다음 sibling.
+ * fullheight hero 의 하단 빈 공간을 채우면서 hr 라인 바로 아래에 자리잡음. */
+.techblog-hero-notice {
+    position: relative;
+    z-index: 2;
+    max-width: 1400px;
+    margin: clamp(48px, 8vw, 96px) auto 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    animation: editFadeUp 0.9s cubic-bezier(.2, .7, .2, 1) .5s forwards;
+}
+
+.techblog-hero-notice__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mute);
+}
+
+.techblog-hero-notice__title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(28px, 4vw, 44px);
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.techblog-hero-notice__sub {
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--mute);
+    max-width: 520px;
+    line-height: 1.7;
+    margin: 0;
+}
+
 /* EXTRAS (아래 CTA / 연락처 등) */
 .editorial-extras {
     position: relative;
@@ -307,6 +353,164 @@
     font-family: 'Pretendard Variable', Pretendard, sans-serif;
     color: #2B1E14;
     background-color: #FBF5E3;
+}
+
+/* =========================================================
+ * Editorial Search Bar — 조선 ledger 검색대 (索)
+ * 입력 + 필터(select) 를 한 종이판 위 두 칸으로 통합.
+ * 외곽 보더 없이 cream fill + offset shadow 로 카드감,
+ * 안쪽은 한지색 dashed 경계 한 줄로 영역 분리.
+ * focus-within 시 카드 전체가 들썩 → 한 단위 인터랙션.
+ *
+ * 재사용: .search-bar / .search-input-wrapper / .search-input / select.input
+ *  4개 클래스 조합으로 다른 페이지에서도 동일 룩 (JobSearchPage 외 적용 가능).
+ *  외부 컨테이너만 .job-tracker-app 이면 됨.
+ * ========================================================= */
+.job-tracker-app .search-bar {
+    display: flex !important;
+    align-items: stretch !important;          /* 자식 높이 균일 */
+    gap: 0 !important;                         /* 안쪽은 divider 로 분리 */
+    background: var(--jt-cream) !important;
+    border-radius: 2px;
+    box-shadow: 3px 5px 0 rgba(43, 30, 20, 0.18);
+    overflow: hidden;
+    margin-bottom: clamp(24px, 3vw, 36px) !important;
+    transition: transform 0.25s cubic-bezier(.2, .7, .2, 1),
+                box-shadow 0.25s ease;
+    position: relative;
+}
+
+.job-tracker-app .search-bar:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 4px 8px 0 rgba(43, 30, 20, 0.26);
+}
+
+/* 카드 위 hairline — 한지 ledger 의 헤더 룰 모방 (먹 0.4 alpha) */
+.job-tracker-app .search-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 18px;
+    right: 18px;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0,
+        rgba(43, 30, 20, 0.28) 12%,
+        rgba(43, 30, 20, 0.28) 88%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+/* === input 영역 === */
+.job-tracker-app .search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;                              /* flex item overflow 방지 */
+}
+
+.job-tracker-app .search-icon {
+    position: absolute;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--jt-mute);
+    pointer-events: none;
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.job-tracker-app .search-input-wrapper:focus-within .search-icon {
+    color: var(--jt-accent);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.job-tracker-app .search-input {
+    width: 100% !important;
+    padding: 18px 22px 18px 54px !important;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    line-height: 1.4;
+    color: var(--jt-ink) !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    letter-spacing: -0.01em;
+    transform: none !important;                /* 카드가 lift 처리, 자식은 정적 */
+}
+
+.job-tracker-app .search-input::placeholder {
+    color: rgba(43, 30, 20, 0.4);
+    font-weight: 400;
+}
+
+/* === select 필터 영역 === */
+.job-tracker-app .search-bar > select.input {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    width: auto !important;
+    min-width: 168px;
+    flex-shrink: 0;
+    padding: 18px 46px 18px 22px !important;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    color: var(--jt-ink) !important;
+    background-color: transparent !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232B1E14' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 18px center !important;
+    background-size: 14px 14px !important;
+    border: none !important;
+    border-left: 1px dashed rgba(43, 30, 20, 0.32) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease;
+    transform: none !important;
+}
+
+.job-tracker-app .search-bar > select.input:hover {
+    background-color: rgba(43, 30, 20, 0.04) !important;
+    color: var(--jt-accent) !important;
+    box-shadow: none !important;
+}
+
+.job-tracker-app .search-bar > select.input:focus {
+    outline: none !important;
+    background-color: rgba(140, 30, 26, 0.06) !important;
+    color: var(--jt-accent) !important;
+    box-shadow: none !important;
+}
+
+.job-tracker-app .search-bar > select.input option {
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--jt-ink);
+    background-color: var(--jt-cream);
+}
+
+/* === Responsive === select 가 너무 좁아지지 않게 stack */
+@media (max-width: 640px) {
+    .job-tracker-app .search-bar {
+        flex-direction: column !important;
+    }
+    .job-tracker-app .search-bar > select.input {
+        width: 100% !important;
+        border-left: none !important;
+        border-top: 1px dashed rgba(43, 30, 20, 0.32) !important;
+    }
 }
 
 /* ANIMATIONS */

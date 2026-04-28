@@ -12,11 +12,13 @@ interface PostCardProps {
 const formatDate = (dateString: string | null): string => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  });
+  return date
+    .toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    .replace(/\.\s*$/, '');
 };
 
 const PostCard: React.FC<PostCardProps> = ({ post, animationDelay = 1 }) => {
@@ -50,11 +52,11 @@ const PostCard: React.FC<PostCardProps> = ({ post, animationDelay = 1 }) => {
           <p className="post-card-excerpt">
             {post.excerpt || '내용 미리보기가 없습니다.'}
           </p>
-          <span className="post-card-date">{formatDate(post.published_at)}</span>
         </div>
       </Link>
 
       <div className="post-card-footer">
+        <span className="post-card-date">{formatDate(post.published_at)}</span>
         <div className="post-card-stats">
           <span className="post-card-stat">
             <svg viewBox="0 0 24 24">

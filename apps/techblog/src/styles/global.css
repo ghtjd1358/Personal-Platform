@@ -63,7 +63,6 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   padding: 20px;
-  border: 1px solid var(--border);
 }
 
 .card-header {
@@ -107,7 +106,6 @@ body {
 .btn-secondary {
   background: var(--surface);
   color: var(--text-primary);
-  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
@@ -181,7 +179,6 @@ body {
   background: var(--surface);
   border-radius: var(--radius-lg);
   padding: 20px;
-  border: 1px solid var(--border);
   transition: all 0.2s;
   cursor: pointer;
 }
@@ -408,7 +405,7 @@ body {
   background: var(--surface);
   border-radius: var(--radius-lg);
   padding: 20px;
-  border: 1px solid var(--border);
+  text-align: center;
 }
 
 .stat-value {

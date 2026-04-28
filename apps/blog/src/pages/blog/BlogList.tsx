@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { usePermission } from '@sonhoseong/mfa-lib';
 import {useBlogData, useScrollAnimation} from "@/hooks";
-import {BlogStats, HeroSection, PostsSection, SEOHead} from "@/components";
+import {BlogStats, HeroSection, PostsSection, SEOHead, SearchBar} from "@/components";
 import { getCategories, CategoryDetail } from "@/network";
 import { LINK_PREFIX } from '@/config/constants';
 
@@ -15,6 +15,7 @@ const BlogList: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sort, setSort] = useState<SortOpt>('latest');
   const [cols, setCols] = useState<ColsOpt>(4);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const {
     posts,
@@ -27,6 +28,7 @@ const BlogList: React.FC = () => {
     limit: 20,
     categoryId: selectedCategory,
     sort,
+    search: searchQuery,
   });
 
   useScrollAnimation([posts.length]);
@@ -34,12 +36,13 @@ const BlogList: React.FC = () => {
   // 필터 초기화
   const handleResetFilters = useCallback(() => {
     setSelectedCategory(null);
+    setSearchQuery('');
   }, []);
 
   // 활성 필터 여부 (메모이제이션)
   const hasActiveFilters = useMemo(
-    () => !!selectedCategory,
-    [selectedCategory]
+    () => !!selectedCategory || !!searchQuery,
+    [selectedCategory, searchQuery]
   );
 
   // 카테고리 목록 로드
@@ -99,34 +102,134 @@ const BlogList: React.FC = () => {
       {/* 필터 섹션 */}
       <section className="filter-section">
         <div className="container">
-          {/* 정렬 + 페이지당 개수 */}
+          {/* 검색바 */}
+          <div className="filter-group">
+            <SearchBar
+              placeholder="제목, 본문 내 검색..."
+              initialValue={searchQuery}
+              onSearch={setSearchQuery}
+            />
+          </div>
+
+          {/* 정렬 + 열 개수 — segmented control */}
           <div className="filter-group blog-sort-row">
             <div className="blog-sort-field">
               <span className="filter-label">정렬</span>
-              <select
-                className="editorial-select"
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortOpt)}
-                aria-label="정렬 기준"
-              >
-                <option value="latest">최신순</option>
-                <option value="oldest">오래된순</option>
-                <option value="popular">조회수 많은순</option>
-                <option value="liked">좋아요 많은순</option>
-              </select>
+              <div className="segmented-control" role="radiogroup" aria-label="정렬 기준">
+                <button
+                  type="button"
+                  className={`segmented-btn ${sort === 'latest' ? 'active' : ''}`}
+                  onClick={() => setSort('latest')}
+                  title="최신순"
+                  aria-pressed={sort === 'latest'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="6" x2="13" y2="6" />
+                    <line x1="3" y1="12" x2="11" y2="12" />
+                    <line x1="3" y1="18" x2="9" y2="18" />
+                    <polyline points="17 18 17 6 21 10" />
+                  </svg>
+                  <span>최신</span>
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-btn ${sort === 'oldest' ? 'active' : ''}`}
+                  onClick={() => setSort('oldest')}
+                  title="오래된순"
+                  aria-pressed={sort === 'oldest'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="6" x2="9" y2="6" />
+                    <line x1="3" y1="12" x2="11" y2="12" />
+                    <line x1="3" y1="18" x2="13" y2="18" />
+                    <polyline points="17 6 17 18 21 14" />
+                  </svg>
+                  <span>오래된</span>
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-btn ${sort === 'popular' ? 'active' : ''}`}
+                  onClick={() => setSort('popular')}
+                  title="조회수 많은순"
+                  aria-pressed={sort === 'popular'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <span>조회수</span>
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-btn ${sort === 'liked' ? 'active' : ''}`}
+                  onClick={() => setSort('liked')}
+                  title="좋아요 많은순"
+                  aria-pressed={sort === 'liked'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill={sort === 'liked' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  <span>좋아요</span>
+                </button>
+              </div>
             </div>
             <div className="blog-sort-field">
-              <span className="filter-label">열 개수</span>
-              <select
-                className="editorial-select"
-                value={cols}
-                onChange={(e) => setCols(Number(e.target.value) as ColsOpt)}
-                aria-label="열 개수"
-              >
-                <option value={3}>3열</option>
-                <option value={4}>4열</option>
-                <option value={5}>5열</option>
-              </select>
+              <span className="filter-label">열</span>
+              <div className="segmented-control segmented-control--cols" role="radiogroup" aria-label="열 개수">
+                {([3, 4, 5] as const).map((n) => {
+                  // 3 → 1행 3열, 4 → 2행 2열, 5 → 위 2 + 아래 3
+                  const rows: number[] = n === 3 ? [3] : n === 4 ? [2, 2] : [2, 3];
+                  const W = 32;
+                  const H = 24;
+                  const pad = 3;
+                  const gap = 2.5;
+                  const innerH = H - pad * 2;
+                  const rowH = (innerH - gap * (rows.length - 1)) / rows.length;
+                  const isActive = cols === n;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`segmented-btn cols-btn ${isActive ? 'active' : ''}`}
+                      onClick={() => setCols(n)}
+                      title={`${n}열`}
+                      aria-pressed={isActive}
+                    >
+                      <svg
+                        width={W}
+                        height={H}
+                        viewBox={`0 0 ${W} ${H}`}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        {rows.flatMap((cellsInRow, rIdx) => {
+                          const innerW = W - pad * 2;
+                          const cellW = (innerW - gap * (cellsInRow - 1)) / cellsInRow;
+                          const y = pad + rIdx * (rowH + gap);
+                          return Array.from({ length: cellsInRow }).map((_, cIdx) => {
+                            const x = pad + cIdx * (cellW + gap);
+                            return (
+                              <rect
+                                key={`${rIdx}-${cIdx}`}
+                                x={x}
+                                y={y}
+                                width={cellW}
+                                height={rowH}
+                                rx={1}
+                                fill={isActive ? 'currentColor' : 'none'}
+                              />
+                            );
+                          });
+                        })}
+                      </svg>
+                      <span className="cols-btn-num">{n}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -162,6 +265,12 @@ const BlogList: React.FC = () => {
             <div className="active-filters">
               <span className="filter-result-count">{posts.length}개의 결과</span>
               <div className="active-filter-tags">
+                {searchQuery && (
+                  <span className="active-filter-tag">
+                    검색: {searchQuery}
+                    <button onClick={() => setSearchQuery('')}>×</button>
+                  </span>
+                )}
                 {selectedCategory && (
                   <span className="active-filter-tag">
                     카테고리: {categories.find(c => c.id === selectedCategory)?.name}

@@ -28,7 +28,6 @@ const HomePage: React.FC = () => {
         projects,
         portfolioData,
         features,
-        contactLinks,
         loading,
     } = useHomePageData();
 
@@ -39,7 +38,7 @@ const HomePage: React.FC = () => {
             <SkillsSection categories={skillCategories} />
             <ExperienceSection experiences={experiences} projects={projects} />
             <ProjectsSection portfolioData={portfolioData} isLoading={loading} />
-            <ContactSection links={contactLinks} />
+            <ContactSection />
             <ModalContainer />
         </>
     );

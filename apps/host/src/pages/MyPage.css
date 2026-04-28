@@ -92,7 +92,6 @@
     flex-direction: column;
     padding: 28px 26px 22px;
     background: var(--mp-cream);
-    border: 2px solid var(--mp-ink);
     border-radius: 2px;
     box-shadow: 4px 6px 0 rgba(43, 30, 20, 0.12);
     transition:

@@ -7,6 +7,7 @@
  */
 import { Suspense, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import {
     selectIsAuthenticated,
     useSupabaseInitialize,
@@ -30,6 +31,9 @@ const App = () => {
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const { initialized } = useSupabaseInitialize();
     const { filterMenus } = usePermission();
+    const location = useLocation();
+    // 블로그 글 상세 페이지에선 host dock 숨김 — 본문 + TOC 집중 환경 확보
+    const isBlogPostDetail = /\/blog\/post\//.test(location.pathname);
 
     const filteredLnbItems = useMemo(() => {
         const currentUser = getCurrentUser();
@@ -71,7 +75,7 @@ const App = () => {
                     </main>
                 </ErrorBoundary>
             </Container>
-            <FloatingNav />
+            {!isBlogPostDetail && <FloatingNav />}
         </HostShell>
     ): (
         <HostShell>

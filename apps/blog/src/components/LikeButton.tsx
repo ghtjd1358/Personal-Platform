@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { toggleLike, checkLiked } from "../network";
 import { getCurrentUser, useToast } from "@sonhoseong/mfa-lib";
-import debounce from "lodash/debounce";
 
 interface LikeButtonProps {
   postId: string;
@@ -18,6 +17,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [animating, setAnimating] = useState(false);
   const isProcessingRef = useRef(false);
+  // 사용자가 한 번이라도 클릭하면 useEffect 의 stale checkLiked 결과로 state 덮어쓰지 않도록 플래그
+  const hasInteractedRef = useRef(false);
   const currentUser = getCurrentUser();
   const toast = useToast();
 
@@ -26,6 +27,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       if (!currentUser?.id) return;
 
       const result = await checkLiked(postId, currentUser.id);
+      // 사용자가 클릭한 후 늦게 resolve 되면 무시 (race 차단)
+      if (hasInteractedRef.current) return;
       if (result.success && result.data !== undefined) {
         setLiked(result.data);
       }
@@ -60,13 +63,6 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     [postId, currentUser?.id, onLikeChange]
   );
 
-  const debouncedToggle = useCallback(
-    debounce((prevLiked: boolean, prevCount: number) => {
-      performLikeToggle(prevLiked, prevCount);
-    }, 300),
-    [performLikeToggle]
-  );
-
   const handleLike = () => {
     if (!currentUser?.id) {
       toast.info("좋아요를 누르려면 로그인이 필요합니다.");
@@ -75,18 +71,21 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 
     if (isProcessingRef.current) return;
     isProcessingRef.current = true;
+    hasInteractedRef.current = true;
 
     const prevLiked = liked;
     const prevCount = likeCount;
     const newLiked = !liked;
     const newCount = newLiked ? likeCount + 1 : likeCount - 1;
 
+    // 옵티미스틱 UI 갱신 — 즉시 반영
     setLiked(newLiked);
     setLikeCount(newCount);
     setAnimating(true);
     setTimeout(() => setAnimating(false), 300);
 
-    debouncedToggle(prevLiked, prevCount);
+    // 서버 호출 즉시 (debounce 제거 — lock + 옵티미스틱 으로 충분, debounce 가 stale checkLiked 와 race 만 유발)
+    performLikeToggle(prevLiked, prevCount);
   };
 
   return (

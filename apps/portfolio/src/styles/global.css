@@ -366,8 +366,10 @@ body.has-header {
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 20px rgba(0, 0, 0, 0.08);
   position: relative;
 }
 
@@ -499,8 +501,11 @@ body.has-header {
   border-radius: 20px;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  /* tight ring + drop shadow — 보더 없이 사방 가장자리 정의 */
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 20px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
 }
@@ -698,8 +703,10 @@ body.has-header {
   overflow: hidden;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 6px 18px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
 }
@@ -829,8 +836,10 @@ body.has-header {
   border-radius: var(--radius-xl);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 6px 18px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
 }
@@ -1022,8 +1031,10 @@ body.has-header {
   overflow: hidden;
   cursor: pointer;
   transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 8px 40px rgba(30, 58, 95, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 0 0 1px rgba(30, 58, 95, 0.05),
+    0 1px 3px rgba(30, 58, 95, 0.08),
+    0 8px 40px rgba(30, 58, 95, 0.1);
 }
 
 .insta-hero-card:hover {

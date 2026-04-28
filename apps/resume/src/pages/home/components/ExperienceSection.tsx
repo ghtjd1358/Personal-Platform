@@ -182,7 +182,9 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
           </>
         )}
 
-        <SectionEditButton editPath="/admin/experience" label="경력 편집" />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+          <SectionEditButton editPath="/admin/experience" label="경력 편집" />
+        </div>
       </div>
     </section>
   );

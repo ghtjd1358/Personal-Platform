@@ -57,7 +57,9 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ categories }) => {
           )}
         </div>
 
-        <SectionEditButton editPath="/admin/skills" label="기술스택 편집" />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+          <SectionEditButton editPath="/admin/skills" label="기술스택 편집" />
+        </div>
       </div>
     </section>
   );
