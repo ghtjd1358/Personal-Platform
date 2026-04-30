@@ -105,7 +105,9 @@
       "Bash(awk 'NR<=40 || NR%5==0')",
       "Bash(tasklist /FI \"PID eq 3676\" /FI \"PID eq 18292\" /FI \"PID eq 2252\" /FI \"PID eq 13804\" /FI \"PID eq 16692\")",
       "Bash(tasklist //FI 'PID eq __TRACKED_VAR__' //NH)",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "Bash(sort -t: -k2 -n)",
+      "Bash(awk -F': ' '{n++; s+=$2; if\\($2>m\\)m=$2; if\\(n==1||$2<min\\)min=$2} END {printf \"commits=%d  avg=%.2fms  max=%.2fms  min=%.2fms\\\\n\", n, s/n, m, min}')"
     ]
   },
   "outputStyle": "Learning"
