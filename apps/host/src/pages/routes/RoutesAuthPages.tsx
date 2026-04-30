@@ -4,10 +4,15 @@
 import React, { Suspense } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { trackPromise } from 'react-promise-tracker';
 import { RemoteErrorBoundary, REMOTE_LINK_PREFIX, selectUser } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './paths';
 import Dashboard from '../Dashboard';
 import MyPage from '../MyPage';
+
+// LNB → remote 진입 시 chunk download 동안 GlobalLoading 띄우기 위한 GLOBAL area.
+// lib `useShowGlobalLoading` 와 동일 area 라 같은 GlobalLoading 인스턴스가 자동 표시.
+const LOADING_AREA = 'GLOBAL';
 
 /**
  * MyPageGuard — admin 은 MyPage 접근 불가 (운영 원칙).
@@ -23,29 +28,22 @@ const MyPageGuard: React.FC = () => {
 };
 
 
-// Remote App lazy imports with fallback
+// Remote App lazy imports — chunk download 를 trackPromise 로 감싸 GlobalLoading 표시.
+// 실패 시 빈 컴포넌트로 graceful fallback (네트워크/배포 이슈로 remoteEntry.js 로드 실패 케이스).
 const ResumeApp = React.lazy(() =>
-  import('@resume/App').catch(() => ({
-    default: () => null // 로드 실패 시 빈 컴포넌트
-  }))
+  trackPromise(import('@resume/App').catch(() => ({ default: () => null })), LOADING_AREA)
 );
 
 const BlogApp = React.lazy(() =>
-  import('@blog/App').catch(() => ({
-    default: () => null
-  }))
+  trackPromise(import('@blog/App').catch(() => ({ default: () => null })), LOADING_AREA)
 );
 
 const PortfolioApp = React.lazy(() =>
-  import('@portfolio/App').catch(() => ({
-    default: () => null
-  }))
+  trackPromise(import('@portfolio/App').catch(() => ({ default: () => null })), LOADING_AREA)
 );
 
 const JobTrackerApp = React.lazy(() =>
-  import('@jobtracker/App').catch(() => ({
-    default: () => null
-  }))
+  trackPromise(import('@jobtracker/App').catch(() => ({ default: () => null })), LOADING_AREA)
 );
 
 // Remote URL prefix — lib 의 단일 소스에서 가져옴 (remote 의 LINK_PREFIX 와 동기화 보장)
