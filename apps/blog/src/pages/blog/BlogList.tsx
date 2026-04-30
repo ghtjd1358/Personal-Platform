@@ -349,6 +349,8 @@ const BlogList: React.FC = () => {
           isLoadingMore={isLoadingMore}
           hasMore={hasMore}
           onLoadMore={loadMore}
+          sortField={sortField}
+          sortDir={sortDir}
         />
       </div>
       </>

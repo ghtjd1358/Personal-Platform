@@ -4230,7 +4230,26 @@ pre.shiki:hover .code-copy-btn,
  * ========================================================= */
 .filter-section {
     position: relative;
-    padding: 16px 0 clamp(28px, 4vw, 48px);
+    padding: 16px 0 12px;
+}
+
+/* PostsSection(.section) 기본 padding 이 큼 — filter-section 직후라 위쪽 간격 압축. */
+.filter-section + div .section,
+.filter-section ~ div .section {
+    padding-top: 8px;
+}
+
+/* PostsSection eyebrow — POSTS · 작성일 내림차순 같은 정렬 컨텍스트 라벨 */
+.posts-section-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
 }
 
 /* =========================================================
@@ -7145,7 +7164,7 @@ pre.shiki:hover .code-copy-btn,
  * 한지 cream + 먹 hairline rule. 카드 위로 끌어올리는 컴팩트 1행 bar.
  * ================================================================== */
 .blog-tabs-section {
-    padding: 0;
+    padding: clamp(56px, 7vw, 96px) 0 0;
 }
 
 .blog-toolbar-row {
