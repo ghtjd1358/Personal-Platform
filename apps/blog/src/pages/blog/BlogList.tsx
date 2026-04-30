@@ -78,6 +78,7 @@ const BlogList: React.FC = () => {
         totalPosts={totalPosts}
         totalLikes={totalLikes}
         daysRunning={daysRunning}
+        isLoading={isLoading}
       />
 
       {/* 관리자 전용 inline action bar — stats 아래, 글 목록 바로 위에 배치

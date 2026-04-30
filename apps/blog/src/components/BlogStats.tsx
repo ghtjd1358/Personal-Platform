@@ -6,6 +6,8 @@ interface BlogStatsProps {
   totalPosts: number;
   totalLikes: number;
   daysRunning: number;
+  /** 데이터 fetch 중이면 0 대신 3-dot pulse 표시 (count-up 깜빡임/0 정체 UX 해결) */
+  isLoading?: boolean;
 }
 
 /**
@@ -47,10 +49,19 @@ const useCountUp = (target: number, duration = 900, active = true): number => {
   return value;
 };
 
-/* 스켈레톤 dots 제거 — 숫자는 항상 0 에서 count-up, 데이터 도착하면 자연스럽게 올라감.
-   Hero/Admin bar 와 같은 "껍데기" 영역에 skeleton 이 뜨는 게 어색하다는 피드백 반영. */
-const StatValue: React.FC<{ target: number }> = ({ target }) => {
-  const v = useCountUp(target, 900, true);
+/* loading 중엔 3-dot ink pulse, 아니면 count-up.
+   Hero/Admin bar 와 다르게 stats 는 정량 정보라 0 정체가 더 어색 → 명시적 loading 신호 필요. */
+const StatValue: React.FC<{ target: number; isLoading?: boolean }> = ({ target, isLoading }) => {
+  const v = useCountUp(target, 900, !isLoading);
+  if (isLoading) {
+    return (
+      <span className="blog-stat-value blog-stat-loading" aria-label="불러오는 중">
+        <span className="blog-stat-dot" />
+        <span className="blog-stat-dot" />
+        <span className="blog-stat-dot" />
+      </span>
+    );
+  }
   return <span className="blog-stat-value">{v.toLocaleString()}</span>;
 };
 
@@ -59,25 +70,26 @@ const BlogStats: React.FC<BlogStatsProps> = ({
   totalPosts,
   totalLikes,
   daysRunning,
+  isLoading = false,
 }) => {
   return (
     <section className="blog-stats-section">
       <div className="container">
         <div className="blog-stats">
           <div className="blog-stat">
-            <StatValue target={totalViews} />
+            <StatValue target={totalViews} isLoading={isLoading} />
             <span className="blog-stat-label">총 방문</span>
           </div>
           <div className="blog-stat">
-            <StatValue target={totalPosts} />
+            <StatValue target={totalPosts} isLoading={isLoading} />
             <span className="blog-stat-label">포스트</span>
           </div>
           <div className="blog-stat">
-            <StatValue target={totalLikes} />
+            <StatValue target={totalLikes} isLoading={isLoading} />
             <span className="blog-stat-label">좋아요</span>
           </div>
           <div className="blog-stat">
-            <StatValue target={daysRunning} />
+            <StatValue target={daysRunning} isLoading={isLoading} />
             <span className="blog-stat-label">일째 운영</span>
           </div>
         </div>
