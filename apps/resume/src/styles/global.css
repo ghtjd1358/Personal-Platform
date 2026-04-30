@@ -1556,6 +1556,29 @@ body.has-header {
   margin-bottom: 40px;
 }
 
+/* ContactSection 안의 editorial-contact 만 가운데 정렬 — Hero 의 좌측 정렬은 보존 */
+.section.contact .editorial-contact {
+  align-items: center;
+  text-align: center;
+}
+
+/* ContactSection 의 section-title / contact-desc 사이 hr / underline / 장식 pseudo 차단.
+ * 어디서 오는 cascade 든 (lib / global / brutalist) 모두 reset. */
+.section.contact .section-title,
+.section.contact .contact-desc {
+  border: none !important;
+  padding-bottom: 0 !important;
+  text-decoration: none !important;
+  background: transparent !important;
+}
+.section.contact .section-title::before,
+.section.contact .section-title::after,
+.section.contact .contact-desc::before,
+.section.contact .contact-desc::after {
+  content: none !important;
+  display: none !important;
+}
+
 .contact-links {
   display: flex;
   justify-content: center;
@@ -2005,24 +2028,35 @@ body.has-header {
     margin-bottom: 20px;
   }
 
-  /* Timeline */
+  /* Timeline — 모바일에서는 회사명 → 날짜 → 역할 순으로 재배열.
+     desktop의 [date | content] 그리드를 contents 로 풀어 order 로 흐름 제어. */
   .timeline-item {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     padding: 20px 0;
   }
 
+  .timeline-content { display: contents; }
+  .timeline-content h3 { order: 1; font-size: 18px; }
+
   .timeline-date {
-    font-size: 14px;
+    order: 2;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    padding: 0;
+    margin-bottom: 8px;
+  }
+  .timeline-date .exp-type-badge {
+    display: inline-block;
+    margin-left: 6px;
+    margin-top: 0;
   }
 
-  .timeline-content h3 {
-    font-size: 18px;
-  }
-
-  .timeline-content p {
-    font-size: 14px;
-  }
+  .timeline-content p { order: 3; font-size: 14px; }
+  .timeline-content .timeline-tech-icons,
+  .timeline-content .toggle-tasks,
+  .timeline-content .timeline-tasks-collapsible { order: 4; }
 
   .timeline-tasks li {
     font-size: 13px;

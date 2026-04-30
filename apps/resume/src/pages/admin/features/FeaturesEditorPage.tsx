@@ -14,6 +14,7 @@ import {
     useUploadFeatureImage,
     useDeleteFeatureImage,
 } from '../../../network/hooks'
+import { resolveFeatureImage } from '@/assets/images/hero'
 import { LINK_PREFIX } from '@/config/constants'
 import '../experience/ExperienceEditor.editorial.css'
 
@@ -103,7 +104,9 @@ const FeaturesEditorPage: React.FC = () => {
         navigate(`${LINK_PREFIX}/admin/features`)
     }
 
-    const currentImage = previewUrl || form.image_url || null
+    // 홈/list 와 동일한 resolver — order_index 매핑 우선, 그 다음 업로드 preview/DB url.
+    const currentImage =
+        previewUrl ?? resolveFeatureImage(form.order_index, form.image_url) ?? null
 
     return (
         <div className="admin-editor-page exp-editor">

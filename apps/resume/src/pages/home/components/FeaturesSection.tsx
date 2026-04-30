@@ -1,9 +1,7 @@
 import React from 'react';
 import SectionEditButton from '../../../components/common/SectionEditButton';
 import { FeatureCardSkeleton } from './FeatureCardSkeleton';
-import reactImg from '@/assets/images/hero/react.webp';
-import optimizationImg from '@/assets/images/hero/optimization.webp';
-import teamworkImg from '@/assets/images/hero/teamwork.webp';
+import { resolveFeatureImage } from '@/assets/images/hero';
 
 /**
  * Feature 카드는 DB row (image_url) 기반.
@@ -26,12 +24,6 @@ interface FeaturesSectionProps {
 
 const SKELETON_COUNT = 6;
 
-const FEATURE_IMAGE_BY_ORDER: Record<number, string> = {
-  1: reactImg,
-  2: optimizationImg,
-  3: teamworkImg,
-};
-
 export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ features, isLoading = false }) => {
   const showSkeleton = isLoading && features.length === 0;
 
@@ -48,10 +40,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ features, isLo
                 <FeatureCardSkeleton key={`skeleton-${i}`} />
               ))
             : features.map((feature, index) => {
-                const mappedImage = feature.order_index
-                  ? FEATURE_IMAGE_BY_ORDER[feature.order_index]
-                  : undefined;
-                const imageSrc = mappedImage ?? feature.image_url;
+                const imageSrc = resolveFeatureImage(feature.order_index, feature.image_url);
                 return (
                   <div
                     /* key 를 index 로 — mock('react')→DB(uuid) fetch 교체 시 React 가

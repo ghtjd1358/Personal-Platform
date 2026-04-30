@@ -1,46 +1,32 @@
 /**
- * FeaturesListPage — "이런 개발자입니다" 섹션 카드 CRUD 목록.
- * - 내 features 만 표시 (권한: owner 본인 전체 CRUD, 다른 사람은 열람만)
- * - 썸네일 + 제목 + 설명 요약 + ✎ / × 인라인 액션
+ * FeaturesListPage — "이런 개발자입니다" 섹션 카드 목록 (수정 전용).
+ * - 추가/삭제 비활성. 기존 카드 내용만 수정 가능.
+ * - 썸네일 + 제목 + 설명 요약 + ✎ 인라인 액션
  */
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useAsyncConfirm, usePermission, getCurrentUser } from '@sonhoseong/mfa-lib'
+import { usePermission, getCurrentUser } from '@sonhoseong/mfa-lib'
 import type { Feature } from '../../../network/apis/types'
 import {
     useFetchFeatures,
     useFetchFeaturesByUserId,
-    useDeleteFeature,
-    useDeleteFeatureImage,
 } from '../../../network/hooks'
+import { resolveFeatureImage } from '@/assets/images/hero'
 import { LINK_PREFIX } from '@/config/constants'
 import '../experience/ExperienceList.editorial.css'
 
 const FeaturesListPage: React.FC = () => {
-    const confirmDialog = useAsyncConfirm()
     const { canEditResource } = usePermission()
     const currentUser = getCurrentUser()
 
-    const [updater, setUpdater] = useState(0)
-    // 로그인 유저면 본인 것만, 아니면 전체. 두 훅 모두 mount 되지만 데이터는 하나만 사용.
-    const { features: myFeatures } = useFetchFeaturesByUserId(currentUser?.id, updater)
-    const { features: allFeatures } = useFetchFeatures(currentUser?.id ? -1 : updater)
-    const deleteFeature = useDeleteFeature()
-    const deleteFeatureImage = useDeleteFeatureImage()
+    // 핵심 역량 카드는 추가/삭제 불가 — 수정만 가능. updater 불필요.
+    const { features: myFeatures } = useFetchFeaturesByUserId(currentUser?.id, 0)
+    const { features: allFeatures } = useFetchFeatures(currentUser?.id ? -1 : 0)
 
     const items = useMemo(
         () => (currentUser?.id ? (myFeatures as Feature[]) : (allFeatures as Feature[])),
         [currentUser?.id, myFeatures, allFeatures],
     )
-
-    const handleDelete = async (item: Feature) => {
-        const ok = await confirmDialog(`"${item.title}" 카드를 삭제할까요?`, '카드 삭제')
-        if (!ok) return
-        // Storage 이미지도 같이 정리 (orphan 방지)
-        if (item.image_url) await deleteFeatureImage(item.image_url)
-        const done = await deleteFeature(item.id)
-        if (done) setUpdater((n) => n + 1)
-    }
 
     return (
         <div className="admin-list-page exp-admin">
@@ -62,31 +48,21 @@ const FeaturesListPage: React.FC = () => {
                         <span className="exp-section-eyebrow">SECTION · FEATURES</span>
                         <h2 className="exp-section-title">핵심 역량 카드</h2>
                     </div>
-                    <Link
-                        to={`${LINK_PREFIX}/admin/features/new`}
-                        className="exp-btn exp-btn--primary"
-                    >
-                        + 카드 추가
-                    </Link>
                 </header>
 
                 {items.length === 0 ? (
                     <div className="exp-empty">
                         <p className="exp-empty-title">등록된 카드가 없습니다.</p>
-                        <Link
-                            to={`${LINK_PREFIX}/admin/features/new`}
-                            className="exp-btn exp-btn--ghost"
-                        >
-                            첫 카드 추가하기
-                        </Link>
                     </div>
                 ) : (
                     <ul className="exp-list">
-                        {items.map((f) => (
+                        {items.map((f) => {
+                            const thumb = resolveFeatureImage(f.order_index, f.image_url)
+                            return (
                             <li key={f.id} className="exp-row">
-                                {f.image_url && (
+                                {thumb && (
                                     <img
-                                        src={f.image_url}
+                                        src={thumb}
                                         alt={f.title}
                                         className="exp-row-thumb"
                                     />
@@ -98,25 +74,14 @@ const FeaturesListPage: React.FC = () => {
                                 </div>
                                 <div className="exp-row-actions">
                                     {canEditResource(f.user_id) ? (
-                                        <>
-                                            <Link
-                                                to={`${LINK_PREFIX}/admin/features/edit/${f.id}`}
-                                                className="exp-icon-btn"
-                                                title="수정"
-                                                aria-label="수정"
-                                            >
-                                                ✎
-                                            </Link>
-                                            <button
-                                                type="button"
-                                                className="exp-icon-btn exp-icon-btn--danger"
-                                                onClick={() => handleDelete(f)}
-                                                title="삭제"
-                                                aria-label="삭제"
-                                            >
-                                                ×
-                                            </button>
-                                        </>
+                                        <Link
+                                            to={`${LINK_PREFIX}/admin/features/edit/${f.id}`}
+                                            className="exp-icon-btn"
+                                            title="수정"
+                                            aria-label="수정"
+                                        >
+                                            ✎
+                                        </Link>
                                     ) : (
                                         <Link
                                             to={`${LINK_PREFIX}/admin/features/edit/${f.id}`}
@@ -129,7 +94,7 @@ const FeaturesListPage: React.FC = () => {
                                     )}
                                 </div>
                             </li>
-                        ))}
+                        )})}
                     </ul>
                 )}
             </section>
