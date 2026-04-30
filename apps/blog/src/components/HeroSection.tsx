@@ -85,7 +85,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           <h1 className="editorial-title">
             배움과<br />
             고민의 과정을<br />
-            <em>차곡차곡 기록합니다.</em>
+            <em>기록합니다.</em>
           </h1>
           <p className="editorial-sub">
             프론트엔드 개발 경험과 학습 내용을 기록합니다.

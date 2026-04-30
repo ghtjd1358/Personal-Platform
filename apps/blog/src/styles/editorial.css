@@ -204,7 +204,7 @@
 
 .editorial-stat-value {
     font-family: 'Fraunces', 'Nanum Myeongjo', serif;
-    font-size: clamp(28px, 3.4vw, 40px);
+    font-size: clamp(44px, 5.5vw, 64px);
     font-weight: 400;
     font-style: italic;
     font-variation-settings: "opsz" 144, "SOFT" 60, "WONK" 1;
@@ -214,16 +214,15 @@
     font-variant-numeric: tabular-nums;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .editorial-stat-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    font-family: 'Pretendard Variable', 'JetBrains Mono', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
     color: var(--mute);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* loading dots inline — 큰 숫자 자리 보존 */
