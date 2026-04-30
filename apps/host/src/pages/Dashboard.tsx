@@ -59,7 +59,7 @@ const channels: Channel[] = [
         num: '/01',
         ko: '이력서',
         en: 'Résumé',
-        desc: '경력과 프로젝트를 정리한 이력서. Supabase 기반으로 내용이 실시간 반영됩니다.',
+        desc: '지금까지의 경력, 진행한 프로젝트, 다룰 줄 아는 기술을 한 페이지에 정리.',
         tags: ['React 19', 'Supabase', 'TypeScript'],
         path: RoutePath.Resume,
         Icon: ResumeIcon,
@@ -68,7 +68,7 @@ const channels: Channel[] = [
         num: '/02',
         ko: '블로그',
         en: 'Journal',
-        desc: 'Tiptap 에디터와 Shiki 코드 하이라이팅을 갖춘 개인 블로그. 마크다운 CRUD와 시리즈 기능.',
+        desc: '공부한 것·고민한 것·풀어낸 것을 글로 남기는 개인 저장소. 시리즈로 묶어 정리합니다.',
         tags: ['Tiptap', 'Shiki', 'Markdown'],
         path: RoutePath.Blog,
         Icon: BlogIcon,
@@ -77,7 +77,7 @@ const channels: Channel[] = [
         num: '/03',
         ko: '포트폴리오',
         en: 'Works',
-        desc: 'AOS 스크롤 애니메이션으로 연출한 프로젝트 쇼케이스. 카드 그리드와 상세 모달.',
+        desc: '직접 만든 프로젝트의 의도와 결과를 모아놓은 쇼케이스. 카드에서 골라 상세를 들여다봅니다.',
         tags: ['AOS', 'Scroll Anim', 'Modal'],
         path: RoutePath.Portfolio,
         Icon: PortfolioIcon,
@@ -86,7 +86,7 @@ const channels: Channel[] = [
         num: '/04',
         ko: '취업관리',
         en: 'Tracker',
-        desc: '지원 현황과 일정을 캘린더로 관리하는 트래커. 기술 블로그 포스팅도 함께 운영.',
+        desc: '지원한 회사·일정·결과를 한곳에 기록하는 개인 트래커. 어디까지 왔는지 한눈에.',
         tags: ['Calendar', 'Tracker', 'Tech Blog'],
         path: RoutePath.JobTracker,
         Icon: JobTrackerIcon,
@@ -140,8 +140,8 @@ const Dashboard: React.FC = () => {
                 <div>
                     <span className="hero-eyebrow">MFA // Portfolio // 2026</span>
                     <h1 className="hero-title">
-                        Four Apps,<br />
-                        <em>One Shell.</em>
+                        나만을 위한 작업,<br />
+                        <em>개인 플랫폼.</em>
                     </h1>
                     <p className="hero-sub">
                         Webpack Module Federation으로 독립 배포된 네 개의 remote를 하나의 host에 묶은 포트폴리오 플랫폼.

@@ -75,10 +75,10 @@
  */
 .dashboard-root .hero-title {
     font-family: 'Fraunces', 'FallbackFraunces', 'Georgia', 'Times New Roman', serif;
-    font-size: clamp(56px, 9.5vw, 148px);
+    font-size: clamp(44px, 6.4vw, 96px);
     font-weight: 300;
-    line-height: 0.92;
-    letter-spacing: -0.04em;
+    line-height: 0.96;
+    letter-spacing: -0.035em;
     margin: 0;
     font-variation-settings: "opsz" 144, "SOFT" 100;
     animation: none; /* resume 의 fadeInBlur 가 따라오던 것 차단 */
@@ -91,7 +91,7 @@
 }
 
 .dashboard-root .hero-sub {
-    max-width: 520px;
+    max-width: none;  /* title 과 동일한 좌측 grid column 폭 사용 */
     margin: 24px 0 0;
     font-family: 'Fraunces', 'Pretendard Variable', serif;
     font-style: italic;
