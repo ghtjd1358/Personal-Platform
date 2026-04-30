@@ -13,6 +13,11 @@
     --jaseong: #8C1E1A;           /* 朱紅 — 인장 */
     --royal-gold: #C8A35C;        /* 왕실 황 */
     --straw: #E6D4A3;             /* 볏짚 */
+
+    /* host 전용 modal 컨셉 — admin/system 무게감 (accent 를 먹 단색으로,
+       eyebrow 라벨도 SYSTEM 으로 차별화). 나머지 4 remote 는 lib fallback(한지+먹+주홍) 그대로. */
+    --mfa-modal-accent: var(--sumi);
+    --mfa-modal-eyebrow: 'SYSTEM';
 }
 
 html,

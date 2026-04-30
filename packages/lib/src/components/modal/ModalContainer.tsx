@@ -104,8 +104,9 @@ const ModalContainer: React.FC = () => {
             ))}
 
             <style>{`
-                /* Editorial modal — 한지 cream + 먹 ink + 주홍 accent.
-                 * 이전 기본 UI(흰색 bg + 파란 버튼) 는 프로젝트 톤과 충돌해서 전면 교체.
+                /* Editorial modal — token 화. 각 remote 가 :root 에서 --mfa-modal-* 만 override 하면
+                 * 자기 컨셉(blog 한지/주홍, portfolio 한지/주홍, resume 한지/먹, techblog 별도 톤 등)
+                 * 으로 달라짐. fallback 값은 blog editorial(한지+먹+주홍).
                  */
                 .modal-overlay {
                     position: fixed;
@@ -113,7 +114,7 @@ const ModalContainer: React.FC = () => {
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: rgba(43, 30, 20, 0.55);
+                    background: var(--mfa-modal-overlay-bg, rgba(43, 30, 20, 0.55));
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -126,19 +127,19 @@ const ModalContainer: React.FC = () => {
                 }
 
                 .modal-container {
-                    background: #FBF5E3;
-                    border: 2px solid #2B1E14;
-                    border-radius: 2px;
+                    background: var(--mfa-modal-bg, #FBF5E3);
+                    border: 2px solid var(--mfa-modal-ink, #2B1E14);
+                    border-radius: var(--mfa-modal-radius, 2px);
                     box-shadow:
-                        6px 8px 0 rgba(43, 30, 20, 0.22),
+                        6px 8px 0 var(--mfa-modal-ink-shadow, rgba(43, 30, 20, 0.22)),
                         14px 20px 40px rgba(43, 30, 20, 0.15);
                     min-width: 340px;
                     max-width: 520px;
                     max-height: 90vh;
                     overflow: hidden;
                     animation: modal-slide-up 0.25s cubic-bezier(.2, .7, .2, 1);
-                    font-family: 'Pretendard Variable', Pretendard, sans-serif;
-                    color: #2B1E14;
+                    font-family: var(--mfa-modal-font-body, 'Pretendard Variable', Pretendard, sans-serif);
+                    color: var(--mfa-modal-ink, #2B1E14);
                     position: relative;
                 }
 
@@ -147,7 +148,7 @@ const ModalContainer: React.FC = () => {
                     content: '';
                     position: absolute;
                     inset: 0;
-                    background-image: radial-gradient(rgba(43, 30, 20, 0.05) 1px, transparent 1px);
+                    background-image: radial-gradient(var(--mfa-modal-ink-shadow, rgba(43, 30, 20, 0.05)) 1px, transparent 1px);
                     background-size: 3px 3px;
                     pointer-events: none;
                     opacity: 0.5;
@@ -170,22 +171,22 @@ const ModalContainer: React.FC = () => {
                 }
 
                 .modal-header::before {
-                    content: 'DIALOG';
+                    content: var(--mfa-modal-eyebrow, 'DIALOG');
                     display: block;
-                    font-family: 'JetBrains Mono', monospace;
+                    font-family: var(--mfa-modal-font-mono, 'JetBrains Mono', monospace);
                     font-size: 10px;
                     letter-spacing: 0.22em;
-                    color: #8C1E1A;
+                    color: var(--mfa-modal-accent, #8C1E1A);
                     text-transform: uppercase;
                     margin-bottom: 6px;
                 }
 
                 .modal-title {
                     margin: 0;
-                    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+                    font-family: var(--mfa-modal-font-display, 'Fraunces', 'FallbackFraunces', Georgia, serif);
                     font-weight: 500;
                     font-size: 22px;
-                    color: #2B1E14;
+                    color: var(--mfa-modal-ink, #2B1E14);
                     line-height: 1.25;
                     letter-spacing: -0.005em;
                     font-variation-settings: "opsz" 144, "SOFT" 30;
@@ -199,10 +200,10 @@ const ModalContainer: React.FC = () => {
                 .modal-message {
                     margin: 0;
                     font-size: 14px;
-                    color: #2B1E14;
+                    color: var(--mfa-modal-ink, #2B1E14);
                     line-height: 1.7;
                     white-space: pre-wrap;
-                    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
+                    font-family: var(--mfa-modal-font-display, 'Fraunces', 'FallbackFraunces', Georgia, serif);
                     font-style: italic;
                 }
 
@@ -212,43 +213,43 @@ const ModalContainer: React.FC = () => {
                     justify-content: flex-end;
                     gap: 8px;
                     padding: 16px 28px;
-                    background: #F4EAD5;
-                    border-top: 1px dashed #D4C4A8;
+                    background: var(--mfa-modal-bg-secondary, #F4EAD5);
+                    border-top: 1px dashed var(--mfa-modal-line, #D4C4A8);
                 }
 
                 .modal-button {
                     padding: 9px 20px;
-                    font-family: 'Pretendard Variable', sans-serif;
+                    font-family: var(--mfa-modal-font-body, 'Pretendard Variable', sans-serif);
                     font-size: 13px;
                     font-weight: 600;
-                    border-radius: 2px;
-                    border: 1px solid #2B1E14;
+                    border-radius: var(--mfa-modal-radius, 2px);
+                    border: 1px solid var(--mfa-modal-ink, #2B1E14);
                     cursor: pointer;
                     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
                     line-height: 1;
                 }
 
                 .modal-button.primary {
-                    background: #2B1E14;
-                    color: #FBF5E3;
+                    background: var(--mfa-modal-ink, #2B1E14);
+                    color: var(--mfa-modal-bg, #FBF5E3);
                 }
 
                 .modal-button.primary:hover {
                     transform: translateY(-1px);
-                    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.25);
-                    background: #8C1E1A;
-                    border-color: #8C1E1A;
+                    box-shadow: 2px 3px 0 var(--mfa-modal-ink-shadow, rgba(43, 30, 20, 0.25));
+                    background: var(--mfa-modal-accent, #8C1E1A);
+                    border-color: var(--mfa-modal-accent, #8C1E1A);
                 }
 
                 .modal-button.secondary {
                     background: transparent;
-                    color: #2B1E14;
+                    color: var(--mfa-modal-ink, #2B1E14);
                 }
 
                 .modal-button.secondary:hover {
-                    background: #FBF5E3;
-                    color: #8C1E1A;
-                    border-color: #8C1E1A;
+                    background: var(--mfa-modal-bg, #FBF5E3);
+                    color: var(--mfa-modal-accent, #8C1E1A);
+                    border-color: var(--mfa-modal-accent, #8C1E1A);
                 }
             `}</style>
         </>

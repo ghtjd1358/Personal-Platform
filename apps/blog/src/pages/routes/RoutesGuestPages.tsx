@@ -1,5 +1,6 @@
 import React, { lazy, useEffect } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
+import { useAsyncAlert } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './paths';
 import { PREFIX } from '@/config/constants';
 
@@ -9,10 +10,13 @@ const SeriesDetail = lazy(() => import('@/pages/series/SeriesDetail'));
 
 function LoginRequiredAlert() {
     const navigate = useNavigate();
+    const alertDialog = useAsyncAlert();
     useEffect(() => {
-        alert('로그인 부탁드립니다.');
-        navigate(`${PREFIX}/`, { replace: true });
-    }, [navigate]);
+        // 알럿 닫힘 후 목록으로 이동 — async 모달이라 navigate 를 then 으로 묶음.
+        alertDialog('로그인 부탁드립니다.').then(() => {
+            navigate(`${PREFIX}/`, { replace: true });
+        });
+    }, [navigate, alertDialog]);
     return null;
 }
 
