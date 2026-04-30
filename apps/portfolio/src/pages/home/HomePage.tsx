@@ -10,7 +10,7 @@ import { usePortfolios } from './hooks';
 import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
 import PortfolioCardSkeleton from '@/components/PortfolioCardSkeleton';
-import { HeroSection } from '@/components';
+import { HeroSection, PortfolioStats } from '@/components';
 import AOS from 'aos';
 import './HomePage.editorial.css';
 
@@ -24,7 +24,7 @@ const HomePage: React.FC = () => {
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
-  const [cols, setCols] = useState<ColsOpt>(3);
+  const [cols, setCols] = useState<ColsOpt>(1);
   const { portfolios, featuredProjects, otherProjects, loading } = usePortfolios();
   const currentUser = getCurrentUser();
   const navigate = useNavigate();
@@ -139,6 +139,9 @@ const HomePage: React.FC = () => {
     <div className="portfolio-module">
       {/* 히어로 섹션 - 비디오 배경 */}
       <HeroSection />
+
+      {/* 정량 지표 — blog/BlogStats 와 동일 dialect, portfolio 도메인 데이터로 */}
+      <PortfolioStats portfolios={portfolios} isLoading={loading} />
 
       {/* 관리자 전용 inline action bar — admin (role=admin 또는 owner) 에게만 */}
       {isAdmin && (
