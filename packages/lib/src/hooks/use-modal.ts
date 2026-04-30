@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { useModalContext } from '../components/modal/ModalContext';
 
 // 모달 옵션 (Hook용)
 export interface SimpleModalOptions {
@@ -97,7 +98,7 @@ export function useConfirmModal(): ConfirmModalResult {
 
 /**
  * 비동기 Alert 모달 - ModalContext 연동
- * KOMCA 패턴 업그레이드: Context 기반으로 커스텀 모달 사용
+ * 호출처 hook 컴포넌트가 ModalProvider 트리 안에 있어야 함 (host + 4 remote 모두 bootstrap 에서 보장).
  *
  * @example
  * const alert = useAsyncAlert();
@@ -105,30 +106,17 @@ export function useConfirmModal(): ConfirmModalResult {
  * await alert('오류가 발생했습니다.', '오류');
  */
 export function useAsyncAlert() {
-  // ModalContext를 직접 import하지 않고 동적으로 가져옴 (순환 참조 방지)
-  const getModalContext = useCallback(() => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { useModalContext } = require('../components/modal/ModalContext');
-      return useModalContext();
-    } catch {
-      return null;
-    }
-  }, []);
-
-  return useCallback(async (message: string, title?: string): Promise<void> => {
-    const context = getModalContext();
-    if (context?.alert) {
-      return context.alert(message, title);
-    }
-    // fallback: 브라우저 기본 alert
-    alert(title ? `${title}\n\n${message}` : message);
-  }, [getModalContext]);
+  // hook 은 render top-level 에서 호출 — useCallback 안에서 호출하면 Rules of Hooks 위반.
+  // 이전엔 require() + try/catch 로 감쌌으나 그 안에서 hook 호출이 동작하지 않아 항상 fallback(native alert) 으로 빠지는 버그였음.
+  const context = useModalContext();
+  return useCallback(
+    (message: string, title?: string): Promise<void> => context.alert(message, title),
+    [context],
+  );
 }
 
 /**
  * 비동기 Confirm 모달 - ModalContext 연동
- * KOMCA 패턴 업그레이드: Context 기반으로 커스텀 모달 사용
  *
  * @example
  * const confirm = useAsyncConfirm();
@@ -138,24 +126,11 @@ export function useAsyncAlert() {
  * }
  */
 export function useAsyncConfirm() {
-  const getModalContext = useCallback(() => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { useModalContext } = require('../components/modal/ModalContext');
-      return useModalContext();
-    } catch {
-      return null;
-    }
-  }, []);
-
-  return useCallback(async (message: string, title?: string): Promise<boolean> => {
-    const context = getModalContext();
-    if (context?.confirm) {
-      return context.confirm(message, title);
-    }
-    // fallback: 브라우저 기본 confirm
-    return confirm(title ? `${title}\n\n${message}` : message);
-  }, [getModalContext]);
+  const context = useModalContext();
+  return useCallback(
+    (message: string, title?: string): Promise<boolean> => context.confirm(message, title),
+    [context],
+  );
 }
 
 // 하위 호환성을 위한 alias
