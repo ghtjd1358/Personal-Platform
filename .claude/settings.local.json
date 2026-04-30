@@ -110,7 +110,8 @@
       "Bash(awk -F': ' '{n++; s+=$2; if\\($2>m\\)m=$2; if\\(n==1||$2<min\\)min=$2} END {printf \"commits=%d  avg=%.2fms  max=%.2fms  min=%.2fms\\\\n\", n, s/n, m, min}')",
       "Read(//c/Coding/KOMCA/container/komca-container-front/**)",
       "Read(//c/Coding/KOMCA/container/komca-container-front/src/**)",
-      "Read(//c/Coding/KOMCA/**)"
+      "Read(//c/Coding/KOMCA/**)",
+      "Bash(xargs stat *)"
     ]
   },
   "outputStyle": "Learning"
