@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { iconMap } from '../../../constants/iconMap';
 import type { ExperienceDetail, ProjectDetail } from '../../../types';
 import { SectionEditButton } from '../../../components/common';
@@ -17,13 +17,22 @@ const formatDate = (dateStr: string | null, isEnd = false, isCurrent = false) =>
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}`;
 };
 
+// 진행중(is_current) 최상단 → start_date desc. server order_index 정렬은 신규 항목 맨 아래로 가서 직관 어긋남.
+const sortByRecent = <T extends { is_current?: boolean; start_date?: string | null }>(a: T, b: T) => {
+  if (a.is_current !== b.is_current) return a.is_current ? -1 : 1;
+  return (b.start_date || '').localeCompare(a.start_date || '');
+};
+
 export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experiences, projects }) => {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [showAllExp, setShowAllExp] = useState(false);
   const [showAllProjects, setShowAllProjects] = useState(false);
 
-  const visibleExperiences = showAllExp ? experiences : experiences.slice(0, INITIAL_DISPLAY_COUNT);
-  const visibleProjects = showAllProjects ? projects : projects.slice(0, INITIAL_DISPLAY_COUNT);
+  const sortedExperiences = useMemo(() => [...experiences].sort(sortByRecent), [experiences]);
+  const sortedProjects = useMemo(() => [...projects].sort(sortByRecent), [projects]);
+
+  const visibleExperiences = showAllExp ? sortedExperiences : sortedExperiences.slice(0, INITIAL_DISPLAY_COUNT);
+  const visibleProjects = showAllProjects ? sortedProjects : sortedProjects.slice(0, INITIAL_DISPLAY_COUNT);
 
   const hasNoData = experiences.length === 0 && projects.length === 0;
 

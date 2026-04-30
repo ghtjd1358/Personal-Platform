@@ -36,12 +36,23 @@ const ExperienceListPage: React.FC = () => {
     const deletePortfolio = useDeletePortfolio()
 
     // resumeId 쿼리 있으면 client-side 필터 — getByResumeId 쿼리 별도 발사 대신 이미 fetched 된 전체에서 걸러내는 게 단순.
+    // 정렬: is_current(진행중) 최상단 → start_date desc(최신 시작 위). server 의 order_index 정렬은 신규 추가 항목이 맨 아래로 가서 직관과 어긋남.
+    const sortByRecent = <T extends { is_current?: boolean; start_date?: string | null }>(a: T, b: T) => {
+        if (a.is_current !== b.is_current) return a.is_current ? -1 : 1
+        return (b.start_date || '').localeCompare(a.start_date || '')
+    }
     const experiences = useMemo(
-        () => (resumeId ? allExp.filter((e) => (e as Experience).resume_id === resumeId) : allExp) as Experience[],
+        () => {
+            const filtered = (resumeId ? allExp.filter((e) => (e as Experience).resume_id === resumeId) : allExp) as Experience[]
+            return [...filtered].sort(sortByRecent)
+        },
         [allExp, resumeId],
     )
     const projects = useMemo(
-        () => (resumeId ? allProj.filter((p) => (p as Portfolio).resume_id === resumeId) : allProj) as Portfolio[],
+        () => {
+            const filtered = (resumeId ? allProj.filter((p) => (p as Portfolio).resume_id === resumeId) : allProj) as Portfolio[]
+            return [...filtered].sort(sortByRecent)
+        },
         [allProj, resumeId],
     )
 

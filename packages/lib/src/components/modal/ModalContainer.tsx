@@ -194,15 +194,17 @@ const ModalContainer: React.FC = () => {
 
                 .modal-body {
                     position: relative;
-                    padding: 16px 28px 22px;
+                    padding: 16px 24px 22px;
                 }
 
                 .modal-message {
                     margin: 0;
-                    font-size: 14px;
+                    width: 100%;
+                    font-size: 15px;
                     color: var(--mfa-modal-ink, #2B1E14);
                     line-height: 1.7;
                     white-space: pre-wrap;
+                    word-break: keep-all;
                     font-family: var(--mfa-modal-font-display, 'Fraunces', 'FallbackFraunces', Georgia, serif);
                     font-style: italic;
                 }
