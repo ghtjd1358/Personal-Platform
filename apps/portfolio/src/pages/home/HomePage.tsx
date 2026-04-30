@@ -14,13 +14,17 @@ import { HeroSection } from '@/components';
 import AOS from 'aos';
 import './HomePage.editorial.css';
 
-type SortOption = 'latest' | 'popular' | 'alphabetical';
+type SortField = 'date' | 'views' | 'title';
+type SortDir = 'desc' | 'asc';
+type ColsOpt = 1 | 2 | 3;
 
 const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>('latest');
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [cols, setCols] = useState<ColsOpt>(3);
   const { portfolios, featuredProjects, otherProjects, loading } = usePortfolios();
   const currentUser = getCurrentUser();
   const navigate = useNavigate();
@@ -58,24 +62,31 @@ const HomePage: React.FC = () => {
       );
     }
 
-    // 정렬
-    switch (sortBy) {
-      case 'popular':
-        projects.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+    // 정렬 — base comparator 의 자연 방향에 따라 부호 명시 반전
+    switch (sortField) {
+      case 'views':
+        projects.sort((a, b) => {
+          const diff = (b.view_count || 0) - (a.view_count || 0); // base: desc
+          return sortDir === 'desc' ? diff : -diff;
+        });
         break;
-      case 'alphabetical':
-        projects.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+      case 'title':
+        projects.sort((a, b) => {
+          const diff = a.title.localeCompare(b.title, 'ko'); // base: asc(가나다)
+          return sortDir === 'asc' ? diff : -diff;
+        });
         break;
-      case 'latest':
+      case 'date':
       default:
-        projects.sort((a, b) =>
-          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-        );
+        projects.sort((a, b) => {
+          const diff = new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(); // base: desc(최신)
+          return sortDir === 'desc' ? diff : -diff;
+        });
         break;
     }
 
     return projects;
-  }, [portfolios, searchQuery, selectedTech, sortBy]);
+  }, [portfolios, searchQuery, selectedTech, sortField, sortDir]);
 
   // 필터된 프로젝트 분류
   const filteredFeatured = useMemo(() =>
@@ -108,11 +119,21 @@ const HomePage: React.FC = () => {
   // 로딩 상태 UI 제거 — host GlobalLoading(전역 오버레이)에 맡기고,
   // 데이터 fetch 중엔 빈 구조만 렌더 → 데이터 준비되면 자연 교체.
 
-  // 필터링 여부에 따라 다른 데이터 사용
-  const heroProjects = isFiltering ? [] : featuredProjects.slice(0, 2);
+  // 필터링 여부 무관 — sort 가 항상 반영되도록 filteredProjects 기반으로 derived.
+  // 이전: featuredProjects/otherProjects (원본 fetch 순서) 사용 → 정렬 silent fail.
+  const featuredFromFiltered = useMemo(
+    () => filteredProjects.filter(p => p.is_featured),
+    [filteredProjects]
+  );
+  const otherFromFiltered = useMemo(
+    () => filteredProjects.filter(p => !p.is_featured),
+    [filteredProjects]
+  );
+
+  const heroProjects = isFiltering ? [] : featuredFromFiltered.slice(0, 2);
   const gridProjects = isFiltering
     ? filteredProjects
-    : [...featuredProjects.slice(2), ...otherProjects];
+    : [...featuredFromFiltered.slice(2), ...otherFromFiltered];
 
   return (
     <div className="portfolio-module">
@@ -153,40 +174,169 @@ const HomePage: React.FC = () => {
             <h2 className="section-title">전체 프로젝트</h2>
           </div>
 
-          {/* 검색 및 필터 */}
+          {/* 검색 및 필터 — blog SearchBar 와 동일 마크업 (form 대신 div, submit 버튼 없음 — live search) */}
           <div className="filter-bar" data-aos="fade-up">
-            <div className="filter-bar-row">
-              <div className="search-box">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <div className="search-bar">
+              <div className="search-input-wrapper">
+                <svg
+                  className="search-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  width="20"
+                  height="20"
+                >
                   <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  <path d="M21 21l-4.35-4.35" />
                 </svg>
                 <input
                   type="text"
+                  className="search-input"
                   placeholder="프로젝트 검색..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 {searchQuery && (
-                  <button className="search-clear" onClick={() => setSearchQuery('')}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <button
+                    type="button"
+                    className="search-clear-btn"
+                    onClick={() => setSearchQuery('')}
+                    aria-label="검색어 지우기"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
                       <line x1="18" y1="6" x2="6" y2="18" />
                       <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
                   </button>
                 )}
               </div>
-              <div className="sort-dropdown">
-                <select
-                  className="editorial-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  aria-label="정렬 기준"
-                >
-                  <option value="latest">최신순</option>
-                  <option value="popular">인기순</option>
-                  <option value="alphabetical">이름순</option>
-                </select>
+            </div>
+
+            {/* 정렬 segmented — field 3 + direction 2 */}
+            <div className="filter-group blog-sort-row portfolio-sort-row">
+              <div className="blog-sort-field">
+                <span className="filter-label">정렬</span>
+                <div className="segmented-control" role="radiogroup" aria-label="정렬 기준">
+                  <button
+                    type="button"
+                    className={`segmented-btn ${sortField === 'date' ? 'active' : ''}`}
+                    onClick={() => setSortField('date')}
+                    title="작성일 기준"
+                    aria-pressed={sortField === 'date'}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>작성일</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`segmented-btn ${sortField === 'views' ? 'active' : ''}`}
+                    onClick={() => setSortField('views')}
+                    title="조회수 기준"
+                    aria-pressed={sortField === 'views'}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <span>조회수</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`segmented-btn ${sortField === 'title' ? 'active' : ''}`}
+                    onClick={() => setSortField('title')}
+                    title="이름 기준"
+                    aria-pressed={sortField === 'title'}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="4 7 4 4 20 4 20 7" />
+                      <line x1="9" y1="20" x2="15" y2="20" />
+                      <line x1="12" y1="4" x2="12" y2="20" />
+                    </svg>
+                    <span>이름</span>
+                  </button>
+                </div>
+              </div>
+              <div className="blog-sort-field">
+                <span className="filter-label">방향</span>
+                <div className="segmented-control" role="radiogroup" aria-label="정렬 방향">
+                  <button
+                    type="button"
+                    className={`segmented-btn ${sortDir === 'desc' ? 'active' : ''}`}
+                    onClick={() => setSortDir('desc')}
+                    title="내림차순 (큰→작)"
+                    aria-pressed={sortDir === 'desc'}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="3" y1="6" x2="13" y2="6" />
+                      <line x1="3" y1="12" x2="11" y2="12" />
+                      <line x1="3" y1="18" x2="9" y2="18" />
+                      <polyline points="17 18 17 6 21 10" />
+                    </svg>
+                    <span>내림</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`segmented-btn ${sortDir === 'asc' ? 'active' : ''}`}
+                    onClick={() => setSortDir('asc')}
+                    title="오름차순 (작→큰)"
+                    aria-pressed={sortDir === 'asc'}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="3" y1="6" x2="9" y2="6" />
+                      <line x1="3" y1="12" x2="11" y2="12" />
+                      <line x1="3" y1="18" x2="13" y2="18" />
+                      <polyline points="17 6 17 18 21 14" />
+                    </svg>
+                    <span>오름</span>
+                  </button>
+                </div>
+              </div>
+              <div className="blog-sort-field">
+                <span className="filter-label">열</span>
+                <div className="segmented-control segmented-control--cols" role="radiogroup" aria-label="열 개수">
+                  {([1, 2, 3] as const).map((n) => {
+                    // 1열 = cinematic Z-pattern (기존), 2/3열 = grid
+                    const rows: number[] = [n];
+                    const W = 32;
+                    const H = 24;
+                    const pad = 3;
+                    const gap = 2.5;
+                    const innerH = H - pad * 2;
+                    const rowH = (innerH - gap * (rows.length - 1)) / rows.length;
+                    const isActive = cols === n;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        className={`segmented-btn cols-btn ${isActive ? 'active' : ''}`}
+                        onClick={() => setCols(n)}
+                        title={`${n}열`}
+                        aria-pressed={isActive}
+                      >
+                        <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden>
+                          {rows.flatMap((cellsInRow, rIdx) => {
+                            const innerW = W - pad * 2;
+                            const cellW = (innerW - gap * (cellsInRow - 1)) / cellsInRow;
+                            const y = pad + rIdx * (rowH + gap);
+                            return Array.from({ length: cellsInRow }).map((_, cIdx) => {
+                              const x = pad + cIdx * (cellW + gap);
+                              return (
+                                <rect key={`${rIdx}-${cIdx}`} x={x} y={y} width={cellW} height={rowH} rx={1} fill={isActive ? 'currentColor' : 'none'} />
+                              );
+                            });
+                          })}
+                        </svg>
+                        <span className="cols-btn-num">{n}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
             {allTechStacks.length > 0 && (
@@ -219,7 +369,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {loading && gridProjects.length === 0 && heroProjects.length === 0 ? (
-            <div className="insta-grid">
+            <div className={`insta-grid${cols > 1 ? ` insta-grid--cols-${cols}` : ''}`}>
               {Array.from({ length: 8 }).map((_, i) => (
                 <PortfolioCardSkeleton key={`skeleton-${i}`} />
               ))}
@@ -230,7 +380,7 @@ const HomePage: React.FC = () => {
               <p className="empty-state-text">아직 등록된 포트폴리오가 없습니다.</p>
             </div>
           ) : (
-            <div className="insta-grid">
+            <div className={`insta-grid${cols > 1 ? ` insta-grid--cols-${cols}` : ''}`}>
               {gridProjects.map((project, index) => (
                 <article
                   key={project.id}

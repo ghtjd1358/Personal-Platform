@@ -21,14 +21,16 @@ const supabaseConfig: ServiceConfig = {
 
 /**
  * Supabase 요청 핸들러
- * - apikey 헤더 추가
- * - Authorization 헤더 추가
+ * - apikey: 항상 anon key (REST 진입 인증)
+ * - Authorization: 로그인 사용자의 JWT 우선, 없으면 anon
+ *   이전 버전: 항상 anon 만 사용 → RLS `auth.uid() = user_id` 가 NULL 이라 INSERT/UPDATE 401.
  */
 const supabaseRequestHandler = (config: RequestConfig): RequestConfig => {
   const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
+  const accessToken = getAccessToken();
 
   config.headers['apikey'] = anonKey;
-  config.headers['Authorization'] = `Bearer ${anonKey}`;
+  config.headers['Authorization'] = `Bearer ${accessToken || anonKey}`;
   config.headers['Content-Type'] = 'application/json';
   config.headers['Prefer'] = 'return=representation';
 

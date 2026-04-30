@@ -49,10 +49,12 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || submitting) return;
+    if (!currentUser?.id) return; // RLS 가 거부하는 케이스 사전 차단
 
     setSubmitting(true);
     const res = await createComment({
       portfolio_id: portfolioId,
+      user_id: currentUser.id,
       content: newComment.trim(),
     });
 
@@ -65,10 +67,12 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
 
   const handleReply = async (parentId: string) => {
     if (!replyContent.trim() || submitting) return;
+    if (!currentUser?.id) return;
 
     setSubmitting(true);
     const res = await createComment({
       portfolio_id: portfolioId,
+      user_id: currentUser.id,
       content: replyContent.trim(),
       parent_id: parentId,
     });
@@ -99,12 +103,7 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
   };
 
   const handleDelete = async (commentId: string) => {
-    const ok = await confirmDialog({
-      title: '댓글 삭제',
-      message: '댓글을 삭제하시겠습니까?',
-      confirmText: '삭제',
-      cancelText: '취소',
-    });
+    const ok = await confirmDialog('댓글을 삭제하시겠습니까?', '댓글 삭제');
     if (!ok) return;
 
     const res = await deleteComment(commentId);
@@ -246,11 +245,12 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
   };
 
   return (
-    <section className="comments-section" data-aos="fade-up">
-      <div className="container">
-        <h2 className="section-title">
+    <section className="comments-section">
+      {/* container 제거 — 부모(modal-right / page) 가 width 결정. h2 → h3 으로 톤 다운 */}
+      <div className="comments-inner">
+        <h3 className="comments-title">
           댓글 <span className="comment-count">({comments.length})</span>
-        </h2>
+        </h3>
 
         {/* 댓글 입력 폼 */}
         {isAuthenticated ? (

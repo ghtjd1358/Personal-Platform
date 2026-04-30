@@ -1,12 +1,9 @@
 /**
- * PortfolioModal - 포트폴리오 상세 모달
- * 80vw x 80vh 크기, 좌측: 콘텐츠, 우측: 댓글
+ * PortfolioModal - 포트폴리오 상세 모달 (단일 컬럼)
  */
 
 import React, { useEffect, useState } from 'react';
 import { getPortfolioById, PortfolioDetail } from '@/network';
-import { getCurrentUser, useToast } from '@sonhoseong/mfa-lib';
-import { getComments, createComment, Comment, CreateCommentRequest } from '@/network/apis/comments';
 import './PortfolioModal.editorial.css';
 
 interface PortfolioModalProps {
@@ -16,12 +13,7 @@ interface PortfolioModalProps {
 
 const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose }) => {
   const [portfolio, setPortfolio] = useState<PortfolioDetail | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const currentUser = getCurrentUser();
-  const toast = useToast();
 
   useEffect(() => {
     if (portfolioId) {
@@ -48,48 +40,14 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
 
     setIsLoading(true);
     try {
-      const [portfolioRes, commentsRes] = await Promise.all([
-        getPortfolioById(portfolioId),
-        getComments(portfolioId),
-      ]);
-
+      const portfolioRes = await getPortfolioById(portfolioId);
       if (portfolioRes.success && portfolioRes.data) {
         setPortfolio(portfolioRes.data);
-      }
-      if (commentsRes.success && commentsRes.data) {
-        setComments(commentsRes.data);
       }
     } catch (error) {
       console.error('Failed to load portfolio:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim() || !currentUser || !portfolioId) return;
-
-    setIsSubmitting(true);
-    try {
-      const request: CreateCommentRequest = {
-        portfolio_id: portfolioId,
-        content: newComment.trim(),
-      };
-
-      const result = await createComment(request);
-
-      if (result.success) {
-        setNewComment('');
-        loadData(); // 댓글 목록 새로고침
-        toast.success('댓글이 등록되었습니다.');
-      } else {
-        toast.error(result.error || '댓글 등록에 실패했습니다.');
-      }
-    } catch {
-      toast.error('댓글 등록 중 오류가 발생했습니다.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -120,7 +78,6 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
           </div>
         ) : (
           <div className="modal-content-wrapper">
-            {/* 좌측: 콘텐츠 */}
             <div className="modal-left">
               {/* 이미지/커버 */}
               <div className="modal-cover">
@@ -220,63 +177,6 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                     {portfolio.view_count || 0}
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* 우측: 댓글 */}
-            <div className="modal-right">
-              <div className="comments-header">
-                <h3>댓글 <span className="comment-count">{comments.length}</span></h3>
-              </div>
-
-              {/* 댓글 작성 */}
-              {currentUser ? (
-                <form className="comment-form" onSubmit={handleSubmitComment}>
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="댓글을 작성하세요..."
-                    rows={3}
-                    className="comment-input"
-                  />
-                  <button
-                    type="submit"
-                    className="comment-submit"
-                    disabled={!newComment.trim() || isSubmitting}
-                  >
-                    {isSubmitting ? '등록 중...' : '등록'}
-                  </button>
-                </form>
-              ) : (
-                <div className="login-prompt">
-                  <p>댓글을 작성하려면 로그인이 필요합니다.</p>
-                </div>
-              )}
-
-              {/* 댓글 목록 */}
-              <div className="comments-list">
-                {comments.length === 0 ? (
-                  <div className="no-comments">
-                    <p>아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
-                  </div>
-                ) : (
-                  comments.map((comment) => (
-                    <div key={comment.id} className="comment-item">
-                      <div className="comment-author">
-                        <div className="comment-avatar">
-                          {comment.author?.name?.charAt(0) || '?'}
-                        </div>
-                        <div className="comment-info">
-                          <span className="comment-name">{comment.author?.name || '익명'}</span>
-                          <span className="comment-date">
-                            {new Date(comment.created_at).toLocaleDateString('ko-KR')}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="comment-content">{comment.content}</p>
-                    </div>
-                  ))
-                )}
               </div>
             </div>
           </div>

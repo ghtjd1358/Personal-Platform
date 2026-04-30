@@ -211,6 +211,310 @@
     }
 }
 
+/* === Portfolio sort row — blog 와 동일 segmented control dialect 이식 === */
+.portfolio-module .blog-sort-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 16px;
+    background: #FBF5E3;
+    border-radius: 1px;
+    box-shadow:
+        0 1px 0 rgba(43, 30, 20, 0.04),
+        0 4px 12px -4px rgba(43, 30, 20, 0.10),
+        0 14px 28px -10px rgba(43, 30, 20, 0.16);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.35s cubic-bezier(.2, .7, .2, 1),
+                box-shadow 0.35s ease;
+}
+
+.portfolio-module .blog-sort-row:focus-within {
+    transform: translateY(-2px);
+    box-shadow:
+        0 2px 0 rgba(43, 30, 20, 0.06),
+        0 10px 18px -4px rgba(43, 30, 20, 0.18);
+}
+
+.portfolio-module .blog-sort-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 22px;
+    min-width: 0;
+}
+
+.portfolio-module .blog-sort-field + .blog-sort-field {
+    border-left: 1px dashed rgba(43, 30, 20, 0.32);
+}
+
+.portfolio-module .blog-sort-field .filter-label {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: #8B7355;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.portfolio-module .segmented-control {
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.portfolio-module .segmented-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #8B7355;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.portfolio-module .segmented-btn + .segmented-btn {
+    border-left: 1px dashed rgba(43, 30, 20, 0.18);
+}
+
+.portfolio-module .segmented-btn:hover {
+    background: rgba(43, 30, 20, 0.04);
+    color: #2B1E14;
+}
+
+.portfolio-module .segmented-btn.active {
+    background: rgba(140, 30, 26, 0.08);
+    color: #8C1E1A;
+}
+
+@media (max-width: 640px) {
+    .portfolio-module .blog-sort-row {
+        flex-direction: column;
+    }
+    .portfolio-module .blog-sort-field + .blog-sort-field {
+        border-left: none;
+        border-top: 1px dashed rgba(43, 30, 20, 0.32);
+    }
+}
+
+/* === blog SearchBar 와 동일 시각 — search-bar 카드 dialect === */
+.portfolio-module .search-bar {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #FBF5E3;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='80'%3E%3Cfilter id='psbf'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.78' numOctaves='2' seed='17'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23psbf)'/%3E%3C/svg%3E");
+    background-size: 420px 80px;
+    background-repeat: repeat;
+    background-blend-mode: multiply;
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+        0 1px 0 rgba(43, 30, 20, 0.04),
+        0 4px 12px -4px rgba(43, 30, 20, 0.10),
+        0 14px 28px -10px rgba(43, 30, 20, 0.16);
+    transform: rotate(-0.3deg);
+    transition: transform 0.35s cubic-bezier(.2, .7, .2, 1), box-shadow 0.35s ease;
+}
+
+.portfolio-module .search-bar:focus-within {
+    transform: rotate(0deg) translateY(-3px);
+    box-shadow:
+        0 2px 0 rgba(43, 30, 20, 0.06),
+        0 10px 18px -4px rgba(43, 30, 20, 0.18),
+        0 18px 36px -10px rgba(43, 30, 20, 0.22);
+}
+
+.portfolio-module .search-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent 0, rgba(43, 30, 20, 0) 3%, rgba(43, 30, 20, 0.32) 12%, rgba(43, 30, 20, 0.48) 50%, rgba(43, 30, 20, 0.32) 88%, rgba(43, 30, 20, 0) 97%, transparent 100%);
+    pointer-events: none;
+}
+
+.portfolio-module .search-bar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0, rgba(139, 115, 85, 0) 4%, rgba(139, 115, 85, 0.42) 14%, rgba(43, 30, 20, 0.4) 50%, rgba(139, 115, 85, 0.42) 86%, rgba(139, 115, 85, 0) 96%, transparent 100%);
+    pointer-events: none;
+}
+
+.portfolio-module .search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0 18px 0 50px;
+}
+
+.portfolio-module .search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8B7355;
+    transition: color 0.25s ease;
+}
+
+.portfolio-module .search-bar:focus-within .search-icon {
+    color: #8C1E1A;
+}
+
+.portfolio-module .search-input {
+    flex: 1;
+    width: 100%;
+    padding: 16px 0;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #2B1E14;
+    background: transparent;
+    border: none;
+    outline: none;
+    letter-spacing: -0.01em;
+}
+
+.portfolio-module .search-input::placeholder {
+    color: rgba(43, 30, 20, 0.4);
+    font-weight: 400;
+}
+
+.portfolio-module .search-clear-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: rgba(43, 30, 20, 0.08);
+    color: #8B7355;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.portfolio-module .search-clear-btn:hover {
+    background: rgba(140, 30, 26, 0.12);
+    color: #8C1E1A;
+}
+
+/* === Cols picker (3/4/5) — blog 동일 패턴 === */
+.portfolio-module .segmented-control--cols .cols-btn {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 24px;
+    min-width: 78px;
+    position: relative;
+}
+
+.portfolio-module .segmented-control--cols .cols-btn svg {
+    width: 32px;
+    height: 24px;
+    opacity: 0.72;
+}
+
+.portfolio-module .segmented-control--cols .cols-btn .cols-btn-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: inherit;
+    opacity: 0.7;
+}
+
+.portfolio-module .segmented-control--cols .cols-btn.active {
+    background: linear-gradient(135deg, rgba(244, 234, 213, 0.55) 0%, rgba(244, 234, 213, 0.85) 100%);
+    color: #2B1E14;
+}
+
+.portfolio-module .segmented-control--cols .cols-btn.active svg,
+.portfolio-module .segmented-control--cols .cols-btn.active .cols-btn-num {
+    opacity: 1;
+    color: #8C1E1A;
+}
+
+/* === Cols layout switch — Z-pattern (cols=1, base) → grid (cols=2/3) ===
+ * cols=1 은 modifier 안 붙음 → 기존 .insta-grid 의 cinematic Z-pattern 그대로.
+ * cols=2/3 은 modifier 활성 → display: grid + 카드 내부 vertical stack 으로 reset. */
+.portfolio-module .insta-grid--cols-2,
+.portfolio-module .insta-grid--cols-3 {
+    display: grid !important;
+    gap: clamp(20px, 2.5vw, 32px) !important;
+    padding: clamp(28px, 4vw, 56px) 0 !important;
+}
+
+.portfolio-module .insta-grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+.portfolio-module .insta-grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+.portfolio-module .insta-grid--cols-2 .insta-grid-card,
+.portfolio-module .insta-grid--cols-3 .insta-grid-card {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    height: auto !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    transform: rotate(0) !important;
+}
+
+.portfolio-module .insta-grid--cols-2 .insta-grid-image,
+.portfolio-module .insta-grid--cols-3 .insta-grid-image {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 10;
+    border-right: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #2B1E14 !important;
+}
+
+.portfolio-module .insta-grid--cols-2 .insta-grid-info,
+.portfolio-module .insta-grid--cols-3 .insta-grid-info {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    padding: 20px 22px 24px !important;
+    gap: 10px !important;
+}
+
+@media (max-width: 768px) {
+    .portfolio-module .insta-grid--cols-2,
+    .portfolio-module .insta-grid--cols-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ==================================================================
  * PortfolioCard v2 — "CINEMATIC POSTER" editorial
  *

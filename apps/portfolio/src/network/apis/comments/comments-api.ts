@@ -61,7 +61,16 @@ export async function createComment(
 
     return { success: true, data: data[0] };
   } catch (err) {
-    console.error('Error creating comment:', err);
+    // 진단용 — supabase 가 반환하는 정확한 code/message/hint 노출
+    if (isAxiosError(err)) {
+      console.error('[createComment] axios error:', {
+        status: err.response?.status,
+        body: err.response?.data,
+        request,
+      });
+    } else {
+      console.error('[createComment] error:', err);
+    }
     return {
       success: false,
       error: getErrorMessage(err, '댓글 작성 중 오류가 발생했습니다.'),

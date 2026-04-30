@@ -20,6 +20,7 @@ export interface Comment {
 
 export interface CreateCommentRequest {
   portfolio_id: string;
+  user_id: string;       // RLS `auth.uid() = user_id` 비교용 — 반드시 현재 로그인 사용자 id
   content: string;
   parent_id?: string;
 }

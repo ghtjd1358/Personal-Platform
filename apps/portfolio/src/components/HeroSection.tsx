@@ -30,8 +30,8 @@ const HeroSection: React.FC = () => {
         <div className="editorial-head">
           <span className="editorial-eyebrow">WORKS // 2026 — SELECTED</span>
           <h1 className="editorial-title">
-            Selected,<br />
-            <em>Shown.</em>
+            남길 만한 것,<br />
+            <em>몇 가지.</em>
           </h1>
           <p className="editorial-sub">
             아이디어를 현실로 만드는 과정의 집합 — 카드, 모달, 스크롤 인터랙션.
