@@ -489,7 +489,7 @@ const PortfolioEditorPage: React.FC = () => {
                         {techStack.length > 0 && (
                             <div className="tech-stack-list">
                                 {techStack.map((tech, index) => (
-                                    <span key={index} className="tech-tag">
+                                    <span key={`${tech.name}-${index}`} className="tech-tag">
                                         {tech.name}
                                         <button type="button" onClick={() => removeTechStack(index)}>×</button>
                                     </span>
@@ -609,7 +609,7 @@ const PortfolioEditorPage: React.FC = () => {
                         {techStack.length > 0 && (
                             <div className="preview-tech">
                                 {techStack.map((tech, index) => (
-                                    <span key={index} className="preview-tech-tag">
+                                    <span key={`${tech.name}-${index}`} className="preview-tech-tag">
                                         {tech.name}
                                     </span>
                                 ))}

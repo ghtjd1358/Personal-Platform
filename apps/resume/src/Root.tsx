@@ -7,6 +7,7 @@ import {
     ErrorBoundary,
     GlobalLoading,
     ScrollTopButton,
+    storage,
     useSimpleInitialize,
     selectAccessToken
 } from '@sonhoseong/mfa-lib'
@@ -35,7 +36,7 @@ function Root() {
                     <GlobalLoading />
                 </ErrorBoundary>
             </Container>
-            <ScrollTopButton />
+            {!storage.isHostApp() && <ScrollTopButton />}
         </>
     ) : (
         <></>

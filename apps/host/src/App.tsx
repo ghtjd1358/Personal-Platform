@@ -7,7 +7,6 @@
  */
 import { Suspense, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import {
     selectIsAuthenticated,
     useSupabaseInitialize,
@@ -22,7 +21,6 @@ import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
 import { lnbItems } from './lnb-items';
 import { MyPageIcon } from './components/icons';
 import HostShell from './components/HostShell';
-import FloatingNav from './components/FloatingNav';
 import './App.css';
 import './sidebar-editorial.css';
 import './theme-editorial.css';
@@ -31,9 +29,6 @@ const App = () => {
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const { initialized } = useSupabaseInitialize();
     const { filterMenus } = usePermission();
-    const location = useLocation();
-    // 블로그 글 상세 페이지에선 host dock 숨김 — 본문 + TOC 집중 환경 확보
-    const isBlogPostDetail = /\/blog\/post\//.test(location.pathname);
 
     const filteredLnbItems = useMemo(() => {
         const currentUser = getCurrentUser();
@@ -75,7 +70,6 @@ const App = () => {
                     </main>
                 </ErrorBoundary>
             </Container>
-            {!isBlogPostDetail && <FloatingNav />}
         </HostShell>
     ): (
         <HostShell>

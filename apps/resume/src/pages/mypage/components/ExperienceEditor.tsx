@@ -33,7 +33,11 @@ const ExperienceEditor: React.FC<ExperienceEditorProps> = ({
   disabled = false,
 }) => {
   const handleAdd = () => {
-    onChange([...experiences, { ...emptyExperience }]);
+    // 신규 항목에 stable temp id 부여 — 추가/삭제 시 React key 안정성 보장 (input value/focus 보존).
+    const tempId = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    onChange([...experiences, { ...emptyExperience, id: tempId }]);
   };
 
   const handleRemove = (index: number) => {
@@ -91,7 +95,7 @@ const ExperienceEditor: React.FC<ExperienceEditorProps> = ({
       ) : (
         <div className="inline-editor-list">
           {experiences.map((exp, index) => (
-            <div key={index} className="inline-editor-item">
+            <div key={exp.id || `exp-${index}`} className="inline-editor-item">
               <div className="inline-editor-item-header">
                 <span className="inline-editor-item-number">#{index + 1}</span>
                 <button

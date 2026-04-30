@@ -33,7 +33,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   disabled = false,
 }) => {
   const handleAdd = () => {
-    onChange([...projects, { ...emptyProject }]);
+    // 신규 항목에 stable temp id 부여 — 추가/삭제 시 React key 안정성 보장.
+    const tempId = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    onChange([...projects, { ...emptyProject, id: tempId }]);
   };
 
   const handleRemove = (index: number) => {
@@ -89,7 +93,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       ) : (
         <div className="inline-editor-list">
           {projects.map((proj, index) => (
-            <div key={index} className="inline-editor-item">
+            <div key={proj.id || `proj-${index}`} className="inline-editor-item">
               <div className="inline-editor-item-header">
                 <span className="inline-editor-item-number">#{index + 1}</span>
                 <button

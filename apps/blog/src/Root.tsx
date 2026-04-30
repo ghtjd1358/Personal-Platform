@@ -100,7 +100,7 @@ function Root() {
                     <GlobalLoading />
                 </ErrorBoundary>
             </Container>
-            <ScrollTopButton />
+            {!storage.isHostApp() && <ScrollTopButton />}
         </>
     )
 }
