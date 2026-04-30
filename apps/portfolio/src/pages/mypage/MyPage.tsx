@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCurrentUser, useConfirmModal, useToast } from '@sonhoseong/mfa-lib';
+import { getCurrentUser, useAsyncConfirm, useToast } from '@sonhoseong/mfa-lib';
 import { getMyPortfolios, deletePortfolio, PortfolioSummary } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
 
@@ -13,7 +13,7 @@ const MyPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
     const toast = useToast();
-    const confirmModal = useConfirmModal();
+    const confirmDialog = useAsyncConfirm();
 
     const currentUser = getCurrentUser();
 
@@ -35,12 +35,11 @@ const MyPage: React.FC = () => {
     };
 
     const handleDelete = async (portfolio: PortfolioSummary) => {
-        const confirmed = await confirmModal.show({
-            title: '포트폴리오 삭제',
-            message: `"${portfolio.title}"을(를) 삭제하시겠습니까?\n삭제된 항목은 복구할 수 없습니다.`,
-            confirmText: '삭제',
-            cancelText: '취소',
-        });
+        // useAsyncConfirm 시그니처: (message, title) — ModalContext 의 한지 editorial 다이얼로그가 표시됨.
+        const confirmed = await confirmDialog(
+            `"${portfolio.title}"을(를) 삭제하시겠습니까?\n삭제된 항목은 복구할 수 없습니다.`,
+            '포트폴리오 삭제'
+        );
 
         if (confirmed) {
             const result = await deletePortfolio(portfolio.id);

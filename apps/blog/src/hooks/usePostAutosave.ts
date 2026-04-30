@@ -78,12 +78,10 @@ export function usePostAutosave({
 
         if (timeDiff < AUTOSAVE_CONFIG.maxAge) {
           if (parsed.title || parsed.content) {
-            const confirmRestore = await confirmDialog({
-              title: '임시 저장 글 복원',
-              message: `${savedTime.toLocaleString('ko-KR')}에 저장된 임시 글이 있습니다.\n복원하시겠습니까?`,
-              confirmText: '복원',
-              cancelText: '버리기',
-            });
+            const confirmRestore = await confirmDialog(
+              `${savedTime.toLocaleString('ko-KR')}에 저장된 임시 글이 있습니다.\n복원하시겠습니까?`,
+              '임시 저장 글 복원'
+            );
             if (confirmRestore) {
               setFormData({
                 title: parsed.title || '',

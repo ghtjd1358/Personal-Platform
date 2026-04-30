@@ -148,12 +148,11 @@ const MyResumeDetailPage: React.FC = () => {
   const handleDelete = useCallback(async () => {
     if (!resume) return;
 
-    const ok = await confirmDialog({
-      title: '이력서 삭제',
-      message: `"${resume.resume_name || '이력서'}"를 삭제하시겠습니까?\n\n연결된 경력과 프로젝트도 함께 삭제됩니다.`,
-      confirmText: '삭제',
-      cancelText: '취소',
-    });
+    // useAsyncConfirm 시그니처: (message, title) — ModalContext 의 한지 editorial 다이얼로그.
+    const ok = await confirmDialog(
+      `"${resume.resume_name || '이력서'}"를 삭제하시겠습니까?\n\n연결된 경력과 프로젝트도 함께 삭제됩니다.`,
+      '이력서 삭제'
+    );
     if (!ok) return;
 
     try {
