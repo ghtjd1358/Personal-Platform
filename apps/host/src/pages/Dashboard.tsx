@@ -59,7 +59,7 @@ const channels: Channel[] = [
         num: '/01',
         ko: '이력서',
         en: 'Résumé',
-        desc: '지금까지의 경력, 진행한 프로젝트, 다룰 줄 아는 기술을 한 페이지에 정리.',
+        desc: '경력, 프로젝트, 기술을 정리한 페이지입니다.',
         tags: ['React 19', 'Supabase', 'TypeScript'],
         path: RoutePath.Resume,
         Icon: ResumeIcon,
@@ -68,7 +68,7 @@ const channels: Channel[] = [
         num: '/02',
         ko: '블로그',
         en: 'Journal',
-        desc: '공부한 것·고민한 것·풀어낸 것을 글로 남기는 개인 저장소. 시리즈로 묶어 정리합니다.',
+        desc: '공부하고 고민한 내용을 기록합니다.',
         tags: ['Tiptap', 'Shiki', 'Markdown'],
         path: RoutePath.Blog,
         Icon: BlogIcon,
@@ -77,7 +77,7 @@ const channels: Channel[] = [
         num: '/03',
         ko: '포트폴리오',
         en: 'Works',
-        desc: '직접 만든 프로젝트의 의도와 결과를 모아놓은 쇼케이스. 카드에서 골라 상세를 들여다봅니다.',
+        desc: '직접 만든 프로젝트를 모아두었습니다.',
         tags: ['AOS', 'Scroll Anim', 'Modal'],
         path: RoutePath.Portfolio,
         Icon: PortfolioIcon,
@@ -85,12 +85,25 @@ const channels: Channel[] = [
     {
         num: '/04',
         ko: '취업관리',
-        en: 'Tracker',
-        desc: '지원한 회사·일정·결과를 한곳에 기록하는 개인 트래커. 어디까지 왔는지 한눈에.',
+        en: 'Job Tracker',
+        desc: '지원 현황과 일정을 관리합니다.',
         tags: ['Calendar', 'Tracker', 'Tech Blog'],
         path: RoutePath.JobTracker,
         Icon: JobTrackerIcon,
     },
+];
+
+type Stat = {
+    num: string;
+    label: string;
+    sub: string;
+};
+
+const stats: Stat[] = [
+    { num: '4', label: 'Independent Remotes', sub: '독립 배포되는 리모트 앱' },
+    { num: '1', label: 'Shared Authentication', sub: 'Supabase 통합 인증 레이어' },
+    { num: '1', label: 'Unified State Management', sub: 'Redux 단일 상태 스토어' },
+    { num: '4', label: 'Deployment Pipelines', sub: '앱별 Vercel 자동 배포' },
 ];
 
 const kstFormatter = new Intl.DateTimeFormat('en-US', {
@@ -144,7 +157,7 @@ const Dashboard: React.FC = () => {
                         <em>개인 플랫폼.</em>
                     </h1>
                     <p className="hero-sub">
-                        Webpack Module Federation으로 독립 배포된 네 개의 remote를 하나의 host에 묶은 포트폴리오 플랫폼.
+                        독립 배포되는 네 개의 애플리케이션을 하나의 플랫폼으로 통합한 마이크로 프론트엔드 포트폴리오.
                     </p>
                 </div>
                 <div className="hero-meta">
@@ -169,10 +182,21 @@ const Dashboard: React.FC = () => {
 
             <section className="dashboard-intro" style={{ animationDelay: '0.3s' }}>
                 <p>
-                    네 개의 <em>독립 앱</em>이 하나의 컨테이너로 엮인 마이크로 프론트엔드 포트폴리오.
-                    각 remote는 자체 도메인과 배포 파이프라인을 가지며, <em>공유되는 인증과 상태</em>로
-                    단일한 사용자 경험을 이어갑니다.
+                    각 애플리케이션은 <em>독립적으로 배포</em>되며, <em>공통 인증과 상태</em>를 공유해
+                    확장성과 유지보수성을 높였습니다.
                 </p>
+            </section>
+
+            <section className="dashboard-stats" style={{ animationDelay: '0.4s' }}>
+                {stats.map((s) => (
+                    <div key={s.label} className="stat">
+                        <span className="stat-num">{s.num}</span>
+                        <div className="stat-text">
+                            <span className="stat-label">{s.label}</span>
+                            <span className="stat-sub">{s.sub}</span>
+                        </div>
+                    </div>
+                ))}
             </section>
 
             <section>
