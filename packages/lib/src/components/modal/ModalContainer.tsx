@@ -59,12 +59,12 @@ const ModalContainer: React.FC = () => {
             {modals.map((modal, index) => (
                 <div
                     key={modal.id}
-                    className="modal-overlay"
+                    className="mfa-modal-overlay"
                     style={{ zIndex: 10000 + index }}
                     onClick={() => handleOverlayClick(modal)}
                 >
                     <div
-                        className="modal-container"
+                        className="mfa-modal-container"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {modal.content ? (
@@ -74,24 +74,24 @@ const ModalContainer: React.FC = () => {
                             // 기본 Alert/Confirm UI
                             <>
                                 {modal.title && (
-                                    <div className="modal-header">
-                                        <h3 className="modal-title">{modal.title}</h3>
+                                    <div className="mfa-modal-header">
+                                        <h3 className="mfa-modal-title">{modal.title}</h3>
                                     </div>
                                 )}
-                                <div className="modal-body">
-                                    <p className="modal-message">{modal.message}</p>
+                                <div className="mfa-modal-body">
+                                    <p className="mfa-modal-message">{modal.message}</p>
                                 </div>
-                                <div className="modal-footer">
+                                <div className="mfa-modal-footer">
                                     {modal.type === 'confirm' && modal.cancelText && (
                                         <button
-                                            className="modal-button secondary"
+                                            className="mfa-modal-button secondary"
                                             onClick={() => handleCancel(modal)}
                                         >
                                             {modal.cancelText}
                                         </button>
                                     )}
                                     <button
-                                        className="modal-button primary"
+                                        className="mfa-modal-button primary"
                                         onClick={() => handleConfirm(modal)}
                                     >
                                         {modal.confirmText || '확인'}
@@ -108,25 +108,25 @@ const ModalContainer: React.FC = () => {
                  * 자기 컨셉(blog 한지/주홍, portfolio 한지/주홍, resume 한지/먹, techblog 별도 톤 등)
                  * 으로 달라짐. fallback 값은 blog editorial(한지+먹+주홍).
                  */
-                .modal-overlay {
+                .mfa-modal-overlay {
                     position: fixed;
                     top: 0;
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: var(--mfa-modal-overlay-bg, rgba(43, 30, 20, 0.55));
+                    background: var(--mfa-mfa-modal-overlay-bg, rgba(43, 30, 20, 0.55));
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    animation: modal-fade-in 0.2s ease-out;
+                    animation: mfa-modal-fade-in 0.2s ease-out;
                 }
 
-                @keyframes modal-fade-in {
+                @keyframes mfa-modal-fade-in {
                     from { opacity: 0; }
                     to { opacity: 1; }
                 }
 
-                .modal-container {
+                .mfa-modal-container {
                     background: var(--mfa-modal-bg, #FBF5E3);
                     border: 2px solid var(--mfa-modal-ink, #2B1E14);
                     border-radius: var(--mfa-modal-radius, 2px);
@@ -137,14 +137,14 @@ const ModalContainer: React.FC = () => {
                     max-width: 520px;
                     max-height: 90vh;
                     overflow: hidden;
-                    animation: modal-slide-up 0.25s cubic-bezier(.2, .7, .2, 1);
+                    animation: mfa-modal-slide-up 0.25s cubic-bezier(.2, .7, .2, 1);
                     font-family: var(--mfa-modal-font-body, 'Pretendard Variable', Pretendard, sans-serif);
                     color: var(--mfa-modal-ink, #2B1E14);
                     position: relative;
                 }
 
                 /* 종이 grain */
-                .modal-container::before {
+                .mfa-modal-container::before {
                     content: '';
                     position: absolute;
                     inset: 0;
@@ -154,7 +154,7 @@ const ModalContainer: React.FC = () => {
                     opacity: 0.5;
                 }
 
-                @keyframes modal-slide-up {
+                @keyframes mfa-modal-slide-up {
                     from {
                         opacity: 0;
                         transform: translateY(18px) scale(0.985);
@@ -165,12 +165,12 @@ const ModalContainer: React.FC = () => {
                     }
                 }
 
-                .modal-header {
+                .mfa-modal-header {
                     position: relative;
                     padding: 24px 28px 0;
                 }
 
-                .modal-header::before {
+                .mfa-modal-header::before {
                     content: var(--mfa-modal-eyebrow, 'DIALOG');
                     display: block;
                     font-family: var(--mfa-modal-font-mono, 'JetBrains Mono', monospace);
@@ -181,7 +181,7 @@ const ModalContainer: React.FC = () => {
                     margin-bottom: 6px;
                 }
 
-                .modal-title {
+                .mfa-modal-title {
                     margin: 0;
                     font-family: var(--mfa-modal-font-display, 'Fraunces', 'FallbackFraunces', Georgia, serif);
                     font-weight: 500;
@@ -192,12 +192,12 @@ const ModalContainer: React.FC = () => {
                     font-variation-settings: "opsz" 144, "SOFT" 30;
                 }
 
-                .modal-body {
+                .mfa-modal-body {
                     position: relative;
                     padding: 16px 24px 22px;
                 }
 
-                .modal-message {
+                .mfa-modal-message {
                     margin: 0;
                     width: 100%;
                     font-size: 15px;
@@ -209,7 +209,7 @@ const ModalContainer: React.FC = () => {
                     font-style: italic;
                 }
 
-                .modal-footer {
+                .mfa-modal-footer {
                     position: relative;
                     display: flex;
                     justify-content: flex-end;
@@ -219,7 +219,7 @@ const ModalContainer: React.FC = () => {
                     border-top: 1px dashed var(--mfa-modal-line, #D4C4A8);
                 }
 
-                .modal-button {
+                .mfa-modal-button {
                     padding: 9px 20px;
                     font-family: var(--mfa-modal-font-body, 'Pretendard Variable', sans-serif);
                     font-size: 13px;
@@ -231,24 +231,24 @@ const ModalContainer: React.FC = () => {
                     line-height: 1;
                 }
 
-                .modal-button.primary {
+                .mfa-modal-button.primary {
                     background: var(--mfa-modal-ink, #2B1E14);
                     color: var(--mfa-modal-bg, #FBF5E3);
                 }
 
-                .modal-button.primary:hover {
+                .mfa-modal-button.primary:hover {
                     transform: translateY(-1px);
                     box-shadow: 2px 3px 0 var(--mfa-modal-ink-shadow, rgba(43, 30, 20, 0.25));
                     background: var(--mfa-modal-accent, #8C1E1A);
                     border-color: var(--mfa-modal-accent, #8C1E1A);
                 }
 
-                .modal-button.secondary {
+                .mfa-modal-button.secondary {
                     background: transparent;
                     color: var(--mfa-modal-ink, #2B1E14);
                 }
 
-                .modal-button.secondary:hover {
+                .mfa-modal-button.secondary:hover {
                     background: var(--mfa-modal-bg, #FBF5E3);
                     color: var(--mfa-modal-accent, #8C1E1A);
                     border-color: var(--mfa-modal-accent, #8C1E1A);
