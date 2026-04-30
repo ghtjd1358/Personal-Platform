@@ -111,7 +111,8 @@
       "Read(//c/Coding/KOMCA/container/komca-container-front/**)",
       "Read(//c/Coding/KOMCA/container/komca-container-front/src/**)",
       "Read(//c/Coding/KOMCA/**)",
-      "Bash(xargs stat *)"
+      "Bash(xargs stat *)",
+      "Bash(xargs -I {} taskkill //F //PID {})"
     ]
   },
   "outputStyle": "Learning"
