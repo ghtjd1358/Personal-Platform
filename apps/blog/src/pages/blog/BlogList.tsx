@@ -43,7 +43,9 @@ const BlogList: React.FC = () => {
   // BlogList 첫 마운트에 한 번만 fetch, 탭 토글은 단순 표시 분기.
   const { series } = useFetchSeries();
 
-  useScrollAnimation([posts.length]);
+  // deps 에 activeTab 추가 — 시리즈 ↔ 전체 글 탭 전환 시 PostsSection 재마운트되며
+  // 새 .animate-on-scroll 카드가 생기는데 posts.length 만 보면 effect 재실행 안 돼 영원히 opacity:0.
+  useScrollAnimation([posts.length, activeTab]);
 
   // 필터 초기화
   const handleResetFilters = useCallback(() => {
