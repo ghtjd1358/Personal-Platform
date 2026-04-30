@@ -83,7 +83,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           )}
           <span className="editorial-eyebrow">JOURNAL // VOL.01 // 2026</span>
           <h1 className="editorial-title">
-            배움과 고민의 과정을<br />
+            배움과<br />
+            고민의 과정을<br />
             <em>차곡차곡 기록합니다.</em>
           </h1>
           <p className="editorial-sub">
