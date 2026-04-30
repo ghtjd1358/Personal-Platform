@@ -2,16 +2,18 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { usePermission } from '@sonhoseong/mfa-lib';
 import {useBlogData, useScrollAnimation} from "@/hooks";
-import {BlogStats, HeroSection, PostsSection, SEOHead, SearchBar} from "@/components";
+import {BlogStats, HeroSection, PostsSection, SeriesGrid, SEOHead, SearchBar} from "@/components";
 import { getCategories, CategoryDetail } from "@/network";
 import { LINK_PREFIX } from '@/config/constants';
 
 type SortField = 'date' | 'views' | 'likes';
 type SortDir = 'desc' | 'asc';
 type ColsOpt = 3 | 4 | 5;
+type ListTab = 'posts' | 'series';
 
 const BlogList: React.FC = () => {
   const { isAdmin } = usePermission();
+  const [activeTab, setActiveTab] = useState<ListTab>('posts');
   const [categories, setCategories] = useState<CategoryDetail[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('date');
@@ -105,6 +107,36 @@ const BlogList: React.FC = () => {
         </div>
       )}
 
+      {/* 탭 메뉴 — 전체 글 / 시리즈 */}
+      <section className="blog-tabs-section">
+        <div className="container">
+          <div className="blog-tabs" role="tablist" aria-label="블로그 보기 모드">
+            <button
+              type="button"
+              role="tab"
+              className={`blog-tab ${activeTab === 'posts' ? 'active' : ''}`}
+              onClick={() => setActiveTab('posts')}
+              aria-selected={activeTab === 'posts'}
+            >
+              전체 글
+            </button>
+            <button
+              type="button"
+              role="tab"
+              className={`blog-tab ${activeTab === 'series' ? 'active' : ''}`}
+              onClick={() => setActiveTab('series')}
+              aria-selected={activeTab === 'series'}
+            >
+              시리즈
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {activeTab === 'series' ? (
+        <SeriesGrid />
+      ) : (
+      <>
       {/* 필터 섹션 */}
       <section className="filter-section">
         <div className="container">
@@ -320,8 +352,12 @@ const BlogList: React.FC = () => {
           isLoadingMore={isLoadingMore}
           hasMore={hasMore}
           onLoadMore={loadMore}
+          sortField={sortField}
+          sortDir={sortDir}
         />
       </div>
+      </>
+      )}
     </>
   );
 };
