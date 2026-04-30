@@ -1,4 +1,5 @@
 import React from 'react';
+import { getCurrentUser } from '@sonhoseong/mfa-lib';
 import '@/styles/editorial.css';
 
 const Grain: React.FC = () => (
@@ -22,12 +23,16 @@ const Fiber: React.FC = () => (
 );
 
 const HeroSection: React.FC = () => {
+  const userName = getCurrentUser()?.name;
   return (
     <section className="editorial-hero editorial-hero--fullheight">
       <Grain />
       <Fiber />
       <div className="editorial-inner">
         <div className="editorial-head">
+          {userName && (
+            <span className="editorial-welcome">Welcome · {userName}</span>
+          )}
           <span className="editorial-eyebrow">TRACKER // 2026 — LEDGER</span>
           <h1 className="editorial-title">
             지원과 일정을,<br />

@@ -139,6 +139,7 @@ const HomePage: React.FC = () => {
     <div className="portfolio-module">
       {/* 히어로 섹션 — stats 4 metric 을 hero 안 editorial-extras 슬롯에 통합 (blog 와 동일) */}
       <HeroSection
+        userName={currentUser?.name}
         totalViews={portfolios.reduce((s, p) => s + (p.view_count || 0), 0)}
         totalProjects={portfolios.length}
         totalLikes={portfolios.reduce((s, p) => s + (p.like_count || 0), 0)}

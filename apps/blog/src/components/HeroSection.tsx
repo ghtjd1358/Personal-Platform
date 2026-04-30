@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import '@/styles/editorial.css';
 
 interface HeroSectionProps {
+  userName?: string;
   totalViews?: number;
   totalPosts?: number;
   totalLikes?: number;
@@ -64,6 +65,7 @@ const StatValue: React.FC<{ target: number; isLoading?: boolean }> = ({ target, 
 };
 
 const HeroSection: React.FC<HeroSectionProps> = ({
+  userName,
   totalViews = 0,
   totalPosts = 0,
   totalLikes = 0,
@@ -76,6 +78,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <Fiber />
       <div className="editorial-inner">
         <div className="editorial-head">
+          {userName && (
+            <span className="editorial-welcome">Welcome · {userName}</span>
+          )}
           <span className="editorial-eyebrow">JOURNAL // VOL.01 // 2026</span>
           <h1 className="editorial-title">
             읽고, 쓰고,<br />

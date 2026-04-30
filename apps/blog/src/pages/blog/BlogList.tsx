@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { usePermission } from '@sonhoseong/mfa-lib';
+import { usePermission, getCurrentUser } from '@sonhoseong/mfa-lib';
 import {useBlogData, useScrollAnimation} from "@/hooks";
 import {useFetchSeries} from "@/network/hooks";
 import {HeroSection, PostsSection, SeriesGrid, SEOHead, SearchBar} from "@/components";
@@ -79,6 +79,7 @@ const BlogList: React.FC = () => {
         description="개발자 손호성의 기술 블로그입니다. 웹 개발, 프론트엔드, React, TypeScript 관련 글을 작성합니다."
       />
       <HeroSection
+        userName={getCurrentUser()?.name}
         totalViews={totalViews}
         totalPosts={totalPosts}
         totalLikes={totalLikes}
