@@ -28,6 +28,19 @@
     overflow: hidden;
 }
 
+/* 첫 방문 시 viewport 꽉 채우는 hero — 모든 4 remote 통일 (resume 제외, 콘텐츠 자체로 fill). */
+.editorial-hero.editorial-hero--fullheight {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* fullheight hero 안에서 stats 영역(editorial-extras)을 하단으로 밀어 newspaper folio 톤 */
+.editorial-hero.editorial-hero--fullheight .editorial-extras {
+    margin-top: auto;
+}
+
 /* 한지 섬유 오버레이 — 가로로 긴 fiber 질감 (baseFrequency의 X/Y 비대칭) */
 .editorial-fiber {
     position: absolute;

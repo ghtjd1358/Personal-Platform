@@ -4230,7 +4230,7 @@ pre.shiki:hover .code-copy-btn,
  * ========================================================= */
 .filter-section {
     position: relative;
-    padding: clamp(40px, 6vw, 72px) 0 clamp(48px, 6vw, 80px);
+    padding: 16px 0 clamp(28px, 4vw, 48px);
 }
 
 /* =========================================================
@@ -7124,20 +7124,49 @@ pre.shiki:hover .code-copy-btn,
 }
 
 /* ==================================================================
- * Blog Tabs — 전체 글 / 시리즈 토글 (BlogList editorial)
- * 한지 cream + 먹 underline accent, 잡지 톤 미니멀 탭
+ * Blog Toolbar — 탭(좌) + admin ✎ (우) folio strip
+ * 한지 cream + 먹 hairline rule. 카드 위로 끌어올리는 컴팩트 1행 bar.
  * ================================================================== */
 .blog-tabs-section {
-    padding: 8px 0 0;
+    padding: 0;
+}
+
+.blog-toolbar-row {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--color-border);
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
 .blog-tabs {
     display: flex;
-    justify-content: center;
     gap: 4px;
-    border-bottom: 1px solid var(--color-border);
-    margin: 0 auto 24px;
-    max-width: 1100px;
+}
+
+.blog-toolbar-write {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    align-self: center;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.18s cubic-bezier(.2, 0, 0, 1),
+                background 0.18s cubic-bezier(.2, 0, 0, 1),
+                border-color 0.18s cubic-bezier(.2, 0, 0, 1);
+}
+
+.blog-toolbar-write:hover {
+    color: var(--color-bg);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
 }
 
 .blog-tab {

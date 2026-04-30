@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { usePermission } from '@sonhoseong/mfa-lib';
 import {useBlogData, useScrollAnimation} from "@/hooks";
+import {useFetchSeries} from "@/network/hooks";
 import {HeroSection, PostsSection, SeriesGrid, SEOHead, SearchBar} from "@/components";
 import { getCategories, CategoryDetail } from "@/network";
 import { LINK_PREFIX } from '@/config/constants';
@@ -37,6 +38,10 @@ const BlogList: React.FC = () => {
     sort: sortKey,
     search: searchQuery,
   });
+
+  // 시리즈 데이터를 부모에서 호이스트 — 탭 전환 시 unmount/remount 로 빈 화면 깜빡이던 버그 해결.
+  // BlogList 첫 마운트에 한 번만 fetch, 탭 토글은 단순 표시 분기.
+  const { series } = useFetchSeries();
 
   useScrollAnimation([posts.length]);
 
@@ -81,58 +86,49 @@ const BlogList: React.FC = () => {
         isLoading={isLoading}
       />
 
-      {/* 관리자 전용 inline action bar — stats 아래, 글 목록 바로 위에 배치
-         (글쓰기 진입을 카드 목록과 가까이 두어 "지금 바로 쓰기" 맥락 강화) */}
-      {isAdmin && (
-        <div className="blog-admin-bar">
-          <div className="container">
-            <div className="blog-admin-bar-inner">
-              <div className="blog-admin-bar-meta">
-                <span className="blog-admin-bar-eyebrow">ADMIN · AUTHOR</span>
-                <span className="blog-admin-bar-hint">새 글을 작성하거나 기존 글을 관리합니다</span>
-              </div>
-              <div className="blog-admin-bar-actions">
-                <Link to={`${LINK_PREFIX}/write`} className="blog-admin-btn blog-admin-btn--primary">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
-                  + 글쓰기
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 탭 메뉴 — 전체 글 / 시리즈 */}
+      {/* 통합 toolbar — 탭(좌) + admin ✎ (우, isAdmin 만). admin-bar 분리 폐기. */}
       <section className="blog-tabs-section">
         <div className="container">
-          <div className="blog-tabs" role="tablist" aria-label="블로그 보기 모드">
-            <button
-              type="button"
-              role="tab"
-              className={`blog-tab ${activeTab === 'posts' ? 'active' : ''}`}
-              onClick={() => setActiveTab('posts')}
-              aria-selected={activeTab === 'posts'}
-            >
-              전체 글
-            </button>
-            <button
-              type="button"
-              role="tab"
-              className={`blog-tab ${activeTab === 'series' ? 'active' : ''}`}
-              onClick={() => setActiveTab('series')}
-              aria-selected={activeTab === 'series'}
-            >
-              시리즈
-            </button>
+          <div className="blog-toolbar-row">
+            <div className="blog-tabs" role="tablist" aria-label="블로그 보기 모드">
+              <button
+                type="button"
+                role="tab"
+                className={`blog-tab ${activeTab === 'posts' ? 'active' : ''}`}
+                onClick={() => setActiveTab('posts')}
+                aria-selected={activeTab === 'posts'}
+              >
+                전체 글
+              </button>
+              <button
+                type="button"
+                role="tab"
+                className={`blog-tab ${activeTab === 'series' ? 'active' : ''}`}
+                onClick={() => setActiveTab('series')}
+                aria-selected={activeTab === 'series'}
+              >
+                시리즈
+              </button>
+            </div>
+            {isAdmin && (
+              <Link
+                to={`${LINK_PREFIX}/write`}
+                className="blog-toolbar-write"
+                title="글쓰기"
+                aria-label="글쓰기"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </Link>
+            )}
           </div>
         </div>
       </section>
 
       {activeTab === 'series' ? (
-        <SeriesGrid />
+        <SeriesGrid series={series} />
       ) : (
       <>
       {/* 필터 섹션 */}

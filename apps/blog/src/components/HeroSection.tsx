@@ -71,7 +71,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   isLoading = false,
 }) => {
   return (
-    <section className="editorial-hero">
+    <section className="editorial-hero editorial-hero--fullheight">
       <Grain />
       <Fiber />
       <div className="editorial-inner">

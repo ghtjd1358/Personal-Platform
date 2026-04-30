@@ -1,15 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useFetchSeries } from '@/network/hooks';
+import type { SeriesDetail } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
 import './SeriesGrid.editorial.css';
 
 const SKELETON_COUNT = 6;
 
-const SeriesGrid: React.FC = () => {
-  const { series } = useFetchSeries();
-  const isLoading = series.length === 0; // 단순 휴리스틱: 빈 상태 = 초기 fetch 중 또는 진짜 빈 상태
+interface SeriesGridProps {
+  series: SeriesDetail[];
+  isLoading?: boolean;
+}
 
+const SeriesGrid: React.FC<SeriesGridProps> = ({ series, isLoading = false }) => {
   return (
     <section id="series" className="section">
       <div className="container">
