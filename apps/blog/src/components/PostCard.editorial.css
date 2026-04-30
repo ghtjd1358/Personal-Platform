@@ -21,10 +21,11 @@
     border-radius: 3px !important;
     position: relative;
     transform: translateY(var(--rest-y)) rotate(var(--rest-angle));
-    /* UX 응답성 — 0.35s → 0.2s 로 즉각 반응 + GPU compositor 힌트 */
-    transition: transform 0.2s ease,
-                box-shadow 0.2s ease,
-                z-index 0s linear 0.2s;
+    /* UX 응답성 — snappy ease-out 곡선(.2,0,0,1) 으로 마우스 즉각 반응.
+       ease(slow-start) 가 호버 lag 인상 주던 문제 해결. */
+    transition: transform 0.14s cubic-bezier(.2, 0, 0, 1),
+                box-shadow 0.14s cubic-bezier(.2, 0, 0, 1),
+                z-index 0s linear 0.14s;
     will-change: transform;
     box-shadow: var(--rest-shadow-x) var(--rest-shadow-y) 0 rgba(43, 30, 20, var(--rest-shadow-alpha));
     overflow: visible !important;
@@ -94,8 +95,8 @@
         4px 10px 0 rgba(43, 30, 20, 0.22),
         8px 16px 24px rgba(43, 30, 20, 0.14);
     z-index: 5;
-    transition: transform 0.18s ease,
-                box-shadow 0.18s ease,
+    transition: transform 0.12s cubic-bezier(.2, 0, 0, 1),
+                box-shadow 0.12s cubic-bezier(.2, 0, 0, 1),
                 z-index 0s linear;
     animation: none;   /* hover 시 sway-in 중단 (있을 경우) */
 }
@@ -312,5 +313,54 @@
     .post-card:hover {
         transform: none;
         transition: box-shadow 0.2s ease;
+    }
+}
+
+/* ==== Admin 전용 — 카드 모서리 수정 ✎ 버튼 (portfolio 와 동일 패턴) ==== */
+.post-card-edit-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #FBF5E3;
+    border: 1.5px solid #2B1E14;
+    border-radius: 2px;
+    color: #2B1E14;
+    text-decoration: none;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.18s cubic-bezier(.2, 0, 0, 1),
+                transform 0.18s cubic-bezier(.2, 0, 0, 1),
+                background 0.15s ease, color 0.15s ease;
+    box-shadow: 2px 2px 0 rgba(43, 30, 20, 0.15);
+}
+
+.post-card:hover .post-card-edit-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.post-card-edit-btn:hover {
+    background: #2B1E14;
+    color: #FBF5E3;
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 rgba(43, 30, 20, 0.28);
+}
+
+/* global.css 의 `.post-card svg { display: none !important }` (텍스트-only 톤) 무력화 — 수정 ✎ 아이콘은 노출. */
+.post-card .post-card-edit-btn svg {
+    display: inline-block !important;
+}
+
+/* 모바일: hover 없으므로 항상 보이게 */
+@media (max-width: 768px) {
+    .post-card-edit-btn {
+        opacity: 1;
+        transform: none;
     }
 }
