@@ -6,25 +6,13 @@ import {PostCardSkeleton} from "@/components/PostCardSkeleton";
 const SKELETON_COUNT = 8;
 
 
-type SortField = 'date' | 'views' | 'likes';
-type SortDir = 'desc' | 'asc';
-
 interface PostsSectionProps {
   posts: PostSummary[];
   isLoading: boolean;
   isLoadingMore?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
-  /** 현재 정렬 기준 — section-label 텍스트 동적 생성 */
-  sortField?: SortField;
-  sortDir?: SortDir;
 }
-
-const SORT_LABEL: Record<SortField, string> = {
-  date: '작성일',
-  views: '조회수',
-  likes: '좋아요',
-};
 
 const PostsSection: React.FC<PostsSectionProps> = ({
   posts,
@@ -32,8 +20,6 @@ const PostsSection: React.FC<PostsSectionProps> = ({
   isLoadingMore = false,
   hasMore = false,
   onLoadMore,
-  sortField = 'date',
-  sortDir = 'desc',
 }) => {
   const observerRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef(onLoadMore);
@@ -95,11 +81,6 @@ const PostsSection: React.FC<PostsSectionProps> = ({
   return (
     <section id="posts" className="section">
       <div className="container">
-        <div className="section-header animate-on-scroll">
-          <div className="section-label">
-            {SORT_LABEL[sortField]} · {sortDir === 'desc' ? '내림차순' : '오름차순'}
-          </div>
-        </div>
 
         {/* 초기 로딩: 카드 쉐입 skeleton 으로 "쉘은 존재하고 내용만 채워진다" 느낌.
            데이터 도착 후: 실제 PostCard 로 교체.

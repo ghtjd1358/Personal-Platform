@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { usePermission } from '@sonhoseong/mfa-lib';
 import {useBlogData, useScrollAnimation} from "@/hooks";
-import {BlogStats, HeroSection, PostsSection, SeriesGrid, SEOHead, SearchBar} from "@/components";
+import {HeroSection, PostsSection, SeriesGrid, SEOHead, SearchBar} from "@/components";
 import { getCategories, CategoryDetail } from "@/network";
 import { LINK_PREFIX } from '@/config/constants';
 
@@ -73,9 +73,7 @@ const BlogList: React.FC = () => {
         title="블로그"
         description="개발자 손호성의 기술 블로그입니다. 웹 개발, 프론트엔드, React, TypeScript 관련 글을 작성합니다."
       />
-      <HeroSection />
-
-      <BlogStats
+      <HeroSection
         totalViews={totalViews}
         totalPosts={totalPosts}
         totalLikes={totalLikes}
@@ -352,8 +350,6 @@ const BlogList: React.FC = () => {
           isLoadingMore={isLoadingMore}
           hasMore={hasMore}
           onLoadMore={loadMore}
-          sortField={sortField}
-          sortDir={sortDir}
         />
       </div>
       </>

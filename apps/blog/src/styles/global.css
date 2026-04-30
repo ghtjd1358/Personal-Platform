@@ -4231,31 +4231,7 @@ pre.shiki:hover .code-copy-btn,
 .filter-section {
     position: relative;
     padding: clamp(40px, 6vw, 72px) 0 clamp(48px, 6vw, 80px);
-    /* 상하 brushstroke 계선 — 섹션 경계 표시 */
 }
-
-.filter-section::before,
-.filter-section::after {
-    content: '';
-    position: absolute;
-    left: clamp(24px, 5vw, 80px);
-    right: clamp(24px, 5vw, 80px);
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent 0,
-        rgba(43, 30, 20, 0) 4%,
-        rgba(43, 30, 20, 0.22) 12%,
-        rgba(43, 30, 20, 0.36) 50%,
-        rgba(43, 30, 20, 0.22) 88%,
-        rgba(43, 30, 20, 0) 96%,
-        transparent 100%
-    );
-    pointer-events: none;
-}
-
-.filter-section::before { top: 0; }
-.filter-section::after { bottom: 0; }
 
 /* =========================================================
  * Editorial Search Bar — 조선 ledger 검색대 (techblog 패턴 이식).

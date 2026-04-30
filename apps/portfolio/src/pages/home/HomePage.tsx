@@ -10,7 +10,7 @@ import { usePortfolios } from './hooks';
 import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
 import PortfolioCardSkeleton from '@/components/PortfolioCardSkeleton';
-import { HeroSection, PortfolioStats } from '@/components';
+import { HeroSection } from '@/components';
 import AOS from 'aos';
 import './HomePage.editorial.css';
 
@@ -137,11 +137,23 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="portfolio-module">
-      {/* 히어로 섹션 - 비디오 배경 */}
-      <HeroSection />
-
-      {/* 정량 지표 — blog/BlogStats 와 동일 dialect, portfolio 도메인 데이터로 */}
-      <PortfolioStats portfolios={portfolios} isLoading={loading} />
+      {/* 히어로 섹션 — stats 4 metric 을 hero 안 editorial-extras 슬롯에 통합 (blog 와 동일) */}
+      <HeroSection
+        totalViews={portfolios.reduce((s, p) => s + (p.view_count || 0), 0)}
+        totalProjects={portfolios.length}
+        totalLikes={portfolios.reduce((s, p) => s + (p.like_count || 0), 0)}
+        daysRunning={(() => {
+          if (portfolios.length === 0) return 0;
+          const earliest = portfolios.reduce<number>((min, p) => {
+            const t = p.created_at ? new Date(p.created_at).getTime() : Number.POSITIVE_INFINITY;
+            return Math.min(min, t);
+          }, Number.POSITIVE_INFINITY);
+          return Number.isFinite(earliest)
+            ? Math.max(1, Math.floor((Date.now() - earliest) / (1000 * 60 * 60 * 24)))
+            : 0;
+        })()}
+        isLoading={loading}
+      />
 
       {/* 관리자 전용 inline action bar — admin (role=admin 또는 owner) 에게만 */}
       {isAdmin && (

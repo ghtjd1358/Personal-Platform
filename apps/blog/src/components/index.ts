@@ -3,7 +3,6 @@ export * from './PostCard';
 export * from './PostsSection';
 export * from './SeriesGrid';
 export * from './HeroSection';
-export * from './BlogStats';
 export * from './ConfirmModal';
 export * from './BlogHeader';
 export * from './TableOfContents';

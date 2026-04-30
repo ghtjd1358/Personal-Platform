@@ -13,22 +13,19 @@ const SeriesGrid: React.FC = () => {
   return (
     <section id="series" className="section">
       <div className="container">
-        <div className="section-header animate-on-scroll">
-          <div className="section-label">SERIES · 묶어 읽는 글</div>
-        </div>
-
+        {/* animate-on-scroll 미사용 — 탭 전환으로 마운트되는 컴포넌트는
+            BlogList 의 IntersectionObserver setup 시점을 놓쳐 opacity:0 으로 영영 가려짐. */}
         <div className="blog-series-grid">
           {series.length === 0 ? (
-            // 시리즈 없을 때 — useFetchSeries 가 이미 GlobalLoading 트리거하므로 별도 skeleton 안 깔고 empty-state 그대로 노출
             Array.from({ length: SKELETON_COUNT }).map((_, i) => (
               <div key={`series-skeleton-${i}`} className="blog-series-card blog-series-card--skeleton" />
             ))
           ) : (
-            series.map((item, index) => (
+            series.map((item) => (
               <Link
                 key={item.id}
                 to={`${LINK_PREFIX}/series/${item.slug}`}
-                className={`blog-series-card animate-on-scroll delay-${Math.min(index + 1, 5)}`}
+                className="blog-series-card"
               >
                 <div className="blog-series-card-cover">
                   {item.cover_image ? (

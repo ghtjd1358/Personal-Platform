@@ -1,5 +1,13 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '@/styles/editorial.css';
+
+interface HeroSectionProps {
+  totalViews?: number;
+  totalPosts?: number;
+  totalLikes?: number;
+  daysRunning?: number;
+  isLoading?: boolean;
+}
 
 const Grain: React.FC = () => (
   <svg className="editorial-grain" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false">
@@ -21,7 +29,47 @@ const Fiber: React.FC = () => (
   </svg>
 );
 
-const HeroSection: React.FC = () => {
+/** 0 → target cubic ease-out count-up. */
+const useCountUp = (target: number, duration = 900, active = true): number => {
+  const [value, setValue] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!active || target === 0) { setValue(0); return; }
+    const start = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.floor(target * eased));
+      if (progress < 1) rafRef.current = requestAnimationFrame(tick);
+      else setValue(target);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
+  }, [target, duration, active]);
+  return value;
+};
+
+const StatValue: React.FC<{ target: number; isLoading?: boolean }> = ({ target, isLoading }) => {
+  const v = useCountUp(target, 900, !isLoading);
+  if (isLoading) {
+    return (
+      <span className="editorial-stat-value editorial-stat-value--loading" aria-label="불러오는 중">
+        <span className="editorial-stat-dot" />
+        <span className="editorial-stat-dot" />
+        <span className="editorial-stat-dot" />
+      </span>
+    );
+  }
+  return <span className="editorial-stat-value">{v.toLocaleString()}</span>;
+};
+
+const HeroSection: React.FC<HeroSectionProps> = ({
+  totalViews = 0,
+  totalPosts = 0,
+  totalLikes = 0,
+  daysRunning = 0,
+  isLoading = false,
+}) => {
   return (
     <section className="editorial-hero">
       <Grain />
@@ -49,6 +97,28 @@ const HeroSection: React.FC = () => {
           <div className="editorial-meta-row">
             <span className="editorial-meta-label">KIND</span>
             <span className="editorial-meta-value">LONG-FORM</span>
+          </div>
+        </div>
+      </div>
+
+      {/* hero 하단 정량 지표 — 이력서 editorial-contacts 와 동일 가로 그리드 톤. 4 remote 통일. */}
+      <div className="editorial-extras">
+        <div className="editorial-stats">
+          <div className="editorial-stat">
+            <StatValue target={totalViews} isLoading={isLoading} />
+            <span className="editorial-stat-label">총 방문</span>
+          </div>
+          <div className="editorial-stat">
+            <StatValue target={totalPosts} isLoading={isLoading} />
+            <span className="editorial-stat-label">포스트</span>
+          </div>
+          <div className="editorial-stat">
+            <StatValue target={totalLikes} isLoading={isLoading} />
+            <span className="editorial-stat-label">좋아요</span>
+          </div>
+          <div className="editorial-stat">
+            <StatValue target={daysRunning} isLoading={isLoading} />
+            <span className="editorial-stat-label">일째 운영</span>
           </div>
         </div>
       </div>
