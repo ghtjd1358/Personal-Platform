@@ -86,19 +86,29 @@ export async function getPosts(
       }
     }
 
-    // 정렬 — sort 파라미터 기반. is_pinned 는 항상 최우선(핀 글 상단 고정).
+    // 정렬 — field + direction 조합. is_pinned 는 항상 최우선(핀 글 상단 고정).
     query = query.order('is_pinned', { ascending: false });
     switch (sort) {
-      case 'popular':
+      case 'views_desc':
+      case 'popular': // legacy alias
         query = query.order('view_count', { ascending: false }).order('published_at', { ascending: false });
         break;
-      case 'liked':
+      case 'views_asc':
+        query = query.order('view_count', { ascending: true }).order('published_at', { ascending: false });
+        break;
+      case 'likes_desc':
+      case 'liked': // legacy alias
         query = query.order('like_count', { ascending: false }).order('published_at', { ascending: false });
         break;
-      case 'oldest':
+      case 'likes_asc':
+        query = query.order('like_count', { ascending: true }).order('published_at', { ascending: false });
+        break;
+      case 'date_asc':
+      case 'oldest': // legacy alias
         query = query.order('published_at', { ascending: true });
         break;
-      case 'latest':
+      case 'date_desc':
+      case 'latest': // legacy alias
       default:
         query = query.order('published_at', { ascending: false });
         break;

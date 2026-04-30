@@ -1727,7 +1727,7 @@ body.has-header {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .blog-grid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -7045,11 +7045,6 @@ pre.shiki:hover .code-copy-btn,
 
 .segmented-btn svg {
     flex-shrink: 0;
-    transition: transform 0.2s ease;
-}
-
-.segmented-btn:hover svg {
-    transform: scale(1.05);
 }
 
 /* === Cols picker — 등사판 도장 + 인장 metaphor ===
@@ -7077,7 +7072,6 @@ pre.shiki:hover .code-copy-btn,
 
 .segmented-control--cols .cols-btn:hover svg {
     opacity: 0.95;
-    transform: scale(1.04);
 }
 
 .segmented-control--cols .cols-btn .cols-btn-num {

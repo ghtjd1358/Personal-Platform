@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getComments, createComment, updateComment, deleteComment, CommentDetail, CreateCommentRequest } from '@/network';
 import { getCurrentUser, useToast, useAsyncConfirm } from '@sonhoseong/mfa-lib';
+import { formatRelativeOrDate } from '@/utils';
 
 interface CommentSectionProps {
   postId: string;
@@ -186,23 +187,6 @@ const CommentItem: React.FC<CommentItemProps> = ({
     setIsEditing(false);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-    if (hours < 24) return `${hours}시간 전`;
-    if (days < 7) return `${days}일 전`;
-
-    return date.toLocaleDateString('ko-KR');
-  };
-
   return (
     <div className={`comment-item ${depth > 0 ? 'comment-reply' : ''}`} style={{ marginLeft: depth * 24 }}>
       <div className="comment-header">
@@ -222,7 +206,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
             {comment.author?.name || comment.author_name || '익명'}
           </span>
         </div>
-        <span className="comment-date">{formatDate(comment.created_at)}</span>
+        <span className="comment-date">{formatRelativeOrDate(comment.created_at)}</span>
       </div>
 
       {isEditing ? (

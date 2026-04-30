@@ -2,24 +2,13 @@
 import { Link } from 'react-router-dom';
 import { PostSummary } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
+import { formatDateShort } from '@/utils';
 import './PostCard.editorial.css';
 
 interface PostCardProps {
   post: PostSummary;
   animationDelay?: number;
 }
-
-const formatDate = (dateString: string | null): string => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date
-    .toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    })
-    .replace(/\.\s*$/, '');
-};
 
 const PostCard: React.FC<PostCardProps> = ({ post, animationDelay = 1 }) => {
   const delay = Math.min(animationDelay, 5);
@@ -56,7 +45,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, animationDelay = 1 }) => {
       </Link>
 
       <div className="post-card-footer">
-        <span className="post-card-date">{formatDate(post.published_at)}</span>
+        <span className="post-card-date">{formatDateShort(post.published_at)}</span>
         <div className="post-card-stats">
           <span className="post-card-stat">
             <svg viewBox="0 0 24 24">

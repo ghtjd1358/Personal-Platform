@@ -6,16 +6,21 @@ import {BlogStats, HeroSection, PostsSection, SEOHead, SearchBar} from "@/compon
 import { getCategories, CategoryDetail } from "@/network";
 import { LINK_PREFIX } from '@/config/constants';
 
-type SortOpt = 'latest' | 'oldest' | 'popular' | 'liked';
+type SortField = 'date' | 'views' | 'likes';
+type SortDir = 'desc' | 'asc';
 type ColsOpt = 3 | 4 | 5;
 
 const BlogList: React.FC = () => {
   const { isAdmin } = usePermission();
   const [categories, setCategories] = useState<CategoryDetail[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortOpt>('latest');
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [cols, setCols] = useState<ColsOpt>(4);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // field + direction 합성 → backend PostSortOption (`date_desc`, `views_asc` 등)
+  const sortKey = `${sortField}_${sortDir}` as const;
 
   const {
     posts,
@@ -27,7 +32,7 @@ const BlogList: React.FC = () => {
   } = useBlogData({
     limit: 20,
     categoryId: selectedCategory,
-    sort,
+    sort: sortKey,
     search: searchQuery,
   });
 
@@ -111,47 +116,32 @@ const BlogList: React.FC = () => {
             />
           </div>
 
-          {/* 정렬 + 열 개수 — segmented control */}
+          {/* 정렬 + 열 개수 — segmented control. field 3 + direction 2 = 6 조합 */}
           <div className="filter-group blog-sort-row">
             <div className="blog-sort-field">
               <span className="filter-label">정렬</span>
               <div className="segmented-control" role="radiogroup" aria-label="정렬 기준">
                 <button
                   type="button"
-                  className={`segmented-btn ${sort === 'latest' ? 'active' : ''}`}
-                  onClick={() => setSort('latest')}
-                  title="최신순"
-                  aria-pressed={sort === 'latest'}
+                  className={`segmented-btn ${sortField === 'date' ? 'active' : ''}`}
+                  onClick={() => setSortField('date')}
+                  title="작성일 기준"
+                  aria-pressed={sortField === 'date'}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="3" y1="6" x2="13" y2="6" />
-                    <line x1="3" y1="12" x2="11" y2="12" />
-                    <line x1="3" y1="18" x2="9" y2="18" />
-                    <polyline points="17 18 17 6 21 10" />
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
-                  <span>최신</span>
+                  <span>작성일</span>
                 </button>
                 <button
                   type="button"
-                  className={`segmented-btn ${sort === 'oldest' ? 'active' : ''}`}
-                  onClick={() => setSort('oldest')}
-                  title="오래된순"
-                  aria-pressed={sort === 'oldest'}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="3" y1="6" x2="9" y2="6" />
-                    <line x1="3" y1="12" x2="11" y2="12" />
-                    <line x1="3" y1="18" x2="13" y2="18" />
-                    <polyline points="17 6 17 18 21 14" />
-                  </svg>
-                  <span>오래된</span>
-                </button>
-                <button
-                  type="button"
-                  className={`segmented-btn ${sort === 'popular' ? 'active' : ''}`}
-                  onClick={() => setSort('popular')}
-                  title="조회수 많은순"
-                  aria-pressed={sort === 'popular'}
+                  className={`segmented-btn ${sortField === 'views' ? 'active' : ''}`}
+                  onClick={() => setSortField('views')}
+                  title="조회수 기준"
+                  aria-pressed={sortField === 'views'}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -161,15 +151,50 @@ const BlogList: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  className={`segmented-btn ${sort === 'liked' ? 'active' : ''}`}
-                  onClick={() => setSort('liked')}
-                  title="좋아요 많은순"
-                  aria-pressed={sort === 'liked'}
+                  className={`segmented-btn ${sortField === 'likes' ? 'active' : ''}`}
+                  onClick={() => setSortField('likes')}
+                  title="좋아요 기준"
+                  aria-pressed={sortField === 'likes'}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill={sort === 'liked' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill={sortField === 'likes' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
                   <span>좋아요</span>
+                </button>
+              </div>
+            </div>
+            <div className="blog-sort-field">
+              <span className="filter-label">방향</span>
+              <div className="segmented-control" role="radiogroup" aria-label="정렬 방향">
+                <button
+                  type="button"
+                  className={`segmented-btn ${sortDir === 'desc' ? 'active' : ''}`}
+                  onClick={() => setSortDir('desc')}
+                  title="내림차순 (큰→작)"
+                  aria-pressed={sortDir === 'desc'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="6" x2="13" y2="6" />
+                    <line x1="3" y1="12" x2="11" y2="12" />
+                    <line x1="3" y1="18" x2="9" y2="18" />
+                    <polyline points="17 18 17 6 21 10" />
+                  </svg>
+                  <span>내림</span>
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-btn ${sortDir === 'asc' ? 'active' : ''}`}
+                  onClick={() => setSortDir('asc')}
+                  title="오름차순 (작→큰)"
+                  aria-pressed={sortDir === 'asc'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="6" x2="9" y2="6" />
+                    <line x1="3" y1="12" x2="11" y2="12" />
+                    <line x1="3" y1="18" x2="13" y2="18" />
+                    <polyline points="17 6 17 18 21 14" />
+                  </svg>
+                  <span>오름</span>
                 </button>
               </div>
             </div>

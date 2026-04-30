@@ -408,6 +408,11 @@
     background: transparent !important;
 }
 
+/* 본문(post-content)·footer 와 같은 폭으로 — global.css 의 800px 제한 override */
+.post-detail .comment-section {
+    max-width: 100% !important;
+}
+
 .post-detail .post-footer {
     max-width: 1120px;
     margin: clamp(32px, 4vw, 48px) auto 0;
@@ -470,8 +475,9 @@
 }
 
 .post-detail .post-actions {
+    max-width: 100% !important;  /* global.css 의 800 제한 풀어 footer container(1120) 폭에 맞춤 */
     display: flex;
-    justify-content: flex-start;  /* 좌측 정렬 — 목록/share/edit/delete 한 묶음으로 왼쪽에 */
+    justify-content: space-between;  /* 양끝 — 좌: 목록 / 우: share·edit·delete 묶음 */
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
