@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npm run build:lib && npm run build:host",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },

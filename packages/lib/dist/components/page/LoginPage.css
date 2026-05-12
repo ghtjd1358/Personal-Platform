@@ -1,0 +1,492 @@
+/* ============================================
+   LoginPage — Editorial 한지/먹/주홍 dialect
+   다른 페이지(host Dashboard, blog/portfolio editorial-hero, ModalContainer)
+   와 동일 한지 cream + 먹 ink + 인장 주홍 톤
+   ============================================ */
+
+.login-page {
+    --lp-bone: #F4EAD5;        /* 한지 미색 */
+    --lp-cream: #FBF5E3;       /* 밝은 한지 (카드 bg) */
+    --lp-ink: #2B1E14;         /* 먹색 */
+    --lp-accent: #8C1E1A;      /* 인장 주홍 */
+    --lp-accent-deep: #6B1512;
+    --lp-mute: #8B7355;        /* 아교 갈색 */
+    --lp-line: #D4C4A8;        /* warm paper border */
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 56px 24px;
+    background: var(--lp-bone);
+    color: var(--lp-ink);
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    overflow: hidden;
+}
+
+/* ===== Background — 한지 grain 텍스처 (파란 particle 폐기) ===== */
+.login-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.login-bg-gradient {
+    position: absolute;
+    inset: 0;
+    /* 종이 섬유 fiber 질감 + 살짝 따스한 vignette */
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(140, 30, 26, 0.04) 0%, transparent 55%),
+        radial-gradient(ellipse at 70% 80%, rgba(43, 30, 20, 0.06) 0%, transparent 55%);
+}
+
+/* 파란 particle 12개를 옅은 먹 dot 으로 재의미 — 종이 위 잉크 얼룩 */
+.login-particle {
+    position: absolute;
+    background: var(--lp-ink);
+    border-radius: 50%;
+    opacity: 0.08;
+    box-shadow: none;
+    animation: lpFloat linear infinite;
+}
+.login-particle--1  { width: 5px;  height: 5px;  left: 10%; top: 20%; animation-duration: 28s; }
+.login-particle--2  { width: 7px;  height: 7px;  left: 20%; top: 60%; animation-duration: 33s; animation-delay: -5s;  background: var(--lp-accent); opacity: 0.12; }
+.login-particle--3  { width: 4px;  height: 4px;  left: 80%; top: 30%; animation-duration: 24s; animation-delay: -10s; }
+.login-particle--4  { width: 6px;  height: 6px;  left: 70%; top: 70%; animation-duration: 30s; animation-delay: -3s;  background: var(--lp-mute); opacity: 0.18; }
+.login-particle--5  { width: 5px;  height: 5px;  left: 40%; top: 10%; animation-duration: 36s; animation-delay: -8s; }
+.login-particle--6  { width: 8px;  height: 8px;  left: 90%; top: 50%; animation-duration: 34s; animation-delay: -12s; opacity: 0.06; }
+.login-particle--7  { width: 4px;  height: 4px;  left: 5%;  top: 80%; animation-duration: 27s; animation-delay: -15s; }
+.login-particle--8  { width: 6px;  height: 6px;  left: 55%; top: 85%; animation-duration: 25s; animation-delay: -7s;  background: var(--lp-accent); opacity: 0.1; }
+.login-particle--9  { width: 4px;  height: 4px;  left: 30%; top: 40%; animation-duration: 31s; animation-delay: -18s; }
+.login-particle--10 { width: 7px;  height: 7px;  left: 85%; top: 15%; animation-duration: 26s; animation-delay: -2s; }
+.login-particle--11 { width: 4px;  height: 4px;  left: 15%; top: 45%; animation-duration: 35s; animation-delay: -20s; }
+.login-particle--12 { width: 6px;  height: 6px;  left: 60%; top: 25%; animation-duration: 29s; animation-delay: -11s; background: var(--lp-mute); opacity: 0.14; }
+
+@keyframes lpFloat {
+    0%   { transform: translate(0, 0) rotate(0deg);     opacity: 0; }
+    8%   { opacity: var(--_o, 0.1); }
+    50%  { transform: translate(40px, -80px) rotate(180deg); }
+    92%  { opacity: var(--_o, 0.1); }
+    100% { transform: translate(80px, -160px) rotate(360deg); opacity: 0; }
+}
+
+/* ===== Card — 한지 cream + 먹 border + offset shadow ===== */
+.login-card {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    background: var(--lp-cream);
+    border: 2px solid var(--lp-ink);
+    border-radius: 3px;
+    padding: 48px 40px 44px;
+    box-shadow:
+        6px 9px 0 rgba(43, 30, 20, 0.18),
+        14px 22px 44px rgba(43, 30, 20, 0.12);
+    animation: lpCardAppear 0.55s cubic-bezier(.2, .7, .2, 1) forwards;
+    opacity: 0;
+    transform: translateY(24px) scale(0.98) rotate(-0.4deg);
+    z-index: 5;
+}
+
+@keyframes lpCardAppear {
+    to { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+/* 종이 grain dot */
+.login-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(43, 30, 20, 0.05) 1px, transparent 1px);
+    background-size: 3px 3px;
+    pointer-events: none;
+    opacity: 0.5;
+    border-radius: inherit;
+}
+
+/* ===== Header ===== */
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+}
+
+.login-logo-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 8px 16px;
+    background: transparent;
+    border-radius: 9999px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(.2, .7, .2, 1);
+    animation: lpLogoPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.18s forwards;
+    opacity: 0;
+    transform: scale(0.85);
+}
+
+@keyframes lpLogoPop {
+    to { opacity: 1; transform: scale(1); }
+}
+
+.login-logo-link:hover {
+    transform: translateY(-3px) scale(1.04);
+}
+
+/* eyebrow — 'SIGN IN' mono 라벨 (Modal eyebrow 와 동일 어휘) */
+.login-header::before {
+    content: 'SIGN IN';
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    color: var(--lp-accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 600;
+    animation: lpFadeUp 0.5s ease 0.3s forwards;
+    opacity: 0;
+}
+
+.login-title {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif;
+    font-size: 30px;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--lp-ink);
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 1;
+    animation: lpFadeUp 0.5s ease 0.4s forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.login-subtitle {
+    font-size: 14px;
+    color: var(--lp-mute);
+    margin: 0;
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif;
+    font-style: italic;
+    animation: lpFadeUp 0.5s ease 0.45s forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+@keyframes lpFadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Google Login ===== */
+.login-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 50px;
+    position: relative;
+    z-index: 1;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--lp-ink);
+    background: transparent;
+    border: 1.5px solid var(--lp-ink);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.18s cubic-bezier(.2, 0, 0, 1),
+                color 0.18s cubic-bezier(.2, 0, 0, 1),
+                transform 0.18s cubic-bezier(.2, 0, 0, 1),
+                box-shadow 0.18s cubic-bezier(.2, 0, 0, 1);
+    animation: lpFadeUp 0.5s ease 0.5s forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.login-google:hover {
+    background: var(--lp-cream);
+    transform: translateY(-2px);
+    box-shadow: 3px 4px 0 rgba(43, 30, 20, 0.16);
+}
+
+.login-google:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ===== Divider — dashed paper line ===== */
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 22px 0;
+    position: relative;
+    z-index: 1;
+    animation: lpFadeUp 0.5s ease 0.55s forwards;
+    opacity: 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    height: 0;
+    border-top: 1px dashed var(--lp-line);
+}
+
+.login-divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--lp-mute);
+}
+
+/* ===== Form ===== */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: relative;
+    z-index: 1;
+}
+
+.login-input-group {
+    animation: lpFadeUp 0.5s ease forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.login-input-group:nth-child(1) { animation-delay: 0.5s; }
+.login-input-group:nth-child(2) { animation-delay: 0.55s; }
+.login-input-group:nth-child(3) { animation-delay: 0.6s; }
+
+.login-label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--lp-mute);
+    margin-bottom: 8px;
+    transition: color 0.18s ease;
+}
+
+.login-input-group.focused .login-label {
+    color: var(--lp-accent);
+}
+
+.login-input-wrapper {
+    position: relative;
+}
+
+.login-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--lp-mute);
+    transition: color 0.18s ease;
+    pointer-events: none;
+}
+
+.login-input-group.focused .login-input-icon {
+    color: var(--lp-accent);
+}
+
+.login-input {
+    width: 100%;
+    height: 50px;
+    padding: 0 14px 0 44px;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 14px;
+    color: var(--lp-ink);
+    background: var(--lp-bone);
+    border: 1.5px solid var(--lp-line);
+    border-radius: 2px;
+    outline: none;
+    transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.login-input::placeholder {
+    color: var(--lp-mute);
+    font-style: italic;
+    font-family: 'Fraunces', Georgia, serif;
+}
+
+.login-input:hover {
+    border-color: rgba(43, 30, 20, 0.5);
+}
+
+.login-input:focus {
+    background: var(--lp-cream);
+    border-color: var(--lp-ink);
+    box-shadow: 0 0 0 3px rgba(140, 30, 26, 0.12);
+}
+
+/* ===== Error — 주홍 톤 ===== */
+.login-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(140, 30, 26, 0.06);
+    border: 1px dashed var(--lp-accent);
+    border-radius: 2px;
+    color: var(--lp-accent-deep);
+    font-size: 13px;
+    font-weight: 500;
+    font-style: italic;
+    font-family: 'Fraunces', Georgia, serif;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+    animation: lpShake 0.4s ease, lpFadeUp 0.3s ease;
+}
+
+@keyframes lpShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-3px); }
+    40%, 80% { transform: translateX(3px); }
+}
+
+/* ===== Submit Button — Modal primary 와 동일 패턴 (먹 fill → 주홍 hover) ===== */
+.login-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 50px;
+    margin-top: 8px;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--lp-cream);
+    background: var(--lp-ink);
+    border: 1.5px solid var(--lp-ink);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.18s cubic-bezier(.2, 0, 0, 1),
+                border-color 0.18s cubic-bezier(.2, 0, 0, 1),
+                transform 0.18s cubic-bezier(.2, 0, 0, 1),
+                box-shadow 0.18s cubic-bezier(.2, 0, 0, 1);
+    animation: lpFadeUp 0.5s ease 0.65s forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.login-button:hover:not(:disabled) {
+    background: var(--lp-accent);
+    border-color: var(--lp-accent);
+    transform: translateY(-2px);
+    box-shadow: 3px 5px 0 rgba(43, 30, 20, 0.25);
+}
+
+.login-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.login-button svg {
+    transition: transform 0.18s cubic-bezier(.2, 0, 0, 1);
+}
+
+.login-button:hover:not(:disabled) svg {
+    transform: translateX(3px);
+}
+
+/* ===== Spinner ===== */
+.login-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(251, 245, 227, 0.3);
+    border-top-color: var(--lp-cream);
+    border-radius: 50%;
+    animation: lpSpin 0.7s linear infinite;
+}
+
+.login-spinner--dark {
+    border-color: rgba(43, 30, 20, 0.18);
+    border-top-color: var(--lp-ink);
+}
+
+@keyframes lpSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== Test Account ===== */
+.login-test-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--lp-line);
+    position: relative;
+    z-index: 1;
+    animation: lpFadeUp 0.5s ease 0.7s forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.login-test-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--lp-accent);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--lp-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+.login-test-credentials {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--lp-ink);
+    background: var(--lp-bone);
+    padding: 6px 12px;
+    border: 1px solid var(--lp-line);
+    border-radius: 2px;
+    letter-spacing: 0.04em;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+    .login-page {
+        padding: 32px 16px;
+    }
+
+    .login-card {
+        padding: 36px 24px;
+    }
+
+    .login-title {
+        font-size: 26px;
+    }
+
+    .login-input,
+    .login-button,
+    .login-google {
+        height: 46px;
+    }
+}
