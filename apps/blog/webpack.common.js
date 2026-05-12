@@ -61,6 +61,8 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'blog',
       filename: 'remoteEntry.js',
+      // strict mode IIFE 에서 var 가 window 노출 안 되는 문제 회피 — window type 명시
+      library: { type: 'window', name: 'blog' },
       exposes: {
         './App': './src/App',
         './LnbItems': './src/exposes/lnb-items',

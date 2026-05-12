@@ -58,6 +58,7 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'jobtracker',
       filename: 'remoteEntry.js',
+      library: { type: 'window', name: 'jobtracker' },
       exposes: {
         './App': './src/App',
         './LnbItems': './src/exposes/lnb-items'

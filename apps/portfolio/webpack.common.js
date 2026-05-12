@@ -60,6 +60,7 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'portfolio',
       filename: 'remoteEntry.js',
+      library: { type: 'window', name: 'portfolio' },
       exposes: {
         './App': './src/App',
         './LnbItems': './src/exposes/lnb-items'
