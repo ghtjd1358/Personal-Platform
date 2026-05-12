@@ -7,6 +7,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, selectAccessToken, selectUser } from '../../store/app-store';
+import { getSupabase } from '../../network/supabase-client';
 
 export interface GnbItem {
   id: string;
@@ -31,7 +32,13 @@ export const Header: React.FC<HeaderProps> = ({ gnbItems, appName = '앱', logo 
     navigate(path);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Supabase 자체 session 까지 제거 — 우리 storage 만 비우면 새로고침 시 sb-*-auth-token 으로 자동 hydrate 됨.
+    try {
+      await getSupabase().auth.signOut();
+    } catch (err) {
+      console.warn('supabase signOut failed:', err);
+    }
     dispatch(logout());
     navigate('/');
   };

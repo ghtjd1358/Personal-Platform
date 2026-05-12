@@ -192,18 +192,19 @@ export function LoginPage({
                     <a href="/" className="login-logo-link">
                         {logo || (
                             <>
+                                {/* ㅅㅎㅅ editorial 톤 — 먹(#2B1E14) / 인장 주홍(#8C1E1A) / 한지 cream(#FBF5E3) */}
                                 <svg viewBox="0 0 48 48" fill="none" width="28" height="28">
-                                    <path d="M 8 40 L 24 8 L 40 40" stroke="#1E3A5F" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                                    <path d="M 8 40 L 24 8 L 40 40" stroke="#2B1E14" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                                 </svg>
                                 <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
-                                    <rect x="20" y="2" width="8" height="16" rx="4" fill="#0EA5E9"/>
-                                    <rect x="6" y="16" width="36" height="6" rx="3" fill="#0EA5E9"/>
-                                    <ellipse cx="24" cy="36" rx="18" ry="12" fill="#0EA5E9"/>
-                                    <ellipse cx="17" cy="36" rx="4" ry="6" fill="#FFFFFF"/>
-                                    <ellipse cx="31" cy="36" rx="4" ry="6" fill="#FFFFFF"/>
+                                    <rect x="20" y="2" width="8" height="16" rx="4" fill="#8C1E1A"/>
+                                    <rect x="6" y="16" width="36" height="6" rx="3" fill="#8C1E1A"/>
+                                    <ellipse cx="24" cy="36" rx="18" ry="12" fill="#8C1E1A"/>
+                                    <ellipse cx="17" cy="36" rx="4" ry="6" fill="#FBF5E3"/>
+                                    <ellipse cx="31" cy="36" rx="4" ry="6" fill="#FBF5E3"/>
                                 </svg>
                                 <svg viewBox="0 0 48 48" fill="none" width="28" height="28">
-                                    <path d="M 8 40 L 24 8 L 40 40" stroke="#1E3A5F" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                                    <path d="M 8 40 L 24 8 L 40 40" stroke="#2B1E14" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                                 </svg>
                             </>
                         )}

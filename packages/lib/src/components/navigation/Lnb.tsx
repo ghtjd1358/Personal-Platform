@@ -7,6 +7,7 @@ import React, { useState, isValidElement, cloneElement } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, selectAccessToken, selectUser } from '../../store/app-store';
+import { getSupabase } from '../../network/supabase-client';
 import { LnbMenuItem } from '../../types';
 
 // LnbMenuItem 타입 re-export (하위 호환)
@@ -35,7 +36,14 @@ export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo }) => {
     navigate(path);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Supabase 자체 session(`sb-<ref>-auth-token` localStorage) 까지 제거 — 안 부르면 새로고침 시 자동 hydrate 로 로그인 상태 복원되는 stale session 버그.
+    try {
+      await getSupabase().auth.signOut();
+    } catch (err) {
+      // signOut 실패해도 우리 store/storage 는 비워야 진짜 로그아웃 효과
+      console.warn('supabase signOut failed:', err);
+    }
     dispatch(logout());
     navigate('/');
   };
