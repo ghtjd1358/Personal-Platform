@@ -17,12 +17,9 @@ const REMOTE4_URL = process.env.REMOTE4_URL || 'http://localhost:5004';
 // - Graceful fallback (로드 실패 시에도 앱 동작)
 // ============================================
 const dynamicRemoteLoader = (remoteName, remoteUrl) => {
-  // 캐시 무효화를 위한 타임스탬프 (1분 단위)
-  const timestamp = Math.floor(Date.now() / 60000);
-  const urlWithTimestamp = `${remoteUrl}?t=${timestamp}`;
-
+  // ?t= 를 runtime Date.now() 로 박아 host main.js 가 stale cache 라도 remoteEntry 는 매 fetch fresh 보장
+  // (build-time timestamp 였을 때는 옛 deploy cache + 같은 URL 로 stale remoteEntry 받는 케이스 존재)
   return `promise new Promise((resolve, reject) => {
-    // 이미 로드된 경우 재사용
     if (window['${remoteName}']) {
       resolve({
         get: (request) => window['${remoteName}'].get(request),
@@ -38,7 +35,7 @@ const dynamicRemoteLoader = (remoteName, remoteUrl) => {
     }
 
     const script = document.createElement('script');
-    script.src = '${urlWithTimestamp}';
+    script.src = '${remoteUrl}' + '?t=' + Date.now();
     script.type = 'text/javascript';
     script.async = true;
 
