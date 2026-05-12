@@ -112,7 +112,11 @@
       "Read(//c/Coding/KOMCA/container/komca-container-front/src/**)",
       "Read(//c/Coding/KOMCA/**)",
       "Bash(xargs stat *)",
-      "Bash(xargs -I {} taskkill //F //PID {})"
+      "Bash(xargs -I {} taskkill //F //PID {})",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} / time=%{time_total}s\\\\n\" \"https://ujhlgylnauzluttvmcrz.supabase.co/auth/v1/health\" --max-time 10)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" \"https://ujhlgylnauzluttvmcrz.supabase.co/rest/v1/\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGxneWxuYXV6bHV0dHZtY3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU1MDA0MjcsImV4cCI6MjA4MTA3NjQyN30.UcOpbc6QDU-J2s_6eI5vEehvbgSRMCSHIjkFiHb0oRo\" --max-time 10)",
+      "mcp__plugin_supabase_supabase__get_project",
+      "Bash(curl *)"
     ]
   },
   "outputStyle": "Learning"
