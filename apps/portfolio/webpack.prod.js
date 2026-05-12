@@ -10,34 +10,33 @@ module.exports = merge(common, {
     filename: '[name].[contenthash].js'
   },
 
+  // ModuleFederation 함정: runtimeChunk 'single' / chunks 'all' 가 remoteEntry 깨뜨림. async 로 제한 + runtime inline
   optimization: {
     usedExports: true,
     sideEffects: true,
     splitChunks: {
-      chunks: 'all',
+      chunks: 'async',
       minSize: 20000,
-      maxSize: 244000,
       cacheGroups: {
         react: {
           test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
           name: 'react-vendor',
-          chunks: 'all',
+          chunks: 'async',
           priority: 30,
         },
         reactEcosystem: {
           test: /[\\/]node_modules[\\/](react-router|react-router-dom|@reduxjs|react-redux)[\\/]/,
           name: 'react-ecosystem',
-          chunks: 'all',
+          chunks: 'async',
           priority: 25,
         },
         vendor: {
           test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
-          chunks: 'all',
+          chunks: 'async',
           priority: 10,
         },
       },
     },
-    runtimeChunk: 'single',
   },
 });

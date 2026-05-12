@@ -58,6 +58,7 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'jobtracker',
       filename: 'remoteEntry.js',
+      // strict mode IIFE 안 'var X' 는 outer 노출 안 되므로 type 'window' 명시
       library: { type: 'window', name: 'jobtracker' },
       exposes: {
         './App': './src/App',

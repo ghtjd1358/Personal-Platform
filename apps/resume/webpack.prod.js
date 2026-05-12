@@ -10,37 +10,36 @@ module.exports = merge(common, {
     filename: '[name].[contenthash].js'
   },
 
+  // ModuleFederation 함정: runtimeChunk 'single' 가 webpack runtime 을 별도 chunk 로 빼면
+  // remoteEntry.js 에 runtime 없어 host 가 fetch 해도 chunk callback 실행 불가 → window.X 미노출
+  // 또 splitChunks chunks:'all' 가 entry/initial chunk 까지 split 해 dependency 흩어짐
+  // → 둘 다 'async' 로 제한해 remoteEntry 가 self-contained 가 되게 함
   optimization: {
     usedExports: true,
     sideEffects: true,
     splitChunks: {
-      chunks: 'all',
+      chunks: 'async',
       minSize: 20000,
-      maxSize: 244000,
       cacheGroups: {
-        // React 코어 라이브러리
         react: {
           test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
           name: 'react-vendor',
-          chunks: 'all',
+          chunks: 'async',
           priority: 30,
         },
-        // React Router & Redux
         reactEcosystem: {
           test: /[\\/]node_modules[\\/](react-router|react-router-dom|@reduxjs|react-redux)[\\/]/,
           name: 'react-ecosystem',
-          chunks: 'all',
+          chunks: 'async',
           priority: 25,
         },
-        // 기타 vendor
         vendor: {
           test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
-          chunks: 'all',
+          chunks: 'async',
           priority: 10,
         },
       },
     },
-    runtimeChunk: 'single',
   },
 });

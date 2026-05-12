@@ -66,7 +66,7 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'remote1',
       filename: 'remoteEntry.js',
-      // host dynamicRemoteLoader 가 window[name] 에서 container 찾음 → strict mode IIFE 안 'var X' 는 window 노출 안 돼 'window' type 명시 필요
+      // host dynamicRemoteLoader 가 window[name] 에서 container 찾음 → strict mode IIFE 안 'var X' 는 outer 노출 안 됨
       library: { type: 'window', name: 'remote1' },
       exposes: {
         './App': './src/exposes/App',
