@@ -8,14 +8,16 @@ export const NotFound = ({ title = '페이지를 찾을 수 없습니다', messa
     const handleGoHome = () => {
         navigate(homePath);
     };
-    return (_jsx("div", { style: styles.container, children: _jsxs("div", { style: styles.content, children: [_jsx("div", { style: styles.errorCode, children: "404" }), _jsx("h1", { style: styles.title, children: title }), _jsx("p", { style: styles.message, children: message }), _jsxs("div", { style: styles.buttonContainer, children: [showBackButton && (_jsx("button", { onClick: handleGoBack, style: styles.button, onMouseEnter: (e) => {
-                                e.currentTarget.style.backgroundColor = '#5a6268';
+    return (_jsx("div", { style: styles.container, children: _jsxs("div", { style: styles.content, children: [_jsx("div", { style: styles.eyebrow, children: "404 \u00B7 NOT FOUND" }), _jsx("div", { style: styles.errorCode, children: "\u56DB\u3007\u56DB" }), _jsx("h1", { style: styles.title, children: title }), _jsx("p", { style: styles.message, children: message }), _jsxs("div", { style: styles.buttonContainer, children: [showBackButton && (_jsx("button", { onClick: handleGoBack, style: styles.button, onMouseEnter: (e) => {
+                                e.currentTarget.style.backgroundColor = '#2B1E14';
+                                e.currentTarget.style.color = '#FBF5E3';
                             }, onMouseLeave: (e) => {
-                                e.currentTarget.style.backgroundColor = '#6c757d';
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.color = '#2B1E14';
                             }, children: "\uC774\uC804 \uD398\uC774\uC9C0" })), showHomeButton && (_jsx("button", { onClick: handleGoHome, style: { ...styles.button, ...styles.primaryButton }, onMouseEnter: (e) => {
-                                e.currentTarget.style.backgroundColor = '#0056b3';
+                                e.currentTarget.style.backgroundColor = '#6E1614';
                             }, onMouseLeave: (e) => {
-                                e.currentTarget.style.backgroundColor = '#007bff';
+                                e.currentTarget.style.backgroundColor = '#8C1E1A';
                             }, children: "\uD648\uC73C\uB85C" }))] })] }) }));
 };
 const styles = {
@@ -24,31 +26,42 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        backgroundColor: '#f8f9fa',
-        padding: '20px',
+        backgroundColor: '#F4EAD5',
+        padding: '24px',
+        fontFamily: '"Iowan Old Style", "Nanum Myeongjo", "Apple SD Gothic Neo", serif',
     },
     content: {
         textAlign: 'center',
-        maxWidth: '500px',
+        maxWidth: '520px',
+    },
+    eyebrow: {
+        fontSize: '11px',
+        fontWeight: 600,
+        color: '#8C1E1A',
+        letterSpacing: '0.24em',
+        marginBottom: '24px',
+        fontFamily: '"SF Mono", "Menlo", monospace',
     },
     errorCode: {
-        fontSize: '120px',
-        fontWeight: 'bold',
-        color: '#dee2e6',
+        fontSize: '96px',
+        fontWeight: 700,
+        color: '#2B1E14',
         lineHeight: 1,
-        marginBottom: '20px',
+        marginBottom: '24px',
+        letterSpacing: '-0.02em',
     },
     title: {
         fontSize: '24px',
         fontWeight: 600,
-        color: '#343a40',
-        marginBottom: '12px',
+        color: '#2B1E14',
+        marginBottom: '14px',
+        letterSpacing: '-0.01em',
     },
     message: {
-        fontSize: '16px',
-        color: '#6c757d',
-        marginBottom: '32px',
-        lineHeight: 1.5,
+        fontSize: '15px',
+        color: '#6E5E4E',
+        marginBottom: '40px',
+        lineHeight: 1.7,
     },
     buttonContainer: {
         display: 'flex',
@@ -56,18 +69,23 @@ const styles = {
         justifyContent: 'center',
     },
     button: {
-        padding: '12px 24px',
-        fontSize: '14px',
-        fontWeight: 500,
-        border: 'none',
-        borderRadius: '8px',
+        padding: '12px 28px',
+        fontSize: '12px',
+        fontWeight: 600,
+        border: '1.5px solid #2B1E14',
+        borderRadius: 0,
         cursor: 'pointer',
-        backgroundColor: '#6c757d',
-        color: '#fff',
-        transition: 'background-color 0.2s',
+        backgroundColor: 'transparent',
+        color: '#2B1E14',
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        transition: 'all 0.2s ease',
+        fontFamily: '"SF Mono", "Menlo", monospace',
     },
     primaryButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#8C1E1A',
+        borderColor: '#8C1E1A',
+        color: '#FBF5E3',
     },
 };
 export default NotFound;
