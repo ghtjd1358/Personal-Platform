@@ -14,7 +14,7 @@
     align-items: flex-start;
     justify-content: center;
     z-index: 10000;
-    padding: 40px 24px;
+    padding: 24px 20px;
     overflow-y: auto;
     animation: pmBackdropFade 0.22s ease-out;
 }
@@ -23,11 +23,11 @@
     to { opacity: 1; }
 }
 
-/* === MODAL === */
+/* === MODAL — viewport 거의 꽉 채움 (사용자 요청). 큰 화면(>1500) 에서만 약간 양보 === */
 .pm-modal {
     position: relative;
     width: 100%;
-    max-width: 1040px;
+    max-width: 1500px;
     background: #FBF5E3;
     border: 1.5px solid #2B1E14;
     border-radius: 4px;
