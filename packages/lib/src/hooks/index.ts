@@ -33,6 +33,9 @@ export type { ConnectionType } from './use-network-status';
 // Permission Hook
 export * from './use-permission';
 
+// Admin Read-Only Guard (demo admin 의 mutation 차단)
+export * from './use-admin-readonly-guard';
+
 // Recent Menu Hook
 export * from './use-recent-menu';
 

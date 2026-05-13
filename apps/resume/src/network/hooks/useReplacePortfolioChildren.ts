@@ -4,16 +4,18 @@
  * editor save flow 에서 상위 update 와 묶여 호출 → 기본 silent (상위에서 최종 토스트 1회).
  */
 import { useCallback, useRef } from 'react';
-import { useShowGlobalLoading, useToast } from '@sonhoseong/mfa-lib';
+import { useShowGlobalLoading, useToast, useAdminReadOnlyGuard } from '@sonhoseong/mfa-lib';
 import { portfoliosApi } from '@/network/apis/supabase';
 
 export function useReplacePortfolioChildren(options: { silent?: boolean } = { silent: true }) {
     const prevAbortRef = useRef<AbortController | null>(null);
     const showGlobalLoading = useShowGlobalLoading();
     const { error: toastError } = useToast();
+    const guard = useAdminReadOnlyGuard();
 
     return useCallback(
         async (portfolioId: string, tasks: string[], tags: string[]): Promise<true | false> => {
+            if (guard()) return false as const;
             if (prevAbortRef.current) prevAbortRef.current.abort();
             const controller = new AbortController();
             prevAbortRef.current = controller;
@@ -28,6 +30,6 @@ export function useReplacePortfolioChildren(options: { silent?: boolean } = { si
                     }),
             );
         },
-        [showGlobalLoading, toastError, options.silent],
+        [showGlobalLoading, toastError, options.silent, guard],
     );
 }

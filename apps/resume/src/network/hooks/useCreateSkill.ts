@@ -7,6 +7,7 @@ import { useCallback, useRef } from 'react';
 import {
     useShowGlobalLoading,
     useToast,
+    useAdminReadOnlyGuard,
 } from '@sonhoseong/mfa-lib';
 import { skillsApi, type SkillInput } from '@/network/apis/supabase';
 
@@ -19,9 +20,11 @@ export function useCreateSkill(options: { silent?: boolean } = {}) {
     const prevAbortRef = useRef<AbortController | null>(null);
     const showGlobalLoading = useShowGlobalLoading();
     const { error: toastError, success: toastSuccess } = useToast();
+    const guard = useAdminReadOnlyGuard();
 
     return useCallback(
         async (payload: CreatePayload): Promise<CreatedRow | false> => {
+            if (guard()) return false as const;
             if (prevAbortRef.current) prevAbortRef.current.abort();
             const controller = new AbortController();
             prevAbortRef.current = controller;
@@ -43,6 +46,6 @@ export function useCreateSkill(options: { silent?: boolean } = {}) {
                     }),
             );
         },
-        [showGlobalLoading, toastError, toastSuccess, options.silent],
+        [showGlobalLoading, toastError, toastSuccess, options.silent, guard],
     );
 }

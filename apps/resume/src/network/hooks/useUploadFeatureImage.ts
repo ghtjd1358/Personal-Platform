@@ -4,16 +4,18 @@
  * 업로드 자체는 save flow 의 일부인 경우가 많아 기본 silent (상위에서 최종 토스트).
  */
 import { useCallback, useRef } from 'react';
-import { useShowGlobalLoading, useToast } from '@sonhoseong/mfa-lib';
+import { useShowGlobalLoading, useToast, useAdminReadOnlyGuard } from '@sonhoseong/mfa-lib';
 import { featuresApi } from '@/network/apis/supabase';
 
 export function useUploadFeatureImage(options: { silent?: boolean } = { silent: true }) {
     const prevAbortRef = useRef<AbortController | null>(null);
     const showGlobalLoading = useShowGlobalLoading();
     const { error: toastError } = useToast();
+    const guard = useAdminReadOnlyGuard();
 
     return useCallback(
         async (userId: string, file: File): Promise<string | false> => {
+            if (guard()) return false as const;
             if (prevAbortRef.current) prevAbortRef.current.abort();
             const controller = new AbortController();
             prevAbortRef.current = controller;
@@ -28,6 +30,6 @@ export function useUploadFeatureImage(options: { silent?: boolean } = { silent: 
                     }),
             );
         },
-        [showGlobalLoading, toastError, options.silent],
+        [showGlobalLoading, toastError, options.silent, guard],
     );
 }

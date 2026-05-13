@@ -8,6 +8,7 @@ import { useCallback, useRef } from 'react';
 import {
     useShowGlobalLoading,
     useToast,
+    useAdminReadOnlyGuard,
 } from '@sonhoseong/mfa-lib';
 import { experiencesApi } from '@/network/apis/supabase';
 
@@ -15,9 +16,11 @@ export function useReplaceExperienceChildren(options: { silent?: boolean } = { s
     const prevAbortRef = useRef<AbortController | null>(null);
     const showGlobalLoading = useShowGlobalLoading();
     const { error: toastError } = useToast();
+    const guard = useAdminReadOnlyGuard();
 
     return useCallback(
         async (experienceId: string, tasks: string[], tags: string[]): Promise<true | false> => {
+            if (guard()) return false as const;
             if (prevAbortRef.current) prevAbortRef.current.abort();
             const controller = new AbortController();
             prevAbortRef.current = controller;
@@ -32,6 +35,6 @@ export function useReplaceExperienceChildren(options: { silent?: boolean } = { s
                     }),
             );
         },
-        [showGlobalLoading, toastError, options.silent],
+        [showGlobalLoading, toastError, options.silent, guard],
     );
 }

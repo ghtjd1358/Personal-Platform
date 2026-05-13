@@ -12,6 +12,7 @@ export * from './use-error-notification';
 export { default as useNetworkStatus } from './use-network-status';
 export type { ConnectionType } from './use-network-status';
 export * from './use-permission';
+export * from './use-admin-readonly-guard';
 export * from './use-recent-menu';
 export * from './use-debounce';
 export * from './use-scroll-restoration';

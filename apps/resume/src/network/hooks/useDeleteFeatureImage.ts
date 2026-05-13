@@ -4,16 +4,18 @@
  * 반환: 성공/실패 모두 true (orphan 이어도 치명적이지 않음) — 호출부는 await 후 이어서 진행.
  */
 import { useCallback, useRef } from 'react';
-import { useShowGlobalLoading, useToast } from '@sonhoseong/mfa-lib';
+import { useShowGlobalLoading, useToast, useAdminReadOnlyGuard } from '@sonhoseong/mfa-lib';
 import { featuresApi } from '@/network/apis/supabase';
 
 export function useDeleteFeatureImage(options: { silent?: boolean } = { silent: true }) {
     const prevAbortRef = useRef<AbortController | null>(null);
     const showGlobalLoading = useShowGlobalLoading();
     const { error: toastError } = useToast();
+    const guard = useAdminReadOnlyGuard();
 
     return useCallback(
         async (publicUrl: string): Promise<true> => {
+            if (guard()) return true as const;
             if (prevAbortRef.current) prevAbortRef.current.abort();
             const controller = new AbortController();
             prevAbortRef.current = controller;
@@ -28,6 +30,6 @@ export function useDeleteFeatureImage(options: { silent?: boolean } = { silent: 
                     }),
             );
         },
-        [showGlobalLoading, toastError, options.silent],
+        [showGlobalLoading, toastError, options.silent, guard],
     );
 }

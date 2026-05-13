@@ -3,16 +3,18 @@
  * 주의: 이 훅은 DB row 만 삭제. Storage 파일 삭제가 필요하면 useDeleteFeatureImage 를 같이 호출해야 함.
  */
 import { useCallback, useRef } from 'react';
-import { useShowGlobalLoading, useToast } from '@sonhoseong/mfa-lib';
+import { useShowGlobalLoading, useToast, useAdminReadOnlyGuard } from '@sonhoseong/mfa-lib';
 import { featuresApi } from '@/network/apis/supabase';
 
 export function useDeleteFeature(options: { silent?: boolean } = {}) {
     const prevAbortRef = useRef<AbortController | null>(null);
     const showGlobalLoading = useShowGlobalLoading();
     const { error: toastError, success: toastSuccess } = useToast();
+    const guard = useAdminReadOnlyGuard();
 
     return useCallback(
         async (id: string): Promise<true | false> => {
+            if (guard()) return false as const;
             if (prevAbortRef.current) prevAbortRef.current.abort();
             const controller = new AbortController();
             prevAbortRef.current = controller;
@@ -31,6 +33,6 @@ export function useDeleteFeature(options: { silent?: boolean } = {}) {
                     }),
             );
         },
-        [showGlobalLoading, toastError, toastSuccess, options.silent],
+        [showGlobalLoading, toastError, toastSuccess, options.silent, guard],
     );
 }
