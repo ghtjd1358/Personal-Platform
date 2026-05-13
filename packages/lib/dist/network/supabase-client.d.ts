@@ -10,10 +10,6 @@ export interface SupabaseClientConfig {
     supabaseUrl: string;
     supabaseAnonKey: string;
 }
-/**
- * Supabase 클라이언트 초기화
- * 앱 시작 시 한 번만 호출
- */
 export declare function initSupabase(config: SupabaseClientConfig): SupabaseClient;
 /**
  * Supabase 클라이언트 가져오기
