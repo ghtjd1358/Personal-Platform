@@ -395,8 +395,6 @@ const HomePage: React.FC = () => {
                 <article
                   key={project.id}
                   className="insta-grid-card"
-                  data-aos="fade-up"
-                  data-aos-delay={Math.min(index * 100, 400)}
                 >
                   {/* Admin 전용 수정 버튼 — 카드 모서리 ✎ */}
                   {isAdmin && (

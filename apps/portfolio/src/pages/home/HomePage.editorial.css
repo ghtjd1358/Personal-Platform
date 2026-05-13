@@ -788,14 +788,12 @@
     grid-row: 1;
 }
 
-/* info 영역 한지 grain */
+/* info 영역 한지 grain 폐기 — 글씨 위 multiply 가 가독성 떨어뜨림 */
 .portfolio-module .insta-grid-info::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='pgi'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.85' numOctaves='2' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23pgi)'/%3E%3C/svg%3E");
-    mix-blend-mode: multiply;
-    opacity: 0.42;
+    content: none;
+    display: none;
+    background: none;
+    opacity: 0;
     pointer-events: none;
 }
 .portfolio-module .insta-grid-info > * {
@@ -843,21 +841,11 @@
     position: relative;
 }
 
-/* 붓 획 underline */
-.portfolio-module .insta-grid-title::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 120px;
-    height: 12px;
-    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 12' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='pgu'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='1' seed='3'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='2'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M 4 7 Q 50 2 80 6 T 156 7' stroke='%232B1E14' stroke-width='3' fill='none' stroke-linecap='round' filter='url(%23pgu)' opacity='0.9'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
+/* 붓 획 underline 폐기 — 사용자 평 '지렁이/실 같아 가독성 안 좋다' */
+.portfolio-module .insta-grid-title::after,
 .portfolio-module .insta-grid-card:nth-child(2n) .insta-grid-title::after {
-    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 12' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='pgu2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='1' seed='7'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='2'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M 4 7 Q 50 2 80 6 T 156 7' stroke='%238C1E1A' stroke-width='3' fill='none' stroke-linecap='round' filter='url(%23pgu2)' opacity='0.92'/%3E%3C/svg%3E");
+    content: none;
+    display: none;
 }
 
 .portfolio-module .insta-grid-sub {
