@@ -202,6 +202,27 @@
     font-size: 13px;
 }
 
+/* LEFT 안 tech stack 블록 — properties 다음 / links 직전 위치 */
+.pm-meta-tech {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.pm-meta-tech-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #A89A80;
+    font-weight: 500;
+}
+.pm-left .pm-chips { gap: 6px; }
+.pm-left .pm-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+    letter-spacing: 0.02em;
+}
+
 /* LEFT links — flex column bottom push */
 .pm-left .pm-links {
     margin-top: auto;

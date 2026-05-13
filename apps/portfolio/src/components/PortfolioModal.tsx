@@ -135,11 +135,19 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                       <span className="pm-prop-val">{portfolio.detail.client}</span>
                     </div>
                   )}
-                  <div className="pm-prop">
-                    <span className="pm-prop-key">조회</span>
-                    <span className="pm-prop-val pm-prop-val--mono">{(portfolio.view_count || 0).toLocaleString()}</span>
-                  </div>
                 </div>
+
+                {/* TECH STACK — 메타 패널 안에서 보여 좌측 본문 진입에 가독성 부담 안 줌 */}
+                {portfolio.techStack && portfolio.techStack.length > 0 && (
+                  <div className="pm-meta-tech">
+                    <span className="pm-meta-tech-key">기술 스택</span>
+                    <div className="pm-chips">
+                      {portfolio.techStack.map((tech) => (
+                        <span key={tech.id} className="pm-chip">{tech.name}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* LINKS — 좌측 페이지 하단 CTA */}
                 {(portfolio.demo_url || portfolio.github_url) && (
@@ -176,20 +184,8 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                 )}
               </aside>
 
-              {/* === RIGHT PAGE — 콘텐츠 (tech/sections/rich/tags) === */}
+              {/* === RIGHT PAGE — 콘텐츠 (sections/rich/tags). tech 는 좌측 메타로 이동 === */}
               <div className="pm-right">
-                {/* TECH STACK */}
-                {portfolio.techStack && portfolio.techStack.length > 0 && (
-                  <section className="pm-section">
-                    <h2 className="pm-h2">기술 스택</h2>
-                    <div className="pm-chips">
-                      {portfolio.techStack.map((tech) => (
-                        <span key={tech.id} className="pm-chip">{tech.name}</span>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
                 {portfolio.detail?.overview && (
                   <section className="pm-section">
                     <h2 className="pm-h2">개요</h2>
