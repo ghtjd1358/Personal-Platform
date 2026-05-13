@@ -88,51 +88,78 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                   </div>
                 )}
 
-                {/* PROPERTIES — 좁은 좌측 페이지에선 단일 컬럼 stack */}
-                <div className="pm-properties">
-                  {portfolio.detail?.period && (
-                    <div className="pm-prop">
-                      <span className="pm-prop-key">기간</span>
-                      <span className="pm-prop-val">{portfolio.detail.period}</span>
-                    </div>
-                  )}
-                  {portfolio.detail?.duration && (
-                    <div className="pm-prop">
-                      <span className="pm-prop-key">기간(D)</span>
-                      <span className="pm-prop-val">{portfolio.detail.duration}</span>
-                    </div>
-                  )}
-                  {portfolio.detail?.role && (
-                    <div className="pm-prop">
-                      <span className="pm-prop-key">역할</span>
-                      <span className="pm-prop-val">{portfolio.detail.role}</span>
-                    </div>
-                  )}
-                  {portfolio.detail?.team_size != null && (
-                    <div className="pm-prop">
-                      <span className="pm-prop-key">팀</span>
-                      <span className="pm-prop-val">{portfolio.detail.team_size}명</span>
-                    </div>
-                  )}
-                  {portfolio.detail?.client && (
-                    <div className="pm-prop">
-                      <span className="pm-prop-key">클라이언트</span>
-                      <span className="pm-prop-val">{portfolio.detail.client}</span>
-                    </div>
-                  )}
-                </div>
+                {(() => {
+                  const hasProperties = !!(
+                    portfolio.detail?.period ||
+                    portfolio.detail?.duration ||
+                    portfolio.detail?.role ||
+                    portfolio.detail?.team_size != null ||
+                    portfolio.detail?.client
+                  );
+                  const hasTech = !!(portfolio.techStack && portfolio.techStack.length > 0);
+                  const hasMeta = hasProperties || hasTech;
 
-                {/* TECH STACK — 메타 패널 안에서 보여 좌측 본문 진입에 가독성 부담 안 줌 */}
-                {portfolio.techStack && portfolio.techStack.length > 0 && (
-                  <div className="pm-meta-tech">
-                    <span className="pm-meta-tech-key">기술 스택</span>
-                    <div className="pm-chips">
-                      {portfolio.techStack.map((tech) => (
-                        <span key={tech.id} className="pm-chip">{tech.name}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                  if (!hasMeta) {
+                    return (
+                      <div className="pm-meta-empty">
+                        <span className="pm-meta-empty-mark">✶</span>
+                        <p>아직 상세 정보가 등록되지 않은 프로젝트입니다.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <>
+                      {/* PROPERTIES — 좁은 좌측 페이지에선 단일 컬럼 stack */}
+                      {hasProperties && (
+                        <div className="pm-properties">
+                          {portfolio.detail?.period && (
+                            <div className="pm-prop">
+                              <span className="pm-prop-key">기간</span>
+                              <span className="pm-prop-val">{portfolio.detail.period}</span>
+                            </div>
+                          )}
+                          {portfolio.detail?.duration && (
+                            <div className="pm-prop">
+                              <span className="pm-prop-key">기간(D)</span>
+                              <span className="pm-prop-val">{portfolio.detail.duration}</span>
+                            </div>
+                          )}
+                          {portfolio.detail?.role && (
+                            <div className="pm-prop">
+                              <span className="pm-prop-key">역할</span>
+                              <span className="pm-prop-val">{portfolio.detail.role}</span>
+                            </div>
+                          )}
+                          {portfolio.detail?.team_size != null && (
+                            <div className="pm-prop">
+                              <span className="pm-prop-key">팀</span>
+                              <span className="pm-prop-val">{portfolio.detail.team_size}명</span>
+                            </div>
+                          )}
+                          {portfolio.detail?.client && (
+                            <div className="pm-prop">
+                              <span className="pm-prop-key">클라이언트</span>
+                              <span className="pm-prop-val">{portfolio.detail.client}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* TECH STACK */}
+                      {hasTech && (
+                        <div className="pm-meta-tech">
+                          <span className="pm-meta-tech-key">기술 스택</span>
+                          <div className="pm-chips">
+                            {portfolio.techStack!.map((tech) => (
+                              <span key={tech.id} className="pm-chip">{tech.name}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
                 {/* LINKS — 좌측 페이지 하단 CTA */}
                 {(portfolio.demo_url || portfolio.github_url) && (

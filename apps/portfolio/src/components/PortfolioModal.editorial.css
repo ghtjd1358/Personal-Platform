@@ -204,6 +204,35 @@
     font-size: 13px;
 }
 
+/* properties + tech 둘 다 비어있을 때 안내 — 면접 데모 시 빈 메타 패널 대신 친절한 fallback */
+.pm-meta-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 12px;
+    text-align: center;
+    border: 1px dashed #D4C4A8;
+    border-radius: 2px;
+    background: rgba(244, 234, 213, 0.4);
+}
+.pm-meta-empty-mark {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif;
+    font-style: italic;
+    font-size: 32px;
+    color: #8B7355;
+    line-height: 1;
+}
+.pm-meta-empty p {
+    margin: 0;
+    font-size: 13px;
+    color: #8B7355;
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif;
+    font-style: italic;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+
 /* LEFT 안 tech stack 블록 — properties 다음 / links 직전 위치 */
 .pm-meta-tech {
     display: flex;

@@ -101,12 +101,12 @@ const HomePage: React.FC = () => {
 
   const isFiltering = searchQuery.trim() || selectedTech;
 
-  // 데이터 로드 후 AOS refresh
+  // AOS refresh — 데이터 로드 + cols/필터/정렬 변경 시 매번. cols 1↔2/3 토글 시 viewport 밖 카드가 opacity:0 인 채 남아 안 보이던 버그 해결
   useEffect(() => {
     if (!loading && portfolios.length > 0) {
-      AOS.refresh();
+      AOS.refreshHard();
     }
-  }, [loading, portfolios]);
+  }, [loading, portfolios, cols, searchQuery, selectedTech, sortField, sortDir]);
 
   const handleProjectClick = (portfolioId: string) => {
     setSelectedPortfolioId(portfolioId);

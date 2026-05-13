@@ -21,6 +21,80 @@
     color: #2B1E14;
 }
 
+/* ===== Portfolio modal modifier — modal-container 가 grid (1fr 260) =====
+ * HTML 구조: header + body + sidebar 가 modal-container 의 형제 자식.
+ * sidebar 가 grid-row 전체 차지 → 기술 스택 위 빈공간 없이 header 라인부터 시작.
+ * BEM modifier 로 다른 modal 엔 leak 없음. */
+.modal .modal-container--portfolio {
+    max-width: 1140px;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    grid-template-rows: auto 1fr;
+    column-gap: 32px;
+}
+
+.modal-container--portfolio .modal-header {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+/* modal-body 기존 grid 풀기 — 본문 sections 가 직접 자식 (modal-main wrapper 폐기). title 과 거리 벌리기 위해 padding-top 28 */
+.modal-container--portfolio .modal-body {
+    grid-column: 1;
+    grid-row: 2;
+    display: block;
+    padding: 28px 0 32px 48px;
+}
+
+/* sidebar — 우측 column 풀 높이 (header 옆부터 body 끝까지). 살짝 짙은 한지 카드 + 점선 border */
+.modal-container--portfolio .modal-sidebar {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    margin: 32px 48px 32px 0;
+    background: #F4EAD5;
+    border: 1px dashed #C5B493;
+    border-radius: 2px;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* sidebar 안 info-card — 모든 카드 동일 padding (portfolio 별 first/last 가 바뀌어 padding 들쭉날쭉 보이던 문제 해결) */
+.modal-container--portfolio .modal-sidebar .modal-info-card {
+    padding: 12px 4px;
+    border-bottom: 1px dashed rgba(43, 30, 20, 0.12);
+}
+
+/* sidebar 안 tech-icon — 4열 한 줄 채우게 작게 (sidebar 폭 260 - 패딩 36 = 224 / 4 = 56 cell, icon 30 + gap 6) */
+.modal-container--portfolio .modal-sidebar .modal-tech-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+.modal-container--portfolio .modal-sidebar .modal-tech-grid .tech-icon {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    padding: 4px;
+}
+.modal-container--portfolio .modal-sidebar .modal-info-card:last-child {
+    border-bottom: none;
+}
+
+/* mobile — grid 풀고 header → body → sidebar 단일 컬럼 stack */
+@media (max-width: 768px) {
+    .modal .modal-container--portfolio {
+        display: block;
+    }
+    .modal-container--portfolio .modal-body {
+        padding: 0 20px 24px;
+    }
+    .modal-container--portfolio .modal-sidebar {
+        margin: 16px 20px 24px;
+    }
+}
+
 /* 종이 grain */
 .modal .modal-container::before {
     content: '';
@@ -73,13 +147,13 @@
 .modal .modal-title {
     margin: 0 0 12px;
     font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
-    font-weight: 500;
+    font-weight: 600;
     font-style: italic;
     font-size: 30px;
     color: #2B1E14;
     line-height: 1.15;
     letter-spacing: -0.01em;
-    font-variation-settings: "opsz" 144, "SOFT" 30;
+    font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 600;
 }
 
 /* ===== Section title — 먹 대비 + 주홍 아이콘 ===== */
@@ -94,12 +168,12 @@
     color: #8C1E1A;
 }
 
-/* ===== Description text — Fraunces italic serif ===== */
+/* ===== Description text — Pretendard sans-serif (가독성 우선) ===== */
 .modal .modal-desc {
-    font-family: 'Fraunces', 'FallbackFraunces', Georgia, serif;
-    font-style: italic;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    font-style: normal;
     font-size: 15px;
-    line-height: 1.75;
+    line-height: 1.8;
     color: #2B1E14;
     white-space: pre-line;
 }
