@@ -103,14 +103,15 @@
     display: block;
 }
 
-/* COVER */
+/* COVER — 우측 메타 패널 최상단 thumbnail. 좌측 콘텐츠가 viewport top 부터 노출되게 cover 자체를 thumbnail 화 */
 .pm-cover {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
     background: #D4C4A8;
-    border-bottom: 1px solid rgba(43, 30, 20, 0.2);
+    border: 1px solid #D4C4A8;
+    border-radius: 2px;
 }
 .pm-cover img {
     width: 100%;
@@ -125,7 +126,7 @@
     background: linear-gradient(135deg, #FBF5E3 0%, #F4EAD5 100%);
     font-family: 'Fraunces', Georgia, serif;
     font-style: italic;
-    font-size: 120px;
+    font-size: 48px;
     color: #8B7355;
     font-weight: 300;
 }

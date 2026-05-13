@@ -74,20 +74,20 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
           </div>
         ) : (
           <article className="pm-page">
-            {/* COVER — 노션 페이지 상단 cover image */}
-            {portfolio.cover_image ? (
-              <div className="pm-cover">
-                <img src={portfolio.cover_image} alt={portfolio.title} />
-              </div>
-            ) : (
-              <div className="pm-cover pm-cover--empty">
-                <span>{portfolio.badge || '✶'}</span>
-              </div>
-            )}
-
             <div className="pm-spread">
-              {/* === LEFT PAGE — 메타 정보 (제목/lede/properties/links) === */}
+              {/* === LEFT PAGE — 메타 정보 (cover thumbnail + 제목/lede/properties/links) === */}
               <aside className="pm-left">
+                {/* COVER — 메타 패널 최상단 작은 thumbnail. 좌측 콘텐츠가 viewport top 부터 바로 노출되도록 */}
+                {portfolio.cover_image ? (
+                  <div className="pm-cover">
+                    <img src={portfolio.cover_image} alt={portfolio.title} />
+                  </div>
+                ) : (
+                  <div className="pm-cover pm-cover--empty">
+                    <span>{portfolio.badge || '✶'}</span>
+                  </div>
+                )}
+
                 <header className="pm-title-block">
                   <div className="pm-eyebrow">
                     {portfolio.category?.name && (
