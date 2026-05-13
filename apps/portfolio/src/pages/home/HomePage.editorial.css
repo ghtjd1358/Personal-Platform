@@ -560,8 +560,29 @@
 
 .portfolio-module .insta-grid--cols-2 .insta-grid-info::after,
 .portfolio-module .insta-grid--cols-3 .insta-grid-info::after {
-    padding: 9px 14px !important;
-    font-size: 10px !important;
+    display: none !important;
+}
+
+/* cols 2/3 — tech chips / actions 작게 (좁은 카드 적응) */
+.portfolio-module .insta-grid--cols-2 .insta-grid-tech-chip,
+.portfolio-module .insta-grid--cols-3 .insta-grid-tech-chip {
+    font-size: 10px;
+    padding: 3px 8px;
+}
+.portfolio-module .insta-grid--cols-2 .insta-grid-action,
+.portfolio-module .insta-grid--cols-3 .insta-grid-action {
+    font-size: 10px;
+    padding: 7px 12px;
+    letter-spacing: 0.08em;
+    gap: 4px;
+}
+.portfolio-module .insta-grid--cols-2 .insta-grid-eyebrow-period,
+.portfolio-module .insta-grid--cols-3 .insta-grid-eyebrow-period {
+    display: block;
+    padding-left: 0;
+    border-left: none;
+    margin-left: 0;
+    margin-top: 4px;
 }
 
 @media (max-width: 768px) {
@@ -609,7 +630,7 @@
     box-shadow:
         8px 14px 0 rgba(43, 30, 20, 0.18),
         0 28px 50px rgba(43, 30, 20, 0.08);
-    cursor: pointer;
+    cursor: default;
     overflow: hidden;
     transition: box-shadow 0.45s ease;
     counter-increment: portfolio-card;
@@ -718,9 +739,7 @@
     right: 28px;
 }
 
-.portfolio-module .insta-grid-card:hover::after {
-    transform: translateY(-3px) rotate(-2deg);
-}
+/* 인장 숫자 hover 변형 제거 — 호버 시 이미지만 움직이도록 (사용자 요청) */
 
 /* ==== Paper tape (::before) — 카드 좌상단 주홍 테이프 ==== */
 .portfolio-module .insta-grid-card::before {
@@ -892,30 +911,83 @@
     50% { opacity: 0.5; }
 }
 
-/* info 영역은 pseudo-element CTA 대신 meta 아래에 항상 보이는 "VIEW →" — hover 시 먹 채움 */
-.portfolio-module .insta-grid-info::after {
-    content: 'VIEW PROJECT →';
-    display: inline-flex;
-    align-items: center;
-    padding: 11px 18px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.26em;
-    color: #2B1E14;
-    background: transparent;
-    border: 1px solid #2B1E14;
-    border-radius: 2px;
-    align-self: flex-start;
-    margin-top: 4px;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+/* VIEW PROJECT pseudo CTA 폐기 — 실제 action 버튼(노션/Live Demo/GitHub) 으로 대체 */
+.portfolio-module .insta-grid-info::after { content: none; display: none; }
+
+/* === eyebrow 안 기간 (CASE · 01 · 2024.03~2025.11) === */
+.portfolio-module .insta-grid-eyebrow-period {
+    color: #6E5E4E;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    padding-left: 12px;
+    margin-left: 4px;
+    border-left: 1px solid rgba(43, 30, 20, 0.25);
 }
 
-.portfolio-module .insta-grid-card:hover .insta-grid-info::after {
+/* === 기술 스택 chips === */
+.portfolio-module .insta-grid-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+.portfolio-module .insta-grid-tech-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: #2B1E14;
+    background: rgba(43, 30, 20, 0.06);
+    border: 1px solid rgba(43, 30, 20, 0.18);
+    border-radius: 2px;
+    font-weight: 500;
+}
+
+/* === actions row (노션 / Live Demo / GitHub) === */
+.portfolio-module .insta-grid-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+.portfolio-module .insta-grid-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.portfolio-module .insta-grid-action--primary {
     background: #2B1E14;
     color: #FBF5E3;
-    transform: translateY(-1px);
-    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.2);
+    border: 1px solid #2B1E14;
+}
+.portfolio-module .insta-grid-action--primary:hover {
+    background: #8C1E1A;
+    border-color: #8C1E1A;
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.22);
+}
+.portfolio-module .insta-grid-action--ghost {
+    background: transparent;
+    color: #2B1E14;
+    border: 1px solid #2B1E14;
+}
+.portfolio-module .insta-grid-action--ghost:hover {
+    background: #FBF5E3;
+    color: #8C1E1A;
+    border-color: #8C1E1A;
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 3px 0 rgba(43, 30, 20, 0.18);
 }
 
 /* 구 Instagram overlay off */

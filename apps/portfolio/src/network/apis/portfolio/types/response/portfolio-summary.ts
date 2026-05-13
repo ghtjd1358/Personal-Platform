@@ -36,6 +36,8 @@ export interface PortfolioSummary {
   demo_url: string | null;
   /** GitHub URL */
   github_url: string | null;
+  /** Notion 상세 페이지 URL — 있으면 PortfolioModal 본문 자리에 "Notion 에서 자세히 보기" 버튼 노출 */
+  notion_url: string | null;
   /** 생성일시 */
   created_at: string;
   /** 수정일시 */

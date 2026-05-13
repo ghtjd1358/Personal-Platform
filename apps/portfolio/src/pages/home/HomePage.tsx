@@ -9,6 +9,7 @@ import { ScrollTopButton, getCurrentUser, storage, usePermission, useDebounce } 
 import { usePortfolios } from './hooks';
 import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
+import NotionEmbedModal from '@/components/NotionEmbedModal';
 import PortfolioCardSkeleton from '@/components/PortfolioCardSkeleton';
 import { HeroSection } from '@/components';
 import AOS from 'aos';
@@ -24,6 +25,8 @@ const HomePage: React.FC = () => {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
+  // 상세 버튼 클릭 시 NotionEmbedModal 안 iframe 으로 노션 페이지 임베드
+  const [selectedNotion, setSelectedNotion] = useState<{ url: string; title: string } | null>(null);
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [cols, setCols] = useState<ColsOpt>(1);
@@ -394,15 +397,12 @@ const HomePage: React.FC = () => {
                   className="insta-grid-card"
                   data-aos="fade-up"
                   data-aos-delay={Math.min(index * 100, 400)}
-                  onClick={() => handleProjectClick(project.id)}
                 >
-                  {/* Admin 전용 수정 버튼 — 카드 모서리 ✎ (클릭 시 편집 페이지로,
-                     카드 자체 클릭(모달 열기)은 stopPropagation 으로 차단) */}
+                  {/* Admin 전용 수정 버튼 — 카드 모서리 ✎ */}
                   {isAdmin && (
                     <Link
                       to={`/container/resume/admin/portfolio/edit/${project.id}`}
                       className="insta-grid-edit-btn"
-                      onClick={(e) => e.stopPropagation()}
                       aria-label="이 프로젝트 수정"
                       title="이 프로젝트 수정"
                     >
@@ -425,20 +425,70 @@ const HomePage: React.FC = () => {
                   <div className="insta-grid-info">
                     <span className="insta-grid-eyebrow">
                       {project.badge || `CASE · 0${(index % 9) + 1}`}
+                      {project.detail?.period && (
+                        <span className="insta-grid-eyebrow-period">{project.detail.period}</span>
+                      )}
                     </span>
                     <h3 className="insta-grid-title">{project.title}</h3>
                     {project.short_description && (
                       <p className="insta-grid-sub">{project.short_description}</p>
                     )}
-                    <div className="insta-grid-meta">
-                      <span className="insta-grid-meta-item">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
-                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                        </svg>
-                        {project.view_count || 0}
-                      </span>
-                      {(project as any).is_current && (
-                        <span className="insta-grid-meta-item insta-grid-live">● LIVE</span>
+
+                    {project.techStack && project.techStack.length > 0 && (
+                      <div className="insta-grid-tech">
+                        {project.techStack.slice(0, 8).map((tech) => (
+                          <span key={tech.id} className="insta-grid-tech-chip">{tech.name}</span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="insta-grid-actions">
+                      {project.notion_url && (
+                        <button
+                          type="button"
+                          className="insta-grid-action insta-grid-action--primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedNotion({ url: project.notion_url!, title: project.title });
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                          </svg>
+                          상세 내용
+                        </button>
+                      )}
+                      {project.demo_url && (
+                        <a
+                          href={project.demo_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="insta-grid-action insta-grid-action--ghost"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                          Live Demo
+                        </a>
+                      )}
+                      {project.github_url && (
+                        <a
+                          href={project.github_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="insta-grid-action insta-grid-action--ghost"
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label="GitHub"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                          </svg>
+                          GitHub
+                        </a>
                       )}
                     </div>
                   </div>
@@ -468,13 +518,20 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* 포트폴리오 상세 모달 */}
+      {/* 포트폴리오 상세 모달 (legacy — 카드 onClick 폐기 후 호출 경로 없음. 데이터 케이스 위해 코드 유지) */}
       {selectedPortfolioId && (
         <PortfolioModal
           portfolioId={selectedPortfolioId}
           onClose={handleCloseModal}
         />
       )}
+
+      {/* Notion 상세 — 카드 '상세 내용' 버튼 클릭 시 iframe 으로 노션 페이지 임베드 */}
+      <NotionEmbedModal
+        notionUrl={selectedNotion?.url ?? null}
+        title={selectedNotion?.title}
+        onClose={() => setSelectedNotion(null)}
+      />
     </div>
   );
 };

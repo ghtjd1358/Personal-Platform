@@ -196,9 +196,9 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                 )}
               </aside>
 
-              {/* === LEFT(visual) PAGE — 본문 (title/lede/sections/rich/tags) === */}
+              {/* === LEFT(visual) PAGE — 본문. notion_url 있으면 본문 sections 통째 폐기 + Notion CTA 카드로 대체 === */}
               <div className="pm-right">
-                {/* TITLE BLOCK — 좌측 본문의 책 표지 격. 제목/소개는 콘텐츠 흐름과 함께 좌측 */}
+                {/* TITLE BLOCK */}
                 <header className="pm-title-block">
                   <div className="pm-eyebrow">
                     {portfolio.category?.name && (
@@ -214,42 +214,69 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                   )}
                 </header>
 
-                {portfolio.detail?.overview && (
-                  <section className="pm-section">
-                    <h2 className="pm-h2">개요</h2>
-                    <p className="pm-paragraph">{portfolio.detail.overview}</p>
-                  </section>
-                )}
+                {portfolio.notion_url ? (
+                  /* Notion CTA — 본문 상세는 Notion 페이지로 위임. 사용자의 노션 작업 그대로 보여줌 */
+                  <a
+                    href={portfolio.notion_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pm-notion-cta"
+                  >
+                    <div className="pm-notion-cta-meta">
+                      <span className="pm-notion-cta-eyebrow">DETAIL · NOTION</span>
+                      <h2 className="pm-notion-cta-title">상세 작업 노트를 노션에서 봅니다</h2>
+                      <p className="pm-notion-cta-sub">
+                        과정 · 의사결정 · 트러블슈팅 까지 — 노션 페이지로 새 탭에서 엽니다
+                      </p>
+                    </div>
+                    <div className="pm-notion-cta-arrow">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </div>
+                  </a>
+                ) : (
+                  <>
+                    {portfolio.detail?.overview && (
+                      <section className="pm-section">
+                        <h2 className="pm-h2">개요</h2>
+                        <p className="pm-paragraph">{portfolio.detail.overview}</p>
+                      </section>
+                    )}
 
-                {portfolio.detail?.challenge && (
-                  <section className="pm-section">
-                    <h2 className="pm-h2">도전 과제</h2>
-                    <p className="pm-paragraph">{portfolio.detail.challenge}</p>
-                  </section>
-                )}
+                    {portfolio.detail?.challenge && (
+                      <section className="pm-section">
+                        <h2 className="pm-h2">도전 과제</h2>
+                        <p className="pm-paragraph">{portfolio.detail.challenge}</p>
+                      </section>
+                    )}
 
-                {portfolio.detail?.solution && (
-                  <section className="pm-section">
-                    <h2 className="pm-h2">접근 방법</h2>
-                    <p className="pm-paragraph">{portfolio.detail.solution}</p>
-                  </section>
-                )}
+                    {portfolio.detail?.solution && (
+                      <section className="pm-section">
+                        <h2 className="pm-h2">접근 방법</h2>
+                        <p className="pm-paragraph">{portfolio.detail.solution}</p>
+                      </section>
+                    )}
 
-                {portfolio.detail?.outcome && (
-                  <section className="pm-section">
-                    <h2 className="pm-h2">성과</h2>
-                    <p className="pm-paragraph">{portfolio.detail.outcome}</p>
-                  </section>
-                )}
+                    {portfolio.detail?.outcome && (
+                      <section className="pm-section">
+                        <h2 className="pm-h2">성과</h2>
+                        <p className="pm-paragraph">{portfolio.detail.outcome}</p>
+                      </section>
+                    )}
 
-                {portfolio.description && (
-                  <section className="pm-section pm-rich">
-                    <h2 className="pm-h2">상세 내용</h2>
-                    <div
-                      className="pm-rich-content"
-                      dangerouslySetInnerHTML={{ __html: portfolio.description }}
-                    />
-                  </section>
+                    {portfolio.description && (
+                      <section className="pm-section pm-rich">
+                        <h2 className="pm-h2">상세 내용</h2>
+                        <div
+                          className="pm-rich-content"
+                          dangerouslySetInnerHTML={{ __html: portfolio.description }}
+                        />
+                      </section>
+                    )}
+                  </>
                 )}
 
                 {portfolio.tags && portfolio.tags.length > 0 && (
