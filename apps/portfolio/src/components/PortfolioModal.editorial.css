@@ -27,7 +27,7 @@
 .pm-modal {
     position: relative;
     width: 100%;
-    max-width: 880px;
+    max-width: 1040px;
     background: #FBF5E3;
     border: 1.5px solid #2B1E14;
     border-radius: 4px;
@@ -130,40 +130,44 @@
     font-weight: 300;
 }
 
-/* === BOOK SPREAD — 2 페이지 펼친 책 느낌 === */
+/* === BOOK SPREAD — 좌 콘텐츠 / 우 메타 (사용자는 본문을 좌측 읽기 흐름으로 기대) === */
 .pm-spread {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 1fr 300px;
     align-items: stretch;
     position: relative;
 }
-/* gutter — 두 페이지 사이 spine 그림자 */
+/* gutter — content 와 meta 사이 spine 그림자 (우측 300 경계) */
 .pm-spread::before {
     content: '';
     position: absolute;
-    left: 300px;
+    right: 300px;
     top: 0;
     bottom: 0;
     width: 1px;
     background: #D4C4A8;
     box-shadow:
-        -10px 0 14px -10px rgba(43, 30, 20, 0.25),
-        10px 0 14px -10px rgba(43, 30, 20, 0.12);
+        -10px 0 14px -10px rgba(43, 30, 20, 0.12),
+        10px 0 14px -10px rgba(43, 30, 20, 0.25);
     pointer-events: none;
     z-index: 1;
 }
 
+/* pm-left = 메타 패널. JSX 순서는 그대로 두되 grid order 로 우측 배치 */
 .pm-left {
-    padding: 40px 24px 36px 32px;
-    background: linear-gradient(90deg, #FBF5E3 0%, #F4EAD5 100%);
+    order: 2;
+    padding: 40px 32px 36px 24px;
+    background: linear-gradient(90deg, #F4EAD5 0%, #FBF5E3 100%);
     display: flex;
     flex-direction: column;
     gap: 24px;
     min-height: 100%;
 }
 
+/* pm-right = 콘텐츠 본문. grid order 1 로 좌측 */
 .pm-right {
-    padding: 40px 36px 48px 36px;
+    order: 1;
+    padding: 40px 36px 48px 40px;
     min-width: 0;
 }
 
@@ -509,10 +513,14 @@
         grid-template-columns: 1fr;
     }
     .pm-spread::before { display: none; }
+    /* mobile: 콘텐츠 위(우선) / 메타 아래 — grid order 재정의 */
+    .pm-right { order: 0; }
+    .pm-left  { order: 1; }
     .pm-left {
         background: #FBF5E3;
-        border-bottom: 1px dashed #D4C4A8;
-        padding: 32px 24px 28px;
+        border-top: 1px dashed #D4C4A8;
+        border-bottom: none;
+        padding: 28px 24px 32px;
         gap: 20px;
     }
     .pm-left .pm-properties {
