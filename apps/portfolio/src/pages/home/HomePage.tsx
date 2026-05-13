@@ -182,14 +182,9 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* 전체 프로젝트 그리드 */}
-      <section id="portfolio" className="section">
+      {/* 필터 섹션 — blog 와 동일한 wrap (section.filter-section + container + filter-group 묶음). section-header/label 폐기 */}
+      <section id="portfolio" className="filter-section">
         <div className="container">
-          <div className="section-header" data-aos="fade-up">
-            <div className="section-label">All Projects</div>
-            <h2 className="section-title">전체 프로젝트</h2>
-          </div>
-
           {/* 검색 및 필터 — blog SearchBar 와 동일 마크업 (form 대신 div, submit 버튼 없음 — live search) */}
           <div className="filter-bar" data-aos="fade-up">
             <div className="search-bar">

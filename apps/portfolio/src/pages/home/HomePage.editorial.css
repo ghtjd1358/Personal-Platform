@@ -2,6 +2,13 @@
  * 기존 global.css 위에 override. search input과 select 높이/스타일 일관.
  */
 
+/* blog 첫 페이지와 동일한 wrap — section.filter-section 의 컴팩트 padding.
+ * 기존 .section (60px+) 대비 압축, hero 직후 자연 흐름 보장. */
+.portfolio-module .filter-section {
+    position: relative;
+    padding: 16px 0 12px;
+}
+
 .portfolio-module .filter-bar {
     margin-bottom: 48px;
 }
