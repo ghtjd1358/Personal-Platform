@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ScrollTopButton, getCurrentUser, storage, usePermission } from '@sonhoseong/mfa-lib';
+import { ScrollTopButton, getCurrentUser, storage, usePermission, useDebounce } from '@sonhoseong/mfa-lib';
 import { usePortfolios } from './hooks';
 import { LINK_PREFIX } from '@/config/constants';
 import PortfolioModal from '@/components/PortfolioModal';
@@ -20,6 +20,8 @@ type ColsOpt = 1 | 2 | 3;
 
 const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  // 실시간 검색 시 매 키 입력마다 filteredProjects 가 재계산 → 카드들이 깜빡이며 사라졌다 다시 나타나는 UX 문제 → 300ms debounce
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('date');
@@ -43,9 +45,9 @@ const HomePage: React.FC = () => {
   const filteredProjects = useMemo(() => {
     let projects = [...portfolios];
 
-    // 검색어 필터
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+    // 검색어 필터 (debounce 적용 — 입력 300ms 후 fetch/filter)
+    if (debouncedSearchQuery.trim()) {
+      const query = debouncedSearchQuery.toLowerCase();
       projects = projects.filter(p =>
         p.title.toLowerCase().includes(query) ||
         p.description?.toLowerCase().includes(query) ||
@@ -86,7 +88,7 @@ const HomePage: React.FC = () => {
     }
 
     return projects;
-  }, [portfolios, searchQuery, selectedTech, sortField, sortDir]);
+  }, [portfolios, debouncedSearchQuery, selectedTech, sortField, sortDir]);
 
   // 필터된 프로젝트 분류
   const filteredFeatured = useMemo(() =>
@@ -99,14 +101,14 @@ const HomePage: React.FC = () => {
     [filteredProjects]
   );
 
-  const isFiltering = searchQuery.trim() || selectedTech;
+  const isFiltering = debouncedSearchQuery.trim() || selectedTech;
 
   // AOS refresh — 데이터 로드 + cols/필터/정렬 변경 시 매번. cols 1↔2/3 토글 시 viewport 밖 카드가 opacity:0 인 채 남아 안 보이던 버그 해결
   useEffect(() => {
     if (!loading && portfolios.length > 0) {
       AOS.refreshHard();
     }
-  }, [loading, portfolios, cols, searchQuery, selectedTech, sortField, sortDir]);
+  }, [loading, portfolios, cols, debouncedSearchQuery, selectedTech, sortField, sortDir]);
 
   const handleProjectClick = (portfolioId: string) => {
     setSelectedPortfolioId(portfolioId);
@@ -369,14 +371,6 @@ const HomePage: React.FC = () => {
                 ))}
               </div>
             )}
-            {isFiltering && (
-              <div className="filter-result">
-                <span>{filteredProjects.length}개의 프로젝트</span>
-                <button className="clear-filter" onClick={() => { setSearchQuery(''); setSelectedTech(null); }}>
-                  필터 초기화
-                </button>
-              </div>
-            )}
           </div>
 
           {loading && gridProjects.length === 0 && heroProjects.length === 0 ? (
@@ -387,8 +381,10 @@ const HomePage: React.FC = () => {
             </div>
           ) : !loading && gridProjects.length === 0 && heroProjects.length === 0 ? (
             <div className="empty-state" data-aos="fade-up">
-              <div className="empty-state-icon">📁</div>
-              <p className="empty-state-text">아직 등록된 포트폴리오가 없습니다.</p>
+              <div className="empty-state-icon">✶</div>
+              <p className="empty-state-text">
+                {isFiltering ? '검색 조건에 맞는 프로젝트가 없습니다.' : '아직 등록된 포트폴리오가 없습니다.'}
+              </p>
             </div>
           ) : (
             <div className={`insta-grid${cols > 1 ? ` insta-grid--cols-${cols}` : ''}`}>

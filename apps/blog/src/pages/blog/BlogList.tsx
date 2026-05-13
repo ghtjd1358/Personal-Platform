@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { usePermission, getCurrentUser } from '@sonhoseong/mfa-lib';
+import { usePermission, getCurrentUser, useDebounce } from '@sonhoseong/mfa-lib';
 import {useBlogData, useScrollAnimation} from "@/hooks";
 import {useFetchSeries} from "@/network/hooks";
 import {HeroSection, PostsSection, SeriesGrid, SEOHead, SearchBar} from "@/components";
@@ -21,6 +21,8 @@ const BlogList: React.FC = () => {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [cols, setCols] = useState<ColsOpt>(4);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  // 매 입력마다 useBlogData 가 새 fetch 트리거 → 카드 깜빡임. 300ms debounce 로 입력 끝 후만 fetch.
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // field + direction 합성 → backend PostSortOption (`date_desc`, `views_asc` 등)
   const sortKey = `${sortField}_${sortDir}` as const;
@@ -36,7 +38,7 @@ const BlogList: React.FC = () => {
     limit: 20,
     categoryId: selectedCategory,
     sort: sortKey,
-    search: searchQuery,
+    search: debouncedSearchQuery,
   });
 
   // 시리즈 데이터를 부모에서 호이스트 — 탭 전환 시 unmount/remount 로 빈 화면 깜빡이던 버그 해결.
