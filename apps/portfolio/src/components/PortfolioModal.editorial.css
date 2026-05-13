@@ -130,12 +130,87 @@
     font-weight: 300;
 }
 
-/* BODY (Notion content max-width) */
-.pm-body {
-    padding: 56px clamp(28px, 6vw, 80px) 48px;
-    max-width: 760px;
-    margin: 0 auto;
+/* === BOOK SPREAD — 2 페이지 펼친 책 느낌 === */
+.pm-spread {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    align-items: stretch;
+    position: relative;
 }
+/* gutter — 두 페이지 사이 spine 그림자 */
+.pm-spread::before {
+    content: '';
+    position: absolute;
+    left: 300px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #D4C4A8;
+    box-shadow:
+        -10px 0 14px -10px rgba(43, 30, 20, 0.25),
+        10px 0 14px -10px rgba(43, 30, 20, 0.12);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.pm-left {
+    padding: 40px 24px 36px 32px;
+    background: linear-gradient(90deg, #FBF5E3 0%, #F4EAD5 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-height: 100%;
+}
+
+.pm-right {
+    padding: 40px 36px 48px 36px;
+    min-width: 0;
+}
+
+/* LEFT 안 title block 좁은 칸 적응 */
+.pm-left .pm-title-block { margin-bottom: 0; }
+.pm-left .pm-title {
+    font-size: clamp(22px, 2.6vw, 28px);
+    line-height: 1.2;
+}
+.pm-left .pm-lede {
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+/* LEFT 안 properties — 단일 컬럼 + key/value 좌우 배치 */
+.pm-left .pm-properties {
+    grid-template-columns: 1fr;
+    gap: 10px 0;
+    padding: 16px 0;
+    margin-bottom: 0;
+}
+.pm-left .pm-prop {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+}
+.pm-left .pm-prop-key { flex-shrink: 0; }
+.pm-left .pm-prop-val {
+    text-align: right;
+    font-size: 13px;
+}
+
+/* LEFT links — flex column bottom push */
+.pm-left .pm-links {
+    margin-top: auto;
+    flex-direction: column;
+    gap: 8px;
+}
+.pm-left .pm-link {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 16px;
+}
+
+/* RIGHT 첫 섹션 margin-top 제거 */
+.pm-right .pm-section:first-of-type { margin-top: 0; }
 
 /* TITLE BLOCK */
 .pm-title-block {
@@ -416,7 +491,7 @@
     transform: translateY(-1px);
 }
 
-/* RESPONSIVE */
+/* RESPONSIVE — 768px 이하 책 spread 풀고 단일 컬럼 stack */
 @media (max-width: 768px) {
     .pm-backdrop {
         padding: 16px 0;
@@ -430,13 +505,34 @@
     .pm-cover {
         aspect-ratio: 4 / 3;
     }
-    .pm-body {
-        padding: 36px 24px 36px;
+    .pm-spread {
+        grid-template-columns: 1fr;
+    }
+    .pm-spread::before { display: none; }
+    .pm-left {
+        background: #FBF5E3;
+        border-bottom: 1px dashed #D4C4A8;
+        padding: 32px 24px 28px;
+        gap: 20px;
+    }
+    .pm-left .pm-properties {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .pm-left .pm-prop {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .pm-left .pm-prop-val {
+        text-align: left;
+    }
+    .pm-left .pm-links {
+        flex-direction: row;
+    }
+    .pm-right {
+        padding: 32px 24px 36px;
     }
     .pm-title {
-        font-size: 28px;
-    }
-    .pm-properties {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        font-size: 26px;
     }
 }
