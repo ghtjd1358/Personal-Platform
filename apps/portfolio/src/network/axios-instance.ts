@@ -12,10 +12,19 @@ const getAccessToken = (): string => {
 };
 
 /**
+ * Public Supabase 자격 fallback — lib initSupabase 와 동일 패턴.
+ * webpack-dev-server 가 root .env 못 읽어 process.env 가 빈 문자열일 때 사용. anon key 는 public + RLS 가 진짜 보호.
+ */
+const PUBLIC_SUPABASE_FALLBACK = {
+  url: 'https://ujhlgylnauzluttvmcrz.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGxneWxuYXV6bHV0dHZtY3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU1MDA0MjcsImV4cCI6MjA4MTA3NjQyN30.UcOpbc6QDU-J2s_6eI5vEehvbgSRMCSHIjkFiHb0oRo',
+};
+
+/**
  * Supabase REST API 설정
  */
 const supabaseConfig: ServiceConfig = {
-  hostUrl: process.env.REACT_APP_SUPABASE_URL || '',
+  hostUrl: process.env.REACT_APP_SUPABASE_URL || PUBLIC_SUPABASE_FALLBACK.url,
   basePath: '/rest/v1',
 };
 
@@ -26,7 +35,7 @@ const supabaseConfig: ServiceConfig = {
  *   이전 버전: 항상 anon 만 사용 → RLS `auth.uid() = user_id` 가 NULL 이라 INSERT/UPDATE 401.
  */
 const supabaseRequestHandler = (config: RequestConfig): RequestConfig => {
-  const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
+  const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || PUBLIC_SUPABASE_FALLBACK.anonKey;
   const accessToken = getAccessToken();
 
   config.headers['apikey'] = anonKey;
