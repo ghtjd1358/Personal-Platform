@@ -183,12 +183,14 @@
     line-height: 1.55;
 }
 
-/* LEFT 안 properties — 단일 컬럼 + key/value 좌우 배치 */
+/* LEFT 안 properties — 단일 컬럼 + key/value 좌우 배치. hr(border) 제거해서 빈 칸막이 잔여 없앰 */
 .pm-left .pm-properties {
     grid-template-columns: 1fr;
     gap: 10px 0;
-    padding: 16px 0;
+    padding: 0;
     margin-bottom: 0;
+    border-top: none;
+    border-bottom: none;
 }
 .pm-left .pm-prop {
     flex-direction: row;

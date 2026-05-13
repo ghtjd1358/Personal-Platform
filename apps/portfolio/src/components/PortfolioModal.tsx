@@ -75,9 +75,9 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
         ) : (
           <article className="pm-page">
             <div className="pm-spread">
-              {/* === LEFT PAGE — 메타 정보 (cover thumbnail + 제목/lede/properties/links) === */}
+              {/* === RIGHT(visual) PAGE — 메타 패널 (cover thumbnail + properties + tech + links) === */}
               <aside className="pm-left">
-                {/* COVER — 메타 패널 최상단 작은 thumbnail. 좌측 콘텐츠가 viewport top 부터 바로 노출되도록 */}
+                {/* COVER — 메타 패널 최상단 작은 thumbnail */}
                 {portfolio.cover_image ? (
                   <div className="pm-cover">
                     <img src={portfolio.cover_image} alt={portfolio.title} />
@@ -87,21 +87,6 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                     <span>{portfolio.badge || '✶'}</span>
                   </div>
                 )}
-
-                <header className="pm-title-block">
-                  <div className="pm-eyebrow">
-                    {portfolio.category?.name && (
-                      <span className="pm-eyebrow-cat">{portfolio.category.name}</span>
-                    )}
-                    {portfolio.is_featured && (
-                      <span className="pm-eyebrow-featured">★ FEATURED</span>
-                    )}
-                  </div>
-                  <h1 className="pm-title">{portfolio.title}</h1>
-                  {portfolio.short_description && (
-                    <p className="pm-lede">{portfolio.short_description}</p>
-                  )}
-                </header>
 
                 {/* PROPERTIES — 좁은 좌측 페이지에선 단일 컬럼 stack */}
                 <div className="pm-properties">
@@ -184,8 +169,24 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                 )}
               </aside>
 
-              {/* === RIGHT PAGE — 콘텐츠 (sections/rich/tags). tech 는 좌측 메타로 이동 === */}
+              {/* === LEFT(visual) PAGE — 본문 (title/lede/sections/rich/tags) === */}
               <div className="pm-right">
+                {/* TITLE BLOCK — 좌측 본문의 책 표지 격. 제목/소개는 콘텐츠 흐름과 함께 좌측 */}
+                <header className="pm-title-block">
+                  <div className="pm-eyebrow">
+                    {portfolio.category?.name && (
+                      <span className="pm-eyebrow-cat">{portfolio.category.name}</span>
+                    )}
+                    {portfolio.is_featured && (
+                      <span className="pm-eyebrow-featured">★ FEATURED</span>
+                    )}
+                  </div>
+                  <h1 className="pm-title">{portfolio.title}</h1>
+                  {portfolio.short_description && (
+                    <p className="pm-lede">{portfolio.short_description}</p>
+                  )}
+                </header>
+
                 {portfolio.detail?.overview && (
                   <section className="pm-section">
                     <h2 className="pm-h2">개요</h2>
