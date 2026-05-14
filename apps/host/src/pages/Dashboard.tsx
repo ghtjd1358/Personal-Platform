@@ -77,7 +77,7 @@ const channels: Channel[] = [
         num: '/03',
         ko: '포트폴리오',
         en: 'Works',
-        desc: '직접 만든 프로젝트를 모아두었습니다.',
+        desc: '협업과 개인 프로젝트를 모아두었습니다.',
         tags: ['AOS', 'Scroll Anim', 'Modal'],
         path: RoutePath.Portfolio,
         Icon: PortfolioIcon,
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
                         <em>개인 플랫폼.</em>
                     </h1>
                     <p className="hero-sub">
-                        독립 배포되는 네 개의 애플리케이션을 하나의 플랫폼으로 통합한 마이크로 프론트엔드 포트폴리오.
+                        독립된 4 개의 애플리케이션을 유기적으로 조합한 마이크로 프론트엔드 작업공간.
                     </p>
                 </div>
                 <div className="hero-meta">
@@ -182,8 +182,8 @@ const Dashboard: React.FC = () => {
 
             <section className="dashboard-intro" style={{ animationDelay: '0.3s' }}>
                 <p>
-                    각 애플리케이션은 <em>독립적으로 배포</em>되며, <em>공통 인증과 상태</em>를 공유해
-                    확장성과 유지보수성을 높였습니다.
+                    이력서 · 블로그 · 포트폴리오 · 취업관리가 <em>각자의 속도로 자라도록</em>,
+                    <em>공통 인증과 상태</em>만 한 곳에 모았습니다.
                 </p>
             </section>
 
