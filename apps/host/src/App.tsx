@@ -21,6 +21,7 @@ import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
 import { lnbItems } from './lnb-items';
 import { MyPageIcon } from './components/icons';
 import HostShell from './components/HostShell';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 import './sidebar-editorial.css';
 import './theme-editorial.css';
@@ -46,7 +47,19 @@ const App = () => {
         return filterMenus(baseItems);
     }, [filterMenus, isAuthenticated]);
 
-    if (!initialized) return null;
+    // 인증 init 전에도 Dashboard 만큼은 정적으로 첫 paint —
+    // 콜드 캐시 진입에서 supabase.getSession resolve 동안 빈화면 보이던 문제 차단.
+    if (!initialized) {
+        return (
+            <HostShell>
+                <Container>
+                    <main className="main-content">
+                        <Dashboard />
+                    </main>
+                </Container>
+            </HostShell>
+        );
+    }
 
     return  isAuthenticated ? (
         <HostShell>

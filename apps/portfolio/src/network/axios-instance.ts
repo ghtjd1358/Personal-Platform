@@ -1,11 +1,23 @@
 import { AxiosClientFactory, ServiceConfig, RequestConfig } from './axios-factory';
 
 /**
- * KOMCA 패턴 - localStorage에서 accessToken 가져오기
+ * localStorage 에서 accessToken 가져오기 + 만료 검사.
+ *
+ * Why: supabase-js 와 달리 우리 axios 는 raw localStorage 를 신뢰함. 과거 로그인 잔존 JWT
+ * 가 만료된 채로 남아 있으면 Bearer <expired> 가 그대로 가서 supabase 가 401 반환.
+ * payload.exp 만 확인하면 충분 (서명 검증은 server 가 함). 만료 감지 시 즉시 정리해서
+ * 인터셉터가 자동으로 anonKey 로 fallback 하도록 한다.
  */
 const getAccessToken = (): string => {
   try {
-    return localStorage.getItem('accessToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
+    if (!token) return '';
+    const payload = JSON.parse(atob(token.split('.')[1] || ''));
+    if (payload?.exp && payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem('accessToken');
+      return '';
+    }
+    return token;
   } catch {
     return '';
   }
