@@ -144,6 +144,8 @@
 .nm-notion-wrap .notion {
     font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
     color: #2B1E14;
+    font-size: 15px;
+    line-height: 1.75;
 }
 .nm-notion-wrap .notion-title {
     font-family: 'Fraunces', 'Nanum Myeongjo', serif;
@@ -158,6 +160,108 @@
 .nm-notion-wrap .notion-h3 {
     font-family: 'Fraunces', 'Nanum Myeongjo', serif;
     color: #2B1E14;
+}
+
+/* === spacing override — react-notion-x styles.css 가 모달 wrapper 와 충돌해 죽는 마진 복원 === */
+.nm-notion-wrap .notion-page-content > *:first-child {
+    margin-top: 0;
+}
+.nm-notion-wrap .notion-text {
+    margin: 0 0 0.65em;
+    padding: 3px 2px;
+    line-height: 1.78;
+    white-space: normal;
+    word-break: keep-all;
+}
+.nm-notion-wrap .notion-h1 {
+    margin: 2em 0 0.7em;
+    line-height: 1.35;
+    font-size: 30px;
+}
+.nm-notion-wrap .notion-h2 {
+    margin: 2em 0 0.8em;
+    line-height: 1.35;
+    font-size: 24px;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #D4C4A8;
+}
+.nm-notion-wrap .notion-h3 {
+    margin: 1.6em 0 0.5em;
+    line-height: 1.35;
+    font-size: 18px;
+}
+.nm-notion-wrap .notion-h2 + .notion-text,
+.nm-notion-wrap .notion-h3 + .notion-text {
+    margin-top: 0.3em;
+}
+.nm-notion-wrap .notion-list {
+    margin: 0.7em 0 1.1em;
+    padding-left: 1.7em;
+}
+.nm-notion-wrap .notion-list-disc,
+.nm-notion-wrap .notion-list-numbered {
+    margin: 0.7em 0 1.1em;
+    padding-left: 1.7em;
+}
+.nm-notion-wrap .notion-list li {
+    margin: 0.55em 0;
+    line-height: 1.85;
+    padding-left: 4px;
+}
+.nm-notion-wrap .notion-list li::marker {
+    color: #8C1E1A;
+}
+/* bullet 안의 굵게 톤다운 — 시선이 한 곳에 쏠려 흐름 끊기는 것 방지 */
+.nm-notion-wrap .notion-list li strong,
+.nm-notion-wrap .notion-list li b {
+    font-weight: 600;
+    color: #3A2A1C;
+}
+.nm-notion-wrap .notion-hr {
+    margin: 2em 0;
+    border-color: #D4C4A8;
+}
+.nm-notion-wrap .notion-row {
+    gap: 32px;
+    margin: 0.8em 0;
+}
+.nm-notion-wrap .notion-column {
+    padding: 0;
+}
+.nm-notion-wrap .notion-toggle {
+    margin: 0.6em 0;
+}
+.nm-notion-wrap .notion-toggle > summary {
+    cursor: pointer;
+    padding: 6px 0;
+    line-height: 1.6;
+}
+.nm-notion-wrap .notion-asset-wrapper,
+.nm-notion-wrap .notion-image {
+    margin: 1.2em 0;
+}
+.nm-notion-wrap .notion-quote {
+    margin: 1em 0;
+    padding: 0.5em 1.1em;
+    border-left: 3px solid #2B1E14;
+    line-height: 1.7;
+}
+.nm-notion-wrap .notion-callout {
+    margin: 1em 0;
+    padding: 16px 18px;
+    line-height: 1.7;
+}
+.nm-notion-wrap .notion-code {
+    margin: 1em 0;
+    padding: 14px 16px;
+    line-height: 1.6;
+}
+.nm-notion-wrap strong {
+    font-weight: 700;
+    color: #2B1E14;
+}
+.nm-notion-wrap em {
+    font-style: italic;
 }
 
 /* === LOADING dots === */

@@ -13,6 +13,41 @@ import './NotionEmbedModal.editorial.css';
 // Supabase Edge Function endpoint — 노션 unofficial API 의 content-type/CORS 회피 proxy
 const NOTION_PROXY_URL = 'https://ujhlgylnauzluttvmcrz.supabase.co/functions/v1/notion-page';
 
+// 정적 이미지(PNG/JPG/WebP) 만 노션 image proxy 로 강제 — presigned URL 만료(1h) 우회.
+// GIF 는 노션 proxy 가 transcode 하면서 깨지는 케이스가 있어서 원본 presigned URL 패스스루
+// (모달 열 때마다 노션 API 가 fresh presigned 발급하므로 실무상 OK).
+const GIF_REGEXP = /\.gif(?:$|\?|#)/i;
+const proxyImageUrl = (url: string | undefined, block: any): string | undefined => {
+  if (!url) return undefined;
+  if (url.startsWith('data:')) return url;
+  if (url.startsWith('https://www.notion.so/image/')) return url;
+  if (GIF_REGEXP.test(url)) return url;
+  try {
+    const u = new URL(url);
+    // Edge Function 이 getSignedFileUrls 로 발급한 fresh signed URL 은 그대로 통과
+    if (u.searchParams.has('X-Amz-Signature')) return url;
+    const proxiable =
+      u.hostname.endsWith('.amazonaws.com') ||
+      u.hostname === 'img.notionusercontent.com' ||
+      url.startsWith('/');
+    if (!proxiable) return url;
+  } catch {
+    return url;
+  }
+  const proxied = `https://www.notion.so/image/${encodeURIComponent(url)}`;
+  try {
+    const v2 = new URL(proxied);
+    let table = block?.parent_table === 'space' ? 'block' : block?.parent_table;
+    if (!table || table === 'collection' || table === 'team') table = 'block';
+    v2.searchParams.set('table', table);
+    if (block?.id) v2.searchParams.set('id', block.id);
+    v2.searchParams.set('cache', 'v2');
+    return v2.toString();
+  } catch {
+    return proxied;
+  }
+};
+
 interface Props {
   notionUrl: string | null;
   title?: string;
@@ -149,6 +184,7 @@ const NotionEmbedModal: React.FC<Props> = ({ notionUrl, title, onClose }) => {
                 recordMap={recordMap}
                 fullPage={false}
                 darkMode={false}
+                mapImageUrl={proxyImageUrl}
               />
             </div>
           )}
