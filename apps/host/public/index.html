@@ -116,7 +116,57 @@
   <a href="#main-content" class="skip-link" style="position:absolute;top:-100%;left:16px;z-index:9999;padding:12px 24px;background:#1E3A5F;color:white;text-decoration:none;border-radius:4px;">본문으로 건너뛰기</a>
   <style>.skip-link:focus{top:16px !important;}</style>
 
-  <div id="root"></div>
+  <!-- 정적 splash — bootstrap/App chunk 다운로드 동안에도 첫 paint 가 brand 색이 되도록.
+       createRoot 가 mount 되는 순간 React 가 이 마크업을 자기 트리로 자동 swap. -->
+  <style>
+    #pre-splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      background: #F4EAD5;
+      color: #2B1E14;
+      font-family: 'Pretendard Variable', Pretendard, 'FallbackPretendard', -apple-system, system-ui, sans-serif;
+    }
+    #pre-splash .pre-eyebrow {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      color: #8C1E1A;
+      text-transform: uppercase;
+    }
+    #pre-splash .pre-dots {
+      display: inline-flex;
+      gap: 8px;
+    }
+    #pre-splash .pre-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2B1E14;
+      opacity: 0.25;
+      animation: preDot 1.2s ease-in-out infinite;
+    }
+    #pre-splash .pre-dot:nth-child(2) { animation-delay: 0.18s; }
+    #pre-splash .pre-dot:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes preDot {
+      0%, 100% { opacity: 0.2; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.1); background: #8C1E1A; }
+    }
+  </style>
+  <div id="root">
+    <div id="pre-splash" aria-hidden="true">
+      <span class="pre-eyebrow">MFA · LOADING</span>
+      <div class="pre-dots">
+        <span class="pre-dot"></span>
+        <span class="pre-dot"></span>
+        <span class="pre-dot"></span>
+      </div>
+    </div>
+  </div>
 
   <!-- JavaScript 비활성화 시 메시지 -->
   <noscript>
