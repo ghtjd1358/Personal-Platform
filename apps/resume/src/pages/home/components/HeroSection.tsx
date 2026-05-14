@@ -4,12 +4,14 @@ import { downloadResume } from '../../../network/apis/resume';
 import '../../../styles/editorial.css';
 
 /**
- * HeroSection — 랜딩 첫인상. Supabase 의존 0.
+ * HeroSection — 랜딩 첫인상.
  *
- * 과거에는 `resumeProfile` prop 으로 summary 를 API 에서 주입했는데,
- *  (1) 로딩 지연으로 FOUC 발생,
- *  (2) summary 텍스트는 거의 변하지 않는 정적 자기소개라서
- * 하드코딩으로 전환. 수정은 이 파일에서 직접.
+ * 카피 정책: fallback 하드코딩 + DB 오버라이드.
+ *  - 첫 paint: 코드 안 fallback 카피 (FOUC 0).
+ *  - useHomePageData 의 heroSummary fetch 끝나면 DB 값으로 자연 swap.
+ *  - DB summary 는 '\n' 으로 두 줄 join. split 으로 분리.
+ *  - 카피 다듬을 때 SQL UPDATE 1번이면 즉시 반영 (코드 push 불필요).
+ *  - fallback 이 DB 와 동일하면 swap 시 깜빡임 없음.
  *
  * 추가: grain/fiber/contact-icon SVG 는 CSS 도착 전 브라우저 기본값(300×150) 로 렌더돼
  * 첫 paint 에서 layout shift 발생. 각 SVG 에 `width`/`height` 속성을 직접 부여해서
@@ -18,7 +20,14 @@ import '../../../styles/editorial.css';
 
 interface HeroSectionProps {
   userName?: string;
+  /** DB resume_profile.summary (user_id IS NULL row). null 이면 fallback 사용. */
+  heroSummary?: string | null;
 }
+
+const FALLBACK_HERO_LINES: [string, string] = [
+  'React와 TypeScript를 기반으로 개발합니다.',
+  '제품에 몰입하며 함께 성장할 곳을 찾고 있습니다.',
+];
 
 const Grain: React.FC = () => (
   <svg
@@ -76,9 +85,18 @@ const VelogIcon: React.FC = () => (
   </svg>
 );
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ userName }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ userName, heroSummary }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const toast = useToast();
+
+  // DB summary 우선, 없으면 fallback. split('\n') 후 두 줄 단위로 안전 추출.
+  const [subLine1, subLine2] = (() => {
+    if (heroSummary) {
+      const lines = heroSummary.split('\n').map((s) => s.trim()).filter(Boolean);
+      return [lines[0] ?? FALLBACK_HERO_LINES[0], lines[1] ?? FALLBACK_HERO_LINES[1]];
+    }
+    return FALLBACK_HERO_LINES;
+  })();
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -112,8 +130,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ userName }) => {
             <em style={{ marginRight: '0.18em' }}>손호성</em>입니다.
           </h1>
           <p className="editorial-sub">
-            React와 TypeScript를 기반으로 개발합니다.<br />
-            복잡한 시스템을 분해하고 조립하는 작업을 좋아합니다.
+            {subLine1}<br />
+            {subLine2}
           </p>
         </div>
         <div className="editorial-side">

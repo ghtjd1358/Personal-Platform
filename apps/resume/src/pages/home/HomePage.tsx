@@ -28,12 +28,13 @@ const HomePage: React.FC = () => {
         projects,
         portfolioData,
         features,
+        heroSummary,
         loading,
     } = useHomePageData();
 
     return (
         <>
-            <HeroSection userName={user?.name} />
+            <HeroSection userName={user?.name} heroSummary={heroSummary} />
             <FeaturesSection features={features} isLoading={loading} />
             <SkillsSection categories={skillCategories} />
             <ExperienceSection experiences={experiences} projects={projects} />

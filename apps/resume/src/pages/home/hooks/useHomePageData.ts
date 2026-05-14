@@ -27,6 +27,9 @@ type HomeData = {
     portfolioData: PortfolioItem[];
     features: FeatureItem[] | Feature[];
     contactLinks: ContactLink[];
+    /** Hero summary 두 줄 — DB resume_profile.summary (user_id IS NULL row, '\n' 으로 join).
+     *  fetch 전엔 null → HeroSection 이 fallback 하드코딩 사용 (FOUC 회피). */
+    heroSummary: string | null;
     loading: boolean;
     isLive: boolean;
 };
@@ -137,6 +140,7 @@ export const useHomePageData = (): HomeData => {
     const [projects, setProjects] = useState<ProjectDetail[]>([]);
     const [portfolioData, setPortfolioData] = useState<PortfolioItem[]>([]);
     const [features, setFeatures] = useState<Feature[]>([]);
+    const [heroSummary, setHeroSummary] = useState<string | null>(null);
     const [isLive, setIsLive] = useState(false);
 
     useEffect(() => {
@@ -147,9 +151,10 @@ export const useHomePageData = (): HomeData => {
                 console.log('[useHomePageData] start (public fetch, no user filter)');
                 const sb = getSupabase();
 
-                // resume_profile fetch 제거 — Hero summary 는 하드코딩으로 전환 (FOUC 제거).
+                // resume_profile (user_id IS NULL row) → Hero summary 두 줄. fetch 결과 오기 전엔
+                // HeroSection 이 fallback 하드코딩 사용 → FOUC 회피. 양치기 카피 다듬을 땐 SQL UPDATE 1번이면 끝.
                 // 모든 read 에 user_id 필터 없음. DB 에 존재하는 데이터를 그대로 읽음.
-                const [skillsResp, expResp, portfolioResp, featuresResp] = await Promise.all([
+                const [skillsResp, expResp, portfolioResp, featuresResp, profileResp] = await Promise.all([
                     skillsApi.getCategories().catch(() => [] as SkillCategoryWithSkills[]),
                     sb.from('experiences')
                         .select('*, experience_tasks(id, task, order_index), experience_tags(tag)')
@@ -167,6 +172,12 @@ export const useHomePageData = (): HomeData => {
                         .order('order_index', { ascending: true })
                         .then((r) => (r.data ?? []) as Feature[])
                         .catch(() => [] as Feature[]),
+                    sb.from('resume_profile')
+                        .select('summary')
+                        .is('user_id', null)
+                        .maybeSingle()
+                        .then((r) => (r.data?.summary as string | undefined) ?? null)
+                        .catch(() => null as string | null),
                 ]);
 
                 if (cancelled) return;
@@ -216,6 +227,11 @@ export const useHomePageData = (): HomeData => {
                     gotAnyLiveData = true;
                 }
 
+                if (profileResp) {
+                    setHeroSummary(profileResp);
+                    gotAnyLiveData = true;
+                }
+
                 setIsLive(gotAnyLiveData);
             } catch (err) {
                 console.error('[useHomePageData] Supabase fetch 실패:', err);
@@ -236,6 +252,7 @@ export const useHomePageData = (): HomeData => {
         projects,
         portfolioData,
         features,
+        heroSummary,
         // contactLinks: 별도 테이블 도입 전까지 빈 배열
         contactLinks: [],
         loading,
