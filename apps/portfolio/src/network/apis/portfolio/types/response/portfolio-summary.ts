@@ -26,6 +26,8 @@ export interface PortfolioSummary {
   is_featured: boolean;
   /** 공개 여부 */
   is_public: boolean;
+  /** 이력서(resume) 노출 여부 — false 면 resume 의 "경력&프로젝트" / "주요 작업물" 섹션에서 제외. portfolio 에는 영향 없음. */
+  show_on_resume: boolean;
   /** 조회수 */
   view_count: number;
   /** 좋아요 수 */

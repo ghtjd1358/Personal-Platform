@@ -25,6 +25,7 @@ export interface CreatePortfolioRequest {
   status?: 'draft' | 'published' | 'archived';
   is_featured?: boolean;
   is_public?: boolean;
+  show_on_resume?: boolean;
   demo_url?: string;
   github_url?: string;
   order_index?: number;

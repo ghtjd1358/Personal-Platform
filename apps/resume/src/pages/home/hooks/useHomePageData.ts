@@ -88,6 +88,7 @@ interface PortfolioRow {
     github_url: string | null;
     figma_url: string | null;
     other_url: string | null;
+    notion_url: string | null;
     role: string | null;
     start_date: string | null;
     end_date: string | null;
@@ -129,6 +130,7 @@ const mapPortfolios = (rows: PortfolioRow[]): PortfolioItem[] =>
                 description: row.description ?? undefined,
                 tasks,
                 links,
+                notion_url: row.notion_url ?? undefined,
             },
         };
     });
@@ -164,6 +166,7 @@ export const useHomePageData = (): HomeData => {
                     sb.from('portfolios')
                         .select('*, portfolio_tags(tag, order_index), portfolio_tasks(task, order_index)')
                         .eq('is_public', true)
+                        .eq('show_on_resume', true)
                         .order('order_index', { ascending: true })
                         .then((r) => (r.data ?? []) as PortfolioRow[])
                         .catch(() => [] as PortfolioRow[]),

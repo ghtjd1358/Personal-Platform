@@ -42,6 +42,7 @@ const PortfolioEditorPage: React.FC = () => {
     const [status, setStatus] = useState<'draft' | 'published' | 'archived'>('draft');
     const [isFeatured, setIsFeatured] = useState(false);
     const [isPublic, setIsPublic] = useState(true);
+    const [showOnResume, setShowOnResume] = useState(true);
     const [demoUrl, setDemoUrl] = useState('');
     const [githubUrl, setGithubUrl] = useState('');
 
@@ -85,6 +86,7 @@ const PortfolioEditorPage: React.FC = () => {
             setStatus(p.status || 'draft');
             setIsFeatured(p.is_featured || false);
             setIsPublic(p.is_public !== false);
+            setShowOnResume(p.show_on_resume !== false);
             setDemoUrl(p.demo_url || '');
             setGithubUrl(p.github_url || '');
 
@@ -207,6 +209,7 @@ const PortfolioEditorPage: React.FC = () => {
             status,
             is_featured: isFeatured,
             is_public: isPublic,
+            show_on_resume: showOnResume,
             demo_url: demoUrl.trim() || undefined,
             github_url: githubUrl.trim() || undefined,
             detail: {
@@ -568,6 +571,14 @@ const PortfolioEditorPage: React.FC = () => {
                                     onChange={(e) => setIsFeatured(e.target.checked)}
                                 />
                                 대표 프로젝트로 표시
+                            </label>
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={showOnResume}
+                                    onChange={(e) => setShowOnResume(e.target.checked)}
+                                />
+                                이력서에 노출 (체크 해제 시 resume 의 경력&프로젝트 / 주요 작업물에서 숨김)
                             </label>
                         </div>
                     </section>
