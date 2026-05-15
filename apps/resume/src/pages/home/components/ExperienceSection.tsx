@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { iconMap } from '../../../constants/iconMap';
+import { resolveIcon } from '../../../constants/iconResolver';
 import type { ExperienceDetail, ProjectDetail } from '../../../types';
 import { SectionEditButton } from '../../../components/common';
 
@@ -91,11 +91,14 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                     <p>{exp.position}</p>
                     {exp.tags && exp.tags.length > 0 && (
                       <div className="timeline-tech-icons">
-                        {exp.tags.map((tag, index) => (
-                          <div className="tech-icon" key={`${exp.id}-tag-${index}`} data-tooltip={tag}>
-                            {iconMap[tag] || <span>💻</span>}
-                          </div>
-                        ))}
+                        {exp.tags.map((tag, index) => {
+                          const icon = resolveIcon(tag.iconKey, tag.iconColor);
+                          return (
+                            <div className="tech-icon" key={`${exp.id}-tag-${index}`} data-tooltip={tag.name}>
+                              {icon || <span>💻</span>}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                     {exp.tasks && exp.tasks.length > 0 && (
@@ -155,11 +158,14 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                     <p>{proj.role}</p>
                     {proj.tags && proj.tags.length > 0 && (
                       <div className="timeline-tech-icons">
-                        {proj.tags.map((tag, index) => (
-                          <div className="tech-icon" key={`${proj.id}-tag-${index}`} data-tooltip={tag}>
-                            {iconMap[tag] || <span>💻</span>}
-                          </div>
-                        ))}
+                        {proj.tags.map((tag, index) => {
+                          const icon = resolveIcon(tag.iconKey, tag.iconColor);
+                          return (
+                            <div className="tech-icon" key={`${proj.id}-tag-${index}`} data-tooltip={tag.name}>
+                              {icon || <span>💻</span>}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                     {proj.tasks && proj.tasks.length > 0 && (

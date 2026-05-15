@@ -2,8 +2,8 @@ import React, { useEffect, useCallback } from 'react';
 import { ModalCommonProps } from './types';
 import { popModal } from './modal-manager';
 import type { PortfolioItem, PortfolioSection } from '../../types';
-import { iconMap } from '../../constants/iconMap';
-import { FaBlog, FaGlobe } from 'react-icons/fa';
+import { resolveIcon } from '../../constants/iconResolver';
+import { FaBlog, FaGlobe, FaGithub } from 'react-icons/fa';
 import NotionContent from '../notion/NotionContent';
 import './PortfolioModal.editorial.css';
 
@@ -168,11 +168,14 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
                 기술 스택
               </h5>
               <div className="modal-tech-grid">
-                {portfolio.tags.map((tag) => (
-                  <div className="tech-icon" key={tag} data-tooltip={tag}>
-                    {iconMap[tag] || <span className="tech-icon-fallback">{tag.charAt(0)}</span>}
-                  </div>
-                ))}
+                {portfolio.tags.map((tag) => {
+                  const icon = resolveIcon(tag.iconKey, tag.iconColor);
+                  return (
+                    <div className="tech-icon" key={tag.name} data-tooltip={tag.name}>
+                      {icon || <span className="tech-icon-fallback">{tag.name.charAt(0)}</span>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -242,7 +245,7 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
                       className="modal-link"
                     >
                       {link.label.includes('GitHub') && (
-                        <span className="modal-link-icon">{iconMap['GitHub']}</span>
+                        <span className="modal-link-icon"><FaGithub /></span>
                       )}
                       {link.label.includes('블로그') && (
                         <span className="modal-link-icon"><FaBlog /></span>

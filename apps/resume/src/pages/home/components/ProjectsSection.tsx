@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { usePortfolioModal } from '../../../components/modal';
 import type { PortfolioItem } from '../../../types';
-import { iconMap } from '../../../constants/iconMap';
+import { resolveIcon } from '../../../constants/iconResolver';
 import { FaGithub, FaExternalLinkAlt, FaBlog } from 'react-icons/fa';
 import { SectionEditButton } from '../../../components/common';
 import { ProjectCardSkeleton } from './ProjectCardSkeleton';
@@ -49,14 +49,17 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData,
                   <p className="card-desc22">{portfolio.desc}</p>
                 </div>
 
-                {/* 기술 스택 태그 */}
+                {/* 기술 스택 태그 — DB skills.icon/icon_color 매핑 (PortfolioTag) */}
                 <div className="card-tags22">
-                  {portfolio.tags.slice(0, 4).map((tag) => (
-                    <span key={tag} className="card-tag22">
-                      {iconMap[tag] && <span className="tag-icon">{iconMap[tag]}</span>}
-                      {tag}
-                    </span>
-                  ))}
+                  {portfolio.tags.slice(0, 4).map((tag) => {
+                    const icon = resolveIcon(tag.iconKey, tag.iconColor);
+                    return (
+                      <span key={tag.name} className="card-tag22">
+                        {icon && <span className="tag-icon">{icon}</span>}
+                        {tag.name}
+                      </span>
+                    );
+                  })}
                 </div>
 
                 {/* 링크 버튼 */}

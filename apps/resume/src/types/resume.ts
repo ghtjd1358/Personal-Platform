@@ -36,6 +36,17 @@ export interface ExperienceTask {
   task: string;
 }
 
+/**
+ * 카드/모달/타임라인에서 사용하는 rich tag — DB portfolio_tags / experience_tags 가
+ * skills 와 JOIN 된 결과. iconKey 는 skills.icon (= iconResolver 의 키), iconColor 는 skills.icon_color.
+ * skill 매칭이 안 된 niche tech 는 iconKey/iconColor null → 텍스트 fallback 로만 렌더.
+ */
+export interface PortfolioTag {
+  name: string;
+  iconKey?: string | null;
+  iconColor?: string | null;
+}
+
 export interface ExperienceDetail {
   id: string;
   company: string;
@@ -45,7 +56,7 @@ export interface ExperienceDetail {
   is_current: boolean;
   is_dev: boolean;
   tasks: ExperienceTask[];
-  tags: string[];
+  tags: PortfolioTag[];
 }
 
 export interface ProjectDetail {
@@ -56,7 +67,7 @@ export interface ProjectDetail {
   end_date: string | null;
   is_current: boolean;
   tasks: ExperienceTask[];
-  tags: string[];
+  tags: PortfolioTag[];
   image?: string;
 }
 
@@ -87,7 +98,7 @@ export interface PortfolioItem {
   image?: string;
   link?: string;
   desc: string;
-  tags: string[];
+  tags: PortfolioTag[];
   detail?: {
     period?: string;
     role?: string;

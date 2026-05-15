@@ -16,6 +16,7 @@ import type {
     ExperienceDetail,
     ProjectDetail,
     PortfolioItem,
+    PortfolioTag,
     FeatureItem,
     ContactLink,
 } from '../../../types';
@@ -47,6 +48,17 @@ const mapSkillCategories = (raw: SkillCategoryWithSkills[]): SkillCategoryDetail
         })),
     }));
 
+/** Skill 메타 JOIN — portfolio_tags / experience_tags 의 skill_id 가 가리키는 skills row.
+ *  null 가능 (niche tag 가 어떤 skill 도 매칭 안 된 경우). */
+type SkillJoin = { icon: string | null; icon_color: string | null } | null;
+
+/** DB tag row (portfolio_tags / experience_tags 공통) → PortfolioTag shape 변환. */
+const mapTag = (t: { tag: string; skills?: SkillJoin }): PortfolioTag => ({
+    name: t.tag,
+    iconKey: t.skills?.icon ?? null,
+    iconColor: t.skills?.icon_color ?? null,
+});
+
 /** DB experiences row (+ tasks + tags) → ExperienceDetail shape 변환 */
 interface ExperienceRow {
     id: string;
@@ -57,7 +69,7 @@ interface ExperienceRow {
     is_current: boolean;
     is_dev: boolean;
     experience_tasks?: { id: string; task: string; order_index: number }[];
-    experience_tags?: { tag: string }[];
+    experience_tags?: { tag: string; skills?: SkillJoin }[];
 }
 const mapExperiences = (rows: ExperienceRow[]): ExperienceDetail[] =>
     rows.map((row) => ({
@@ -71,7 +83,7 @@ const mapExperiences = (rows: ExperienceRow[]): ExperienceDetail[] =>
         tasks: (row.experience_tasks ?? [])
             .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
             .map((t) => ({ id: t.id, task: t.task })),
-        tags: (row.experience_tags ?? []).map((t) => t.tag),
+        tags: (row.experience_tags ?? []).map(mapTag),
     }));
 
 /** DB portfolios row (+ portfolio_tags + portfolio_tasks) → PortfolioItem shape 변환.
@@ -93,7 +105,7 @@ interface PortfolioRow {
     start_date: string | null;
     end_date: string | null;
     portfolio_tasks?: { task: string; order_index: number }[];
-    portfolio_tags?: { tag: string; order_index: number }[];
+    portfolio_tags?: { tag: string; order_index: number; skills?: SkillJoin }[];
 }
 
 const mapPortfolios = (rows: PortfolioRow[]): PortfolioItem[] =>
@@ -108,9 +120,10 @@ const mapPortfolios = (rows: PortfolioRow[]): PortfolioItem[] =>
             ? `${row.start_date} ~ ${row.end_date}`
             : row.start_date ?? undefined;
 
-        const tags = (row.portfolio_tags ?? [])
+        const tags: PortfolioTag[] = (row.portfolio_tags ?? [])
+            .slice()
             .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
-            .map((t) => t.tag);
+            .map(mapTag);
 
         const tasks = (row.portfolio_tasks ?? [])
             .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
@@ -159,12 +172,14 @@ export const useHomePageData = (): HomeData => {
                 const [skillsResp, expResp, portfolioResp, featuresResp, profileResp] = await Promise.all([
                     skillsApi.getCategories().catch(() => [] as SkillCategoryWithSkills[]),
                     sb.from('experiences')
-                        .select('*, experience_tasks(id, task, order_index), experience_tags(tag)')
+                        // experience_tags 가 skills 와 FK 조인 — icon / icon_color 함께 끌어옴
+                        .select('*, experience_tasks(id, task, order_index), experience_tags(tag, skills(icon, icon_color))')
                         .order('order_index', { ascending: true })
                         .then((r) => (r.data ?? []) as ExperienceRow[])
                         .catch(() => [] as ExperienceRow[]),
                     sb.from('portfolios')
-                        .select('*, portfolio_tags(tag, order_index), portfolio_tasks(task, order_index)')
+                        // portfolio_tags 도 동일하게 skills FK 조인
+                        .select('*, portfolio_tags(tag, order_index, skills(icon, icon_color)), portfolio_tasks(task, order_index)')
                         .eq('is_public', true)
                         .eq('show_on_resume', true)
                         .order('order_index', { ascending: true })
@@ -218,8 +233,9 @@ export const useHomePageData = (): HomeData => {
                             .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
                             .map((t, i) => ({ id: `${row.id}-${i}`, task: t.task })),
                         tags: (row.portfolio_tags ?? [])
+                            .slice()
                             .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
-                            .map((t) => t.tag),
+                            .map(mapTag),
                         image: row.cover_image ?? row.image_url ?? undefined,
                     })));
                     gotAnyLiveData = true;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { iconMap } from '../../../constants/iconMap';
+import { resolveIcon } from '../../../constants/iconResolver';
 import type { SkillCategoryDetail } from '../../../types';
 import { SectionEditButton } from '../../../components/common';
 
@@ -48,7 +48,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ categories }) => {
                 data-tooltip={skill.name}
               >
                 <div className="skill-icon">
-                  {iconMap[skill.name] || (
+                  {resolveIcon(skill.icon, skill.icon_color) || (
                     <span style={{ color: skill.icon_color || '#666' }}>{skill.icon || '💻'}</span>
                   )}
                 </div>
