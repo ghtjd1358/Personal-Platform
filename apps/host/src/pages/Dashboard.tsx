@@ -182,7 +182,7 @@ const Dashboard: React.FC = () => {
 
             <section className="dashboard-intro" style={{ animationDelay: '0.3s' }}>
                 <p>
-                    이력서 · 블로그 · 포트폴리오 · 취업관리가 <em>각자의 속도로 자라도록</em>,
+                    이력서 · 블로그 · 포트폴리오 · 취업관리가 <em>각자의 속도로 개발되도록</em>,
                     <em>공통 인증과 상태</em>만 한 곳에 모았습니다.
                 </p>
             </section>
