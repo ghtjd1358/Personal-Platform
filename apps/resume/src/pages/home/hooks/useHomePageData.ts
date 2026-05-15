@@ -49,15 +49,30 @@ const mapSkillCategories = (raw: SkillCategoryWithSkills[]): SkillCategoryDetail
     }));
 
 /** Skill 메타 JOIN — portfolio_tags / experience_tags 의 skill_id 가 가리키는 skills row.
- *  null 가능 (niche tag 가 어떤 skill 도 매칭 안 된 경우). */
-type SkillJoin = { icon: string | null; icon_color: string | null } | null;
+ *  skill_categories 는 정렬용으로 order_index 끌어옴 (frontend → state → tools).
+ *  null 가능 (niche tag 가 어떤 skill 도 매칭 안 된 경우 → 정렬 시 999 로 후순위). */
+type SkillJoin = {
+    icon: string | null;
+    icon_color: string | null;
+    skill_categories?: { order_index: number | null } | null;
+} | null;
 
-/** DB tag row (portfolio_tags / experience_tags 공통) → PortfolioTag shape 변환. */
-const mapTag = (t: { tag: string; skills?: SkillJoin }): PortfolioTag => ({
+type TagRow = { tag: string; order_index?: number | null; skills?: SkillJoin };
+
+/** DB tag row → PortfolioTag shape 변환. */
+const mapTag = (t: TagRow): PortfolioTag => ({
     name: t.tag,
     iconKey: t.skills?.icon ?? null,
     iconColor: t.skills?.icon_color ?? null,
 });
+
+/** category order → tag order_index 순으로 정렬. 카테고리 미매칭 (skill_id NULL) 은 후순위. */
+const sortTags = (a: TagRow, b: TagRow) => {
+    const ca = a.skills?.skill_categories?.order_index ?? 999;
+    const cb = b.skills?.skill_categories?.order_index ?? 999;
+    if (ca !== cb) return ca - cb;
+    return (a.order_index ?? 0) - (b.order_index ?? 0);
+};
 
 /** DB experiences row (+ tasks + tags) → ExperienceDetail shape 변환 */
 interface ExperienceRow {
@@ -83,7 +98,7 @@ const mapExperiences = (rows: ExperienceRow[]): ExperienceDetail[] =>
         tasks: (row.experience_tasks ?? [])
             .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
             .map((t) => ({ id: t.id, task: t.task })),
-        tags: (row.experience_tags ?? []).map(mapTag),
+        tags: (row.experience_tags ?? []).slice().sort(sortTags).map(mapTag),
     }));
 
 /** DB portfolios row (+ portfolio_tags + portfolio_tasks) → PortfolioItem shape 변환.
@@ -121,7 +136,7 @@ const mapPortfolios = (rows: PortfolioRow[]): PortfolioItem[] =>
 
         const tags: PortfolioTag[] = (row.portfolio_tags ?? [])
             .slice()
-            .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+            .sort(sortTags)
             .map(mapTag);
 
         const tasks = (row.portfolio_tasks ?? [])
@@ -170,14 +185,14 @@ export const useHomePageData = (): HomeData => {
                 const [skillsResp, expResp, portfolioResp, featuresResp, profileResp] = await Promise.all([
                     skillsApi.getCategories().catch(() => [] as SkillCategoryWithSkills[]),
                     sb.from('experiences')
-                        // experience_tags 가 skills 와 FK 조인 — icon / icon_color 함께 끌어옴
-                        .select('*, experience_tasks(id, task, order_index), experience_tags(tag, skills(icon, icon_color))')
+                        // experience_tags JOIN skills JOIN skill_categories — 카테고리 order 까지 끌어와 정렬용
+                        .select('*, experience_tasks(id, task, order_index), experience_tags(tag, skills(icon, icon_color, skill_categories(order_index)))')
                         .order('order_index', { ascending: true })
                         .then((r) => (r.data ?? []) as ExperienceRow[])
                         .catch(() => [] as ExperienceRow[]),
                     sb.from('portfolios')
-                        // portfolio_tags 도 동일하게 skills FK 조인
-                        .select('*, portfolio_tags(tag, order_index, skills(icon, icon_color)), portfolio_tasks(task, order_index)')
+                        // portfolio_tags 도 동일하게 nested JOIN
+                        .select('*, portfolio_tags(tag, order_index, skills(icon, icon_color, skill_categories(order_index))), portfolio_tasks(task, order_index)')
                         .eq('is_public', true)
                         .eq('show_on_resume', true)
                         .order('order_index', { ascending: true })
@@ -232,7 +247,7 @@ export const useHomePageData = (): HomeData => {
                             .map((t, i) => ({ id: `${row.id}-${i}`, task: t.task })),
                         tags: (row.portfolio_tags ?? [])
                             .slice()
-                            .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+                            .sort(sortTags)
                             .map(mapTag),
                         image: row.cover_image ?? row.image_url ?? undefined,
                     })));
