@@ -119,6 +119,9 @@ const ProjectsEditorPage: React.FC = () => {
             end_date: form.end_date || null,
             is_current: form.is_current,
             resume_id: resumeIdToSet,
+            // "이력서에 노출" 토글 (link_to_resume) 이 resume 의 fetch filter 인 show_on_resume 도 같이 set.
+            // 안 하면 토글 체크해도 useHomePageData 의 .eq('show_on_resume', true) 필터에 걸려 안 보임.
+            show_on_resume: form.link_to_resume,
             short_description: form.short_description || undefined,
             demo_url: form.demo_url || undefined,
             github_url: form.github_url || undefined,
