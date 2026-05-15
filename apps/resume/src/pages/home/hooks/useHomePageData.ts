@@ -93,7 +93,6 @@ interface PortfolioRow {
     title: string;
     badge: string | null;
     short_description: string | null;
-    description: string | null;
     cover_image: string | null;
     image_url: string | null;
     demo_url: string | null;
@@ -140,7 +139,6 @@ const mapPortfolios = (rows: PortfolioRow[]): PortfolioItem[] =>
             detail: {
                 period,
                 role: row.role ?? undefined,
-                description: row.description ?? undefined,
                 tasks,
                 links,
                 notion_url: row.notion_url ?? undefined,

@@ -94,10 +94,9 @@ export interface PortfolioItem {
   detail?: {
     period?: string;
     role?: string;
-    description?: string;
     tasks?: string[];
     links?: PortfolioLink[];
-    /** Notion 상세 페이지 URL — 있으면 PortfolioModal body 가 NotionContent 로 분기 (기존 fallback sections 통과). */
+    /** Notion 상세 페이지 URL — 있으면 PortfolioModal body 가 NotionContent 로 분기. 본문 SOT 는 Notion 1개. */
     notion_url?: string;
   };
 }

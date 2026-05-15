@@ -38,16 +38,20 @@
     grid-row: 1;
 }
 
-/* modal-body 기존 grid 풀기 — 본문 sections 가 직접 자식 (modal-main wrapper 폐기). title 과 거리 벌리기 위해 padding-top 28 */
-/* min-height: 0 + overflow-y: auto: 그리드 아이템 기본 min-height: auto 로 인해 긴 Notion 본문이 1fr row 를
- * 무한정 밀어버리고 그 옆 sidebar (grid-row: 1/-1) 까지 같이 늘어나던 문제 해결. body 만 안쪽 스크롤. */
+/* modal-body 기존 grid 풀기 — portfolio 모달은 container 가 이미 grid (1fr 280) 라 body 는 단순 block. */
 .modal-container--portfolio .modal-body {
     grid-column: 1;
     grid-row: 2;
     display: block;
-    padding: 12px 0 16px 48px;
     min-height: 0;
-    overflow-y: auto;
+}
+
+/* 일반 modal-body — 사이드바 있는 모달의 기본 grid 레이아웃 (1fr 280) */
+.modal-body {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 32px;
+    padding: 0 16px;
 }
 
 /* sidebar — 우측 column 풀 높이 (header 옆부터 body 끝까지). 살짝 짙은 한지 카드 + 점선 border */

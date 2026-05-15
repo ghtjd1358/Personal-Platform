@@ -3,7 +3,7 @@ import { ModalCommonProps } from './types';
 import { popModal } from './modal-manager';
 import type { PortfolioItem } from '../../types';
 import { resolveIcon } from '../../constants/iconResolver';
-import { FaBlog, FaGlobe, FaGithub } from 'react-icons/fa';
+import { FaBlog, FaGlobe, FaGithub, FaBookOpen } from 'react-icons/fa';
 import NotionContent from '../notion/NotionContent';
 import './PortfolioModal.editorial.css';
 
@@ -71,7 +71,7 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
                   </svg>
                   프로젝트 소개
                 </h4>
-                <p className="modal-desc">{portfolio.detail?.description || portfolio.desc}</p>
+                <p className="modal-desc">{portfolio.desc}</p>
               </div>
 
               {portfolio.detail?.tasks && portfolio.detail.tasks.length > 0 && (
@@ -149,8 +149,8 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
               </div>
             )}
 
-            {/* 관련 링크 */}
-            {portfolio.detail?.links && portfolio.detail.links.length > 0 && (
+            {/* 관련 링크 — notion_url 또는 일반 links 중 하나라도 있으면 카드 노출 */}
+            {(portfolio.detail?.notion_url || (portfolio.detail?.links && portfolio.detail.links.length > 0)) && (
               <div className="modal-info-card">
                 <h5 className="modal-info-title">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -160,7 +160,24 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
                   관련 링크
                 </h5>
                 <div className="modal-links">
-                  {portfolio.detail.links.map((link, index) => (
+                  {/* 노션 상세 보기 — 최상단 (primary detail view 진입점) */}
+                  {portfolio.detail?.notion_url && (
+                    <a
+                      href={portfolio.detail.notion_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="modal-link modal-link--notion"
+                    >
+                      <span className="modal-link-icon"><FaBookOpen /></span>
+                      노션 상세 보기
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </a>
+                  )}
+                  {portfolio.detail?.links?.map((link, index) => (
                     <a
                       key={index}
                       href={link.url}

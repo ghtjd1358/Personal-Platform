@@ -78,6 +78,8 @@
 .nm-notion-wrap .notion-list {
     margin: 0.7em 0 1.1em;
     padding-left: 1.7em;
+    width: 100%;
+    box-sizing: border-box;
 }
 .nm-notion-wrap .notion-list-disc {
     list-style-type: disc;
@@ -200,6 +202,16 @@
     color: #8C1E1A;
     text-transform: uppercase;
     font-weight: 600;
+}
+
+/* medium-zoom 오버레이 z-index 끌어올리기 — 기본 300/301 이라 우리 모달(z-index 1000+) 뒤로 깔림.
+ * 오버레이는 <body> 직속으로 portal 되어 모달 안 nm-notion-wrap 스코프 밖이라 전역 selector 필요.
+ * 모달 위에 확실히 떠올리기 위해 10100/10101 강제. */
+.medium-zoom-overlay {
+    z-index: 10100 !important;
+}
+.medium-zoom-image--opened {
+    z-index: 10101 !important;
 }
 
 /* === ERROR fallback === */

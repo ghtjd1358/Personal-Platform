@@ -47,7 +47,6 @@ const ProjectsEditorPage: React.FC = () => {
         link_to_resume: fromResume === '1', // 신규 생성 시 기본값
         // Portfolio-only (선택)
         short_description: '',
-        description: '',
         demo_url: '',
         github_url: '',
         figma_url: '',
@@ -73,7 +72,6 @@ const ProjectsEditorPage: React.FC = () => {
             is_current: data.is_current || false,
             link_to_resume: !!data.resume_id,
             short_description: (data as any).short_description || '',
-            description: (data as any).description || '',
             demo_url: (data as any).demo_url || '',
             github_url: (data as any).github_url || '',
             figma_url: (data as any).figma_url || '',
@@ -122,7 +120,6 @@ const ProjectsEditorPage: React.FC = () => {
             is_current: form.is_current,
             resume_id: resumeIdToSet,
             short_description: form.short_description || undefined,
-            description: form.description || undefined,
             demo_url: form.demo_url || undefined,
             github_url: form.github_url || undefined,
             figma_url: form.figma_url || undefined,
@@ -324,20 +321,6 @@ const ProjectsEditorPage: React.FC = () => {
                             value={form.short_description}
                             onChange={(e) => setForm({ ...form, short_description: e.target.value })}
                             placeholder="카드 hover 시 보이는 한 줄 설명"
-                        />
-                    </div>
-
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">상세 설명</span>
-                            <span className="exp-field-hint">LONG FORM · MARKDOWN OK</span>
-                        </div>
-                        <textarea
-                            className="exp-textarea"
-                            value={form.description}
-                            onChange={(e) => setForm({ ...form, description: e.target.value })}
-                            rows={4}
-                            placeholder="포트폴리오 상세 페이지의 본문"
                         />
                     </div>
 
