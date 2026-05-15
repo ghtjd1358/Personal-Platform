@@ -1,46 +1,11 @@
 import React, { useEffect, useCallback } from 'react';
 import { ModalCommonProps } from './types';
 import { popModal } from './modal-manager';
-import type { PortfolioItem, PortfolioSection } from '../../types';
+import type { PortfolioItem } from '../../types';
 import { resolveIcon } from '../../constants/iconResolver';
 import { FaBlog, FaGlobe, FaGithub } from 'react-icons/fa';
 import NotionContent from '../notion/NotionContent';
 import './PortfolioModal.editorial.css';
-
-// 노션 스타일 섹션 컴포넌트
-const NotionSection: React.FC<{ section: PortfolioSection }> = ({ section }) => (
-  <div className="notion-section">
-    <h4 className="notion-heading">{section.heading}</h4>
-    <div className="notion-divider" />
-    <div className="notion-content">
-      {section.problem && (
-        <div className="notion-item">
-          <span className="notion-label">문제</span>
-          <p className="notion-text">{section.problem}</p>
-        </div>
-      )}
-      {section.cause && (
-        <div className="notion-item">
-          <span className="notion-label">원인</span>
-          <p className="notion-text">{section.cause}</p>
-        </div>
-      )}
-      {section.thinking && (
-        <div className="notion-item">
-          <span className="notion-label">고민</span>
-          <p className="notion-text">{section.thinking}</p>
-        </div>
-      )}
-      {section.solution && section.solution.length > 0 && (
-        <ul className="notion-list">
-          {section.solution.map((item, idx) => (
-            <li key={idx}>{item}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  </div>
-);
 
 interface PortfolioModalProps extends ModalCommonProps {
   portfolio: PortfolioItem;
@@ -126,31 +91,6 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
                 </div>
               )}
 
-              {portfolio.detail?.results && portfolio.detail.results.length > 0 && (
-                <div className="modal-section">
-                  <h4 className="modal-section-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 20V10"></path>
-                      <path d="M18 20V4"></path>
-                      <path d="M6 20v-4"></path>
-                    </svg>
-                    성과
-                  </h4>
-                  <ul className="modal-list results">
-                    {portfolio.detail.results.map((result, index) => (
-                      <li key={index}>{result}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {portfolio.detail?.sections && portfolio.detail.sections.length > 0 && (
-                <div className="notion-sections">
-                  {portfolio.detail.sections.map((section, index) => (
-                    <NotionSection key={index} section={section} />
-                  ))}
-                </div>
-              )}
             </>
           )}
         </div>
@@ -206,22 +146,6 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
                   역할
                 </h5>
                 <p className="modal-info-value">{portfolio.detail.role}</p>
-              </div>
-            )}
-
-            {/* 참여 인원 */}
-            {portfolio.detail?.team && (
-              <div className="modal-info-card">
-                <h5 className="modal-info-title">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                  참여 인원
-                </h5>
-                <p className="modal-info-value">{portfolio.detail.team}</p>
               </div>
             )}
 

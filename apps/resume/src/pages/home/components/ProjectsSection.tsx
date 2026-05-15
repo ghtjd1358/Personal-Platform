@@ -13,6 +13,8 @@ interface ProjectsSectionProps {
 }
 
 const SKELETON_COUNT = 3;
+/** 카드에 노출하는 태그 개수 상한 — 그 이상은 모달에서 전체 확인. list/detail 패턴. */
+const CARD_TAG_LIMIT = 4;
 
 export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData, isLoading = false }) => {
   const [showAllProjects, setShowAllProjects] = useState(false);
@@ -51,7 +53,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData,
 
                 {/* 기술 스택 태그 — DB skills.icon/icon_color 매핑 (PortfolioTag) */}
                 <div className="card-tags22">
-                  {portfolio.tags.slice(0, 4).map((tag) => {
+                  {portfolio.tags.slice(0, CARD_TAG_LIMIT).map((tag) => {
                     const icon = resolveIcon(tag.iconKey, tag.iconColor);
                     return (
                       <span key={tag.name} className="card-tag22">

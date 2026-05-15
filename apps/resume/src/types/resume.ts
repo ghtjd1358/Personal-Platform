@@ -83,14 +83,6 @@ export interface PortfolioLink {
   url: string;
 }
 
-export interface PortfolioSection {
-  heading: string;
-  problem?: string;
-  cause?: string;
-  thinking?: string;
-  solution?: string[];
-}
-
 export interface PortfolioItem {
   id: number;
   badge: string;
@@ -102,13 +94,10 @@ export interface PortfolioItem {
   detail?: {
     period?: string;
     role?: string;
-    team?: string;
     description?: string;
     tasks?: string[];
-    results?: string[];
-    sections?: PortfolioSection[];
     links?: PortfolioLink[];
-    /** Notion 상세 페이지 URL — 있으면 PortfolioModal body 가 NotionContent 로 분기 (기존 sections 폴백). */
+    /** Notion 상세 페이지 URL — 있으면 PortfolioModal body 가 NotionContent 로 분기 (기존 fallback sections 통과). */
     notion_url?: string;
   };
 }
