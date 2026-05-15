@@ -73,7 +73,7 @@ const AwsIcon = ({ color = "#FF9900" }: { color?: string }) => (
 );
 
 const ViteIcon = () => (
-  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="14" height="14" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="vite-gradient-1" x1="6" y1="3" x2="30" y2="29" gradientUnits="userSpaceOnUse">
         <stop stopColor="#41D1FF"/>
