@@ -217,7 +217,7 @@ const ExperienceListPage: React.FC = () => {
                                     {canEditResource(proj.user_id) ? (
                                         <>
                                             <Link
-                                                to={`${LINK_PREFIX}/admin/portfolio/edit/${proj.id}`}
+                                                to={`${LINK_PREFIX}/admin/portfolio/edit/${proj.id}?fromResume=1`}
                                                 className="exp-icon-btn"
                                                 title="수정"
                                                 aria-label="수정"
@@ -236,7 +236,7 @@ const ExperienceListPage: React.FC = () => {
                                         </>
                                     ) : (
                                         <Link
-                                            to={`${LINK_PREFIX}/admin/portfolio/edit/${proj.id}`}
+                                            to={`${LINK_PREFIX}/admin/portfolio/edit/${proj.id}?fromResume=1`}
                                             className="exp-icon-btn exp-icon-btn--locked"
                                             title="Owner 소유 — 열람만 가능"
                                             aria-label="열람만 가능"

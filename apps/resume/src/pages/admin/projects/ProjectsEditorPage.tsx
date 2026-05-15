@@ -64,8 +64,9 @@ const ProjectsEditorPage: React.FC = () => {
     const [tasksText, setTasksText] = useState('')
     const [tagsText, setTagsText] = useState('')
 
-    // 저장/취소 후 복귀: fromResume 쿼리 있거나 이미 이력서 연결된 row 면 경력&프로젝트 로, 아니면 포폴 리스트로
-    const listUrl = form.link_to_resume || fromResume
+    // 저장/취소 후 복귀: URL 의 ?fromResume=1 query 있을 때만 경력&프로젝트 로.
+    // 데이터(form.link_to_resume) 기반으로 결정하면 "포폴 리스트에서 진입했는데 experience 로 튀는" 버그 발생 — 출처는 query 가 단일 source.
+    const listUrl = fromResume === '1'
         ? `${LINK_PREFIX}/admin/experience`
         : `${LINK_PREFIX}/admin/portfolio`
 

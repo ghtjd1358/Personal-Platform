@@ -24,7 +24,19 @@ export const replaceChildren = async (
         if (error) throw error;
     }
     if (tags.length > 0) {
-        const rows = tags.map((t, i) => ({ portfolio_id: portfolioId, tag: t, order_index: i }));
+        // skills.name 으로 skill_id 매칭 — JOIN 시 icon/color 가져오려면 FK 가 살아있어야 함.
+        // 매칭 안 되는 niche tag 는 skill_id=null 로 (텍스트 fallback 만 표시).
+        const { data: matched } = await sb
+            .from('skills')
+            .select('id, name')
+            .in('name', tags);
+        const nameToId = new Map((matched ?? []).map((s: { id: string; name: string }) => [s.name, s.id]));
+        const rows = tags.map((t, i) => ({
+            portfolio_id: portfolioId,
+            tag: t,
+            skill_id: nameToId.get(t) ?? null,
+            order_index: i,
+        }));
         const { error } = await sb.from('portfolio_tags').insert(rows);
         if (error) throw error;
     }
