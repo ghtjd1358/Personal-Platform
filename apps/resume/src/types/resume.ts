@@ -97,6 +97,8 @@ export interface PortfolioItem {
     results?: string[];
     sections?: PortfolioSection[];
     links?: PortfolioLink[];
+    /** Notion 상세 페이지 URL — 있으면 PortfolioModal body 가 NotionContent 로 분기 (기존 sections 폴백). */
+    notion_url?: string;
   };
 }
 

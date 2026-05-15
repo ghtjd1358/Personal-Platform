@@ -39,11 +39,15 @@
 }
 
 /* modal-body 기존 grid 풀기 — 본문 sections 가 직접 자식 (modal-main wrapper 폐기). title 과 거리 벌리기 위해 padding-top 28 */
+/* min-height: 0 + overflow-y: auto: 그리드 아이템 기본 min-height: auto 로 인해 긴 Notion 본문이 1fr row 를
+ * 무한정 밀어버리고 그 옆 sidebar (grid-row: 1/-1) 까지 같이 늘어나던 문제 해결. body 만 안쪽 스크롤. */
 .modal-container--portfolio .modal-body {
     grid-column: 1;
     grid-row: 2;
     display: block;
-    padding: 28px 0 32px 48px;
+    padding: 12px 0 16px 48px;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 /* sidebar — 우측 column 풀 높이 (header 옆부터 body 끝까지). 살짝 짙은 한지 카드 + 점선 border */
@@ -80,6 +84,18 @@
 }
 .modal-container--portfolio .modal-sidebar .modal-info-card:last-child {
     border-bottom: none;
+}
+
+/* Notion column → vertical stack (resume 전용 narrow-modal override).
+ * resume 모달 body 폭은 portfolio 모달보다 sidebar(280) + gap(32) 만큼 좁다.
+ * Notion 페이지가 2-column 으로 작성된 블록에선 안쪽 ul/li 폭이 쪼그라듦.
+ * `.modal-container--portfolio` 로 BEM 스코프 — portfolio app NotionEmbedModal (`.nm-modal`) 엔 leak 없음. */
+.modal-container--portfolio .nm-notion-wrap .notion-row {
+    flex-direction: column;
+    gap: 16px;
+}
+.modal-container--portfolio .nm-notion-wrap .notion-column {
+    width: 100% !important;
 }
 
 /* mobile — grid 풀고 header → body → sidebar 단일 컬럼 stack */

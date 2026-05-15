@@ -1,0 +1,249 @@
+/* NotionContent — react-notion-x 본문 typography override.
+ * portfolio NotionEmbedModal 의 editorial CSS 중 body 부분만 발췌
+ * (modal chrome 인 .nm-backdrop/.nm-modal/.nm-header 는 제외 — resume 모달 frame 이 따로 있음).
+ */
+
+.nm-notion-wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+}
+
+/* 한글 italic 은 폰트 폴백이 synthetic skew 로 깨짐 — Notion 본문/quote/em/inline-style 어떤 경로로 오든
+ * 전부 차단. react-notion-x 기본 styles 와 Notion 의 inline style="font-style: italic" 도 이기게 !important. */
+.nm-notion-wrap,
+.nm-notion-wrap * {
+    font-style: normal !important;
+}
+
+.nm-notion-wrap .notion {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    color: #2B1E14;
+    font-size: 15px;
+    line-height: 1.75;
+}
+.nm-notion-wrap .notion-title {
+    font-family: 'Fraunces', 'Nanum Myeongjo', serif;
+    color: #2B1E14;
+}
+.nm-notion-wrap .notion-link {
+    color: #8C1E1A;
+    border-color: rgba(140, 30, 26, 0.3);
+}
+.nm-notion-wrap .notion-h1,
+.nm-notion-wrap .notion-h2,
+.nm-notion-wrap .notion-h3 {
+    /* 본문과 동일 Pretendard — 한글이 Fraunces 폴백 체인 타며 Nanum Myeongjo 의 대각 stroke 로 떨어지던 문제 회피.
+     * 위계는 size + weight 로만 잡음. */
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    color: #2B1E14;
+}
+
+.nm-notion-wrap .notion-page-content > *:first-child {
+    margin-top: 0;
+}
+.nm-notion-wrap .notion-text {
+    margin: 0 0 0.65em;
+    padding: 3px 2px;
+    line-height: 1.78;
+    white-space: normal;
+    word-break: keep-all;
+}
+.nm-notion-wrap .notion-h1 {
+    margin: 2em 0 0.7em;
+    line-height: 1.35;
+    font-size: 30px;
+}
+.nm-notion-wrap .notion-h2 {
+    margin: 2em 0 0.8em;
+    line-height: 1.35;
+    font-size: 24px;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #D4C4A8;
+}
+.nm-notion-wrap .notion-h3 {
+    /* h3 가독성 강화 — weight + 좌측 주홍 accent 로 본문 흐름에서 확실히 떠오르게. h2 의 bottom-border 와 시각적 차별. */
+    margin: 1.6em 0 0.5em;
+    line-height: 1.4;
+    font-size: 19px;
+    font-weight: 700;
+    color: #2B1E14;
+    padding-left: 10px;
+    border-left: 3px solid #8C1E1A;
+}
+.nm-notion-wrap .notion-h2 + .notion-text,
+.nm-notion-wrap .notion-h3 + .notion-text {
+    margin-top: 0.3em;
+}
+.nm-notion-wrap .notion-list {
+    margin: 0.7em 0 1.1em;
+    padding-left: 1.7em;
+}
+.nm-notion-wrap .notion-list-disc {
+    list-style-type: disc;
+    margin: 0.7em 0 1.1em;
+    padding-left: 1.7em;
+}
+.nm-notion-wrap .notion-list-numbered {
+    list-style-type: decimal;
+    margin: 0.7em 0 1.1em;
+    padding-left: 1.7em;
+}
+.nm-notion-wrap .notion-list li {
+    margin: 0.55em 0;
+    line-height: 1.85;
+    padding-left: 4px;
+}
+.nm-notion-wrap .notion-list li::marker {
+    color: #8C1E1A;
+}
+.nm-notion-wrap .notion-list li strong,
+.nm-notion-wrap .notion-list li b {
+    font-weight: 600;
+    color: #3A2A1C;
+}
+.nm-notion-wrap .notion-hr {
+    margin: 1.1em 0 0.7em;
+    border-color: #D4C4A8;
+}
+.nm-notion-wrap .notion-row {
+    gap: 32px;
+    margin: 0.8em 0;
+}
+.nm-notion-wrap .notion-column {
+    padding: 0;
+}
+.nm-notion-wrap .notion-toggle {
+    margin: 0.6em 0;
+}
+.nm-notion-wrap .notion-toggle > summary {
+    cursor: pointer;
+    padding: 6px 0;
+    line-height: 1.6;
+}
+.nm-notion-wrap .notion-asset-wrapper,
+.nm-notion-wrap .notion-image {
+    margin: 1.2em 0;
+}
+.nm-notion-wrap .notion-quote {
+    margin: 1.2em 0 1.4em;
+    padding: 0.6em 1.2em;
+    border-left: 4px solid #8C1E1A;
+    line-height: 1.55;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    font-size: 19px;
+    font-weight: 500;
+    color: #2B1E14;
+    background: rgba(140, 30, 26, 0.04);
+}
+.nm-notion-wrap .notion-quote strong {
+    font-weight: 700;
+    color: #2B1E14;
+}
+.nm-notion-wrap .notion-callout {
+    margin: 1em 0;
+    padding: 16px 18px;
+    line-height: 1.7;
+}
+.nm-notion-wrap .notion-code {
+    margin: 1em 0;
+    padding: 14px 16px;
+    line-height: 1.6;
+}
+.nm-notion-wrap strong {
+    font-weight: 700;
+    color: #2B1E14;
+}
+/* em 태그도 italic 제거 — 한글에서 italic 폴백이 깨져 보이는 케이스가 너무 잦음. 강조는 weight 로만. */
+.nm-notion-wrap em {
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* === LOADING — dots + editorial 톤 텍스트 (한지 cream 배경에 먹/주홍 강세) === */
+.nm-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 100px 0;
+}
+.nm-loading-dots {
+    display: flex;
+    gap: 10px;
+}
+.nm-loading-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2B1E14;
+    animation: nmDot 1.2s ease-in-out infinite;
+}
+.nm-loading-dot:nth-child(1) { animation-delay: 0s; }
+.nm-loading-dot:nth-child(2) { animation-delay: 0.18s; }
+.nm-loading-dot:nth-child(3) { animation-delay: 0.36s; }
+@keyframes nmDot {
+    0%, 100% { opacity: 0.25; transform: scale(0.7); background: #2B1E14; }
+    50% { opacity: 1; transform: scale(1.1); background: #8C1E1A; }
+}
+.nm-loading-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.nm-loading-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: #8C1E1A;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* === ERROR fallback === */
+.nm-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 100px 24px;
+    text-align: center;
+}
+.nm-error-text {
+    margin: 0;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #2B1E14;
+}
+.nm-error-sub {
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #8B7355;
+    max-width: 520px;
+    word-break: break-all;
+}
+.nm-error-cta {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    padding: 11px 22px;
+    background: #2B1E14;
+    color: #FBF5E3;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 2px;
+    border: 1px solid #2B1E14;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.nm-error-cta:hover {
+    background: #8C1E1A;
+    border-color: #8C1E1A;
+}
