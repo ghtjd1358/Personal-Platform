@@ -24,9 +24,18 @@ const sortByRecent = <T extends { is_current?: boolean; start_date?: string | nu
 };
 
 export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experiences, projects }) => {
-  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [showAllExp, setShowAllExp] = useState(false);
   const [showAllProjects, setShowAllProjects] = useState(false);
+
+  const toggleItem = (id: string) => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const sortedExperiences = useMemo(() => [...experiences].sort(sortByRecent), [experiences]);
   const sortedProjects = useMemo(() => [...projects].sort(sortByRecent), [projects]);
@@ -93,14 +102,14 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                       <>
                         <button
                           type="button"
-                          className={`toggle-tasks ${expandedItem === exp.id ? 'active' : ''}`}
-                          onClick={() => setExpandedItem(expandedItem === exp.id ? null : exp.id)}
-                          aria-expanded={expandedItem === exp.id}
+                          className={`toggle-tasks ${expandedItems.has(exp.id) ? 'active' : ''}`}
+                          onClick={() => toggleItem(exp.id)}
+                          aria-expanded={expandedItems.has(exp.id)}
                         >
                           <span className="toggle-icon">›</span>
                           <span>주요 업무 내용</span>
                         </button>
-                        <div className={`timeline-tasks-collapsible ${expandedItem === exp.id ? 'is-open' : ''}`}>
+                        <div className={`timeline-tasks-collapsible ${expandedItems.has(exp.id) ? 'is-open' : ''}`}>
                           <ul className="timeline-tasks">
                             {exp.tasks.map((task, i) => (
                               <li key={task.id} style={{ ['--i' as any]: i }}>{task.task}</li>
@@ -157,14 +166,14 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                       <>
                         <button
                           type="button"
-                          className={`toggle-tasks ${expandedItem === proj.id ? 'active' : ''}`}
-                          onClick={() => setExpandedItem(expandedItem === proj.id ? null : proj.id)}
-                          aria-expanded={expandedItem === proj.id}
+                          className={`toggle-tasks ${expandedItems.has(proj.id) ? 'active' : ''}`}
+                          onClick={() => toggleItem(proj.id)}
+                          aria-expanded={expandedItems.has(proj.id)}
                         >
                           <span className="toggle-icon">›</span>
                           <span>주요 작업 내용</span>
                         </button>
-                        <div className={`timeline-tasks-collapsible ${expandedItem === proj.id ? 'is-open' : ''}`}>
+                        <div className={`timeline-tasks-collapsible ${expandedItems.has(proj.id) ? 'is-open' : ''}`}>
                           <ul className="timeline-tasks">
                             {proj.tasks.map((task, i) => (
                               <li key={task.id} style={{ ['--i' as any]: i }}>{task.task}</li>
