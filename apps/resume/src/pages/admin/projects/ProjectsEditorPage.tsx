@@ -17,6 +17,7 @@ import {
     useCreatePortfolio,
     useUpdatePortfolio,
     useReplacePortfolioChildren,
+    useDeletePortfolio,
 } from '../../../network/hooks'
 import { LINK_PREFIX } from '@/config/constants'
 import '../experience/ExperienceEditor.editorial.css'
@@ -34,6 +35,14 @@ const ProjectsEditorPage: React.FC = () => {
     const createPortfolio = useCreatePortfolio()
     const updatePortfolio = useUpdatePortfolio()
     const replaceChildren = useReplacePortfolioChildren()
+    const deletePortfolio = useDeletePortfolio()
+
+    const handleDelete = async () => {
+        if (!isEdit || !id) return
+        if (!window.confirm(`"${form.title || '이 프로젝트'}" 를 삭제할까요? 되돌릴 수 없습니다.`)) return
+        const ok = await deletePortfolio(id)
+        if (ok) navigate(listUrl)
+    }
 
     // 필수 + 선택 필드 통합 form
     const [form, setForm] = useState({
@@ -370,6 +379,15 @@ const ProjectsEditorPage: React.FC = () => {
 
                 {/* ===== Actions ===== */}
                 <div className="exp-editor-actions">
+                    {isEdit && (
+                        <button
+                            type="button"
+                            className="exp-editor-btn exp-editor-btn--danger"
+                            onClick={handleDelete}
+                        >
+                            삭제
+                        </button>
+                    )}
                     <button
                         type="button"
                         className="exp-editor-btn exp-editor-btn--ghost"
