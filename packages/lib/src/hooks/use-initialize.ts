@@ -174,8 +174,14 @@ export function useSupabaseInitialize() {
           return;
         }
 
-        // 1. 현재 세션 확인
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // 1. 현재 세션 확인 — 5s 타임아웃 (네트워크 hang 방어)
+        const sessionTimeout = new Promise<{ data: { session: null }; error: null }>(
+            resolve => setTimeout(() => resolve({ data: { session: null }, error: null }), 5000)
+        );
+        const { data: { session }, error } = await Promise.race([
+            supabase.auth.getSession(),
+            sessionTimeout,
+        ]);
 
         if (error) {
           console.warn('[Supabase Init] 세션 가져오기 실패:', error.message);
