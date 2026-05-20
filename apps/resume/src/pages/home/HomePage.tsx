@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { storage } from '@sonhoseong/mfa-lib';
 import { ModalContainer } from '../../components/modal';
 import {
     HeroSection,
@@ -10,6 +11,7 @@ import {
     ContactSection
 } from './components';
 import { useScrollAnimation, useHomePageData } from './hooks';
+import ResumeNavHeader from '@/components/resume/ResumeNavHeader';
 
 /**
  * HomePage - 개인 포트폴리오 메인 페이지
@@ -34,6 +36,7 @@ const HomePage: React.FC = () => {
 
     return (
         <>
+            {!storage.isHostApp() && <ResumeNavHeader />}
             <HeroSection userName={user?.name} heroSummary={heroSummary} />
             <FeaturesSection features={features} isLoading={loading} />
             <SkillsSection categories={skillCategories} />

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectUser } from '@sonhoseong/mfa-lib';
+import { selectUser, storage } from '@sonhoseong/mfa-lib';
 import { resumesApi } from '@/network';
 import type { ResumeDetail } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
+import ResumeNavHeader from '@/components/resume/ResumeNavHeader';
 
 const UserResumePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -104,8 +105,12 @@ const UserResumePage: React.FC = () => {
     );
   }
 
+  const isStandalone = !storage.isHostApp();
+
   return (
-    <div className="resume-detail-page">
+    <>
+      {isStandalone && <ResumeNavHeader />}
+      <div className="resume-detail-page">
       {/* Header with back button */}
       <div className="resume-detail-nav">
         <Link to={LINK_PREFIX || '/'} className="btn-back">
@@ -162,9 +167,36 @@ const UserResumePage: React.FC = () => {
         </div>
       </section>
 
+      {/* 핵심 역량 Section */}
+      {resume.summary && (
+        <section id="core-summary" className="resume-detail-section resume-section">
+          <h2 className="section-title">핵심 역량</h2>
+          <p className="resume-summary-text">{resume.summary}</p>
+        </section>
+      )}
+
+      {/* 기술 스택 Section */}
+      {resume.skills && resume.skills.length > 0 && (
+        <section id="tech-stack" className="resume-detail-section resume-section">
+          <h2 className="section-title">기술 스택</h2>
+          <div className="skill-list">
+            {resume.skills.map((category) => (
+              <div key={category.id} className="skill-category">
+                <h3 className="skill-category-name">{category.name}</h3>
+                <div className="skill-tags">
+                  {category.skills.map((skill) => (
+                    <span key={skill.id} className="skill-tag">{skill.name}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Experiences Section */}
       {resume.experiences && resume.experiences.length > 0 && (
-        <section className="resume-detail-section">
+        <section id="experience" className="resume-detail-section resume-section">
           <h2 className="section-title">경력 & 교육</h2>
           <div className="experience-list">
             {resume.experiences.map((exp) => (
@@ -200,7 +232,7 @@ const UserResumePage: React.FC = () => {
 
       {/* Projects Section */}
       {resume.projects && resume.projects.length > 0 && (
-        <section className="resume-detail-section">
+        <section id="projects" className="resume-detail-section resume-section">
           <h2 className="section-title">프로젝트</h2>
           <div className="project-list">
             {resume.projects.map((project) => (
@@ -239,6 +271,7 @@ const UserResumePage: React.FC = () => {
         </section>
       )}
     </div>
+    </>
   );
 };
 

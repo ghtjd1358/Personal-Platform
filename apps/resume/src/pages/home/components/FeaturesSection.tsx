@@ -28,7 +28,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ features, isLo
   const showSkeleton = isLoading && features.length === 0;
 
   return (
-    <section className="section features">
+    <section id="core-summary" className="section features">
       <div className="container">
         <div className="section-header animate-on-scroll">
           <div className="section-label">핵심 역량</div>
