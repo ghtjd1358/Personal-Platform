@@ -37,8 +37,8 @@ const GlobalLoading = ({ message, force }) => {
         return null;
     if (!visible)
         return null;
-    const displayMessage = message || globalLoadingTitle || '불러오는 중';
-    return (_jsxs("div", { className: "editorial-loading-overlay", role: "status", "aria-live": "polite", children: [_jsxs("div", { className: "editorial-loading-card", children: [_jsxs("svg", { className: "editorial-loading-arc", viewBox: "0 0 60 60", width: "44", height: "44", "aria-hidden": true, children: [_jsx("circle", { cx: "30", cy: "30", r: "24", stroke: "rgba(43, 30, 20, 0.15)", strokeWidth: "3", fill: "none" }), _jsx("circle", { cx: "30", cy: "30", r: "24", stroke: "#8C1E1A", strokeWidth: "3", fill: "none", strokeDasharray: "42 200", strokeLinecap: "round", className: "editorial-loading-arc-head" })] }), _jsxs("p", { className: "editorial-loading-label", children: ["LOADING \u00B7 ", displayMessage] }), _jsxs("div", { className: "editorial-loading-dots", "aria-hidden": true, children: [_jsx("span", {}), _jsx("span", {}), _jsx("span", {})] })] }), _jsx("style", { children: `
+    const displayMessage = message || globalLoadingTitle || 'Loading';
+    return (_jsxs("div", { className: "editorial-loading-overlay", role: "status", "aria-live": "polite", children: [_jsxs("div", { className: "editorial-loading-card", children: [_jsxs("svg", { className: "editorial-loading-arc", viewBox: "0 0 60 60", width: "44", height: "44", "aria-hidden": true, children: [_jsx("circle", { cx: "30", cy: "30", r: "24", stroke: "rgba(43, 30, 20, 0.15)", strokeWidth: "3", fill: "none" }), _jsx("circle", { cx: "30", cy: "30", r: "24", stroke: "#8C1E1A", strokeWidth: "3", fill: "none", strokeDasharray: "42 200", strokeLinecap: "round", className: "editorial-loading-arc-head" })] }), _jsx("p", { className: "editorial-loading-label", children: displayMessage }), _jsxs("div", { className: "editorial-loading-dots", "aria-hidden": true, children: [_jsx("span", {}), _jsx("span", {}), _jsx("span", {})] })] }), _jsx("style", { children: `
                 .editorial-loading-overlay {
                     position: fixed;
                     inset: 0;

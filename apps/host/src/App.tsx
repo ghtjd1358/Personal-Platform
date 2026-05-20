@@ -47,18 +47,8 @@ const App = () => {
         return filterMenus(baseItems);
     }, [filterMenus, isAuthenticated]);
 
-    // 인증 init 전에도 Dashboard 만큼은 정적으로 첫 paint —
-    // 콜드 캐시 진입에서 supabase.getSession resolve 동안 빈화면 보이던 문제 차단.
     if (!initialized) {
-        return (
-            <HostShell>
-                <Container>
-                    <main className="main-content">
-                        <Dashboard />
-                    </main>
-                </Container>
-            </HostShell>
-        );
+        return <HostShell>{null}</HostShell>;
     }
 
     return  isAuthenticated ? (

@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getStore, setAccessToken, setUser } from '../../store/app-store';
 import { storage } from '../../utils/storage';
 import { User } from '../../types';
@@ -60,6 +61,7 @@ export function LoginPage({
     const [focusedField, setFocusedField] = useState<string | null>(null);
 
     const store = getStore();
+    const navigate = useNavigate();
 
     const handleGoogleLogin = useCallback(async () => {
         if (!onGoogleLogin) {
@@ -84,7 +86,7 @@ export function LoginPage({
             onLoginSuccess?.(user);
 
             // 페이지 이동
-            window.location.href = redirectPath;
+            navigate(redirectPath);
         } catch (err: any) {
             if (err?.code === 'auth/popup-closed-by-user') {
                 return;
@@ -93,7 +95,7 @@ export function LoginPage({
         } finally {
             setIsGoogleLoading(false);
         }
-    }, [onGoogleLogin, store, onLoginSuccess, redirectPath]);
+    }, [onGoogleLogin, store, onLoginSuccess, redirectPath, navigate]);
 
     // Supabase 로그인 핸들러
     const handleSupabaseLogin = useCallback(async () => {
@@ -129,11 +131,11 @@ export function LoginPage({
             onLoginSuccess?.(user);
 
             // 페이지 이동
-            window.location.href = redirectPath;
+            navigate(redirectPath);
         } catch (err: any) {
             throw err;
         }
-    }, [email, password, store, onLoginSuccess, redirectPath]);
+    }, [email, password, store, onLoginSuccess, redirectPath, navigate]);
 
     // Mock 로그인 핸들러 (테스트용)
     const handleMockLogin = useCallback(async () => {
@@ -152,11 +154,36 @@ export function LoginPage({
             storage.setUser(user);
 
             onLoginSuccess?.(user);
-            window.location.href = redirectPath;
+            navigate(redirectPath);
         } else {
             throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
         }
-    }, [email, password, store, onLoginSuccess, redirectPath]);
+    }, [email, password, store, onLoginSuccess, redirectPath, navigate]);
+
+    const handleTestLogin = useCallback(async () => {
+        setError('');
+        setIsSubmitting(true);
+        try {
+            const supabase = getSupabase();
+            const { data, error: authError } = await supabase.auth.signInWithPassword({
+                email: 'admin@test.com',
+                password: '1234',
+            });
+            if (authError) throw new Error('테스트 계정 로그인에 실패했습니다.');
+            if (!data.session || !data.user) throw new Error('로그인 응답이 올바르지 않습니다.');
+            const user = mapSupabaseUser(data.user);
+            store.dispatch(setAccessToken(data.session.access_token));
+            store.dispatch(setUser(user));
+            storage.setAccessToken(data.session.access_token);
+            storage.setUser(user);
+            onLoginSuccess?.(user);
+            navigate(redirectPath);
+        } catch (err: any) {
+            setError(err.message || '테스트 로그인 중 오류가 발생했습니다.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [store, onLoginSuccess, redirectPath, navigate]);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -326,7 +353,23 @@ export function LoginPage({
                             </svg>
                             테스트 계정
                         </div>
-                        <span className="login-test-credentials">admin@test.com / 1234</span>
+                        <button
+                            type="button"
+                            className="login-test-button"
+                            onClick={handleTestLogin}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <><span className="login-spinner" />로그인 중...</>
+                            ) : (
+                                <>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
+                                    </svg>
+                                    테스트 계정으로 로그인
+                                </>
+                            )}
+                        </button>
                     </div>
                 )}
             </div>

@@ -470,6 +470,33 @@
     letter-spacing: 0.04em;
 }
 
+.login-test-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--lp-ink);
+    border-radius: 2px;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--lp-ink);
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease;
+    letter-spacing: 0.02em;
+}
+
+.login-test-button:hover:not(:disabled) {
+    background: var(--lp-ink);
+    color: var(--lp-cream);
+}
+
+.login-test-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 480px) {
     .login-page {

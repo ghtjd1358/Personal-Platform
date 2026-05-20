@@ -48,7 +48,7 @@ const GlobalLoading: React.FC<GlobalLoadingProps> = ({ message, force }) => {
 
     if (!visible) return null;
 
-    const displayMessage = message || globalLoadingTitle || '불러오는 중';
+    const displayMessage = message || globalLoadingTitle || 'Loading';
 
     return (
         <div className="editorial-loading-overlay" role="status" aria-live="polite">
@@ -76,7 +76,7 @@ const GlobalLoading: React.FC<GlobalLoadingProps> = ({ message, force }) => {
                         className="editorial-loading-arc-head"
                     />
                 </svg>
-                <p className="editorial-loading-label">LOADING · {displayMessage}</p>
+                <p className="editorial-loading-label">{displayMessage}</p>
                 <div className="editorial-loading-dots" aria-hidden>
                     <span /><span /><span />
                 </div>
