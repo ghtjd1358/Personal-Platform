@@ -161,6 +161,8 @@ export function LoginPage({
     }, [email, password, store, onLoginSuccess, redirectPath, navigate]);
 
     const handleTestLogin = useCallback(async () => {
+        setEmail('admin@test.com');
+        setPassword('1234');
         setError('');
         setIsSubmitting(true);
         try {
@@ -342,36 +344,30 @@ export function LoginPage({
                             </>
                         )}
                     </button>
-                </form>
 
-                {/* Test Account */}
-                {showTestAccount && (
-                    <div className="login-test-info">
-                        <div className="login-test-badge">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            </svg>
-                            테스트 계정
-                        </div>
+                    {showTestAccount && (
                         <button
                             type="button"
-                            className="login-test-button"
+                            className="login-button login-button--test"
                             onClick={handleTestLogin}
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (
-                                <><span className="login-spinner" />로그인 중...</>
+                                <>
+                                    <span className="login-spinner" />
+                                    로그인 중...
+                                </>
                             ) : (
                                 <>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    테스트 계정으로 로그인
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
                                     </svg>
-                                    테스트 계정으로 로그인
                                 </>
                             )}
                         </button>
-                    </div>
-                )}
+                    )}
+                </form>
             </div>
         </div>
     );

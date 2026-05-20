@@ -408,6 +408,20 @@
     transform: translateX(3px);
 }
 
+.login-button--test {
+    background: transparent;
+    color: var(--lp-ink);
+    border-color: var(--lp-ink);
+    margin-top: 0;
+}
+
+.login-button--test:hover:not(:disabled) {
+    background: var(--lp-ink);
+    color: var(--lp-cream);
+    transform: translateY(-2px);
+    box-shadow: 3px 5px 0 rgba(43, 30, 20, 0.25);
+}
+
 /* ===== Spinner ===== */
 .login-spinner {
     width: 16px;
