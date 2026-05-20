@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "portfolio-mfa",
   "version": "1.0.0",
   "private": true,
@@ -18,8 +18,8 @@
     "@supabase/supabase-js": "^2.95.3",
     "dotenv-webpack": "^8.1.1",
     "history": "^5.3.0",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "react-icons": "^5.5.0",
     "react-notion-x": "^7.10.0",
     "notion-client": "^7.10.0",

@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "remote3",
   "version": "1.0.0",
   "main": "index.js",
@@ -31,8 +31,8 @@
     "dotenv-webpack": "^8.1.1",
     "lowlight": "^3.3.0",
     "notion-client": "^7.10.0",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "react-notion-x": "^7.10.0",
     "react-promise-tracker": "^2.1.1",
     "react-redux": "^9.2.0",

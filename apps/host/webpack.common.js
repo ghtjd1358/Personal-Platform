@@ -156,8 +156,8 @@ module.exports = {
         '@jobtracker': dynamicRemoteLoader('jobtracker', `${REMOTE4_URL}/remoteEntry.js`)
       },
       shared: {
-        react: { singleton: true, eager: true, requiredVersion: '^19.2.1' },
-        'react-dom': { singleton: true, eager: true, requiredVersion: '^19.2.1' },
+        react: { singleton: true, eager: true, requiredVersion: '19.2.0' },
+        'react-dom': { singleton: true, eager: true, requiredVersion: '19.2.0' },
         'react-router-dom': { singleton: true, eager: true },
         '@reduxjs/toolkit': { singleton: true, eager: true },
         'react-redux': { singleton: true, eager: true },
