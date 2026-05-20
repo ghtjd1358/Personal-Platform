@@ -16,7 +16,7 @@ import { LINK_PREFIX } from '@/config/constants'
 import '../experience/ExperienceList.editorial.css'
 
 const FeaturesListPage: React.FC = () => {
-    const { canEditResource } = usePermission()
+    const { canEditResource, isOwner } = usePermission()
     const currentUser = getCurrentUser()
 
     // 핵심 역량 카드는 추가/삭제 불가 — 수정만 가능. updater 불필요.
@@ -24,8 +24,8 @@ const FeaturesListPage: React.FC = () => {
     const { features: allFeatures } = useFetchFeatures(currentUser?.id ? -1 : 0)
 
     const items = useMemo(
-        () => (currentUser?.id ? (myFeatures as Feature[]) : (allFeatures as Feature[])),
-        [currentUser?.id, myFeatures, allFeatures],
+        () => (isOwner ? (myFeatures as Feature[]) : (allFeatures as Feature[])),
+        [isOwner, myFeatures, allFeatures],
     )
 
     return (
