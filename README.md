@@ -1,706 +1,214 @@
-# MFA Portfolio
+# 개인 플랫폼 — MFA 포트폴리오
 
-Webpack Module Federation 기반의 Micro Frontend Architecture 포트폴리오 프로젝트입니다.
+> 이력서, 블로그, 포트폴리오를 **하나의 컨테이너**에서 운영하는 Micro Frontend 기반 개인 플랫폼
+
+라우팅부터 인증, 공유 스토어까지 직접 설계하면서 MFA의 본질적인 문제들을 겪어봤습니다.  
+"그냥 하나의 앱 아니야?"가 아니라, 각 Remote가 **독립 실행**되면서도 Host에 통합될 때 아무 문제 없어야 한다는 제약이 생각보다 까다로웠습니다.
+
+---
+
+## 화면
+
+### 대시보드
+
+![대시보드](docs/dashboard.png)
+
+Host가 올라오면 보이는 메인 화면. LNB는 각 Remote 앱이 자신의 메뉴 항목을 `expose`로 내보내고, Host가 런타임에 동적으로 조합합니다.
+
+### 기술스택 관리 (Remote 에디터)
+
+![기술스택 관리](docs/remote_editor.png)
+
+Resume 앱 안의 어드민 기능. 카테고리를 직접 만들고 기술을 쌓는 방식으로 이력서 기술스택을 관리합니다.
+
+### 포트폴리오 상세 모달
+
+![포트폴리오 모달](docs/remote1_modal.png)
+
+Portfolio 앱의 프로젝트 상세 모달. 기간, 스택, 링크, 기여 내용을 한번에 볼 수 있습니다.
+
+---
+
+## 왜 MFA로 만들었나
+
+처음엔 단순히 "기술 공부용"이었는데, 실제로 만들다 보니 개인 포트폴리오 사이트로 딱 맞는 구조였습니다.
+
+- **이력서 앱**은 관리자만 편집, 방문자는 읽기만
+- **블로그 앱**은 글쓰기 에디터와 뷰어가 분리
+- **포트폴리오 앱**은 프로젝트 카드 + 상세 모달
+
+기능 단위로 팀을 나누거나 배포 주기가 다르다면 MFA가 맞는 선택입니다. 그 경험을 개인 프로젝트 규모에서 직접 부딪히며 쌓았습니다.
+
+---
 
 ## 아키텍처
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Host (Container)                      │
-│                     localhost:5000                       │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │  - React Router 관리                                 │ │
-│  │  - Redux Store 생성 및 공유                          │ │
-│  │  - 인증/토큰 관리                                    │ │
-│  │  - LNB 동적 로딩                                     │ │
-│  └─────────────────────────────────────────────────────┘ │
-│              ▼                ▼                ▼         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
-│  │   @resume    │  │    @blog     │  │  @portfolio  │   │
-│  │   (이력서)    │  │   (블로그)   │  │ (포트폴리오)  │   │
-│  │   :5001      │  │   :5002      │  │   :5003      │   │
-│  └──────────────┘  └──────────────┘  └──────────────┘   │
-└─────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│                  Host (port 5000)                      │
+│                                                        │
+│  React Router  ·  Redux Store  ·  Auth  ·  LNB        │
+│                                                        │
+│   ┌──────────┐   ┌──────────┐   ┌──────────────────┐  │
+│   │  resume  │   │   blog   │   │    portfolio     │  │
+│   │  :5001   │   │  :5002   │   │      :5003       │  │
+│   └──────────┘   └──────────┘   └──────────────────┘  │
+│                                                        │
+│   (런타임에 remoteEntry.js 로드 — 빌드 시 의존 없음)   │
+└────────────────────────────────────────────────────────┘
+                         │
+              @sonhoseong/mfa-lib
+         (공유 컴포넌트 · 훅 · 스토어 · 유틸)
 ```
 
-## 프로젝트 구조
+각 Remote는 Host 없이도 `localhost:500x`에서 단독 실행됩니다. Host가 올라오면 `remoteEntry.js`를 런타임에 fetch해서 통합합니다.
+
+### 핵심 설계 결정들
+
+**1. Redux Store 공유 방식**
+
+Host가 `window.__REDUX_STORE__`에 스토어를 노출하고 Remote들이 참조합니다. Module Federation의 `singleton` 설정으로 `react-redux`를 단일 인스턴스로 묶어서 인증 상태가 자연스럽게 공유됩니다.
+
+**2. 라우팅 PREFIX 동적 계산**
 
 ```
-mfa/
-├── host/           # Container 앱 (포트 5000)
-├── remote1/        # 이력서 앱 (포트 5001) - @resume
-├── remote2/        # 블로그 앱 (포트 5002) - @blog
-├── remote3/        # 포트폴리오 앱 (포트 5003) - @portfolio
-├── shared/         # 공유 코드
-└── supabase/       # Supabase 설정
+Host 통합 시:   /blog/post/123  →  Remote는 /post/123 으로 받음  (PREFIX = '')
+단독 실행 시:   /blog/post/123  →  Remote는 /blog/post/123     (PREFIX = '/blog')
 ```
+
+`sessionStorage.isHostApp` 플래그로 실행 컨텍스트를 판별합니다.
+
+**3. LNB 동적 조합**
+
+```typescript
+// Remote가 직접 메뉴 항목을 내보냄
+export const lnbItems = {
+    hasPrefixList: [{ id: 'blog-home', path: '/blog', ... }],
+    hasPrefixAuthList: [...],
+};
+
+// Host가 런타임에 수집
+const { lnbItems: blogItems } = await import('@blog/LnbItems');
+```
+
+Remote를 추가해도 Host 코드를 고칠 필요가 없습니다.
+
+---
+
+## 폴더 구조
+
+```
+mfa-monorepo/
+├── apps/
+│   ├── host/               # 컨테이너 앱 (port 5000)
+│   │   └── src/
+│   │       ├── components/ # Sidebar, Header 등 공통 UI
+│   │       ├── pages/      # Dashboard, MyPage
+│   │       └── setup/      # store, auth 초기화
+│   │
+│   ├── resume/             # 이력서 앱 (port 5001)
+│   │   └── src/
+│   │       ├── exposes/    # lnb-items, App 노출 진입점
+│   │       ├── pages/      # resumes, admin (기술스택 편집)
+│   │       └── network/    # API 훅 모음
+│   │
+│   ├── blog/               # 블로그 앱 (port 5002)
+│   ├── portfolio/          # 포트폴리오 앱 (port 5003)
+│   └── techblog/           # 기술블로그 앱 (port 5004)
+│
+└── packages/
+    └── lib/                # @sonhoseong/mfa-lib
+        └── src/
+            ├── components/ # DeferredComponent, ErrorBoundary 등
+            ├── hooks/      # useAuth, useLocalInitialize 등
+            ├── store/      # authSlice, Redux 설정
+            └── utils/      # storage (토큰·플래그 관리)
+```
+
+---
 
 ## 기술 스택
 
-| 분류 | 기술 |
+| 영역 | 기술 |
 |------|------|
-| Frontend | React 19, TypeScript 5, Redux Toolkit |
-| Build | Webpack 5, Module Federation, Babel |
-| Backend | Supabase (PostgreSQL, REST API) |
-| Hosting | Vercel |
-| Test | Puppeteer |
+| Frontend | React 19, TypeScript 5 |
+| 상태관리 | Redux Toolkit, React Redux |
+| 빌드 | Webpack 5 Module Federation |
+| 백엔드 | Supabase (PostgreSQL, Auth, Row-Level Security) |
+| 배포 | Vercel (앱별 독립 프로젝트) |
+| 공유 라이브러리 | `@sonhoseong/mfa-lib` (자체 패키지) |
 
 ---
 
-## 로컬 개발 환경
-
-### 1. 의존성 설치
+## 로컬 실행
 
 ```bash
-# 각 앱에서 설치
-cd host && npm install
-cd ../remote1 && npm install
-cd ../remote2 && npm install
-cd ../remote3 && npm install
+# 루트에서 전체 설치
+npm install
+
+# 전체 동시 실행 (권장)
+npm run dev
+
+# 앱별 개별 실행
+npm run dev:host      # http://localhost:5000
+npm run dev:resume    # http://localhost:5001
+npm run dev:blog      # http://localhost:5002
+npm run dev:portfolio # http://localhost:5003
 ```
 
-### 2. 개발 서버 실행
+> Remote가 먼저 떠 있어야 Host에서 정상 로드됩니다. `npm run dev`는 concurrently로 동시에 올립니다.
 
-**중요: Remote 앱들을 먼저 실행한 후 Host를 실행해야 합니다!**
+### 환경 변수
 
-```bash
-# 터미널 1 - Remote1 (이력서)
-cd remote1 && npm start   # http://localhost:5001
+루트에 `.env` 생성:
 
-# 터미널 2 - Remote2 (블로그)
-cd remote2 && npm start   # http://localhost:5002
-
-# 터미널 3 - Remote3 (포트폴리오)
-cd remote3 && npm start   # http://localhost:5003
-
-# 터미널 4 - Host (마지막에 실행!)
-cd host && npm start      # http://localhost:5000
+```env
+REACT_APP_SUPABASE_URL=your_supabase_url
+REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+REMOTE1_URL=http://localhost:5001   # 로컬
+REMOTE2_URL=http://localhost:5002
+REMOTE3_URL=http://localhost:5003
 ```
 
-### 3. 접속
+### 테스트 계정
 
-| 앱 | URL | 설명 |
-|----|-----|------|
-| Host (통합) | http://localhost:5000 | 메인 앱 |
-| Remote1 | http://localhost:5001 | 이력서 단독 실행 |
-| Remote2 | http://localhost:5002 | 블로그 단독 실행 |
-| Remote3 | http://localhost:5003 | 포트폴리오 단독 실행 |
-
-### 4. 포트 충돌 해결
-
-`EADDRINUSE: address already in use` 오류가 발생하면 기존 프로세스가 남아있는 것입니다.
-
-**Windows:**
-```bash
-# 포트 사용 중인 프로세스 확인
-netstat -ano | findstr :5000
-
-# 프로세스 종료 (PID를 확인 후)
-taskkill /PID <PID> /F
-```
-
-**또는 PowerShell:**
-```powershell
-Stop-Process -Id <PID> -Force
-```
-
-> 터미널을 닫을 때는 반드시 **Ctrl+C**로 서버를 먼저 종료하세요!
-
----
-
-## Vercel 배포
-
-### 배포된 URL
-
-| 앱 | URL |
-|----|-----|
-| **Host (메인)** | https://host-sonhoseongs-projects.vercel.app |
-| Remote1 (이력서) | https://remote1-sonhoseongs-projects.vercel.app |
-| Remote2 (블로그) | https://remote2-sonhoseongs-projects.vercel.app |
-| Remote3 (포트폴리오) | https://remote3-sonhoseongs-projects.vercel.app |
-
----
-
-### 배포 순서 (중요!)
-
-**반드시 Remote 앱들을 먼저 배포한 후 Host를 배포해야 합니다.**
-
-#### Step 1: Remote 앱들 배포
-
-```bash
-# Remote1 배포
-cd remote1
-vercel --prod --yes
-
-# Remote2 배포
-cd ../remote2
-vercel --prod --yes
-
-# Remote3 배포
-cd ../remote3
-vercel --prod --yes
-```
-
-#### Step 2: Remote 배포 URL 확인
-
-배포 후 각 프로젝트의 기본 도메인 확인:
-- `https://remote1-<your-team>.vercel.app`
-- `https://remote2-<your-team>.vercel.app`
-- `https://remote3-<your-team>.vercel.app`
-
-#### Step 3: Host 환경 변수 설정
-
-Vercel 대시보드에서 **host** 프로젝트 → **Settings** → **Environment Variables**:
-
-| 변수명 | 값 |
-|--------|-----|
-| `REMOTE1_URL` | `https://remote1-<your-team>.vercel.app` |
-| `REMOTE2_URL` | `https://remote2-<your-team>.vercel.app` |
-| `REMOTE3_URL` | `https://remote3-<your-team>.vercel.app` |
-
-#### Step 4: Host 배포
-
-```bash
-cd host
-vercel --prod --yes
-```
-
----
-
-### Deployment Protection 설정 (매우 중요!)
-
-**MFA에서는 Host가 Remote의 remoteEntry.js를 fetch해야 하므로, Remote 앱들의 Protection을 반드시 꺼야 합니다.**
-
-#### 문제 증상
-- Host 페이지가 빈 화면으로 나옴
-- 콘솔에 `401 Unauthorized` 또는 `ScriptExternalLoadError` 오류
-
-#### 해결 방법
-
-1. **Vercel 대시보드** 접속
-2. **팀 Settings** → **Deployment Protection** 이동
-   - URL: `https://vercel.com/<your-team>/settings/deployment-protection`
-
-3. **모든 Remote 프로젝트를 Unprotected로 변경**
-
-| 프로젝트 | 설정 |
-|----------|------|
-| remote1 | **Unprotected** |
-| remote2 | **Unprotected** |
-| remote3 | **Unprotected** |
-| host | Unprotected (권장) |
-
-4. **프로젝트별 설정도 확인**
-   - 각 프로젝트 → Settings → Deployment Protection
-   - **Vercel Authentication** → **Disabled**
-   - **Save** 클릭
-
-5. **설정 변경 후 재배포**
-```bash
-cd remote1 && vercel --prod --yes
-cd ../remote2 && vercel --prod --yes
-cd ../remote3 && vercel --prod --yes
-cd ../host && vercel --prod --yes
-```
-
----
-
-### vercel.json 설정
-
-각 앱에 `vercel.json` 파일이 필요합니다.
-
-**Remote 앱들 (remote1, remote2, remote3):**
-```json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "*" }
-      ]
-    }
-  ],
-  "rewrites": [
-    { "source": "/((?!remoteEntry|.*\\.js|.*\\.css|.*\\.map).*)", "destination": "/index.html" }
-  ]
-}
-```
-
-**Host 앱:**
-```json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "rewrites": [
-    { "source": "/((?!.*\\.js|.*\\.css|.*\\.map|.*\\.html).*)", "destination": "/index.html" }
-  ]
-}
-```
-
----
-
-## 트러블슈팅
-
-### 1. 로컬에서 Remote 로드 실패
-
-**증상:** `Failed to load remote entry`
-
-**원인:** Remote 앱이 실행되지 않음
-
-**해결:**
-```bash
-# Remote 앱들이 실행 중인지 확인
-curl http://localhost:5001/remoteEntry.js
-curl http://localhost:5002/remoteEntry.js
-curl http://localhost:5003/remoteEntry.js
-```
-
-### 2. Vercel 배포 후 401 Unauthorized
-
-**증상:** 브라우저 콘솔에 `401` 오류
-
-**원인:** Deployment Protection이 활성화됨
-
-**해결:** 위의 "Deployment Protection 설정" 섹션 참고
-
-### 3. 포트 충돌 (EADDRINUSE)
-
-**증상:** `Error: listen EADDRINUSE: address already in use`
-
-**원인:** 이전 프로세스가 종료되지 않음
-
-**해결:**
-```bash
-# Windows
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
-
-# 또는 모든 node 프로세스 종료
-taskkill /F /IM node.exe
-```
-
-### 4. 환경 변수가 적용되지 않음
-
-**증상:** 배포 후에도 localhost URL 사용
-
-**원인:** Vercel 환경 변수 미설정 또는 재배포 필요
-
-**해결:**
-1. Vercel 대시보드에서 환경 변수 확인
-2. 환경 변수 설정 후 반드시 재배포
-
----
-
-## 라우팅 아키텍처 (KOMCA 패턴)
-
-### 개요
-
-MFA에서 가장 중요한 부분은 **Host 통합 실행**과 **단독 실행** 시 라우팅이 모두 정상 작동해야 한다는 것입니다.
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Host 통합 실행                               │
-│  URL: http://localhost:5000/blog/post/123                       │
-│                                                                  │
-│  1. Host Router: /blog/* → BlogApp 위임                         │
-│  2. Remote2가 받는 경로: /post/123 (상대 경로)                   │
-│  3. Remote2 Router: /post/:slug → 매칭 성공                     │
-└─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│                     단독 실행                                    │
-│  URL: http://localhost:5002/blog/post/123                       │
-│                                                                  │
-│  1. Remote2 Router: /blog/post/:slug → 매칭 성공                │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### PREFIX 동적 계산
-
-각 Remote 앱은 실행 컨텍스트에 따라 PREFIX를 동적으로 계산합니다.
-
-```typescript
-// 각 컴포넌트에서 직접 계산
-import { storage } from '@sonhoseong/mfa-lib';
-
-// Host 통합 시: '' (빈 문자열)
-// 단독 실행 시: '/blog'
-const PREFIX = storage.isHostApp() ? '' : '/blog';
-```
-
-### Host 앱 플래그 설정
-
-Host는 bootstrap 시점에 플래그를 설정합니다.
-
-```typescript
-// host/src/bootstrap.tsx
-import { storage } from '@sonhoseong/mfa-lib';
-
-storage.setHostApp();  // sessionStorage에 'isHostApp'='true' 설정
-```
-
-Remote는 단독 실행 시 플래그를 제거합니다.
-
-```typescript
-// remote2/src/init.tsx
-import { storage } from '@sonhoseong/mfa-lib';
-
-storage.removeHostApp();  // 단독 실행임을 명시
-```
-
-### 라우트 정의 패턴
-
-```typescript
-// remote2/src/pages/routes/RoutesGuestPages.tsx
-const PREFIX = storage.isHostApp() ? '' : '/blog';
-
-function RoutesGuestPages() {
-    return (
-        <Routes>
-            {/* 메인 */}
-            <Route path="/" element={<BlogList />} />
-            {PREFIX && <Route path={PREFIX} element={<BlogList />} />}
-
-            {/* 상세 페이지 */}
-            <Route path={`${PREFIX}/post/:slug`} element={<PostDetail />} />
-
-            {/* 기타 */}
-            <Route path="*" element={<BlogList />} />
-        </Routes>
-    );
-}
-```
-
-### 경로 매핑 테이블
-
-| 앱 | 실행 환경 | PREFIX | 예시 URL | 실제 라우트 |
-|----|----------|--------|----------|------------|
-| remote2 | Host 통합 | `''` | `/blog/post/123` | `/post/:slug` |
-| remote2 | 단독 | `'/blog'` | `/blog/post/123` | `/blog/post/:slug` |
-| remote1 | Host 통합 | `''` | `/resume/admin/skills` | `/admin/skills` |
-| remote1 | 단독 | `'/resume'` | `/resume/admin/skills` | `/resume/admin/skills` |
-
----
-
-## 인증 및 토큰 관리
-
-### 토큰 저장 구조
-
-```typescript
-// @sonhoseong/mfa-lib의 storage 유틸리티
-export const storage = {
-    // Access Token (localStorage)
-    getAccessToken: () => localStorage.getItem('accessToken'),
-    setAccessToken: (token) => localStorage.setItem('accessToken', token),
-
-    // User 정보 (localStorage)
-    getUser: () => JSON.parse(localStorage.getItem('user')),
-    setUser: (user) => localStorage.setItem('user', JSON.stringify(user)),
-
-    // Host 앱 여부 (sessionStorage)
-    isHostApp: () => sessionStorage.getItem('isHostApp') === 'true',
-    setHostApp: () => sessionStorage.setItem('isHostApp', 'true'),
-    removeHostApp: () => sessionStorage.removeItem('isHostApp'),
-};
-```
-
-### 초기화 흐름
-
-```
-[앱 시작]
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│ init.tsx (단독 실행 시에만)              │
-│ - storage.removeHostApp() 호출          │
-└─────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│ bootstrap.tsx                           │
-│ - Redux Store 생성                      │
-│ - BrowserRouter 설정                    │
-│ - Provider 구성                         │
-└─────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│ Root.tsx (useLocalInitialize)           │
-│ - localStorage에서 토큰 로드            │
-│ - Redux Store에 토큰/유저 정보 dispatch │
-│ - initialized = true                    │
-└─────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│ App.tsx                                 │
-│ - isAuthenticated 확인                  │
-│ - RoutesGuestPages 또는 RoutesAuthPages │
-└─────────────────────────────────────────┘
-```
-
-### Root 컴포넌트 초기화
-
-```typescript
-// remote2/src/Root.tsx
-function useLocalInitialize() {
-    const [initialized, setInitialized] = useState(false);
-
-    useEffect(() => {
-        try {
-            const store = getStore();
-            const savedToken = storage.getAccessToken();
-            const savedUser = storage.getUser();
-
-            if (savedToken) {
-                store.dispatch(setAccessToken(savedToken));
-            }
-            if (savedUser) {
-                store.dispatch(setUser(savedUser));
-            }
-        } finally {
-            setInitialized(true);
-        }
-    }, []);
-
-    return { initialized };
-}
-```
-
-### Redux Store 공유 (Module Federation)
-
-```javascript
-// webpack.common.js
-new ModuleFederationPlugin({
-    shared: {
-        react: { singleton: true },
-        'react-dom': { singleton: true },
-        'react-router-dom': { singleton: true },
-        '@reduxjs/toolkit': { singleton: true },
-        'react-redux': { singleton: true },
-        '@sonhoseong/mfa-lib': { singleton: true }  // 토큰 관리 포함
-    }
-})
-```
-
----
-
-## 로딩 처리
-
-### 1. 앱 초기화 로딩 (Root)
-
-```typescript
-// Root.tsx
-if (!initialized) {
-    return (
-        <div className="app-loading">
-            <div className="loading-spinner" />
-            <p>로딩 중...</p>
-        </div>
-    );
-}
-```
-
-### 2. 라우트 전환 로딩 (Suspense)
-
-```typescript
-// App.tsx
-const PageLoadingFallback = () => (
-    <DeferredComponent delay={150}>
-        <div className="page-loading-skeleton">
-            <div className="skeleton skeleton-hero" />
-            <div className="skeleton-cards">
-                <div className="skeleton skeleton-card" />
-                <div className="skeleton skeleton-card" />
-            </div>
-        </div>
-    </DeferredComponent>
-);
-
-function App() {
-    return (
-        <Suspense fallback={<PageLoadingFallback />}>
-            {!isAuthenticated && <RoutesGuestPages />}
-            {isAuthenticated && <RoutesAuthPages />}
-        </Suspense>
-    );
-}
-```
-
-### 3. Remote 앱 로딩 (Host)
-
-```typescript
-// host/src/pages/routes/RoutesAuthPages.tsx
-const BlogApp = React.lazy(() =>
-    import('@blog/App').catch(() => ({
-        default: () => null  // 로드 실패 시 빈 컴포넌트
-    }))
-);
-
-<Route
-    path={`${blogPathPrefix}/*`}
-    element={
-        <RemoteErrorBoundary remoteName="블로그">
-            <Suspense fallback={<RemoteLoadingFallback />}>
-                <BlogApp />
-            </Suspense>
-        </RemoteErrorBoundary>
-    }
-/>
-```
-
-### 4. DeferredComponent (플리커 방지)
-
-```typescript
-// @sonhoseong/mfa-lib
-const DeferredComponent = ({ delay = 150, children }) => {
-    const [show, setShow] = useState(false);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setShow(true), delay);
-        return () => clearTimeout(timer);
-    }, [delay]);
-
-    return show ? children : null;
-};
-```
-
-- 150ms 미만의 빠른 로딩에서는 스켈레톤 UI를 보여주지 않음
-- 사용자 경험 향상 (불필요한 깜빡임 방지)
-
----
-
-## LNB (사이드 메뉴) 통합
-
-### Remote에서 LNB Items 제공
-
-```typescript
-// remote2/src/exposes/lnb-items.tsx
-export const pathPrefix = '/blog';  // Host가 사용할 prefix
-
-export const lnbItems = {
-    hasPrefixList: [
-        { id: 'blog-home', title: '블로그', path: '/blog', icon: <Icon /> },
-    ],
-    hasPrefixAuthList: [
-        { id: 'blog-home', title: '블로그', path: '/blog', icon: <Icon /> },
-        { id: 'blog-write', title: '글쓰기', path: '/blog/write', icon: <Icon /> },
-    ],
-};
-```
-
-### Host에서 LNB 통합
-
-```typescript
-// host/src/components/Sidebar.tsx
-const { lnbItems: blogLnbItems } = await import('@blog/LnbItems');
-const { lnbItems: resumeLnbItems } = await import('@resume/LnbItems');
-
-const allMenuItems = [
-    ...resumeLnbItems.hasPrefixList,
-    ...blogLnbItems.hasPrefixList,
-];
-```
-
----
-
-## 새로고침 처리 (SPA)
-
-### Webpack Dev Server
-
-```javascript
-// webpack.dev.js
-devServer: {
-    historyApiFallback: true,  // 모든 경로를 index.html로 리다이렉트
-}
-```
-
-### Vercel (vercel.json)
-
-```json
-{
-    "rewrites": [
-        {
-            "source": "/((?!remoteEntry|.*\\.js|.*\\.css|.*\\.map).*)",
-            "destination": "/index.html"
-        }
-    ]
-}
-```
-
-### publicPath 설정
-
-```javascript
-// webpack.common.js
-output: {
-    publicPath: '/',  // 'auto' 대신 명시적으로 '/' 설정
-}
-```
-
----
-
-## Import 경로 규칙
-
-### 로컬 모듈
-```tsx
-import { store } from '@/store';
-import App from '@/App';
-import ErrorBoundary from '@/components/ErrorBoundary';
-```
-
-### Remote 모듈
-```tsx
-const ResumeApp = lazy(() => import('@resume/App'));
-const BlogApp = lazy(() => import('@blog/App'));
-const PortfolioApp = lazy(() => import('@portfolio/App'));
-```
-
----
-
-## 테스트 계정
-
-| 이메일 | 비밀번호 | 역할 |
+| 이메일 | 비밀번호 | 권한 |
 |--------|----------|------|
-| admin@test.com | 1234 | 관리자 |
+| admin@test.com | 1234 | 관리자 (이력서·포트폴리오 편집 가능) |
 
 ---
 
-## 스크립트
+## 배포 구조 (Vercel)
+
+앱마다 독립 Vercel 프로젝트로 배포합니다.
+
+| 앱 | Root Directory | 비고 |
+|----|---------------|------|
+| host | `apps/host` | 환경변수에 Remote URL 등록 필요 |
+| resume | `apps/resume` | CORS 헤더 설정 필요 |
+| blog | `apps/blog` | CORS 헤더 설정 필요 |
+| portfolio | `apps/portfolio` | CORS 헤더 설정 필요 |
+
+Host가 Remote의 `remoteEntry.js`를 fetch하므로, **Remote 앱의 Deployment Protection을 반드시 비활성화**해야 합니다.
 
 ```bash
-# 개발 서버
-npm start
-
-# 프로덕션 빌드
-npm run build
-
-# 통합 테스트 (루트에서)
-node integration-test.js
+# 빌드 (lib 먼저 빌드해야 Remote들이 최신 반영)
+npm run build:lib
+npm run build:all
 ```
 
 ---
 
-## 환경 변수
+## 겪었던 문제들
 
-### 로컬 개발 (.env)
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+**캐시 버스팅**  
+배포 후 `remoteEntry.js`가 캐싱되어 구버전 Remote가 로드되는 문제. 타임스탬프 쿼리스트링으로 1분 단위 캐시 무효화로 해결했습니다.
 
-### Vercel 배포 (Host 프로젝트)
-```env
-REMOTE1_URL=https://remote1-<your-team>.vercel.app
-REMOTE2_URL=https://remote2-<your-team>.vercel.app
-REMOTE3_URL=https://remote3-<your-team>.vercel.app
-```
+**단독/Host 혼용 라우팅**  
+동일한 URL이 실행 컨텍스트에 따라 다르게 파싱되어야 하는 문제. PREFIX를 런타임에 계산하는 패턴으로 정리했습니다.
 
----
+**스켈레톤 깜빡임**  
+빠른 로딩(150ms 미만)에서도 스켈레톤이 잠깐 보이는 플리커 현상. `DeferredComponent`로 지연 마운트해서 해결했습니다.
 
-## 라이선스
-
-Private Project
+**lib 빌드 순서**  
+`@sonhoseong/mfa-lib` 변경 후 빌드 없이 Remote를 실행하면 이전 dist가 참조되어 런타임 에러 발생. `build:all` 스크립트에 lib 빌드를 앞에 강제했습니다.
