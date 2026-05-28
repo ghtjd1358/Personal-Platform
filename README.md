@@ -37,7 +37,7 @@ Portfolio 앱의 프로젝트 상세 모달. 기간, 스택, 링크, 기여 내�
 - **블로그 앱**은 글쓰기 에디터와 뷰어가 분리
 - **포트폴리오 앱**은 프로젝트 카드 + 상세 모달
 
-기능 단위로 팀을 나누거나 배포 주기가 다르다면 MFA가 맞는 선택입니다. 그 경험을 개인 프로젝트 규모에서 직접 부딪히며 쌓았습니다.
+기능 단위로 팀을 나누거나 배포 주기가 다르다면 MFA가 맞는 선택입니다. 그걸 개인 프로젝트 규모에서 한번 해봤습니다.
 
 ---
 
@@ -65,11 +65,11 @@ Portfolio 앱의 프로젝트 상세 모달. 기간, 스택, 링크, 기여 내�
 
 ### 핵심 설계 결정들
 
-**1. Redux Store 공유 방식**
+### Redux Store 공유
 
 Host가 `window.__REDUX_STORE__`에 스토어를 노출하고 Remote들이 참조합니다. Module Federation의 `singleton` 설정으로 `react-redux`를 단일 인스턴스로 묶어서 인증 상태가 자연스럽게 공유됩니다.
 
-**2. 라우팅 PREFIX 동적 계산**
+### 라우팅 PREFIX 동적 계산
 
 ```
 Host 통합 시:   /blog/post/123  →  Remote는 /post/123 으로 받음  (PREFIX = '')
@@ -78,7 +78,7 @@ Host 통합 시:   /blog/post/123  →  Remote는 /post/123 으로 받음  (PREF
 
 `sessionStorage.isHostApp` 플래그로 실행 컨텍스트를 판별합니다.
 
-**3. LNB 동적 조합**
+### LNB 동적 조합
 
 ```typescript
 // Remote가 직접 메뉴 항목을 내보냄
@@ -91,7 +91,7 @@ export const lnbItems = {
 const { lnbItems: blogItems } = await import('@blog/LnbItems');
 ```
 
-Remote를 추가해도 Host 코드를 고칠 필요가 없습니다.
+Remote를 새로 붙여도 Host 건드릴 일이 없습니다.
 
 ---
 

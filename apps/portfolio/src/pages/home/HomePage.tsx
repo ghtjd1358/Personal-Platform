@@ -136,9 +136,14 @@ const HomePage: React.FC = () => {
   );
 
   const heroProjects = isFiltering ? [] : featuredFromFiltered.slice(0, 2);
-  const gridProjects = isFiltering
+  const baseGrid = isFiltering
     ? filteredProjects
-    : [...featuredFromFiltered.slice(2), ...otherFromFiltered];
+    : [...featuredFromFiltered, ...otherFromFiltered];
+  // 토이 프로젝트는 항상 마지막
+  const gridProjects = [
+    ...baseGrid.filter(p => p.badge !== '토이'),
+    ...baseGrid.filter(p => p.badge === '토이'),
+  ];
 
   return (
     <div className="portfolio-module">
