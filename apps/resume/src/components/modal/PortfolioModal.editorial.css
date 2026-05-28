@@ -102,16 +102,64 @@
     width: 100% !important;
 }
 
+/* 모바일 Notion 폴백 — 데스크톱에서 숨김 */
+.nm-mobile-fallback {
+    display: none;
+}
+
 /* mobile — grid 풀고 header → body → sidebar 단일 컬럼 stack */
 @media (max-width: 768px) {
     .modal .modal-container--portfolio {
         display: block;
+        /* global.css margin:40px 을 줄여 375px 폰에서 여유 확보 */
+        margin: 12px;
+        max-height: calc(100dvh - 24px);
     }
     .modal-container--portfolio .modal-body {
         padding: 0 20px 24px;
     }
     .modal-container--portfolio .modal-sidebar {
         margin: 16px 20px 24px;
+    }
+
+    /* Notion 콘텐츠 숨기고 CTA로 대체 */
+    .modal-container--portfolio .nm-notion-wrap {
+        display: none;
+    }
+    .nm-mobile-fallback {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        padding: 48px 24px 32px;
+        text-align: center;
+    }
+    .nm-mobile-fallback-desc {
+        margin: 0;
+        font-family: 'Pretendard Variable', Pretendard, sans-serif;
+        font-size: 14px;
+        color: #8B7355;
+        line-height: 1.7;
+    }
+    .nm-mobile-fallback-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 28px;
+        background: #2B1E14;
+        color: #FBF5E3;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-decoration: none;
+        border-radius: 2px;
+        border: 2px solid #2B1E14;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .nm-mobile-fallback-cta:hover {
+        background: #8C1E1A;
+        border-color: #8C1E1A;
     }
 }
 

@@ -295,7 +295,7 @@ export const resumesApi = {
  * Download resume PDF from Supabase Storage
  */
 export const downloadResume = async (command: DownloadResumeCommand = {}) => {
-  const { fileName = 'resume.pdf' } = command
+  const { fileName = 'resume.pdf', downloadAs } = command
 
   try {
     const { data, error } = await getSupabase().storage
@@ -310,7 +310,7 @@ export const downloadResume = async (command: DownloadResumeCommand = {}) => {
     const url = URL.createObjectURL(data)
     const link = document.createElement('a')
     link.href = url
-    link.download = fileName
+    link.download = downloadAs || fileName
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

@@ -104,7 +104,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ userName, heroSummary 
 
     setIsDownloading(true);
     try {
-      await downloadResume({ fileName: 'resume.pdf' });
+      await downloadResume({ fileName: 'resume.pdf', downloadAs: '손호성 - 프론트엔드 개발자.pdf' });
     } catch (error) {
       console.error('Download failed:', error);
       toast.error('다운로드에 실패했습니다. 잠시 후 다시 시도해주세요.');

@@ -58,7 +58,28 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
         {/* 본문 — notion_url 있으면 react-notion-x 로 분기, 아니면 기존 sections 폴백 */}
         <div className="modal-body">
           {portfolio.detail?.notion_url ? (
-            <NotionContent notionUrl={portfolio.detail.notion_url} />
+            <>
+              {/* 데스크톱: Notion 렌더, 모바일: CSS로 숨김 */}
+              <NotionContent notionUrl={portfolio.detail.notion_url} />
+              {/* 모바일 전용 CTA — 데스크톱에서는 CSS로 숨김 */}
+              <div className="nm-mobile-fallback">
+                <p className="nm-mobile-fallback-desc">모바일에서는 노션 페이지에서 전체 내용을 확인하세요.</p>
+                <a
+                  href={portfolio.detail.notion_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nm-mobile-fallback-cta"
+                >
+                  <FaBookOpen />
+                  노션에서 전체 보기
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+              </div>
+            </>
           ) : (
             <>
               <div className="modal-section">
