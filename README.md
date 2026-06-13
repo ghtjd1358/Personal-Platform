@@ -39,6 +39,8 @@ Portfolio 앱의 프로젝트 상세 모달. 기간, 스택, 링크, 기여 내�
 
 기능 단위로 팀을 나누거나 배포 주기가 다르다면 MFA가 맞는 선택입니다. 그걸 개인 프로젝트 규모에서 한번 해봤습니다.
 
+다만 솔직히 말하면, 초기 설정 비용이 꽤 높습니다. 공유 라이브러리 빌드 순서, 타입 공유, singleton 설정까지 하나라도 빠지면 빈 화면입니다. "그냥 Next.js 하나로 만들 걸"이라는 생각을 여러 번 했습니다.
+
 ---
 
 ## 아키텍처
@@ -67,7 +69,7 @@ Portfolio 앱의 프로젝트 상세 모달. 기간, 스택, 링크, 기여 내�
 
 ### Redux Store 공유
 
-Host가 `window.__REDUX_STORE__`에 스토어를 노출하고 Remote들이 참조합니다. Module Federation의 `singleton` 설정으로 `react-redux`를 단일 인스턴스로 묶어서 인증 상태가 자연스럽게 공유됩니다.
+Host가 `window.__REDUX_STORE__`에 스토어를 노출하고 Remote들이 참조합니다. Module Federation의 `singleton` 설정으로 `react-redux`를 단일 인스턴스로 묶지 않으면, Remote마다 별도 React 컨텍스트가 생겨서 `useSelector`가 아무것도 읽지 못합니다. 실제로 이 설정 빠진 상태에서 인증 상태가 통째로 날아가는 걸 겪어봤습니다.
 
 ### 라우팅 PREFIX 동적 계산
 
@@ -101,20 +103,11 @@ Remote를 새로 붙여도 Host 건드릴 일이 없습니다.
 mfa-monorepo/
 ├── apps/
 │   ├── host/               # 컨테이너 앱 (port 5000)
-│   │   └── src/
-│   │       ├── components/ # Sidebar, Header 등 공통 UI
-│   │       ├── pages/      # Dashboard, MyPage
-│   │       └── setup/      # store, auth 초기화
-│   │
 │   ├── resume/             # 이력서 앱 (port 5001)
-│   │   └── src/
-│   │       ├── exposes/    # lnb-items, App 노출 진입점
-│   │       ├── pages/      # resumes, admin (기술스택 편집)
-│   │       └── network/    # API 훅 모음
-│   │
 │   ├── blog/               # 블로그 앱 (port 5002)
 │   ├── portfolio/          # 포트폴리오 앱 (port 5003)
-│   └── techblog/           # 기술블로그 앱 (port 5004)
+│   ├── techblog/           # 기술블로그 앱 (port 5004)
+│   └── api/                # Express API 서버 (port 4000)
 │
 └── packages/
     └── lib/                # @sonhoseong/mfa-lib
@@ -122,7 +115,7 @@ mfa-monorepo/
             ├── components/ # DeferredComponent, ErrorBoundary 등
             ├── hooks/      # useAuth, useLocalInitialize 등
             ├── store/      # authSlice, Redux 설정
-            └── utils/      # storage (토큰·플래그 관리)
+            └── network/    # apiClient, 공유 axios 인스턴스
 ```
 
 ---
@@ -134,9 +127,369 @@ mfa-monorepo/
 | Frontend | React 19, TypeScript 5 |
 | 상태관리 | Redux Toolkit, React Redux |
 | 빌드 | Webpack 5 Module Federation |
-| 백엔드 | Supabase (PostgreSQL, Auth, Row-Level Security) |
+| 백엔드 API | Express.js (Node.js, MVC 패턴) |
+| 인증 | Google OAuth 2.0 + JWT (AccessToken + HttpOnly RefreshToken) |
+| 데이터베이스 | Supabase (PostgreSQL 17 + RLS + Storage) |
 | 배포 | Vercel (앱별 독립 프로젝트) |
 | 공유 라이브러리 | `@sonhoseong/mfa-lib` (자체 패키지) |
+
+---
+
+## 백엔드 API 아키텍처 (Express MVC)
+
+```
+apps/api/src/
+├── modules/
+│   ├── auth/       ├── blog/       ├── portfolio/
+│   ├── user/       └── upload/
+├── middleware/     authenticate.ts
+├── common/         response.ts
+├── lib/            supabase.ts · token.ts
+└── config/         env.ts
+```
+
+도메인별로 `router / controller / service` 3파일이 한 폴더에 모입니다. Service는 Supabase 쿼리만, Controller는 req/res 파싱과 응답 전송만 담당합니다.
+
+**인증 흐름 — OAuth 콜백에서 토큰을 URL로 안 넘기는 이유**
+
+Google 로그인 콜백 후 프론트에 AccessToken을 전달할 때, URL 파라미터(`?token=xxx`)로 넘기면 브라우저 히스토리와 Referer 헤더에 토큰이 남습니다. 대신 **1분짜리 단기 쿠키**(`access_token_once`)에 담아서 리다이렉트하고, 프론트가 읽는 즉시 쿠키를 삭제합니다. RefreshToken은 7일짜리 HttpOnly 쿠키로 별도 관리합니다.
+
+---
+
+## 데이터베이스 스키마 (ERD)
+
+> Supabase PostgreSQL 17 · 모든 테이블 RLS 활성화
+
+### 전체 도메인 구조
+
+```mermaid
+erDiagram
+    profiles ||--o{ blog_posts : owns
+    profiles ||--o{ portfolios : owns
+    profiles ||--o{ resume_profile : owns
+    profiles ||--o{ experiences : owns
+    profiles ||--o{ skills : owns
+
+    blog_posts ||--o{ blog_comments : has
+    blog_posts ||--o{ blog_likes : has
+    blog_posts ||--o{ blog_post_tags : has
+    blog_posts }o--o{ blog_series : "belongs to"
+
+    portfolios ||--o{ portfolio_tasks : has
+    portfolios ||--o{ portfolio_tags : has
+    portfolios ||--o{ portfolio_tech_stack : has
+    portfolios ||--o{ portfolio_comments : has
+
+    resume_profile ||--o{ experiences : contains
+    experiences ||--o{ experience_tasks : has
+    experiences ||--o{ experience_tags : has
+
+    skills ||--o{ experience_tags : referenced
+    skills ||--o{ portfolio_tags : referenced
+
+    job_applications ||--o{ job_notes : has
+    job_applications ||--o{ calendar_events : schedules
+```
+
+---
+
+### Auth / 사용자 도메인
+
+```mermaid
+erDiagram
+    profiles {
+        uuid id PK
+        text email UK
+        text name
+        text avatar_url
+        user_role role
+        timestamptz created_at
+    }
+    refresh_tokens {
+        uuid id PK
+        uuid user_id FK
+        text token UK
+        timestamptz expires_at
+        boolean revoked
+    }
+    login_history {
+        uuid id PK
+        uuid user_id FK
+        boolean success
+        timestamptz login_at
+    }
+    permissions {
+        uuid id PK
+        user_role role
+        text resource
+        text action
+        boolean allowed
+    }
+
+    profiles ||--o{ refresh_tokens : "발급"
+    profiles ||--o{ login_history : "기록"
+```
+
+---
+
+### Resume 도메인
+
+```mermaid
+erDiagram
+    resume_profile {
+        uuid id PK
+        uuid user_id FK
+        text resume_name
+        text title
+        boolean is_primary
+        boolean is_public
+    }
+    experiences {
+        uuid id PK
+        uuid user_id FK
+        uuid resume_id FK
+        text company
+        text position
+        date start_date
+        date end_date
+        boolean is_dev
+    }
+    experience_tasks {
+        uuid id PK
+        uuid experience_id FK
+        text task
+        int order_index
+    }
+    experience_tags {
+        uuid id PK
+        uuid experience_id FK
+        uuid skill_id FK
+        text tag
+    }
+    skill_categories {
+        uuid id PK
+        uuid user_id FK
+        text name
+        text label
+    }
+    skills {
+        uuid id PK
+        uuid user_id FK
+        uuid category_id FK
+        text name
+        numeric years_of_experience
+        int level
+    }
+    education {
+        uuid id PK
+        uuid user_id FK
+        text school
+        text degree
+    }
+    certifications {
+        uuid id PK
+        uuid user_id FK
+        text name
+        text issuer
+    }
+
+    resume_profile ||--o{ experiences : contains
+    experiences ||--o{ experience_tasks : "주요 업무"
+    experiences ||--o{ experience_tags : "사용 기술"
+    skill_categories ||--o{ skills : groups
+    skills ||--o{ experience_tags : referenced
+```
+
+---
+
+### Blog 도메인
+
+```mermaid
+erDiagram
+    blog_posts {
+        uuid id PK
+        uuid user_id FK
+        text title
+        text slug UK
+        text status
+        boolean is_pinned
+        int view_count
+        int like_count
+        int comment_count
+    }
+    blog_tags {
+        uuid id PK
+        text name UK
+        text slug UK
+    }
+    blog_post_tags {
+        uuid id PK
+        uuid post_id FK
+        uuid tag_id FK
+    }
+    blog_comments {
+        uuid id PK
+        uuid post_id FK
+        uuid user_id FK
+        uuid parent_id FK
+        text content
+        boolean is_deleted
+    }
+    blog_likes {
+        uuid id PK
+        uuid post_id FK
+        uuid user_id FK
+    }
+    blog_series {
+        uuid id PK
+        uuid user_id FK
+        text title
+        text slug UK
+    }
+    blog_series_posts {
+        uuid id PK
+        uuid series_id FK
+        uuid post_id FK
+        int order_index
+    }
+
+    blog_posts ||--o{ blog_post_tags : tagged
+    blog_tags ||--o{ blog_post_tags : "태그됨"
+    blog_posts ||--o{ blog_comments : has
+    blog_comments |o--o{ blog_comments : "대댓글"
+    blog_posts ||--o{ blog_likes : "좋아요"
+    blog_series ||--o{ blog_series_posts : contains
+    blog_posts ||--o{ blog_series_posts : "시리즈 소속"
+```
+
+---
+
+### Portfolio 도메인
+
+```mermaid
+erDiagram
+    portfolios {
+        uuid id PK
+        uuid user_id FK
+        uuid category_id FK
+        uuid resume_id FK
+        text title
+        text slug UK
+        boolean show_on_resume
+        boolean is_featured
+        text role
+    }
+    portfolio_categories {
+        uuid id PK
+        uuid user_id FK
+        text name
+        text slug UK
+    }
+    portfolio_tasks {
+        uuid id PK
+        uuid portfolio_id FK
+        text task
+    }
+    portfolio_results {
+        uuid id PK
+        uuid portfolio_id FK
+        text result
+        text metric_value
+    }
+    portfolio_tags {
+        uuid id PK
+        uuid portfolio_id FK
+        uuid skill_id FK
+        text tag
+    }
+    portfolio_tech_stack {
+        uuid id PK
+        uuid portfolio_id FK
+        text category
+        text name
+    }
+    portfolio_images {
+        uuid id PK
+        uuid portfolio_id FK
+        text image_url
+        boolean is_cover
+    }
+    portfolio_milestones {
+        uuid id PK
+        uuid portfolio_id FK
+        text title
+        date date
+    }
+    portfolio_comments {
+        uuid id PK
+        uuid portfolio_id FK
+        uuid user_id FK
+        uuid parent_id FK
+        text content
+    }
+
+    portfolio_categories ||--o{ portfolios : groups
+    portfolios ||--o{ portfolio_tasks : "주요 업무"
+    portfolios ||--o{ portfolio_results : "성과"
+    portfolios ||--o{ portfolio_tags : "기술 태그"
+    portfolios ||--o{ portfolio_tech_stack : "기술 스택"
+    portfolios ||--o{ portfolio_images : "이미지"
+    portfolios ||--o{ portfolio_milestones : "마일스톤"
+    portfolios ||--o{ portfolio_comments : "댓글"
+    portfolio_comments |o--o{ portfolio_comments : "대댓글"
+```
+
+---
+
+### Techblog (취업 트래커) 도메인
+
+```mermaid
+erDiagram
+    jobs {
+        uuid id PK
+        text company
+        text position
+        text status
+        timestamptz deadline
+        text[] skills
+    }
+    job_applications {
+        uuid id PK
+        uuid user_id FK
+        uuid job_id FK
+        text company_name
+        text status
+        text result
+        timestamptz applied_at
+        timestamptz interview_at
+    }
+    job_notes {
+        uuid id PK
+        uuid application_id FK
+        uuid user_id FK
+        text content
+        text note_type
+    }
+    job_bookmarks {
+        uuid id PK
+        uuid user_id FK
+        uuid job_id FK
+        jsonb job_data
+    }
+    calendar_events {
+        uuid id PK
+        uuid user_id FK
+        uuid application_id FK
+        text title
+        timestamptz date
+        text type
+    }
+
+    jobs ||--o{ job_applications : "지원"
+    jobs ||--o{ job_bookmarks : "북마크"
+    job_applications ||--o{ job_notes : "메모"
+    job_applications ||--o{ calendar_events : "일정"
+```
 
 ---
 
@@ -170,24 +523,19 @@ REMOTE2_URL=http://localhost:5002
 REMOTE3_URL=http://localhost:5003
 ```
 
-### 테스트 계정
-
-| 이메일 | 비밀번호 | 권한 |
-|--------|----------|------|
-| admin@test.com | 1234 | 관리자 (이력서·포트폴리오 편집 가능) |
-
 ---
 
 ## 배포 구조 (Vercel)
 
 앱마다 독립 Vercel 프로젝트로 배포합니다.
 
-| 앱 | Root Directory | 비고 |
-|----|---------------|------|
-| host | `apps/host` | 환경변수에 Remote URL 등록 필요 |
-| resume | `apps/resume` | CORS 헤더 설정 필요 |
-| blog | `apps/blog` | CORS 헤더 설정 필요 |
-| portfolio | `apps/portfolio` | CORS 헤더 설정 필요 |
+| 앱 | Root Directory |
+|----|---------------|
+| host | `apps/host` |
+| resume | `apps/resume` |
+| blog | `apps/blog` |
+| portfolio | `apps/portfolio` |
+| api | `apps/api` |
 
 Host가 Remote의 `remoteEntry.js`를 fetch하므로, **Remote 앱의 Deployment Protection을 반드시 비활성화**해야 합니다.
 
@@ -212,3 +560,9 @@ npm run build:all
 
 **lib 빌드 순서**  
 `@sonhoseong/mfa-lib` 변경 후 빌드 없이 Remote를 실행하면 이전 dist가 참조되어 런타임 에러 발생. `build:all` 스크립트에 lib 빌드를 앞에 강제했습니다.
+
+**Access Token 갱신 요청 중복**  
+토큰 만료 시 여러 요청이 동시에 `/auth/refresh`를 호출하는 레이스 컨디션이 있었습니다. axios 인터셉터에서 갱신 중인지 플래그를 두고, 이후 요청은 Promise 큐에 쌓아뒀다가 갱신 완료 후 일괄 재시도하는 방식으로 해결했습니다.
+
+**이미지 업로드 경로**  
+서버를 거쳐 Supabase Storage에 올리면 서버 메모리를 통과하는 문제가 있습니다. 클라이언트가 API 서버에서 Presigned URL만 받아, Storage에 직접 PUT하는 방식으로 서버는 URL 발급만 담당합니다.
