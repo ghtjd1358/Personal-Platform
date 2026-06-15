@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Button, LoadingSpinner, EmptyState, useAsyncConfirm } from '@sonhoseong/mfa-lib';
 import { SeriesDetail } from '@/network';
 import { useSeriesMutation } from '@/hooks';
 import { SeriesModal } from './SeriesModal';
@@ -22,11 +23,10 @@ const SeriesTab: React.FC<SeriesTabProps> = ({
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSeries, setEditingSeries] = useState<SeriesDetail | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const confirmDialog = useAsyncConfirm();
 
-  const { remove, isDeleting } = useSeriesMutation({
+  const { remove } = useSeriesMutation({
     onSuccess: () => {
-      setDeleteConfirmId(null);
       onRefresh?.();
     },
   });
@@ -43,15 +43,15 @@ const SeriesTab: React.FC<SeriesTabProps> = ({
     setModalOpen(true);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+  const handleDeleteClick = async (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setDeleteConfirmId(id);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (deleteConfirmId) {
-      await remove(deleteConfirmId);
+    const ok = await confirmDialog(
+      '이 시리즈를 삭제하시겠습니까?\n시리즈에 포함된 포스트는 삭제되지 않습니다.',
+      '시리즈 삭제'
+    );
+    if (ok) {
+      await remove(id);
     }
   };
 
@@ -70,7 +70,7 @@ const SeriesTab: React.FC<SeriesTabProps> = ({
     return (
       <div className="mypage-content">
         <div className="container">
-          <div className="mypage-loading">로딩 중...</div>
+          <LoadingSpinner message="로딩 중..." className="mypage-loading" />
         </div>
       </div>
     );
@@ -81,24 +81,23 @@ const SeriesTab: React.FC<SeriesTabProps> = ({
       <div className="container">
         {isOwnProfile && (
           <div className="mypage-series-header">
-            <button className="btn-create-series" onClick={handleCreateClick}>
+            <Button variant="primary" className="btn-create-series" onClick={handleCreateClick}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z"/>
               </svg>
               새 시리즈
-            </button>
+            </Button>
           </div>
         )}
 
         {series.length === 0 ? (
-          <div className="mypage-empty">
-            <p>생성한 시리즈가 없습니다.</p>
-            {isOwnProfile && (
-              <p className="mypage-empty-hint">
-                시리즈를 만들어 관련 포스트를 묶어보세요.
-              </p>
-            )}
-          </div>
+          <EmptyState
+            description={
+              isOwnProfile
+                ? '생성한 시리즈가 없습니다. 시리즈를 만들어 관련 포스트를 묶어보세요.'
+                : '생성한 시리즈가 없습니다.'
+            }
+          />
         ) : (
           <div className="mypage-series-list">
             {series.map((item) => (
@@ -153,32 +152,6 @@ const SeriesTab: React.FC<SeriesTabProps> = ({
                 )}
               </div>
             ))}
-          </div>
-        )}
-
-        {/* 삭제 확인 모달 */}
-        {deleteConfirmId && (
-          <div className="modal-overlay" onClick={() => setDeleteConfirmId(null)}>
-            <div className="modal-content modal-confirm" onClick={(e) => e.stopPropagation()}>
-              <h3>시리즈 삭제</h3>
-              <p>이 시리즈를 삭제하시겠습니까?<br />시리즈에 포함된 포스트는 삭제되지 않습니다.</p>
-              <div className="modal-actions">
-                <button
-                  className="btn-cancel"
-                  onClick={() => setDeleteConfirmId(null)}
-                  disabled={isDeleting}
-                >
-                  취소
-                </button>
-                <button
-                  className="btn-confirm btn-danger"
-                  onClick={handleDeleteConfirm}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? '삭제 중...' : '삭제'}
-                </button>
-              </div>
-            </div>
           </div>
         )}
 

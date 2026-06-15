@@ -1,15 +1,8 @@
 /**
  * Host LnbItems
  */
-import { LnbMenuItem } from '@sonhoseong/mfa-lib';
+import { LnbMenuItem, DashboardIcon, ResumeIcon, BlogIcon, PortfolioIcon, JobTrackerIcon } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './pages/routes/paths';
-import {
-    DashboardIcon,
-    ResumeIcon,
-    BlogIcon,
-    PortfolioIcon,
-    JobTrackerIcon,
-} from './components/icons';
 
 export const lnbItems: LnbMenuItem[] = [
     {

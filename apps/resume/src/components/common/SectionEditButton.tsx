@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePermission, CommonButton } from '@sonhoseong/mfa-lib';
+import { usePermission, Button } from '@sonhoseong/mfa-lib';
 import { LINK_PREFIX } from '@/config/constants';
-import { EditIcon } from '@/constants/actionIcons';
+import { EditIcon } from '@sonhoseong/mfa-lib';
 
 interface SectionEditButtonProps {
   /** 편집 페이지 경로 (예: '/admin/skills') — LINK_PREFIX 가 자동으로 앞에 붙음 */
@@ -26,7 +26,7 @@ export const SectionEditButton: React.FC<SectionEditButtonProps> = ({
   if (!isAdmin) return null;
 
   return (
-    <CommonButton
+    <Button
       variant="ghost"
       size="sm"
       onClick={() => navigate(`${LINK_PREFIX}${editPath}`)}
@@ -34,7 +34,7 @@ export const SectionEditButton: React.FC<SectionEditButtonProps> = ({
       leftIcon={<EditIcon />}
     >
       {label}
-    </CommonButton>
+    </Button>
   );
 };
 

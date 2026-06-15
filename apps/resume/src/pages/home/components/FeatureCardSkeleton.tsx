@@ -11,11 +11,11 @@ const FeatureCardSkeleton: React.FC = () => {
     return (
         <div className="feature-card feature-card--skeleton" aria-hidden>
             <div className="feature-image">
-                <Skeleton width="100%" height="100%" style={{ display: 'block' }} />
+                <Skeleton width="100%" height="100%" className="skeleton-block" />
             </div>
-            <Skeleton variant="text" width="70%" height={20} style={{ display: 'block', marginTop: 16, marginBottom: 10 }} />
-            <Skeleton variant="text" width="100%" height={13} style={{ display: 'block', marginBottom: 6 }} />
-            <Skeleton variant="text" width="85%" height={13} style={{ display: 'block' }} />
+            <Skeleton variant="text" width="70%" height={20} className="skeleton-block--mt-16-mb-10" />
+            <Skeleton variant="text" width="100%" height={13} className="skeleton-block--mb-6" />
+            <Skeleton variant="text" width="85%" height={13} className="skeleton-block" />
         </div>
     );
 };

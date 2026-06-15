@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useToast } from '@sonhoseong/mfa-lib';
+import { useToast, Button } from '@sonhoseong/mfa-lib';
 import { createTag, TagDetail } from '@/network';
 
 interface CreateTagRequest {
@@ -88,9 +88,9 @@ const TagForm: React.FC<TagFormProps> = ({ onTagCreated }) => {
             </div>
           </div>
         </div>
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+        <Button type="submit" variant="primary" className="btn btn-primary" disabled={isSubmitting} loading={isSubmitting}>
           {isSubmitting ? '생성 중...' : '태그 추가'}
-        </button>
+        </Button>
       </form>
     </div>
   );

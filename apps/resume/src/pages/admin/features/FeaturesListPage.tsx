@@ -5,7 +5,7 @@
  */
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { usePermission, getCurrentUser } from '@sonhoseong/mfa-lib'
+import { usePermission, getCurrentUser, EmptyState } from '@sonhoseong/mfa-lib'
 import type { Feature } from '../../../network/apis/types'
 import {
     useFetchFeatures,
@@ -51,9 +51,7 @@ const FeaturesListPage: React.FC = () => {
                 </header>
 
                 {items.length === 0 ? (
-                    <div className="exp-empty">
-                        <p className="exp-empty-title">등록된 카드가 없습니다.</p>
-                    </div>
+                    <EmptyState description="등록된 카드가 없습니다." />
                 ) : (
                     <ul className="exp-list">
                         {items.map((f) => {

@@ -4048,3 +4048,25 @@ body.has-header {
     max-height: none;
   }
 }
+
+/* ===== Inline-style replacement utilities (auto-generated) ===== */
+
+/* Skeleton block-level helpers */
+.skeleton-block { display: block; }
+.skeleton-block--mb-8 { display: block; margin-bottom: 8px; }
+.skeleton-block--mb-10 { display: block; margin-bottom: 10px; }
+
+/* Insta-grid meta flex row in skeleton */
+.insta-grid-meta--skeleton { display: flex; gap: 12px; }
+
+/* File input hide */
+.input-file-hidden { display: none; }
+
+/* Root init loading overlay */
+.root-init-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #0a0a0a;
+}

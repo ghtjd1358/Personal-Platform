@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getCurrentUser, useToast } from '@sonhoseong/mfa-lib';
+import { getCurrentUser, useToast, Button } from '@sonhoseong/mfa-lib';
 import {
   SeriesDetail,
   CreateSeriesRequest,
@@ -11,6 +11,7 @@ import {
   uploadImage,
 } from '@/network';
 import { useSeriesMutation } from '@/hooks';
+import { SeriesInfoForm, SeriesPostsManager } from './components';
 
 interface PostItem {
   id: string;
@@ -99,12 +100,10 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
     }
   }, [isOpen, isEditing, activeTab, currentUser?.id]);
 
-  // 포스트가 시리즈에 포함되어 있는지 확인
   const isPostInSeries = useCallback((postId: string) => {
     return seriesPosts.some((sp) => sp.post.id === postId);
   }, [seriesPosts]);
 
-  // 포스트 추가/제거 토글
   const handleTogglePost = useCallback((post: PostItem) => {
     if (isPostInSeries(post.id)) {
       setSeriesPosts((prev) => prev.filter((sp) => sp.post.id !== post.id));
@@ -119,7 +118,6 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
     }
   }, [seriesPosts, isPostInSeries]);
 
-  // 포스트 순서 변경
   const handleMovePost = useCallback((index: number, direction: 'up' | 'down') => {
     setSeriesPosts((prev) => {
       const newPosts = [...prev].sort((a, b) => a.order_index - b.order_index);
@@ -131,7 +129,6 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
     });
   }, []);
 
-  // 포스트 변경사항 저장
   const handleSavePosts = async () => {
     if (!series) return;
 
@@ -140,14 +137,12 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
       const originalPostIds = new Set((series.posts || []).map((p) => p.post.id));
       const currentPostIds = new Set(seriesPosts.map((p) => p.post.id));
 
-      // 제거된 포스트 처리
       for (const postId of originalPostIds) {
         if (!currentPostIds.has(postId)) {
           await removePostFromSeries(series.id, postId);
         }
       }
 
-      // 추가된 포스트 처리
       for (const sp of seriesPosts) {
         if (!originalPostIds.has(sp.post.id)) {
           await addPostToSeries({
@@ -158,7 +153,6 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
         }
       }
 
-      // 순서 변경 처리
       if (seriesPosts.length > 0) {
         await reorderSeriesPosts({
           series_id: series.id,
@@ -177,18 +171,15 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
     }
   };
 
-  // 이미지 업로드 핸들러
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 이미지 파일만 허용
     if (!file.type.startsWith('image/')) {
       toast.error('이미지 파일만 업로드 가능합니다.');
       return;
     }
 
-    // 5MB 제한
     if (file.size > 5 * 1024 * 1024) {
       toast.error('파일 크기는 5MB 이하만 가능합니다.');
       return;
@@ -244,11 +235,16 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
       <div className="modal-content modal-series modal-series-wide" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{isEditing ? '시리즈 수정' : '새 시리즈'}</h2>
-          <button className="modal-close" onClick={onClose} disabled={isLoading || postsSaving}>
+          <Button.Icon
+            aria-label="닫기"
+            className="modal-close"
+            onClick={onClose}
+            disabled={isLoading || postsSaving}
+          >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
             </svg>
-          </button>
+          </Button.Icon>
         </div>
 
         {/* 탭 네비게이션 (수정 모드에서만) */}
@@ -273,201 +269,36 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
 
         {/* 기본 정보 탭 */}
         {activeTab === 'info' && (
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="series-title">시리즈 제목 *</label>
-              <input
-                id="series-title"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="시리즈 제목을 입력하세요"
-                disabled={isLoading}
-                autoFocus
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="series-description">설명</label>
-              <textarea
-                id="series-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="시리즈에 대한 설명을 입력하세요"
-                rows={3}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>커버 이미지</label>
-              <div className="cover-upload-area">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={isLoading || isUploading}
-                  style={{ display: 'none' }}
-                  id="series-cover-file"
-                />
-                <button
-                  type="button"
-                  className="btn-upload"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading || isUploading}
-                >
-                  {isUploading ? '업로드 중...' : '이미지 선택'}
-                </button>
-                <span className="upload-hint">또는 URL 직접 입력</span>
-                <input
-                  id="series-cover"
-                  type="url"
-                  value={coverImage}
-                  onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  disabled={isLoading || isUploading}
-                  className="url-input"
-                />
-              </div>
-              {coverImage && (
-                <div className="cover-preview">
-                  <img
-                    src={coverImage}
-                    alt="커버 미리보기"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="btn-remove-cover"
-                    onClick={() => setCoverImage('')}
-                    disabled={isLoading || isUploading}
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {error && <div className="form-error">{error}</div>}
-
-            <div className="modal-actions">
-              <button type="button" className="btn-cancel" onClick={onClose} disabled={isLoading}>
-                취소
-              </button>
-              <button type="submit" className="btn-confirm" disabled={isLoading || !title.trim()}>
-                {isLoading ? (isEditing ? '수정 중...' : '생성 중...') : (isEditing ? '수정' : '생성')}
-              </button>
-            </div>
-          </form>
+          <SeriesInfoForm
+            title={title}
+            description={description}
+            coverImage={coverImage}
+            isUploading={isUploading}
+            isLoading={isLoading}
+            isEditing={isEditing}
+            error={error}
+            fileInputRef={fileInputRef}
+            onTitleChange={setTitle}
+            onDescriptionChange={setDescription}
+            onCoverImageChange={setCoverImage}
+            onImageUpload={handleImageUpload}
+            onSubmit={handleSubmit}
+            onClose={onClose}
+          />
         )}
 
         {/* 포스트 관리 탭 */}
         {activeTab === 'posts' && isEditing && (
-          <div className="series-posts-manager">
-            {postsLoading ? (
-              <div className="posts-loading">포스트 목록 로딩 중...</div>
-            ) : (
-              <>
-                {/* 시리즈에 포함된 포스트 */}
-                <div className="posts-section">
-                  <h4 className="posts-section-title">
-                    시리즈에 포함된 포스트 ({sortedSeriesPosts.length})
-                  </h4>
-                  {sortedSeriesPosts.length === 0 ? (
-                    <p className="posts-empty">아직 포스트가 없습니다. 아래에서 추가하세요.</p>
-                  ) : (
-                    <ul className="posts-included-list">
-                      {sortedSeriesPosts.map((sp, index) => (
-                        <li key={sp.post.id} className="post-included-item">
-                          <span className="post-order">{index + 1}</span>
-                          <span className="post-title">{sp.post.title}</span>
-                          <div className="post-actions">
-                            <button
-                              type="button"
-                              className="btn-move"
-                              onClick={() => handleMovePost(index, 'up')}
-                              disabled={index === 0}
-                              title="위로"
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
-                              </svg>
-                            </button>
-                            <button
-                              type="button"
-                              className="btn-move"
-                              onClick={() => handleMovePost(index, 'down')}
-                              disabled={index === sortedSeriesPosts.length - 1}
-                              title="아래로"
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
-                              </svg>
-                            </button>
-                            <button
-                              type="button"
-                              className="btn-remove"
-                              onClick={() => handleTogglePost(sp.post)}
-                              title="제거"
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                              </svg>
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                {/* 추가 가능한 포스트 */}
-                <div className="posts-section">
-                  <h4 className="posts-section-title">
-                    추가 가능한 포스트 ({availablePosts.length})
-                  </h4>
-                  {availablePosts.length === 0 ? (
-                    <p className="posts-empty">추가할 수 있는 포스트가 없습니다.</p>
-                  ) : (
-                    <ul className="posts-available-list">
-                      {availablePosts.map((post) => (
-                        <li key={post.id} className="post-available-item">
-                          <span className="post-title">{post.title}</span>
-                          <button
-                            type="button"
-                            className="btn-add"
-                            onClick={() => handleTogglePost(post)}
-                            title="추가"
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                            </svg>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                <div className="modal-actions">
-                  <button type="button" className="btn-cancel" onClick={onClose} disabled={postsSaving}>
-                    취소
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-confirm"
-                    onClick={handleSavePosts}
-                    disabled={postsSaving}
-                  >
-                    {postsSaving ? '저장 중...' : '포스트 저장'}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+          <SeriesPostsManager
+            postsLoading={postsLoading}
+            postsSaving={postsSaving}
+            sortedSeriesPosts={sortedSeriesPosts}
+            availablePosts={availablePosts}
+            onMovePost={handleMovePost}
+            onTogglePost={handleTogglePost}
+            onSavePosts={handleSavePosts}
+            onClose={onClose}
+          />
         )}
       </div>
     </div>

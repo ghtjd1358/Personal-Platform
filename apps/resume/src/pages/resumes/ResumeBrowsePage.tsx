@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectUser, Logo } from '@sonhoseong/mfa-lib';
+import { selectUser, Logo, Card, LoadingSpinner, EmptyState, ErrorState } from '@sonhoseong/mfa-lib';
 import { resumesApi } from '@/network';
 import type { ResumeWithUser } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
@@ -90,7 +90,7 @@ const ResumeBrowsePage: React.FC = () => {
         className="resume-card-v2"
       >
         {/* Card Header */}
-        <div className="resume-card-v2__header">
+        <Card.Meta className="resume-card-v2__header">
           <div className="resume-card-v2__profile">
             {resume.profile_image ? (
               <img
@@ -104,21 +104,21 @@ const ResumeBrowsePage: React.FC = () => {
               </div>
             )}
             <div className="resume-card-v2__info">
-              <h3 className="resume-card-v2__name">{resume.name || resume.user?.name || '익명'}</h3>
-              <p className="resume-card-v2__title">{resume.title || '개발자'}</p>
+              <Card.Title className="resume-card-v2__name">{resume.name || resume.user?.name || '익명'}</Card.Title>
+              <Card.Description className="resume-card-v2__title">{resume.title || '개발자'}</Card.Description>
             </div>
           </div>
-        </div>
+        </Card.Meta>
 
         {/* Card Body */}
-        <div className="resume-card-v2__body">
-          <p className="resume-card-v2__summary">
+        <Card.Body className="resume-card-v2__body">
+          <Card.Description className="resume-card-v2__summary">
             {resume.summary || '안녕하세요! 열정적으로 성장하는 개발자입니다. 새로운 기술을 배우고 적용하는 것을 좋아합니다.'}
-          </p>
-        </div>
+          </Card.Description>
+        </Card.Body>
 
         {/* Card Footer */}
-        <div className="resume-card-v2__footer">
+        <Card.Footer className="resume-card-v2__footer">
           <div className="resume-card-v2__links">
             {resume.contact_email && (
               <span className="resume-card-v2__link" title="이메일">
@@ -148,7 +148,7 @@ const ResumeBrowsePage: React.FC = () => {
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </span>
-        </div>
+        </Card.Footer>
       </Link>
     );
   };
@@ -200,51 +200,29 @@ const ResumeBrowsePage: React.FC = () => {
 
           {/* Error State */}
           {error && (
-            <div className="browse-empty">
-              <div className="browse-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 8v4M12 16h.01"/>
-                </svg>
-              </div>
-              <h3>오류가 발생했습니다</h3>
-              <p>{error}</p>
-              <button onClick={() => loadResumes(true)} className="btn-create">
-                다시 시도
-              </button>
-            </div>
+            <ErrorState message={error} />
           )}
 
           {/* Loading State - Initial */}
           {isLoading && resumes.length === 0 && !error && (
-            <div className="browse-loading">
-              <div className="browse-loading-spinner" />
-              <span className="browse-loading-text">이력서를 불러오는 중...</span>
-            </div>
+            <LoadingSpinner message="이력서를 불러오는 중..." className="browse-loading" />
           )}
 
           {/* Empty State */}
           {!isLoading && !error && resumes.length === 0 && (
-            <div className="browse-empty">
-              <div className="browse-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="12" y1="18" x2="12" y2="12"/>
-                  <line x1="9" y1="15" x2="15" y2="15"/>
-                </svg>
-              </div>
-              <h3>아직 공개된 이력서가 없습니다</h3>
-              <p>첫 번째로 이력서를 공개해보세요!</p>
-              {currentUser && (
-                <Link to={`${LINK_PREFIX}/mypage/create`} className="btn-create">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 5v14M5 12h14"/>
-                  </svg>
-                  이력서 만들기
-                </Link>
-              )}
-            </div>
+            <EmptyState
+              description="아직 공개된 이력서가 없습니다"
+              action={
+                currentUser ? (
+                  <Link to={`${LINK_PREFIX}/mypage/create`} className="btn-create">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    이력서 만들기
+                  </Link>
+                ) : undefined
+              }
+            />
           )}
 
           {/* Resume Cards Grid */}

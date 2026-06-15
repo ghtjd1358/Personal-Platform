@@ -1,0 +1,48 @@
+/* lib-card — structural only. Visual theme applied per-app via className overrides. */
+
+.lib-card {
+  position: relative;
+}
+
+.lib-card__image {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.lib-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lib-card__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.lib-card__title {
+  margin: 0;
+}
+
+.lib-card__description {
+  margin: 0;
+}
+
+.lib-card__footer {
+  display: flex;
+  align-items: center;
+}
+
+.lib-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lib-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

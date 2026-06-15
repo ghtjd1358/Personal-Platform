@@ -292,6 +292,7 @@ export function usePostSeries(postId: string | undefined): UsePostSeriesReturn {
 interface UseSeriesDetailReturn {
   series: SeriesDetailFull | null;
   isLoading: boolean;
+  error: string | null;
 }
 
 export function useSeriesDetail(slug: string | undefined): UseSeriesDetailReturn {
@@ -321,10 +322,5 @@ export function useSeriesDetail(slug: string | undefined): UseSeriesDetailReturn
       .finally(() => setIsLoading(false));
   }, [slug]);
 
-  // 에러가 있으면 throw → ErrorBoundary가 처리
-  if (error) {
-    throw new Error(error);
-  }
-
-  return { series, isLoading };
+  return { series, isLoading, error };
 }

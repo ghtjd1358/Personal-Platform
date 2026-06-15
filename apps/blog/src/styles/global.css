@@ -7251,3 +7251,43 @@ pre.shiki:hover .code-copy-btn,
         font-size: 15px;
     }
 }
+
+/* ===== Inline-style replacement utilities (auto-generated) ===== */
+
+/* Skeleton block-level helper — full-width display:block w/ optional bottom spacing */
+.skeleton-block { display: block; }
+.skeleton-block--mb-6 { display: block; margin-bottom: 6px; }
+.skeleton-block--mb-10 { display: block; margin-bottom: 10px; }
+.skeleton-block--mb-14 { display: block; margin-bottom: 14px; }
+
+/* Comment indentation by depth — CSS variable driven */
+.comment-item--indented {
+  margin-left: calc(var(--comment-depth, 0) * 24px);
+}
+
+/* File input hide (replaces style={{ display: 'none' }} on <input type="file"/>) */
+.input-file-hidden { display: none; }
+
+/* Root init loading overlay */
+.root-init-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--color-bg, #f8fafc);
+}
+.root-init-loading__inner { text-align: center; }
+.root-init-loading__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+.root-init-loading__text { color: #64748b; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.input-hidden { display: none; }
+.toolbar-highlight-preview { background-color: #fef08a; padding: 0 4px; }

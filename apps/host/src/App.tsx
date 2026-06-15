@@ -19,7 +19,7 @@ import {
 } from '@sonhoseong/mfa-lib';
 import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
 import { lnbItems } from './lnb-items';
-import { MyPageIcon } from './components/icons';
+import { MyPageIcon } from '@sonhoseong/mfa-lib';
 import HostShell from './components/HostShell';
 import Dashboard from './pages/Dashboard';
 import './App.css';

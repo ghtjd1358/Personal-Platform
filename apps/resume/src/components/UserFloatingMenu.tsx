@@ -1,59 +1,39 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser } from '@sonhoseong/mfa-lib';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@sonhoseong/mfa-lib';
+import { useUserFloatingMenu } from '@/hooks';
 import { LINK_PREFIX } from '@/config/constants';
 
 const UserFloatingMenu: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  const location = useLocation();
-
-  const accessToken = useSelector(selectAccessToken);
-  const isAuthenticated = !!accessToken;
-  const currentUser = getCurrentUser();
-
-  // 스크롤 감지
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 100);
-    };
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-  // 현재 페이지 확인
-  const isHomePage = location.pathname === `${LINK_PREFIX}/` || location.pathname === `${LINK_PREFIX}` || location.pathname === '/';
-  const isMyPage = location.pathname.includes('/mypage');
+  const {
+    isOpen,
+    toggleOpen,
+    close,
+    showScrollTop,
+    scrollToTop,
+    isAuthenticated,
+    currentUser,
+    isHomePage,
+    isMyPage,
+  } = useUserFloatingMenu();
 
   return (
     <div className="user-floating-menu">
-      {/* 최상단 버튼 */}
       {showScrollTop && (
-        <button
+        <Button.Icon
+          aria-label="맨 위로"
           className="user-floating-btn scroll-top"
           onClick={scrollToTop}
-          aria-label="맨 위로"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <polyline points="17 11 12 6 7 11" />
             <polyline points="17 18 12 13 7 18" />
           </svg>
-        </button>
+        </Button.Icon>
       )}
 
-      {/* 홈 버튼 (홈페이지가 아닐 때만) */}
       {!isHomePage && (
-        <Link
-          to={`${LINK_PREFIX}/`}
-          className="user-floating-btn home-btn"
-          aria-label="홈으로"
-        >
+        <Link to={`${LINK_PREFIX}/`} className="user-floating-btn home-btn" aria-label="홈으로">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" />
@@ -61,41 +41,30 @@ const UserFloatingMenu: React.FC = () => {
         </Link>
       )}
 
-      {/* 사용자 메뉴 버튼 */}
       {isAuthenticated ? (
         <>
-          <button
-            className={`user-floating-btn ${isOpen ? 'active' : ''}`}
-            onClick={() => setIsOpen(!isOpen)}
+          <Button.Icon
             aria-label="사용자 메뉴"
+            className={`user-floating-btn ${isOpen ? 'active' : ''}`}
+            onClick={toggleOpen}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-          </button>
+          </Button.Icon>
 
           {isOpen && (
             <div className="user-floating-dropdown">
-              <div className="user-floating-header">
-                {currentUser?.name || 'User'}
-              </div>
-              <Link
-                to={`${LINK_PREFIX}/mypage`}
-                className={`user-floating-item ${isMyPage ? 'active' : ''}`}
-                onClick={() => setIsOpen(false)}
-              >
+              <div className="user-floating-header">{currentUser?.name || 'User'}</div>
+              <Link to={`${LINK_PREFIX}/mypage`} className={`user-floating-item ${isMyPage ? 'active' : ''}`} onClick={close}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
                 마이페이지
               </Link>
-              <Link
-                to={`${LINK_PREFIX}/resumes`}
-                className="user-floating-item"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link to={`${LINK_PREFIX}/resumes`} className="user-floating-item" onClick={close}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
@@ -108,11 +77,7 @@ const UserFloatingMenu: React.FC = () => {
           )}
         </>
       ) : (
-        <Link
-          to={`${LINK_PREFIX}/login`}
-          className="user-floating-btn"
-          aria-label="로그인"
-        >
+        <Link to={`${LINK_PREFIX}/login`} className="user-floating-btn" aria-label="로그인">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
             <polyline points="10 17 15 12 10 7" />

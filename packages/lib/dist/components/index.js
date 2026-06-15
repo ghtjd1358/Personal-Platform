@@ -22,3 +22,13 @@ export * from './router';
 export * from './remote';
 // Icons
 export * from './icons';
+// Share
+export * from './share';
+// Editor
+export * from './editor';
+// Card
+export * from './card';
+// Feedback
+export * from './feedback';
+// Badge
+export * from './badge';

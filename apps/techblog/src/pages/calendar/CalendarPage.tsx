@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
+import { Button, EmptyState } from '@sonhoseong/mfa-lib';
 import { CalendarEvent } from '@/types/job';
 import { useCalendarEvents } from '@/hooks';
-import CreateEventModal from '@/components/CreateEventModal';
+import CreateEventModal from '@/components/modals/CreateEventModal';
 import '../home/HomePage.editorial.css';
 import './CalendarPage.editorial.css';
 
@@ -77,28 +78,28 @@ const CalendarPage: React.FC = () => {
         <p>면접 일정과 마감일을 확인하세요</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '24px' }}>
+      <div className="calendar-layout">
         {/* 캘린더 */}
         <div className="calendar-container">
           <div className="calendar-header">
             <div className="calendar-nav">
-              <button onClick={() => navigateMonth(-1)}>
+              <Button.Icon aria-label="이전 달" size="sm" onClick={() => navigateMonth(-1)}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
-              </button>
+              </Button.Icon>
               <span className="calendar-month">
                 {year}년 {month + 1}월
               </span>
-              <button onClick={() => navigateMonth(1)}>
+              <Button.Icon aria-label="다음 달" size="sm" onClick={() => navigateMonth(1)}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 18l6-6-6-6" />
                 </svg>
-              </button>
+              </Button.Icon>
             </div>
-            <button className="btn btn-sm btn-secondary" onClick={goToToday}>
+            <Button size="sm" variant="secondary" onClick={goToToday}>
               오늘
-            </button>
+            </Button>
           </div>
 
           <div className="calendar-grid">
@@ -126,7 +127,7 @@ const CalendarPage: React.FC = () => {
                   </div>
                 ))}
                 {day.events.length > 2 && (
-                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)', padding: '2px' }}>
+                  <div className="calendar-more-events">
                     +{day.events.length - 2}개 더
                   </div>
                 )}
@@ -142,30 +143,22 @@ const CalendarPage: React.FC = () => {
           </div>
 
           {monthEvents.length === 0 ? (
-            <div className="empty-state" style={{ padding: '40px 20px' }}>
-              <p>이번 달 일정이 없습니다</p>
-            </div>
+            <EmptyState description="이번 달 일정이 없습니다" />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="calendar-side-list">
               {monthEvents.map(event => (
                 <div
                   key={event.id}
+                  className="calendar-event-row"
                   style={{
-                    padding: '12px',
-                    background: 'var(--background)',
-                    borderRadius: 'var(--radius)',
                     borderLeft: `4px solid ${event.color || 'var(--primary)'}`
                   }}
                 >
-                  <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
+                  <div className="calendar-event-row-title">
                     {event.title}
                   </div>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  <div className="calendar-event-row-meta">
+                    <span className="calendar-event-row-date">
                       {new Date(event.date).toLocaleDateString('ko-KR', {
                         month: 'long',
                         day: 'numeric',
@@ -173,8 +166,7 @@ const CalendarPage: React.FC = () => {
                       })}
                     </span>
                     <span
-                      className={`calendar-event ${event.type}`}
-                      style={{ position: 'static', padding: '2px 8px' }}
+                      className={`calendar-event ${event.type} calendar-event-row-badge`}
                     >
                       {event.type === 'interview' ? '면접' :
                        event.type === 'deadline' ? '마감' : '지원'}
@@ -186,54 +178,35 @@ const CalendarPage: React.FC = () => {
           )}
 
           {/* 일정 추가 버튼 */}
-          <button
-            className="btn btn-primary"
-            style={{ width: '100%', marginTop: '16px' }}
+          <Button
+            variant="primary"
+            fullWidth
+            className="calendar-add-btn"
             onClick={() => setShowCreateModal(true)}
+            leftIcon={(
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            )}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
             일정 추가
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* 범례 */}
-      <div style={{
-        display: 'flex',
-        gap: '24px',
-        marginTop: '24px',
-        justifyContent: 'center',
-        fontSize: '13px',
-        color: 'var(--text-secondary)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '2px',
-            background: 'var(--warning)'
-          }} />
+      <div className="calendar-legend">
+        <div className="calendar-legend-item">
+          <span className="calendar-legend-swatch calendar-legend-swatch--interview" />
           면접
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '2px',
-            background: 'var(--danger)'
-          }} />
+        <div className="calendar-legend-item">
+          <span className="calendar-legend-swatch calendar-legend-swatch--deadline" />
           마감
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '2px',
-            background: 'var(--primary)'
-          }} />
+        <div className="calendar-legend-item">
+          <span className="calendar-legend-swatch calendar-legend-swatch--applied" />
           지원
         </div>
       </div>

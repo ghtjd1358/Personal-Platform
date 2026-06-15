@@ -15,13 +15,7 @@ import App from './App';
 
 // 초기화 로딩 컴포넌트
 const InitLoading = () => (
-    <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: '#0a0a0a'
-    }}>
+    <div className="root-init-loading">
         <div className="spinner-large" />
     </div>
 );

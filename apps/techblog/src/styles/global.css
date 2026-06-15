@@ -744,3 +744,498 @@ body {
     padding: 4px;
   }
 }
+
+/* ============================================
+ * Static inline-style replacements (techblog)
+ * ============================================ */
+
+/* Modal sizing */
+.modal-container--app { max-width: 700px; }
+.modal-container--app-md { max-width: 500px; }
+.modal-container--app-sm { max-width: 450px; }
+
+/* Modal body min height */
+.modal-body--min-400 { min-height: 400px; }
+
+/* Modal subtitle */
+.modal-subtitle { font-size: 14px; color: var(--text-secondary); }
+
+/* Modal tab row */
+.modal-tab-row {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+.modal-tab-button { padding: 12px 16px; }
+.modal-tab-badge {
+  background: var(--primary);
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+/* Section spacing */
+.section-mb-24 { margin-bottom: 24px; }
+.section-mt-24 { margin-top: 24px; }
+
+/* Section heading */
+.section-heading {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* Status / button row */
+.status-button-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* Info grid panel */
+.info-grid-panel {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px;
+  background: var(--background);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+.info-grid-panel--cols-3 { grid-template-columns: repeat(3, 1fr); }
+.info-grid-panel--no-mb { margin-bottom: 0; }
+
+.info-grid-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.info-grid-value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* External link */
+.external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* Form */
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.form-label-required { color: var(--danger); }
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+.form-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+/* JobDetailModal header info */
+.job-modal-header-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.company-logo--lg {
+  width: 56px;
+  height: 56px;
+  font-size: 20px;
+}
+.company-logo--md {
+  width: 40px;
+  height: 40px;
+  font-size: 14px;
+}
+.company-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.job-description-body {
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--text-primary);
+}
+
+/* JobCard 'closed' label */
+.job-deadline-closed { color: var(--text-secondary); }
+
+/* CalendarPage */
+.calendar-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+}
+.calendar-more-events {
+  font-size: 10px;
+  color: var(--text-secondary);
+  padding: 2px;
+}
+.calendar-side-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.calendar-event-row {
+  padding: 12px;
+  background: var(--background);
+  border-radius: var(--radius);
+}
+.calendar-event-row-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.calendar-event-row-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.calendar-event-row-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.calendar-event-row-badge {
+  position: static;
+  padding: 2px 8px;
+}
+.calendar-add-btn { margin-top: 16px; }
+
+.calendar-legend {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.calendar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.calendar-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+.calendar-legend-swatch--interview { background: var(--warning); }
+.calendar-legend-swatch--deadline { background: var(--danger); }
+.calendar-legend-swatch--applied { background: var(--primary); }
+
+/* HomePage salary stats */
+.salary-card-meta { font-size: 12px; color: var(--text-secondary); }
+.salary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 8px 0;
+}
+.salary-grid-cell { text-align: center; }
+.salary-grid-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.salary-grid-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+.salary-grid-value--primary { color: var(--primary); }
+.salary-grid-value--success { color: var(--success); }
+.salary-grid-unit {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* HomePage monthly trend chart */
+.trend-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+  padding: 16px 0;
+}
+.trend-chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.trend-chart-bar-wrap {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+.trend-chart-bar-value {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.trend-chart-bar {
+  width: 70%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease;
+  position: relative;
+}
+.trend-chart-bar-passed {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--success);
+  border-radius: 0 0 4px 4px;
+}
+.trend-chart-month-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.trend-chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.trend-chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.trend-chart-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+.trend-chart-legend-swatch--applied { background: var(--primary); }
+.trend-chart-legend-swatch--passed { background: var(--success); }
+
+/* HomePage two column grid */
+.home-two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.home-card-full { grid-column: 1 / -1; }
+
+/* Status progress list */
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.status-row-label {
+  width: 80px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.status-row-track {
+  flex: 1;
+  height: 24px;
+  background: var(--background);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.status-row-bar {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 0.3s;
+}
+.status-row-count {
+  width: 30px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Upcoming events list */
+.upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--background);
+  border-radius: var(--radius);
+}
+.upcoming-item-body { flex: 1; }
+.upcoming-item-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+.upcoming-item-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.upcoming-item-badge {
+  position: static;
+  padding: 4px 8px;
+}
+
+/* Recent applications */
+.recent-app-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.recent-app-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: var(--background);
+  border-radius: var(--radius);
+}
+.recent-app-row-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.recent-app-row-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+.recent-app-row-position {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.recent-app-row-salary {
+  margin-left: 8px;
+  color: var(--primary);
+  font-size: 12px;
+}
+.recent-app-row-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.recent-app-status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.recent-app-status-badge--passed {
+  background: #d1fae5;
+  color: #065f46;
+}
+.recent-app-status-badge--failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.recent-app-status-badge--default {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.recent-app-row-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* HomePage bottom cta row */
+.home-cta-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+/* JobSearchPage */
+.search-results-meta {
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.search-results-meta-count { color: var(--primary); }
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 16px;
+}
+
+/* TrackerPage placeholder */
+.tracker-placeholder {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  gap: 16px;
+}
+.tracker-placeholder-eyebrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8B7355;
+}
+.tracker-placeholder-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(28px, 4vw, 44px);
+  color: #2B1E14;
+  margin: 0;
+  line-height: 1.2;
+}
+.tracker-placeholder-desc {
+  font-family: Pretendard, sans-serif;
+  font-size: 15px;
+  color: #8B7355;
+  max-width: 520px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Skeleton blocks for tracker card */
+.skel-block { display: block; }
+.skel-block--mb-6 { margin-bottom: 6px; }
+.skel-block--mb-10 { margin-bottom: 10px; }

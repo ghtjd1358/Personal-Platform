@@ -1,4 +1,5 @@
 import React from 'react';
+import { EmptyState } from '@sonhoseong/mfa-lib';
 import { ProfileDetail } from '@/network';
 
 interface IntroTabProps {
@@ -16,9 +17,7 @@ const IntroTab: React.FC<IntroTabProps> = ({ profile }) => {
               {profile.bio}
             </div>
           ) : (
-            <div className="mypage-empty">
-              <p>소개글이 없습니다.</p>
-            </div>
+            <EmptyState description="소개글이 없습니다." />
           )}
         </div>
       </div>

@@ -27,7 +27,7 @@ export const ContactSection: React.FC = () => {
         <p className="contact-desc animate-on-scroll">
           새로운 기회나 협업 제안을 기다리고 있습니다
         </p>
-        <div className="editorial-contacts animate-on-scroll" style={{ justifyContent: 'center', borderBottom: 'none' }}>
+        <div className="editorial-contacts editorial-contacts--centered animate-on-scroll">
           <a href="mailto:hoseong1358@gmail.com" className="editorial-contact" title="이메일 보내기">
             <MailIcon />
             <span className="editorial-contact-label">Email</span>

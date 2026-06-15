@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useConfirmModal, useToast } from '@sonhoseong/mfa-lib';
+import { useConfirmModal, useToast, ErrorState } from '@sonhoseong/mfa-lib';
 import { useDeletePost, usePostDetail } from '@/hooks';
 import { CommentSection, LoadingSpinner, SeriesNavigation, SEOHead, ReadingProgress } from '@/components';
 import { LINK_PREFIX } from '@/config/constants';
@@ -34,17 +34,11 @@ const PostDetail: React.FC = () => {
   // 에러 발생 시 에러 화면 표시
   if (error) {
     return (
-      <div className="post-error">
-        <div className="container">
-          <div className="error-content">
-            <h2>게시글을 불러올 수 없습니다</h2>
-            <p>{error}</p>
-            <button className="btn btn-primary" onClick={() => navigate(`${LINK_PREFIX}/`)}>
-              목록으로 돌아가기
-            </button>
-          </div>
-        </div>
-      </div>
+      <ErrorState
+        message={error}
+        backHref={`${LINK_PREFIX}/`}
+        backLabel="목록으로 돌아가기"
+      />
     );
   }
 

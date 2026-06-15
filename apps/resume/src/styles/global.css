@@ -265,6 +265,10 @@ body.has-header {
   text-align: center;
 }
 
+.section-header--mt {
+  margin-top: 64px;
+}
+
 .section-label {
   font-size: 14px;
   font-weight: 600;
@@ -354,6 +358,11 @@ body.has-header {
   font-weight: 600;
   border-radius: var(--radius-md);
   transition: all 0.3s ease;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 13px;
 }
 
 .btn-primary {
@@ -6736,4 +6745,222 @@ body.has-header {
     gap: 12px;
     align-items: flex-start;
   }
+}
+
+/* ===== Inline-style replacement utilities (auto-generated) ===== */
+
+/* Skeleton block-level helpers */
+.skeleton-block { display: block; }
+.skeleton-block--mb-6 { display: block; margin-bottom: 6px; }
+.skeleton-block--mb-10 { display: block; margin-bottom: 10px; }
+.skeleton-block--mb-14 { display: block; margin-bottom: 14px; }
+.skeleton-block--mt-16-mb-10 { display: block; margin-top: 16px; margin-bottom: 10px; }
+
+/* Project skeleton tags row */
+.card-tags22--skeleton {
+  margin-top: 16px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Project edit button row (Section bottom) */
+.project-edit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.project-edit-row--hidden { display: none; }
+.project-more--hidden { display: none; }
+
+/* HeroSection em offset */
+.hero-em-spaced { margin-right: 0.18em; }
+
+/* File input hide */
+.input-file-hidden { display: none; }
+
+/* Admin form layout */
+.admin-sub-actions { display: flex; gap: 8px; }
+.admin-skills-input-narrow { max-width: 140px; }
+
+/* Projects editor — collapsible section row */
+.proj-editor-fullwidth-row { grid-column: 1 / -1; }
+.proj-editor-section-block { margin-top: 20px; }
+.proj-editor-input--mb-8 { margin-bottom: 8px; }
+
+/* MyResume detail page */
+.my-resume-prewrap { white-space: pre-line; }
+.my-resume-section-mb-32 { margin-bottom: 32px; }
+.my-resume-section-mt-48 { margin-top: 48px; }
+.my-resume-pl-16 { margin-left: 16px; }
+.my-resume-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* My resumes list page */
+.my-resumes-skeleton-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.my-resumes-skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.my-resumes-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Resume editor */
+.resume-editor-page-min { min-height: 100vh; }
+.resume-editor-spinner-sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+.resume-editor-spinner-md {
+  width: 16px;
+  height: 16px;
+}
+.resume-editor-help-mt-0 { margin-top: 0; }
+.resume-editor-help-mt-8 {
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+.resume-editor-icon-inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.resume-editor-info-box {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.08);
+  border-left: 3px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--color-text-secondary, #6b7280);
+  line-height: 1.6;
+}
+.resume-editor-vis-public { background: var(--color-bg); }
+
+/* Root init loading overlay (consistent w/ blog) */
+.root-init-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--color-bg, #f8fafc);
+}
+.root-init-loading__inner { text-align: center; }
+.root-init-loading__text { color: #64748b; }
+
+/* Projects editor — typography for optional section */
+.proj-editor-summary {
+  cursor: pointer;
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  outline: none;
+}
+.proj-editor-optional-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: #8C1E1A;
+  text-transform: uppercase;
+  margin-right: 10px;
+}
+
+/* ===== Utility modifiers (inline-style replacement) ===== */
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.timeline-category--mt {
+  margin-top: 48px;
+}
+
+.section-edit-link--ml {
+  margin-left: 16px;
+}
+
+.browse-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.browse-skeleton-card {
+  padding: 24px;
+}
+
+.browse-skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.browse-skeleton-info {
+  flex: 1;
+}
+
+.browse-skeleton-name {
+  width: 40%;
+  margin-bottom: 8px;
+}
+
+.browse-skeleton-title {
+  width: 60%;
+}
+
+.browse-loading--full {
+  min-height: 100vh;
+}
+
+.input-hidden {
+  display: none;
+}
+
+.spinner-small--xs {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.resume-editor-hint--no-top {
+  margin-top: 0;
+}
+
+.resume-editor-input--url {
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+
+.label-icon {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.resume-editor-tip {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.resume-editor-tip__text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
 }

@@ -172,3 +172,26 @@
 .common-btn--loading {
     position: relative;
 }
+
+/* ===== icon-only ===== */
+.common-btn--icon-only {
+    padding: 8px;
+    aspect-ratio: 1;
+}
+.common-btn--icon-only.common-btn--size-sm { padding: 6px; }
+.common-btn--icon-only.common-btn--size-lg { padding: 12px; }
+
+/* ===== ButtonGroup ===== */
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+}
+.btn-group--row       { flex-direction: row; }
+.btn-group--column    { flex-direction: column; }
+.btn-group--align-start  { justify-content: flex-start; }
+.btn-group--align-center { justify-content: center; }
+.btn-group--align-end    { justify-content: flex-end; }
+.btn-group--gap-xs { gap: 4px; }
+.btn-group--gap-sm { gap: 8px; }
+.btn-group--gap-md { gap: 12px; }
+.btn-group--gap-lg { gap: 20px; }

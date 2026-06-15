@@ -9,7 +9,7 @@
  * Back nav: `?fromResume=1` 또는 resumeId 쿼리 있으면 `/admin/experience` 로 복귀,
  *          없으면 `/admin/portfolio` 리스트로.
  */
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useToast, getCurrentUser, getSupabase } from '@sonhoseong/mfa-lib'
 import {
@@ -20,6 +20,12 @@ import {
     useDeletePortfolio,
 } from '../../../network/hooks'
 import { LINK_PREFIX } from '@/config/constants'
+import {
+    ProjectCoreFields,
+    ProjectTasksTagsFields,
+    ProjectOptionalFields,
+    type ProjectFormState,
+} from './components'
 import '../experience/ExperienceEditor.editorial.css'
 
 const ProjectsEditorPage: React.FC = () => {
@@ -37,24 +43,14 @@ const ProjectsEditorPage: React.FC = () => {
     const replaceChildren = useReplacePortfolioChildren()
     const deletePortfolio = useDeletePortfolio()
 
-    const handleDelete = async () => {
-        if (!isEdit || !id) return
-        if (!window.confirm(`"${form.title || '이 프로젝트'}" 를 삭제할까요? 되돌릴 수 없습니다.`)) return
-        const ok = await deletePortfolio(id)
-        if (ok) navigate(listUrl)
-    }
-
     // 필수 + 선택 필드 통합 form
-    const [form, setForm] = useState({
-        // Core (필수)
+    const [form, setForm] = useState<ProjectFormState>({
         title: '',
         role: '',
         start_date: '',
         end_date: '',
         is_current: false,
-        // Resume link
-        link_to_resume: fromResume === '1', // 신규 생성 시 기본값
-        // Portfolio-only (선택)
+        link_to_resume: fromResume === '1',
         short_description: '',
         demo_url: '',
         github_url: '',
@@ -65,10 +61,16 @@ const ProjectsEditorPage: React.FC = () => {
     const [tagsText, setTagsText] = useState('')
 
     // 저장/취소 후 복귀: URL 의 ?fromResume=1 query 있을 때만 경력&프로젝트 로.
-    // 데이터(form.link_to_resume) 기반으로 결정하면 "포폴 리스트에서 진입했는데 experience 로 튀는" 버그 발생 — 출처는 query 가 단일 source.
     const listUrl = fromResume === '1'
         ? `${LINK_PREFIX}/admin/experience`
         : `${LINK_PREFIX}/admin/portfolio`
+
+    const handleDelete = async () => {
+        if (!isEdit || !id) return
+        if (!window.confirm(`"${form.title || '이 프로젝트'}" 를 삭제할까요? 되돌릴 수 없습니다.`)) return
+        const ok = await deletePortfolio(id)
+        if (ok) navigate(listUrl)
+    }
 
     // edit 모드: 로드된 portfolio 를 form state 에 반영
     useEffect(() => {
@@ -91,11 +93,6 @@ const ProjectsEditorPage: React.FC = () => {
         setTagsText(data.tags.join(', '))
     }, [isEdit, loadedPortfolio])
 
-    const parsedTags = useMemo(
-        () => tagsText.split(',').map((s) => s.trim()).filter(Boolean),
-        [tagsText],
-    )
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!form.title.trim() || !form.role.trim()) {
@@ -108,8 +105,8 @@ const ProjectsEditorPage: React.FC = () => {
             .map((s) => s.trim())
             .filter(Boolean)
 
-        // resume_id 결정: 토글 on 이면 현재 유저의 대표 이력서 id 찾아서 붙이기, off 면 null
-        // 이 쿼리는 resume_profile 테이블 lookup 으로 resume 훅 계층엔 없음 — 직접 호출 유지
+        const parsedTags = tagsText.split(',').map((s) => s.trim()).filter(Boolean)
+
         let resumeIdToSet: string | null = null
         if (form.link_to_resume && user?.id) {
             const { data: primary } = await getSupabase()
@@ -129,8 +126,6 @@ const ProjectsEditorPage: React.FC = () => {
             end_date: form.end_date || null,
             is_current: form.is_current,
             resume_id: resumeIdToSet,
-            // "이력서에 노출" 토글 (link_to_resume) 이 resume 의 fetch filter 인 show_on_resume 도 같이 set.
-            // 안 하면 토글 체크해도 useHomePageData 의 .eq('show_on_resume', true) 필터에 걸려 안 보임.
             show_on_resume: form.link_to_resume,
             short_description: form.short_description || undefined,
             demo_url: form.demo_url || undefined,
@@ -181,202 +176,16 @@ const ProjectsEditorPage: React.FC = () => {
             </header>
 
             <form onSubmit={handleSubmit} className="exp-editor-form">
-                {/* ===== Left: Core (필수) ===== */}
-                <div className="exp-editor-card">
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">제목</span>
-                            <span className="exp-field-hint">REQUIRED</span>
-                        </div>
-                        <input
-                            className="exp-input"
-                            value={form.title}
-                            onChange={(e) => setForm({ ...form, title: e.target.value })}
-                            placeholder="예: 개인 플랫폼"
-                            required
-                        />
-                    </div>
+                <ProjectCoreFields form={form} onChange={setForm} />
 
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">역할</span>
-                            <span className="exp-field-hint">REQUIRED</span>
-                        </div>
-                        <input
-                            className="exp-input"
-                            value={form.role}
-                            onChange={(e) => setForm({ ...form, role: e.target.value })}
-                            placeholder="예: 개인 프로젝트 · 설계/개발"
-                            required
-                        />
-                    </div>
+                <ProjectTasksTagsFields
+                    tasksText={tasksText}
+                    tagsText={tagsText}
+                    onTasksTextChange={setTasksText}
+                    onTagsTextChange={setTagsText}
+                />
 
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">기간</span>
-                            <span className="exp-field-hint">START · END</span>
-                        </div>
-                        <div className="exp-date-row">
-                            <input
-                                type="date"
-                                className="exp-input"
-                                value={form.start_date}
-                                onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-                                required
-                            />
-                            <input
-                                type="date"
-                                className="exp-input"
-                                value={form.end_date || ''}
-                                onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-                                disabled={form.is_current}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">플래그</span>
-                            <span className="exp-field-hint">FLAGS</span>
-                        </div>
-                        <div className="exp-checks">
-                            <label className="exp-check">
-                                <input
-                                    type="checkbox"
-                                    checked={form.is_current}
-                                    onChange={(e) => setForm({ ...form, is_current: e.target.checked })}
-                                />
-                                <span className="exp-check-box" aria-hidden="true"></span>
-                                <span className="exp-check-label">진행중</span>
-                            </label>
-                            <label className="exp-check">
-                                <input
-                                    type="checkbox"
-                                    checked={form.link_to_resume}
-                                    onChange={(e) => setForm({ ...form, link_to_resume: e.target.checked })}
-                                />
-                                <span className="exp-check-box" aria-hidden="true"></span>
-                                <span className="exp-check-label">이력서에 노출</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ===== Right: Tasks + Tags (공용) ===== */}
-                <div className="exp-editor-card">
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">주요 작업</span>
-                            <span className="exp-field-hint">ONE TASK PER LINE · **BOLD** OK</span>
-                        </div>
-                        <textarea
-                            className="exp-textarea"
-                            value={tasksText}
-                            onChange={(e) => setTasksText(e.target.value)}
-                            rows={6}
-                            placeholder={'예)\n**번들 최적화** - 8.09MB → 397KB (80% 감소)\n**Lighthouse 개선** - 73 → 89점'}
-                        />
-                    </div>
-
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">기술 태그</span>
-                            <span className="exp-field-hint">COMMA SEPARATED</span>
-                        </div>
-                        <input
-                            className="exp-input"
-                            value={tagsText}
-                            onChange={(e) => setTagsText(e.target.value)}
-                            placeholder="React, TypeScript, Vite, Tailwind CSS"
-                        />
-                        <div className="exp-chips">
-                            {parsedTags.length > 0 ? (
-                                parsedTags.map((t) => (
-                                    <span key={t} className="exp-chip">{t}</span>
-                                ))
-                            ) : (
-                                <span className="exp-chips-empty">쉼표로 구분하면 여기에 칩으로 나타나요.</span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* ===== Full-width: Portfolio-only (선택) ===== */}
-                <details className="exp-editor-card" style={{ gridColumn: '1 / -1' }}>
-                    <summary style={{
-                        cursor: 'pointer',
-                        fontFamily: "'Fraunces', serif",
-                        fontSize: '16px',
-                        fontWeight: 500,
-                        marginBottom: '8px',
-                        outline: 'none',
-                    }}>
-                        <span style={{
-                            fontFamily: "'JetBrains Mono', monospace",
-                            fontSize: '10px',
-                            letterSpacing: '0.15em',
-                            color: '#8C1E1A',
-                            textTransform: 'uppercase',
-                            marginRight: '10px',
-                        }}>
-                            OPTIONAL
-                        </span>
-                        포트폴리오 섹션 전용 필드 (이력서엔 표시 안 됨)
-                    </summary>
-
-                    <div className="exp-field" style={{ marginTop: '20px' }}>
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">짧은 소개</span>
-                            <span className="exp-field-hint">SHORT DESCRIPTION · 1~2 FIG</span>
-                        </div>
-                        <input
-                            className="exp-input"
-                            value={form.short_description}
-                            onChange={(e) => setForm({ ...form, short_description: e.target.value })}
-                            placeholder="카드 hover 시 보이는 한 줄 설명"
-                        />
-                    </div>
-
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">커버 이미지 URL</span>
-                            <span className="exp-field-hint">COVER IMAGE</span>
-                        </div>
-                        <input
-                            className="exp-input"
-                            value={form.cover_image}
-                            onChange={(e) => setForm({ ...form, cover_image: e.target.value })}
-                            placeholder="https://..."
-                        />
-                    </div>
-
-                    <div className="exp-field">
-                        <div className="exp-field-label">
-                            <span className="exp-field-name">링크</span>
-                            <span className="exp-field-hint">DEMO · GITHUB · FIGMA</span>
-                        </div>
-                        <input
-                            className="exp-input"
-                            style={{ marginBottom: '8px' }}
-                            value={form.demo_url}
-                            onChange={(e) => setForm({ ...form, demo_url: e.target.value })}
-                            placeholder="Demo URL — https://..."
-                        />
-                        <input
-                            className="exp-input"
-                            style={{ marginBottom: '8px' }}
-                            value={form.github_url}
-                            onChange={(e) => setForm({ ...form, github_url: e.target.value })}
-                            placeholder="GitHub URL — https://github.com/..."
-                        />
-                        <input
-                            className="exp-input"
-                            value={form.figma_url}
-                            onChange={(e) => setForm({ ...form, figma_url: e.target.value })}
-                            placeholder="Figma URL — https://figma.com/..."
-                        />
-                    </div>
-                </details>
+                <ProjectOptionalFields form={form} onChange={setForm} />
 
                 {/* ===== Actions ===== */}
                 <div className="exp-editor-actions">

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCurrentUser } from '@sonhoseong/mfa-lib';
+import { getCurrentUser, EmptyState } from '@sonhoseong/mfa-lib';
 import { LoadingSpinner } from '@/components/loading';
 import { useMyPageData, useScrollAnimation } from '@/hooks';
 import { LINK_PREFIX } from '@/config/constants';
@@ -58,9 +58,7 @@ const MyPage: React.FC = () => {
     return (
       <div className="mypage">
         <div className="container">
-          <div className="mypage-empty">
-            <p>사용자 정보를 불러올 수 없습니다.</p>
-          </div>
+          <EmptyState description="사용자 정보를 불러올 수 없습니다." />
         </div>
       </div>
     );

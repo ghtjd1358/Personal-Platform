@@ -1,4 +1,4 @@
-import { getSupabase } from '@sonhoseong/mfa-lib';
+import { getSupabase, apiClient } from '@sonhoseong/mfa-lib';
 
 // ============================================
 // Response Types
@@ -84,4 +84,4 @@ export function createPaginationMeta<T>(
   };
 }
 
-export { getSupabase };
+export { getSupabase, apiClient };

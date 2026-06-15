@@ -6,6 +6,7 @@ import {
     ToastContainer,
     ErrorBoundary,
     GlobalLoading,
+    LoadingSpinner,
     ScrollTopButton,
     storage,
     getStore,
@@ -50,24 +51,9 @@ function Root() {
 
     if (!initialized) {
         return (
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                background: 'var(--color-bg, #f8fafc)'
-            }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div className="loading-spinner" style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '3px solid #e2e8f0',
-                        borderTop: '3px solid #3b82f6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        margin: '0 auto 16px'
-                    }} />
-                    <p style={{ color: '#64748b' }}>로딩 중...</p>
+            <div className="root-init-loading">
+                <div className="root-init-loading__inner">
+                    <LoadingSpinner message="로딩 중..." />
                 </div>
             </div>
         )

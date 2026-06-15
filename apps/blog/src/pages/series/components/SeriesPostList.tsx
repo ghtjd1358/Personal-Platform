@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { EmptyState } from '@sonhoseong/mfa-lib';
 import { LINK_PREFIX } from '@/config/constants';
 
 interface SeriesPost {
@@ -26,9 +27,7 @@ const SeriesPostList: React.FC<SeriesPostListProps> = ({ posts }) => {
     return (
       <main className="series-content">
         <div className="container">
-          <div className="series-empty">
-            <p>이 시리즈에 포스트가 없습니다.</p>
-          </div>
+          <EmptyState description="이 시리즈에 포스트가 없습니다." />
         </div>
       </main>
     );

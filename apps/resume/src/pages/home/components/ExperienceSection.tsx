@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { resolveIcon } from '../../../constants/iconResolver';
+import { Badge, Button, EmptyState } from '@sonhoseong/mfa-lib';
 import type { ExperienceDetail, ProjectDetail } from '../../../types';
 import { SectionEditButton } from '../../../components/common';
+import { TimelineCard } from '../../../components/timeline/TimelineCard';
 
 interface ExperienceSectionProps {
   experiences: ExperienceDetail[];
@@ -53,9 +54,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
             <div className="section-label">경력</div>
             <h2 className="section-title">경력 & 프로젝트</h2>
           </div>
-          <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
-            경력 정보가 없습니다.
-          </div>
+          <EmptyState description="경력 정보가 없습니다." />
         </div>
       </section>
     );
@@ -82,25 +81,14 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                 <div key={exp.id} className={`timeline-item ${index < INITIAL_DISPLAY_COUNT ? 'animate-on-scroll' : 'animate-visible'}`}>
                   <div className={`timeline-date ${!exp.is_current ? 'past' : ''}`}>
                     {formatDate(exp.start_date)} - {formatDate(exp.end_date, true, exp.is_current)}
-                    <span className={`exp-type-badge ${exp.is_dev ? 'dev' : 'non-dev'}`}>
+                    <Badge
+                      variant={exp.is_dev ? 'success' : 'warning'}
+                      className={`exp-type-badge ${exp.is_dev ? 'dev' : 'non-dev'}`}
+                    >
                       {exp.is_dev ? '개발' : '비개발'}
-                    </span>
+                    </Badge>
                   </div>
-                  <div className="timeline-content">
-                    <h3>{exp.company}</h3>
-                    <p>{exp.position}</p>
-                    {exp.tags && exp.tags.length > 0 && (
-                      <div className="timeline-tech-icons">
-                        {exp.tags.map((tag, index) => {
-                          const icon = resolveIcon(tag.iconKey, tag.iconColor);
-                          return (
-                            <div className="tech-icon" key={`${exp.id}-tag-${index}`} data-tooltip={tag.name}>
-                              {icon || <span>💻</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                  <TimelineCard title={exp.company} subtitle={exp.position} tags={exp.tags}>
                     {exp.tasks && exp.tasks.length > 0 && (
                       <>
                         <button
@@ -121,12 +109,14 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                         </div>
                       </>
                     )}
-                  </div>
+                  </TimelineCard>
                 </div>
               ))}
             </div>
             {experiences.length > INITIAL_DISPLAY_COUNT && (
-              <button
+              <Button
+                type="button"
+                variant="text"
                 className={`show-more-btn ${showAllExp ? 'collapsed' : ''}`}
                 onClick={() => setShowAllExp(!showAllExp)}
               >
@@ -134,7 +124,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                   <span className="chevron"></span>
                   <span className="chevron"></span>
                 </div>
-              </button>
+              </Button>
             )}
           </>
         )}
@@ -153,21 +143,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                   <div className={`timeline-date ${!proj.is_current ? 'past' : ''}`}>
                     {formatDate(proj.start_date)} - {formatDate(proj.end_date, true, proj.is_current)}
                   </div>
-                  <div className="timeline-content">
-                    <h3>{proj.title}</h3>
-                    <p>{proj.role}</p>
-                    {proj.tags && proj.tags.length > 0 && (
-                      <div className="timeline-tech-icons">
-                        {proj.tags.map((tag, index) => {
-                          const icon = resolveIcon(tag.iconKey, tag.iconColor);
-                          return (
-                            <div className="tech-icon" key={`${proj.id}-tag-${index}`} data-tooltip={tag.name}>
-                              {icon || <span>💻</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                  <TimelineCard title={proj.title} subtitle={proj.role} tags={proj.tags}>
                     {proj.tasks && proj.tasks.length > 0 && (
                       <>
                         <button
@@ -188,12 +164,14 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                         </div>
                       </>
                     )}
-                  </div>
+                  </TimelineCard>
                 </div>
               ))}
             </div>
             {projects.length > INITIAL_DISPLAY_COUNT && (
-              <button
+              <Button
+                type="button"
+                variant="text"
                 className={`show-more-btn ${showAllProjects ? 'collapsed' : ''}`}
                 onClick={() => setShowAllProjects(!showAllProjects)}
               >
@@ -201,12 +179,12 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                   <span className="chevron"></span>
                   <span className="chevron"></span>
                 </div>
-              </button>
+              </Button>
             )}
           </>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+        <div className="section-edit-row">
           <SectionEditButton editPath="/admin/experience" label="경력 편집" />
         </div>
       </div>

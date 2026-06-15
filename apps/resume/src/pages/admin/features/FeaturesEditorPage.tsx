@@ -161,7 +161,7 @@ const FeaturesEditorPage: React.FC = () => {
                             type="file"
                             accept={ALLOWED_TYPES.join(',')}
                             onChange={onFileChange}
-                            style={{ display: 'none' }}
+                            className="input-file-hidden"
                         />
                     </div>
                 </label>

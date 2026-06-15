@@ -22,8 +22,9 @@ import {
     storage,
     initSupabase,
     exposeStore,
+    setupFontLoading,
+    initApiClient,
 } from '@sonhoseong/mfa-lib';
-import { setupFontLoading, setupHostAxios } from './setup';
 
 setupFontLoading();
 storage.setHostApp();
@@ -31,7 +32,7 @@ initSupabase({
     supabaseUrl: process.env.REACT_APP_SUPABASE_URL || '',
     supabaseAnonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || '',
 });
-setupHostAxios();
+initApiClient();
 exposeStore(store);
 
 async function start() {

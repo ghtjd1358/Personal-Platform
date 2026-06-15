@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@sonhoseong/mfa-lib';
 import { ProfileDetail } from '@/network';
 
 interface ProfileHeaderProps {
@@ -29,9 +30,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <h1 className="mypage-name">{profile?.name || 'Unknown'}</h1>
             <p className="mypage-bio">{profile?.short_bio || ''}</p>
             {isOwnProfile && (
-              <button className="btn btn-secondary" onClick={onEditClick}>
+              <Button variant="secondary" className="btn btn-secondary" onClick={onEditClick}>
                 프로필 수정
-              </button>
+              </Button>
             )}
           </div>
         </div>

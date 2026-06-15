@@ -1,3 +1,5 @@
 export * from './TiptapEditor';
-export * from './EditorHeader';
-export * from './TagSelector';
+export { EditorHeader } from '@sonhoseong/mfa-lib';
+export type { EditorHeaderProps } from '@sonhoseong/mfa-lib';
+export { TagSelector } from '@sonhoseong/mfa-lib';
+export type { TagSelectorProps, TagItem } from '@sonhoseong/mfa-lib';
