@@ -1,5 +1,5 @@
 import { supabaseAxios } from '../../axios-instance';
-import { isAxiosError } from '../../axios-factory';
+import { isAxiosError } from '@sonhoseong/mfa-lib';
 import { ApiResponse, PageListResponse } from '../common';
 import { PortfolioSearchCondition, PortfolioSummary } from './types';
 

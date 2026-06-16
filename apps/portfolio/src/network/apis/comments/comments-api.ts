@@ -1,5 +1,5 @@
 import { supabaseAxios } from '../../axios-instance';
-import { isAxiosError } from '../../axios-factory';
+import { isAxiosError } from '@sonhoseong/mfa-lib';
 import { ApiResponse } from '../common';
 import { Comment, CreateCommentRequest, UpdateCommentRequest } from './types';
 

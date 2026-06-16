@@ -1,41 +1,38 @@
-/**
- * Root Component - KOMCA 패턴
- * 앱의 최상위 레이아웃 컴포넌트
- */
-
 import React from 'react';
 import {
+    Container,
     ModalContainer,
     ToastContainer,
     ErrorBoundary,
     GlobalLoading,
+    ScrollTopButton,
+    storage,
     useSimpleInitialize,
 } from '@sonhoseong/mfa-lib';
 import App from './App';
 
-// 초기화 로딩 컴포넌트
-const InitLoading = () => (
-    <div className="root-init-loading">
-        <div className="spinner-large" />
-    </div>
-);
+const isHost = storage.isHostApp();
 
 const Root: React.FC = () => {
     const { initialized } = useSimpleInitialize();
 
-    // 초기화 완료 전까지 로딩 표시
-    if (!initialized) {
-        return <InitLoading />;
-    }
+    if (!initialized) return null;
+
+    const content = (
+        <ErrorBoundary>
+            <main className="main-content">
+                <App />
+            </main>
+            <GlobalLoading />
+        </ErrorBoundary>
+    );
 
     return (
         <>
             <ModalContainer />
             <ToastContainer />
-            <ErrorBoundary>
-                <App />
-                <GlobalLoading />
-            </ErrorBoundary>
+            {isHost ? content : <Container>{content}</Container>}
+            {!isHost && <ScrollTopButton />}
         </>
     );
 };
