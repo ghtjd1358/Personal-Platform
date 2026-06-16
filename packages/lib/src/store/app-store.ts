@@ -8,16 +8,12 @@ import recentMenuReducer, { RecentMenuState } from './recent-menu-slice';
 export * from './app-slice';
 export * from './app-selectors';
 
-// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
-
-// 앱이 시작될 때부터 항상 존재하는 Redux 슬라이스
 const staticReducers = {
     app: appSlice.reducer,
     menu: menuReducer,
     recentMenu: recentMenuReducer,
 };
 
-// 리모트 앱이 로드될 때 추가되는 Redux 슬라이스 (지연 등록)
 const dynamicReducers: Record<string, Reducer> = {};
 
 const createRootReducer = () => combineReducers({
@@ -58,26 +54,14 @@ function createLocalStore() {
 // 로컬 폴백 스토어 — singleton lib 가정 하에 모듈 로드 시 1회만 생성됨
 export const store = createLocalStore();
 
-// 호스트 앱의 전역 스토어 반환
-// 리모트 앱은 window.__REDUX_STORE__를 통해 호스트 스토어를 공유받음
-// split-brain 위험: 호스트 내에서 동작 중인데 호스트 스토어를 찾을 수 없으면
-// remote가 자체 store 폴백을 사용 → 인증/사용자 상태가 분리되어 동기화 실패
-// remote의 standalone 모드는 정상 — 자체 store만 사용
-//
+// host 우선, 없으면 로컬 폴백 (standalone 모드)
 export const getStore = () => {
   const w = typeof window !== 'undefined' ? window : undefined;
   return w?.__REDUX_STORE__ ?? store;
 };
 
 export const injectReducer = (key: string, reducer: Reducer) => {
-    if (dynamicReducers[key]) {
-        if (dynamicReducers[key] !== reducer && process.env.NODE_ENV !== 'production') {
-            console.warn(`[Store] injectReducer: '${key}' 키가 이미 다른 reducer로 등록됨 — 무시됨`);
-        }
-        return;
-    }
     dynamicReducers[key] = reducer;
-    // Remote 앱에서 호출될 때도 Host store 에 reducer 가 주입되도록 getStore() 경유
     getStore().replaceReducer(createRootReducer());
 };
 

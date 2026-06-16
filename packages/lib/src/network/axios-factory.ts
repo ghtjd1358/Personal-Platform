@@ -83,11 +83,10 @@ export class AxiosClientFactory {
     serviceConfig: AxiosConfig,
     customRequestHandler?: (config: InternalAxiosRequestConfig) => Promise<InternalAxiosRequestConfig> | InternalAxiosRequestConfig
   ): AxiosInstance {
-    const { hostUrl: _h, basePath: _b, ...axiosRest } = serviceConfig;
     const axiosInstance = Axios.create({
-      ...axiosRest,
       baseURL: `${serviceConfig.hostUrl || ''}${serviceConfig.basePath || ''}`,
       timeout: serviceConfig.timeout || 60000,
+      ...serviceConfig,
     });
 
     // 요청 인터셉터 — 토큰 주입, 요청 ID, 빈 파라미터 제거
@@ -96,12 +95,12 @@ export class AxiosClientFactory {
       if (fc) {
         const token = fc.getAccessToken();
         if (token) {
-          config.headers.set('Authorization', `Bearer ${token}`);
+          config.headers['Authorization'] = `Bearer ${token}`;
         }
       }
 
-      if (!config.headers.has('X-Request-ID')) {
-        config.headers.set('X-Request-ID', uuid());
+      if (!config.headers['X-Request-ID']) {
+        config.headers['X-Request-ID'] = uuid();
       }
 
       if (config.params) {
@@ -146,6 +145,7 @@ export class AxiosClientFactory {
               originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
               return axiosInstance(originalRequest);
             }
+
 
             fc.setAccessToken('');
             fc.onUnauthorized?.();

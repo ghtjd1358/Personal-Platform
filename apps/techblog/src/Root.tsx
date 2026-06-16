@@ -16,7 +16,7 @@ const isHost = storage.isHostApp();
 function Root() {
     const { initialized } = useSimpleInitialize();
 
-    if (!initialized) return <></>;
+    if (!initialized) return null;
 
     const content = (
         <ErrorBoundary>
