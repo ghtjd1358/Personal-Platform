@@ -11,11 +11,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { getStore } from '../store/app-store';
 import { setAccessToken, setUser } from '../store/app-slice';
-import { apiClient } from '../network/api-client';
+import { apiClient, initApiClient } from '../network/api-client';
 import { User } from '../types';
 
 export function useNodeInitialize() {
   const [initialized, setInitialized] = useState(false);
+  // Strict Mode 에서 effect 가 두 번 실행되는 걸 막기 위한 가드
   const ranRef = useRef(false);
 
   useEffect(() => {
@@ -26,6 +27,9 @@ export function useNodeInitialize() {
     const { signal } = controller;
 
     const initialize = async () => {
+      // AxiosClientFactory 전역 초기화 (한 번만)
+      initApiClient();
+
       const store = getStore();
 
       try {
