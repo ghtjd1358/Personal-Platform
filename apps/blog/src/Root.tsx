@@ -30,27 +30,20 @@ function Root() {
         )
     }
 
+    const content = (
+        <ErrorBoundary>
+            <main className="main-content">
+                <App />
+            </main>
+            <GlobalLoading />
+        </ErrorBoundary>
+    )
+
     return (
         <>
             <ModalContainer />
             <ToastContainer />
-            {isHost ? (
-                <ErrorBoundary>
-                    <main className="main-content">
-                        <App />
-                    </main>
-                    <GlobalLoading />
-                </ErrorBoundary>
-            ) : (
-                <Container>
-                    <ErrorBoundary>
-                        <main className="main-content">
-                            <App />
-                        </main>
-                        <GlobalLoading />
-                    </ErrorBoundary>
-                </Container>
-            )}
+            {isHost ? content : <Container>{content}</Container>}
             {!isHost && !isLoginPage && <ScrollTopButton />}
         </>
     )

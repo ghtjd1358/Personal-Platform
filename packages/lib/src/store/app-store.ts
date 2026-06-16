@@ -64,34 +64,8 @@ export const store = createLocalStore();
 // remote가 자체 store 폴백을 사용 → 인증/사용자 상태가 분리되어 동기화 실패
 // remote의 standalone 모드는 정상 — 자체 store만 사용
 //
-// exposeStore()가 sessionStorage.isHostApp을 설정하는 시점보다 이 모듈이 먼저 로드되므로
-// IIFE로 모듈 로드 시점에 캡처하면 항상 false가 된다.
-// 대신 lazy memoization: true가 확인되면 캐시, false는 캐시하지 않음 (아직 미설정일 수 있음)
-let _hostCheckCached = false;
-
-const isRunningInHost = (): boolean => {
-  if (_hostCheckCached) return true;
-  try {
-    const result = typeof sessionStorage !== 'undefined' &&
-      sessionStorage.getItem('isHostApp') === 'true';
-    if (result) _hostCheckCached = true; // true 확인되면 캐시
-    return result;
-  } catch {
-    return false; // 시크릿 모드/iframe sandbox SecurityError 방어
-  }
-};
-
 export const getStore = () => {
-  // SSR/Jest 환경에서 window가 undefined인 경우를 방어 (jsdom에서는 있지만 Node.js 단순 require 시 없음)
   const w = typeof window !== 'undefined' ? window : undefined;
-  if (!w?.__REDUX_STORE__) {
-    if (isRunningInHost()) {
-      // 호스트 안에서 동작 중인데 호스트 스토어를 찾을 수 없음 → 심각한 오류
-      console.error('[mfa-lib] 호스트 스토어를 찾을 수 없습니다. 상태가 동기화되지 않을 수 있습니다.');
-    } else if (process.env.NODE_ENV !== 'production') {
-      console.warn('[mfa-lib] 호스트 스토어 미노출 — 로컬 폴백 사용 중. Remote 간 상태 동기화 안 됨.');
-    }
-  }
   return w?.__REDUX_STORE__ ?? store;
 };
 
@@ -108,12 +82,7 @@ export const injectReducer = (key: string, reducer: Reducer) => {
 };
 
 export const exposeStore = (s: typeof store) => {
-    if (typeof window === 'undefined') return; // SSR 환경 방어
-    // 중복 호출 방어 — 다른 store 인스턴스가 덮어쓰면 split-brain 발생
-    if (window.__REDUX_STORE__ && window.__REDUX_STORE__ !== s) {
-        console.error('[Store] exposeStore: 다른 store 인스턴스로 재호출됨. 상태 분기가 발생할 수 있습니다.');
-        return;
-    }
+    if (typeof window === 'undefined') return;
     storage.setHostApp();
     window.__REDUX_STORE__ = s;
 };
