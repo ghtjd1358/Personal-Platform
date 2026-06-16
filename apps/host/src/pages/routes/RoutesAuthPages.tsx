@@ -14,9 +14,10 @@
 import React, { lazy, Suspense } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { trackPromise } from 'react-promise-tracker';
-import { RemoteErrorBoundary, REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib';
+import { RemoteErrorBoundary, REMOTE_LINK_PREFIX, DeferredComponent } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './paths';
 import MyPageGuard from './MyPageGuard';
+import { PageSkeleton, DashboardSkeleton } from '../../components/skeleton';
 
 // chunk download 동안 GlobalLoading을 띄우기 위해 trackPromise로 감쌈
 const LOADING_AREA = 'GLOBAL';
@@ -48,16 +49,36 @@ const remoteRoutes: { path: string; name: string; App: React.ComponentType }[] =
   { path: `${jobtrackerPathPrefix}/*`,name: '취업관리', App: JobTrackerApp },
 ];
 
+/**
+ * Suspense fallback wrappers
+ * - DeferredComponent 로 감싸면 빠른 chunk(<200ms) 는 skeleton 깜빡임 없이 통과
+ * - 느린 chunk 만 skeleton 노출 → 사용자 체감 안정성 ↑
+ */
+const remoteFallback = (label: string) => (
+  <DeferredComponent>
+    <PageSkeleton label={`${label}을 불러오는 중입니다`} />
+  </DeferredComponent>
+);
+
+const dashboardFallback = (
+  <DeferredComponent>
+    <DashboardSkeleton />
+  </DeferredComponent>
+);
+
 function RoutesAuthPages() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to={RoutePath.Dashboard} replace />} />
-      <Route path={RoutePath.Dashboard} element={<Suspense fallback=""><Dashboard /></Suspense>} />
+      <Route
+        path={RoutePath.Dashboard}
+        element={<Suspense fallback={dashboardFallback}><Dashboard /></Suspense>}
+      />
 
       {remoteRoutes.map(({ path, name, App }) => (
         <Route key={path} path={path} element={
           <RemoteErrorBoundary remoteName={name}>
-            <Suspense fallback=""><App /></Suspense>
+            <Suspense fallback={remoteFallback(name)}><App /></Suspense>
           </RemoteErrorBoundary>
         } />
       ))}

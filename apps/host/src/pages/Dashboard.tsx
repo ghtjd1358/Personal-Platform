@@ -212,7 +212,7 @@ const Dashboard: React.FC = () => {
                         to={ch.path}
                         key={ch.num}
                         className="channel"
-                        style={{ ['--i' as any]: i }}
+                        style={{ '--i': i }}
                         aria-label={`${ch.ko} (${ch.en})`}
                     >
                         <span className="channel-num">{ch.num}</span>

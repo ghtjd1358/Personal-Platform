@@ -40,7 +40,7 @@ export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo, onLogo
   };
 
   return (
-    <aside className={`app-lnb ${collapsed ? 'collapsed' : ''}`}>
+    <aside className={`app-lnb ${collapsed ? 'collapsed' : ''}`} aria-label="주 메뉴">
       <div className="app-lnb-header">
         {(logo || appName) && (
           <div className="app-lnb-logo" onClick={() => handleNavigate('/')}>
@@ -53,69 +53,96 @@ export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo, onLogo
         {title && !collapsed && <div className="app-lnb-title">{title}</div>}
         <button
           className="app-lnb-toggle"
+          type="button"
           onClick={() => setCollapsed(!collapsed)}
+          aria-label="사이드바 토글"
+          aria-expanded={!collapsed}
         >
           {collapsed ? '›' : '‹'}
         </button>
       </div>
 
       <nav className="app-lnb-nav">
-        {lnbItems.map((item) => (
-          <div key={item.id} className="app-lnb-item">
-            {item.children ? (
-              <>
+        {lnbItems.map((item) => {
+          const itemActive = isActive(item.path);
+          const childActive = item.children?.some((c) => isActive(c.path)) ?? false;
+          const expanded = expandedItems.includes(item.id);
+
+          return (
+            <div key={item.id} className="app-lnb-item">
+              {item.children ? (
+                <>
+                  <button
+                    className={`app-lnb-item-btn ${expanded ? 'expanded' : ''}`}
+                    type="button"
+                    onClick={() => toggleExpand(item.id)}
+                    aria-expanded={expanded}
+                    aria-label={collapsed ? item.title : undefined}
+                    aria-current={childActive ? 'page' : undefined}
+                  >
+                    {item.icon && <span className="app-lnb-icon">{item.icon}</span>}
+                    {!collapsed && <span className="app-lnb-text">{item.title}</span>}
+                    {!collapsed && (
+                      <span className="app-lnb-arrow" aria-hidden="true">
+                        {expanded ? '▼' : '▶'}
+                      </span>
+                    )}
+                  </button>
+                  {expanded && !collapsed && (
+                    <div className="app-lnb-subitems">
+                      {item.children.map((child) => {
+                        const subActive = isActive(child.path);
+                        return (
+                          <button
+                            key={child.id}
+                            className={`app-lnb-subitem ${subActive ? 'active' : ''}`}
+                            type="button"
+                            onClick={() => child.path && handleNavigate(child.path)}
+                            aria-current={subActive ? 'page' : undefined}
+                          >
+                            {child.title}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              ) : (
                 <button
-                  className={`app-lnb-item-btn ${expandedItems.includes(item.id) ? 'expanded' : ''}`}
-                  onClick={() => toggleExpand(item.id)}
+                  className={`app-lnb-item-btn ${itemActive ? 'active' : ''}`}
+                  type="button"
+                  onClick={() => item.path && handleNavigate(item.path)}
+                  aria-label={collapsed ? item.title : undefined}
+                  aria-current={itemActive ? 'page' : undefined}
                 >
                   {item.icon && <span className="app-lnb-icon">{item.icon}</span>}
                   {!collapsed && <span className="app-lnb-text">{item.title}</span>}
-                  {!collapsed && (
-                    <span className="app-lnb-arrow">
-                      {expandedItems.includes(item.id) ? '▼' : '▶'}
-                    </span>
-                  )}
                 </button>
-                {expandedItems.includes(item.id) && !collapsed && (
-                  <div className="app-lnb-subitems">
-                    {item.children.map((child) => (
-                      <button
-                        key={child.id}
-                        className={`app-lnb-subitem ${isActive(child.path) ? 'active' : ''}`}
-                        onClick={() => child.path && handleNavigate(child.path)}
-                      >
-                        {child.title}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <button
-                className={`app-lnb-item-btn ${isActive(item.path) ? 'active' : ''}`}
-                onClick={() => item.path && handleNavigate(item.path)}
-              >
-                {item.icon && <span className="app-lnb-icon">{item.icon}</span>}
-                {!collapsed && <span className="app-lnb-text">{item.title}</span>}
-              </button>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       <div className={`app-lnb-footer ${collapsed ? 'collapsed' : ''}`}>
         {isAuthenticated ? (
           <>
             <div className="app-lnb-user-section">
-              <div className="app-lnb-avatar">
+              <div className="app-lnb-avatar" aria-hidden="true">
                 {user?.name?.charAt(0) || user?.email?.charAt(0) || '?'}
               </div>
               {!collapsed && user && (
                 <span className="app-lnb-user-name">{user.name || user.email}</span>
               )}
             </div>
-            <button className="app-lnb-logout-icon" onClick={onLogout} title="로그아웃">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <button
+              className="app-lnb-logout-icon"
+              type="button"
+              onClick={onLogout}
+              title="로그아웃"
+              aria-label="로그아웃"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" />
                 <line x1="21" y1="12" x2="9" y2="12" />
@@ -125,9 +152,11 @@ export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo, onLogo
         ) : (
           <button
             className="app-lnb-login-btn"
+            type="button"
             onClick={() => handleNavigate('/login')}
+            aria-label="로그인"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
               <polyline points="10 17 15 12 10 7" />
               <line x1="15" y1="12" x2="3" y2="12" />

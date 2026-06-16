@@ -24,9 +24,9 @@ export const Footer: React.FC<FooterProps> = ({
                 </div>
                 {links.length > 0 && (
                     <nav className="app-footer-links">
-                        {links.map((link, index) => (
+                        {links.map((link) => (
                             <a
-                                key={index}
+                                key={link.href || link.label}
                                 href={link.href}
                                 className="app-footer-link"
                                 target="_blank"

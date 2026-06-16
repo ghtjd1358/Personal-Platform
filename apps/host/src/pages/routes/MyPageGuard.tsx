@@ -1,8 +1,9 @@
 import React, { lazy, Suspense } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectUser, RemoteErrorBoundary } from '@sonhoseong/mfa-lib';
+import { selectUser, RemoteErrorBoundary, DeferredComponent } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './paths';
+import { InlineLoader } from '../../components/skeleton';
 
 const MyPage = lazy(() => import('../MyPage'));
 
@@ -16,7 +17,13 @@ const MyPageGuard: React.FC = () => {
 
   return (
     <RemoteErrorBoundary remoteName="마이페이지">
-      <Suspense fallback="">
+      <Suspense
+        fallback={
+          <DeferredComponent>
+            <InlineLoader label="마이페이지를 불러오는 중입니다" />
+          </DeferredComponent>
+        }
+      >
         <MyPage />
       </Suspense>
     </RemoteErrorBoundary>

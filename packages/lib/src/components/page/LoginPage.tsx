@@ -6,7 +6,7 @@
  * Supabase Auth 지원
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useId, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStore, setAccessToken, setUser } from '../../store/app-store';
 import { storage } from '../../utils/storage';
@@ -31,6 +31,26 @@ export interface LoginPageProps {
     onGoogleLogin?: () => Promise<{ token: string; user: User } | void>;
 }
 
+/**
+ * 임의의 err 값에서 안전하게 `.code` 와 `.message` 를 뽑는 type guard 헬퍼.
+ * Firebase / Supabase / 네이티브 Error 모두 동일 형태로 다룬다.
+ */
+function getErrorInfo(err: unknown): { code: string; message: string } {
+    if (typeof err === 'object' && err !== null) {
+        const e = err as { code?: unknown; message?: unknown };
+        const code = typeof e.code === 'string' ? e.code : '';
+        const message =
+            typeof e.message === 'string' && e.message.length > 0
+                ? e.message
+                : '알 수 없는 오류가 발생했습니다.';
+        return { code, message };
+    }
+    if (typeof err === 'string') {
+        return { code: '', message: err };
+    }
+    return { code: '', message: '알 수 없는 오류가 발생했습니다.' };
+}
+
 export function LoginPage({
     redirectPath = '/',
     onLoginSuccess,
@@ -44,6 +64,12 @@ export function LoginPage({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
     const [focusedField, setFocusedField] = useState<string | null>(null);
+
+    // React 18+ useId — SSR / 다중 인스턴스에서도 안정적인 id-htmlFor 매칭 보장
+    const reactId = useId();
+    const emailId = `${reactId}-email`;
+    const passwordId = `${reactId}-password`;
+    const errorId = `${reactId}-error`;
 
     const store = getStore();
     const navigate = useNavigate();
@@ -79,8 +105,10 @@ export function LoginPage({
 
             // 페이지 이동
             navigate(redirectPath);
-        } catch (err: any) {
-            if (err?.code === 'auth/popup-closed-by-user') {
+        } catch (err: unknown) {
+            const { code } = getErrorInfo(err);
+            // 사용자가 팝업 직접 닫은 경우 — 에러로 표시할 필요 없음
+            if (code === 'auth/popup-closed-by-user') {
                 return;
             }
             setError('Google 로그인에 실패했습니다.');
@@ -124,8 +152,9 @@ export function LoginPage({
 
         try {
             await handleSupabaseLogin();
-        } catch (err: any) {
-            setError(err.message || '로그인 중 오류가 발생했습니다.');
+        } catch (err: unknown) {
+            const { message } = getErrorInfo(err);
+            setError(message || '로그인 중 오류가 발생했습니다.');
         } finally {
             setIsSubmitting(false);
         }
@@ -134,7 +163,7 @@ export function LoginPage({
     return (
         <div className="login-page">
             {/* Background */}
-            <div className="login-bg">
+            <div className="login-bg" aria-hidden="true">
                 <div className="login-bg-gradient" />
                 {[...Array(12)].map((_, i) => (
                     <div key={i} className={`login-particle login-particle--${i + 1}`} />
@@ -144,21 +173,21 @@ export function LoginPage({
             <div className="login-card">
                 {/* Header */}
                 <div className="login-header">
-                    <a href="/" className="login-logo-link">
+                    <a href="/" className="login-logo-link" aria-label="홈으로 이동">
                         {logo || (
                             <>
                                 {/* ㅅㅎㅅ editorial 톤 — 먹(#2B1E14) / 인장 주홍(#8C1E1A) / 한지 cream(#FBF5E3) */}
-                                <svg viewBox="0 0 48 48" fill="none" width="28" height="28">
+                                <svg viewBox="0 0 48 48" fill="none" width="28" height="28" aria-hidden="true">
                                     <path d="M 8 40 L 24 8 L 40 40" stroke="#2B1E14" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                                 </svg>
-                                <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
+                                <svg viewBox="0 0 48 48" fill="none" width="48" height="48" aria-hidden="true">
                                     <rect x="20" y="2" width="8" height="16" rx="4" fill="#8C1E1A"/>
                                     <rect x="6" y="16" width="36" height="6" rx="3" fill="#8C1E1A"/>
                                     <ellipse cx="24" cy="36" rx="18" ry="12" fill="#8C1E1A"/>
                                     <ellipse cx="17" cy="36" rx="4" ry="6" fill="#FBF5E3"/>
                                     <ellipse cx="31" cy="36" rx="4" ry="6" fill="#FBF5E3"/>
                                 </svg>
-                                <svg viewBox="0 0 48 48" fill="none" width="28" height="28">
+                                <svg viewBox="0 0 48 48" fill="none" width="28" height="28" aria-hidden="true">
                                     <path d="M 8 40 L 24 8 L 40 40" stroke="#2B1E14" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                                 </svg>
                             </>
@@ -170,8 +199,8 @@ export function LoginPage({
 
                 {/* Error */}
                 {error && (
-                    <div className="login-error">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <div className="login-error" id={errorId} role="alert">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" />
                             <line x1="12" y1="8" x2="12" y2="12" />
                             <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -191,12 +220,12 @@ export function LoginPage({
                         >
                             {isGoogleLoading ? (
                                 <>
-                                    <span className="login-spinner login-spinner--dark" />
+                                    <span className="login-spinner login-spinner--dark" aria-hidden="true" />
                                     로그인 중...
                                 </>
                             ) : (
                                 <>
-                                    <svg width="18" height="18" viewBox="0 0 24 24">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -207,49 +236,59 @@ export function LoginPage({
                             )}
                         </button>
 
-                        <div className="login-divider">
+                        <div className="login-divider" aria-hidden="true">
                             <span>또는</span>
                         </div>
                     </>
                 )}
 
                 {/* Form */}
-                <form className="login-form" onSubmit={handleSubmit}>
+                <form className="login-form" onSubmit={handleSubmit} noValidate>
                     <div className={`login-input-group ${focusedField === 'email' ? 'focused' : ''}`}>
-                        <label className="login-label">이메일</label>
+                        <label className="login-label" htmlFor={emailId}>이메일</label>
                         <div className="login-input-wrapper">
-                            <svg className="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg className="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <rect x="2" y="4" width="20" height="16" rx="2" />
                                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                             </svg>
                             <input
+                                id={emailId}
+                                name="email"
                                 type="email"
+                                autoComplete="email"
                                 className="login-input"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 onFocus={() => setFocusedField('email')}
                                 onBlur={() => setFocusedField(null)}
                                 placeholder="name@example.com"
+                                aria-invalid={!!error}
+                                aria-describedby={error ? errorId : undefined}
                                 required
                             />
                         </div>
                     </div>
 
                     <div className={`login-input-group ${focusedField === 'password' ? 'focused' : ''}`}>
-                        <label className="login-label">비밀번호</label>
+                        <label className="login-label" htmlFor={passwordId}>비밀번호</label>
                         <div className="login-input-wrapper">
-                            <svg className="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg className="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                             </svg>
                             <input
+                                id={passwordId}
+                                name="password"
                                 type="password"
+                                autoComplete="current-password"
                                 className="login-input"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 onFocus={() => setFocusedField('password')}
                                 onBlur={() => setFocusedField(null)}
                                 placeholder="비밀번호를 입력하세요"
+                                aria-invalid={!!error}
+                                aria-describedby={error ? errorId : undefined}
                                 required
                             />
                         </div>
@@ -258,13 +297,13 @@ export function LoginPage({
                     <button type="submit" className="login-button" disabled={isSubmitting}>
                         {isSubmitting ? (
                             <>
-                                <span className="login-spinner" />
+                                <span className="login-spinner" aria-hidden="true" />
                                 로그인 중...
                             </>
                         ) : (
                             <>
                                 로그인
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                     <path d="M5 12h14M12 5l7 7-7 7" />
                                 </svg>
                             </>

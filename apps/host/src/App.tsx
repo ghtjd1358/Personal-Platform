@@ -12,10 +12,12 @@ import {
     Lnb,
     Logo,
     MyPageIcon,
+    DeferredComponent,
 } from '@sonhoseong/mfa-lib';
 import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
 import { lnbItems } from './lnb-items';
 import HostShell from './components/HostShell';
+import { PageSkeleton } from './components/skeleton';
 import './App.css';
 import './sidebar-editorial.css';
 import './theme-editorial.css';
@@ -69,7 +71,13 @@ const App = () => {
                         }
                     />
                     <main className="main-content">
-                        <Suspense fallback="">
+                        <Suspense
+                            fallback={
+                                <DeferredComponent>
+                                    <PageSkeleton label="페이지를 불러오는 중입니다" />
+                                </DeferredComponent>
+                            }
+                        >
                             <RoutesAuthPages />
                         </Suspense>
                     </main>
