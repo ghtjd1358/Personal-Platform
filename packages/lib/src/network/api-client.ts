@@ -70,49 +70,16 @@ export function initApiClient(options: { onUnauthorized?: () => void } = {}) {
   });
 }
 
-/**
- * Lazy Axios Proxy 팩토리
- *
- * `initApiClient()` 호출 전에도 import할 수 있게 해주는 Proxy 래퍼.
- * 실제 axios 인스턴스는 첫 번째 메서드 호출 시점에 `getInstance()`로 가져옴.
- *
- * - get:   bound function 캐시로 reference equality 보장 (useCallback dep 안전)
- * - apply: `apiClient(config)` 직접 호출 패턴 지원
- * - set:   axios.defaults 등 외부에서 인스턴스 프로퍼티 수정 가능
- */
 type AxiosClientInstance = ReturnType<typeof AxiosClientFactory.createClient>;
-const _boundCache = new WeakMap<object, Map<string | symbol, Function>>();
 
-function createLazyAxiosProxy(getInstance: () => AxiosClientInstance | undefined): AxiosClientInstance {
-    return new Proxy(function(){} as unknown as AxiosClientInstance, {
-        get(_target, prop) {
-            const instance = getInstance();
-            // Symbol / thenable 키는 Promise.resolve / DevTools 탐색 시 throw 방지
-            if (typeof prop === 'symbol' || prop === 'then' || prop === 'catch' || prop === 'finally') {
-                return instance ? Reflect.get(instance, prop, instance) : undefined;
-            }
-            if (!instance) throw new Error('[apiClient] initApiClient()가 호출되지 않았습니다. bootstrap.tsx를 확인하세요.');
-            const val = Reflect.get(instance, prop, instance);
-            if (typeof val !== 'function') return val;
-            // 매 get마다 새 bind() 생성 방지 — WeakMap 캐시로 재사용
-            let cache = _boundCache.get(instance);
-            if (!cache) { cache = new Map(); _boundCache.set(instance, cache); }
-            if (!cache.has(prop)) cache.set(prop, (val as Function).bind(instance));
-            return cache.get(prop);
-        },
-        apply(_target, _thisArg, args) {
-            const instance = getInstance();
-            if (!instance) throw new Error('[apiClient] initApiClient()가 호출되지 않았습니다.');
-            return (instance as unknown as Function).apply(instance, args);
-        },
-        set(_target, prop, value) {
-            const instance = getInstance();
-            if (!instance) throw new Error('[apiClient] initApiClient()가 호출되지 않았습니다.');
-            (instance as unknown as Record<string | symbol, unknown>)[prop as string] = value;
-            return true;
-        },
-    });
-}
-
-/** 모든 remote에서 공유하는 Node.js API Axios 인스턴스 (initApiClient() 이후 사용 가능) */
-export const apiClient = createLazyAxiosProxy(getApiClientInstance);
+// initApiClient() 호출 전에도 import할 수 있게 Proxy로 감쌈
+// 실제 axios 인스턴스는 메서드 호출 시점에 가져옴
+export const apiClient = new Proxy({} as AxiosClientInstance, {
+    get(_target, prop) {
+        // Symbol, thenable 키는 undefined 반환 (Promise.resolve / DevTools 호환)
+        if (typeof prop === 'symbol' || prop === 'then') return undefined;
+        if (!_apiClient) throw new Error('[apiClient] initApiClient()가 먼저 호출되어야 합니다.');
+        const value = Reflect.get(_apiClient, prop);
+        return typeof value === 'function' ? (value as Function).bind(_apiClient) : value;
+    },
+});

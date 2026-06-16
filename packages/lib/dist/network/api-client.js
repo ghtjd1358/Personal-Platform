@@ -60,44 +60,16 @@ export function initApiClient(options = {}) {
         withCredentials: true, // refresh cookie 전송을 위해 필요
     });
 }
-const _boundCache = new WeakMap();
-function createLazyAxiosProxy(getInstance) {
-    return new Proxy(function () { }, {
-        get(_target, prop) {
-            const instance = getInstance();
-            // Symbol / thenable 키는 Promise.resolve / DevTools 탐색 시 throw 방지
-            if (typeof prop === 'symbol' || prop === 'then' || prop === 'catch' || prop === 'finally') {
-                return instance ? Reflect.get(instance, prop, instance) : undefined;
-            }
-            if (!instance)
-                throw new Error('[apiClient] initApiClient()가 호출되지 않았습니다. bootstrap.tsx를 확인하세요.');
-            const val = Reflect.get(instance, prop, instance);
-            if (typeof val !== 'function')
-                return val;
-            // 매 get마다 새 bind() 생성 방지 — WeakMap 캐시로 재사용
-            let cache = _boundCache.get(instance);
-            if (!cache) {
-                cache = new Map();
-                _boundCache.set(instance, cache);
-            }
-            if (!cache.has(prop))
-                cache.set(prop, val.bind(instance));
-            return cache.get(prop);
-        },
-        apply(_target, _thisArg, args) {
-            const instance = getInstance();
-            if (!instance)
-                throw new Error('[apiClient] initApiClient()가 호출되지 않았습니다.');
-            return instance.apply(instance, args);
-        },
-        set(_target, prop, value) {
-            const instance = getInstance();
-            if (!instance)
-                throw new Error('[apiClient] initApiClient()가 호출되지 않았습니다.');
-            instance[prop] = value;
-            return true;
-        },
-    });
-}
-/** 모든 remote에서 공유하는 Node.js API Axios 인스턴스 (initApiClient() 이후 사용 가능) */
-export const apiClient = createLazyAxiosProxy(getApiClientInstance);
+// initApiClient() 호출 전에도 import할 수 있게 Proxy로 감쌈
+// 실제 axios 인스턴스는 메서드 호출 시점에 가져옴
+export const apiClient = new Proxy({}, {
+    get(_target, prop) {
+        // Symbol, thenable 키는 undefined 반환 (Promise.resolve / DevTools 호환)
+        if (typeof prop === 'symbol' || prop === 'then')
+            return undefined;
+        if (!_apiClient)
+            throw new Error('[apiClient] initApiClient()가 먼저 호출되어야 합니다.');
+        const value = Reflect.get(_apiClient, prop);
+        return typeof value === 'function' ? value.bind(_apiClient) : value;
+    },
+});

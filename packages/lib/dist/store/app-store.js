@@ -27,13 +27,11 @@ const authMiddleware = () => (next) => (action) => {
     return result;
 };
 // 최근 메뉴 목록이 바뀔 때마다 localStorage에 자동 저장하는 미들웨어
-// recentMenu 액션 발생 후 list를 storage에 동기화 — reducer는 순수 함수로 유지
 const recentMenuPersistMiddleware = (api) => (next) => (action) => {
     const result = next(action);
-    if (typeof action === 'object' && action !== null && 'type' in action &&
-        typeof action.type === 'string' &&
-        action.type.startsWith('recentMenu/')) {
-        const list = api.getState().recentMenu.list;
+    const actionType = action.type ?? '';
+    if (actionType.startsWith('recentMenu/')) {
+        const { list } = api.getState().recentMenu;
         storage.setRecentMenu(list);
     }
     return result;
