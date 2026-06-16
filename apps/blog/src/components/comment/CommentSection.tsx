@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CommentDetail, CreateCommentRequest } from '@/network';
-import { getCurrentUser, useToast, useAsyncConfirm, Button } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, useAsyncConfirm, Button } from '@sonhoseong/mfa-lib';
 import { useComments } from '@/hooks';
 import { formatRelativeOrDate } from '@/utils';
 
@@ -32,7 +32,7 @@ const CommentForm: React.FC<CommentFormProps> = ({
   const [content, setContent] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +126,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const [editContent, setEditContent] = useState(comment.content);
   const [deleting, setDeleting] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
   const confirmDialog = useAsyncConfirm();
 
   const isOwner = currentUser?.id === comment.user_id;

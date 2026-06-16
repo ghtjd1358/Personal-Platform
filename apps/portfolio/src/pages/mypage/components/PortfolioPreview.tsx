@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { Badge } from '@sonhoseong/mfa-lib';
 
 interface TechStackItem {
@@ -122,7 +123,7 @@ const PortfolioPreview: React.FC<PortfolioPreviewProps> = ({
                             <h4>상세 설명</h4>
                             <div
                                 className="preview-description-content"
-                                dangerouslySetInnerHTML={{ __html: description }}
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
                             />
                         </div>
                     )}

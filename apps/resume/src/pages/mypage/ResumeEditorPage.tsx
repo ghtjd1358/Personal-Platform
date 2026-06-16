@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
-import { getCurrentUser, useToast, selectAccessToken, LoadingSpinner } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, selectAccessToken, LoadingSpinner } from '@sonhoseong/mfa-lib';
 import { resumesApi, uploadProfileImage, experiencesApi, portfoliosApi } from '@/network';
 import type { ResumeProfile, ResumeVisibility } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
@@ -54,7 +54,7 @@ const ResumeEditorPage: React.FC = () => {
   const location = useLocation();
   const toast = useToast();
   const accessToken = useSelector(selectAccessToken);
-  const user = getCurrentUser();
+  const user = useCurrentUser();
 
   const [resume, setResume] = useState<ResumeProfile | null>(null);
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -183,7 +183,7 @@ const ResumeEditorPage: React.FC = () => {
     try {
       const result = await uploadProfileImage(file, user.id);
       if (result.success && result.publicUrl) {
-        setFormData((prev) => ({ ...prev, profile_image: result.publicUrl }));
+        setFormData((prev) => ({ ...prev, profile_image: result.publicUrl ?? prev.profile_image }));
         toast.success('이미지가 업로드되었습니다.');
       } else {
         toast.error(result.error || '업로드에 실패했습니다.');
@@ -232,7 +232,7 @@ const ResumeEditorPage: React.FC = () => {
           resume_name: formData.resume_name.trim() || undefined,
           name: formData.name.trim(),
           title: formData.title.trim(),
-          summary: formData.summary.trim() || null,
+          summary: formData.summary.trim() || undefined,
           profile_image: formData.profile_image.trim() || null,
           contact_email: formData.contact_email.trim() || null,
           github: formData.github.trim() || null,
@@ -299,9 +299,6 @@ const ResumeEditorPage: React.FC = () => {
             end_date: proj.is_current ? null : (proj.end_date || null),
             is_current: proj.is_current,
             description: proj.description.trim() || undefined,
-            tech_stack: proj.tech_stack
-              ? proj.tech_stack.split(',').map((s) => s.trim()).filter(Boolean)
-              : [],
             order_index: i,
           });
         }

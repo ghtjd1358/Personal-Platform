@@ -11,7 +11,7 @@
  */
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { useToast, getCurrentUser, getSupabase } from '@sonhoseong/mfa-lib'
+import { useToast, useCurrentUser, getSupabase } from '@sonhoseong/mfa-lib'
 import {
     useFetchPortfolioByIdWithDetails,
     useCreatePortfolio,
@@ -34,7 +34,7 @@ const ProjectsEditorPage: React.FC = () => {
     const fromResume = searchParams.get('fromResume')
     const navigate = useNavigate()
     const toast = useToast()
-    const user = getCurrentUser()
+    const user = useCurrentUser()
     const isEdit = !!id
 
     const { portfolio: loadedPortfolio } = useFetchPortfolioByIdWithDetails(id)

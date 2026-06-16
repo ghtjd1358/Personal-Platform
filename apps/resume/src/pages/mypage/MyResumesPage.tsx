@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCurrentUser, useToast, selectAccessToken, LoadingSpinner, EmptyState } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, selectAccessToken, LoadingSpinner, EmptyState } from '@sonhoseong/mfa-lib';
 import { resumesApi, experiencesApi, portfoliosApi } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
 import { ResumeListCard, type ResumeCardData } from '../../components/cards/ResumeListCard';
@@ -10,7 +10,7 @@ const MyResumesPage: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const accessToken = useSelector(selectAccessToken);
-  const user = getCurrentUser();
+  const user = useCurrentUser();
 
   const [resumes, setResumes] = useState<ResumeCardData[]>([]);
   const [isLoading, setIsLoading] = useState(true);

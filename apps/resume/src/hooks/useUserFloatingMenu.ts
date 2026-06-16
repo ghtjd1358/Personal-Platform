@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser } from '@sonhoseong/mfa-lib';
+import { selectAccessToken, getCurrentUser, useCurrentUser } from '@sonhoseong/mfa-lib';
 import { LINK_PREFIX } from '@/config/constants';
 
 interface UseUserFloatingMenuReturn {
@@ -42,7 +42,7 @@ export function useUserFloatingMenu(): UseUserFloatingMenuReturn {
 
   const accessToken = useSelector(selectAccessToken);
   const isAuthenticated = !!accessToken;
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
 
   // 스크롤 감지 — 100px 초과 시 top 버튼 노출
   useEffect(() => {

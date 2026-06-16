@@ -22,7 +22,7 @@ export function useUpdateFeature(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                featuresApi.update(id, payload)
+                Promise.resolve(featuresApi.update(id, payload))
                     .then(({ data, error }) => {
                         if (error) throw error;
                         toastSuccess('Feature 가 수정되었습니다');

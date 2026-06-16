@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getCurrentUser, useToast, Button } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, Button } from '@sonhoseong/mfa-lib';
 import {
   SeriesDetail,
   CreateSeriesRequest,
@@ -60,7 +60,7 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
 
   const isEditing = !!series;
   const isLoading = isCreating || isUpdating;
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
 
   // 모달 열릴 때 초기화
   useEffect(() => {

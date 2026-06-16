@@ -25,7 +25,7 @@ export function useUpdateSkill(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                skillsApi.updateSkill(id, payload)
+                Promise.resolve(skillsApi.updateSkill(id, payload))
                     .then(({ data, error }) => {
                         if (error) throw error;
                         toastSuccess('스킬이 수정되었습니다');

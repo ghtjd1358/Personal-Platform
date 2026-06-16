@@ -176,49 +176,45 @@ export const useHomePageData = (): HomeData => {
 
         const run = async () => {
             try {
-                console.log('[useHomePageData] start (public fetch, no user filter)');
                 const sb = getSupabase();
 
                 // resume_profile (user_id IS NULL row) → Hero summary 두 줄. fetch 결과 오기 전엔
                 // HeroSection 이 fallback 하드코딩 사용 → FOUC 회피. 양치기 카피 다듬을 땐 SQL UPDATE 1번이면 끝.
                 // 모든 read 에 user_id 필터 없음. DB 에 존재하는 데이터를 그대로 읽음.
                 const [skillsResp, expResp, portfolioResp, featuresResp, profileResp] = await Promise.all([
-                    skillsApi.getCategories().catch(() => [] as SkillCategoryWithSkills[]),
-                    sb.from('experiences')
-                        // experience_tags JOIN skills JOIN skill_categories — 카테고리 order 까지 끌어와 정렬용
-                        .select('*, experience_tasks(id, task, order_index), experience_tags(tag, skills(icon, icon_color, skill_categories(order_index)))')
-                        .order('order_index', { ascending: true })
-                        .then((r) => (r.data ?? []) as ExperienceRow[])
+                    Promise.resolve(skillsApi.getCategories()).catch(() => [] as SkillCategoryWithSkills[]),
+                    Promise.resolve(
+                        sb.from('experiences')
+                            // experience_tags JOIN skills JOIN skill_categories — 카테고리 order 까지 끌어와 정렬용
+                            .select('*, experience_tasks(id, task, order_index), experience_tags(tag, skills(icon, icon_color, skill_categories(order_index)))')
+                            .order('order_index', { ascending: true })
+                    ).then((r) => (r.data ?? []) as ExperienceRow[])
                         .catch(() => [] as ExperienceRow[]),
-                    sb.from('portfolios')
-                        // portfolio_tags 도 동일하게 nested JOIN
-                        .select('*, portfolio_tags(tag, order_index, skills(icon, icon_color, skill_categories(order_index))), portfolio_tasks(task, order_index)')
-                        .eq('is_public', true)
-                        .eq('show_on_resume', true)
-                        .order('order_index', { ascending: true })
-                        .then((r) => (r.data ?? []) as PortfolioRow[])
+                    Promise.resolve(
+                        sb.from('portfolios')
+                            // portfolio_tags 도 동일하게 nested JOIN
+                            .select('*, portfolio_tags(tag, order_index, skills(icon, icon_color, skill_categories(order_index))), portfolio_tasks(task, order_index)')
+                            .eq('is_public', true)
+                            .eq('show_on_resume', true)
+                            .order('order_index', { ascending: true })
+                    ).then((r) => (r.data ?? []) as PortfolioRow[])
                         .catch(() => [] as PortfolioRow[]),
-                    sb.from('features')
-                        .select('*')
-                        .order('order_index', { ascending: true })
-                        .then((r) => (r.data ?? []) as Feature[])
+                    Promise.resolve(
+                        sb.from('features')
+                            .select('*')
+                            .order('order_index', { ascending: true })
+                    ).then((r) => (r.data ?? []) as Feature[])
                         .catch(() => [] as Feature[]),
-                    sb.from('resume_profile')
-                        .select('summary')
-                        .is('user_id', null)
-                        .maybeSingle()
-                        .then((r) => (r.data?.summary as string | undefined) ?? null)
+                    Promise.resolve(
+                        sb.from('resume_profile')
+                            .select('summary')
+                            .is('user_id', null)
+                            .maybeSingle()
+                    ).then((r) => (r.data?.summary as string | undefined) ?? null)
                         .catch(() => null as string | null),
                 ]);
 
                 if (cancelled) return;
-
-                console.log('[useHomePageData] fetched', {
-                    skillsCount: skillsResp.length,
-                    expCount: expResp.length,
-                    portfolioCount: portfolioResp.length,
-                    featuresCount: featuresResp.length,
-                });
 
                 let gotAnyLiveData = false;
 

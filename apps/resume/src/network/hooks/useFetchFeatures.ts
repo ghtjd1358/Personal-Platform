@@ -16,7 +16,7 @@ export function useFetchFeatures(updater?: number, options: { silent?: boolean }
         let cancelled = false;
 
         showGlobalLoading(
-            featuresApi.getAll()
+            Promise.resolve(featuresApi.getAll())
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

@@ -36,8 +36,6 @@ export async function updateProfile(
       updateData.avatar_url = data.avatar_url || null;
     }
 
-    console.log('[updateProfile] userId:', userId, 'data:', updateData);
-
     const { data: result, error } = await supabase
       .from('profiles')
       .update(updateData)
@@ -50,7 +48,6 @@ export async function updateProfile(
       return { success: false, error: error.message };
     }
 
-    console.log('[updateProfile] Success:', result);
     return { success: true, data: result };
   } catch (err) {
     console.error('[updateProfile] Exception:', err);

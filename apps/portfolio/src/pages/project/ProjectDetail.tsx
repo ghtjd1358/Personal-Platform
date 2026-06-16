@@ -7,9 +7,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser, ScrollTopButton, storage, LoadingSpinner, ErrorState, Badge } from '@sonhoseong/mfa-lib';
+import { selectAccessToken, useCurrentUser, ScrollTopButton, storage, LoadingSpinner, ErrorState, Badge } from '@sonhoseong/mfa-lib';
 import { getPortfolioDetail, incrementViewCount } from '@/network/apis/portfolio';
 import { PortfolioSummary } from '@/network/apis/portfolio/types';
 import { Comments, ShareButton, LikeButton } from '@/components';
@@ -26,7 +27,7 @@ const ProjectDetail: React.FC = () => {
 
   const accessToken = useSelector(selectAccessToken);
   const isAuthenticated = !!accessToken;
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
   const isOwner = currentUser && project?.user_id === currentUser.id;
 
   useEffect(() => {
@@ -130,7 +131,7 @@ const ProjectDetail: React.FC = () => {
               <h2 className="pd-h2">상세</h2>
               <div
                 className="pd-rich-content"
-                dangerouslySetInnerHTML={{ __html: project.description }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(project.description) }}
               />
             </section>
           )}

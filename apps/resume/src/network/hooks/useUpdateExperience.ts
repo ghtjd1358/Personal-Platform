@@ -26,7 +26,7 @@ export function useUpdateExperience(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                experiencesApi.update(id, payload)
+                Promise.resolve(experiencesApi.update(id, payload))
                     .then(({ data, error }) => {
                         if (error) throw error;
                         toastSuccess('경력이 수정되었습니다');

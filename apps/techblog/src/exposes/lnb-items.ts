@@ -1,6 +1,12 @@
-import { LnbItem, REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib';
+import { REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib';
 
 export const pathPrefix = REMOTE_LINK_PREFIX.jobtracker;
+
+interface LnbItem {
+  name: string;
+  path: string;
+  icon: string;
+}
 
 const lnbItems: LnbItem[] = [
   {

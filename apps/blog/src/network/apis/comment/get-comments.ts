@@ -2,7 +2,7 @@ import { getSupabase, ApiResponse } from '@/network/apis/common';
 import { CommentDetail } from './types';
 
 /** Supabase에서 반환하는 원시 댓글 타입 */
-interface RawComment extends Omit<CommentDetail, 'replies'> {
+interface RawComment extends Omit<CommentDetail, 'replies' | 'author'> {
   author: { id: string; name: string; avatar_url: string | null } | null;
 }
 
@@ -41,7 +41,11 @@ function buildCommentTree(comments: RawComment[]): CommentDetail[] {
   const rootComments: CommentDetail[] = [];
 
   comments.forEach((comment) => {
-    commentMap[comment.id] = { ...comment, replies: [] };
+    commentMap[comment.id] = {
+      ...comment,
+      author: comment.author ?? undefined,
+      replies: [],
+    };
   });
 
   comments.forEach((comment) => {

@@ -27,7 +27,7 @@ export function useFetchExperiencesByResumeId(
         let cancelled = false;
 
         showGlobalLoading(
-            experiencesApi.getByResumeId(resumeId)
+            Promise.resolve(experiencesApi.getByResumeId(resumeId))
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

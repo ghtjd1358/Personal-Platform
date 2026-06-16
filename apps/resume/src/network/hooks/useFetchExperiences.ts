@@ -20,7 +20,7 @@ export function useFetchExperiences(updater?: number, options: { silent?: boolea
         let cancelled = false;
 
         showGlobalLoading(
-            experiencesApi.getAll()
+            Promise.resolve(experiencesApi.getAll())
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

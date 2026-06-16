@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser } from '@sonhoseong/mfa-lib';
+import { selectAccessToken, useCurrentUser, getCurrentUser } from '@sonhoseong/mfa-lib';
 import {
   getComments,
   createComment,
@@ -41,7 +41,7 @@ export function usePortfolioComments(portfolioId: string): UsePortfolioCommentsR
 
   const accessToken = useSelector(selectAccessToken);
   const isAuthenticated = !!accessToken;
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
 
   const refetch = useCallback(async () => {
     const res = await getComments(portfolioId);

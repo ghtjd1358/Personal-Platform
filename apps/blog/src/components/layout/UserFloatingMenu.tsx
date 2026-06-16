@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser } from '@sonhoseong/mfa-lib';
+import { selectAccessToken, useCurrentUser } from '@sonhoseong/mfa-lib';
 import { LINK_PREFIX } from '@/config/constants';
 import { getPosts, PostSummary } from '@/network';
 
@@ -17,7 +17,7 @@ const UserFloatingMenu: React.FC = () => {
 
   const accessToken = useSelector(selectAccessToken);
   const isAuthenticated = !!accessToken;
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
 
   // 현재 페이지 확인
   const isHomePage = location.pathname === `${LINK_PREFIX}/` || location.pathname === `${LINK_PREFIX}`;

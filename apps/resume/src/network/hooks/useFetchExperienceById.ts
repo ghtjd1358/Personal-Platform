@@ -28,7 +28,7 @@ export function useFetchExperienceById(
         let cancelled = false;
 
         showGlobalLoading(
-            experiencesApi.getById(id)
+            Promise.resolve(experiencesApi.getById(id))
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

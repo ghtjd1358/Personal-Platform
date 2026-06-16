@@ -24,7 +24,7 @@ export function useFetchPortfolioById(
         let cancelled = false;
 
         showGlobalLoading(
-            portfoliosApi.getById(id)
+            Promise.resolve(portfoliosApi.getById(id))
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

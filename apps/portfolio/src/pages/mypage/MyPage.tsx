@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCurrentUser, useAsyncConfirm, useToast, Badge, EmptyState, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useAsyncConfirm, useToast, Badge, EmptyState, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
 import { getMyPortfolios, deletePortfolio, PortfolioSummary } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
 
@@ -15,7 +15,7 @@ const MyPage: React.FC = () => {
     const toast = useToast();
     const confirmDialog = useAsyncConfirm();
 
-    const currentUser = getCurrentUser();
+    const currentUser = useCurrentUser();
 
     useEffect(() => {
         if (currentUser?.id) {

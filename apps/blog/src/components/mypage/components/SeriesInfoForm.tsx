@@ -9,7 +9,7 @@ interface SeriesInfoFormProps {
   isLoading: boolean;
   isEditing: boolean;
   error?: string | null;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onCoverImageChange: (value: string) => void;

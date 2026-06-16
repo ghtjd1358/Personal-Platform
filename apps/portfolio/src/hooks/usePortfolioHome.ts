@@ -36,7 +36,7 @@ export function usePortfolioHome() {
         p.description?.toLowerCase().includes(q) ||
         p.short_description?.toLowerCase().includes(q) ||
         p.techStack?.some(t => t.name.toLowerCase().includes(q)) ||
-        p.tags?.some(t => (t.tag || t).toLowerCase().includes(q))
+        p.tags?.some(t => (typeof t === 'string' ? t : t.tag).toLowerCase().includes(q))
       );
     }
 

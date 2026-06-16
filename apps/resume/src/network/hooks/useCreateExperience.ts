@@ -26,7 +26,7 @@ export function useCreateExperience(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                experiencesApi.create(payload)
+                Promise.resolve(experiencesApi.create(payload))
                     .then(({ data, error }) => {
                         if (error) throw error;
                         toastSuccess('경력이 추가되었습니다');

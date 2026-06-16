@@ -5,7 +5,7 @@
  */
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { usePermission, getCurrentUser, EmptyState } from '@sonhoseong/mfa-lib'
+import { usePermission, useCurrentUser, EmptyState } from '@sonhoseong/mfa-lib'
 import type { Feature } from '../../../network/apis/types'
 import {
     useFetchFeatures,
@@ -17,7 +17,7 @@ import '../experience/ExperienceList.editorial.css'
 
 const FeaturesListPage: React.FC = () => {
     const { canEditResource, isOwner } = usePermission()
-    const currentUser = getCurrentUser()
+    const currentUser = useCurrentUser()
 
     // 핵심 역량 카드는 추가/삭제 불가 — 수정만 가능. updater 불필요.
     const { features: myFeatures } = useFetchFeaturesByUserId(currentUser?.id, 0)

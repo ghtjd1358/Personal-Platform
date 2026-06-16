@@ -24,7 +24,7 @@ export function useFetchPortfoliosByResumeId(
         let cancelled = false;
 
         showGlobalLoading(
-            portfoliosApi.getByResumeId(resumeId)
+            Promise.resolve(portfoliosApi.getByResumeId(resumeId))
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

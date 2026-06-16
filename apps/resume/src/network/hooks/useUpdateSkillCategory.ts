@@ -25,7 +25,7 @@ export function useUpdateSkillCategory(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                skillsApi.updateCategory(id, payload)
+                Promise.resolve(skillsApi.updateCategory(id, payload))
                     .then(({ data, error }) => {
                         if (error) throw error;
                         toastSuccess('카테고리가 수정되었습니다');

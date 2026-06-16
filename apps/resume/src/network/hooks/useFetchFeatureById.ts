@@ -24,7 +24,7 @@ export function useFetchFeatureById(
         let cancelled = false;
 
         showGlobalLoading(
-            featuresApi.getById(id)
+            Promise.resolve(featuresApi.getById(id))
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

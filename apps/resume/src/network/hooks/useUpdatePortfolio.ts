@@ -22,7 +22,7 @@ export function useUpdatePortfolio(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                portfoliosApi.update(id, payload)
+                Promise.resolve(portfoliosApi.update(id, payload))
                     .then(({ data, error }) => {
                         if (error) throw error;
                         toastSuccess('포트폴리오가 수정되었습니다');

@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { useToast, getCurrentUser, Badge } from '@sonhoseong/mfa-lib'
+import { useToast, useCurrentUser, Badge } from '@sonhoseong/mfa-lib'
 import { LINK_PREFIX } from '@/config/constants'
 import {
     useFetchExperienceByIdWithDetails,
@@ -20,7 +20,7 @@ const ExperienceEditorPage: React.FC = () => {
     const resumeId = searchParams.get('resumeId')
     const navigate = useNavigate()
     const toast = useToast()
-    const user = getCurrentUser()
+    const user = useCurrentUser()
     const isEdit = !!id
 
     const { experience: loadedExp } = useFetchExperienceByIdWithDetails(id)

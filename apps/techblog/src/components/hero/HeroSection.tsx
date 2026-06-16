@@ -1,5 +1,5 @@
 import React from 'react';
-import { getCurrentUser } from '@sonhoseong/mfa-lib';
+import { useCurrentUser } from '@sonhoseong/mfa-lib';
 import '@/styles/editorial.css';
 
 const Grain: React.FC = () => (
@@ -23,7 +23,8 @@ const Fiber: React.FC = () => (
 );
 
 const HeroSection: React.FC = () => {
-  const userName = getCurrentUser()?.name;
+  const currentUser = useCurrentUser();
+  const userName = currentUser?.name;
   return (
     <section className="editorial-hero editorial-hero--fullheight">
       <Grain />

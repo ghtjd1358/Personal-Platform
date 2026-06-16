@@ -10,7 +10,7 @@ interface PortfolioBasicSectionProps {
     description: string;
     coverImage: string;
     isUploading: boolean;
-    fileInputRef: React.RefObject<HTMLInputElement>;
+    fileInputRef: React.RefObject<HTMLInputElement | null>;
     onTitleChange: (value: string) => void;
     onSlugChange: (value: string) => void;
     onBadgeChange: (value: string) => void;

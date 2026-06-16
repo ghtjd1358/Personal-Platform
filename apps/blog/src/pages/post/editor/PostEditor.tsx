@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCurrentUser, useToast } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast } from '@sonhoseong/mfa-lib';
 import { TiptapEditor, EditorHeader, TagSelector } from '@/components/editor';
 import { LoadingSpinner } from '@/components/loading';
 import { usePostEditorData, useCreatePost, useUpdatePost, usePostAutosave, PostFormData } from '@/hooks';
@@ -14,7 +14,7 @@ const PostEditor: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const toast = useToast();
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
   const isEditMode = Boolean(slug);
 
   // 데이터 페칭 (시리즈는 더 이상 UI에 노출하지 않지만 initialFormData 호환성 유지)

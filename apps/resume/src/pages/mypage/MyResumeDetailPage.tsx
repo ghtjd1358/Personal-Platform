@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCurrentUser, useToast, useAsyncConfirm, selectAccessToken, LoadingSpinner, ErrorState } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, useAsyncConfirm, selectAccessToken, LoadingSpinner, ErrorState } from '@sonhoseong/mfa-lib';
 import { resumesApi, experiencesApi, portfoliosApi } from '@/network';
 import type { ResumeProfile, ProjectItem } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
@@ -19,7 +19,7 @@ const MyResumeDetailPage: React.FC = () => {
   const toast = useToast();
   const confirmDialog = useAsyncConfirm();
   const accessToken = useSelector(selectAccessToken);
-  const user = getCurrentUser();
+  const user = useCurrentUser();
 
   const [resume, setResume] = useState<ResumeProfile | null>(null);
   const [experiences, setExperiences] = useState<ExperienceDetail[]>([]);

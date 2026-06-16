@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser, logout } from '@sonhoseong/mfa-lib';
+import { selectAccessToken, useCurrentUser, logout } from '@sonhoseong/mfa-lib';
 import { LINK_PREFIX } from '@/config/constants';
 
 const BlogHeader: React.FC = () => {
   const accessToken = useSelector(selectAccessToken);
   const isAuthenticated = !!accessToken;
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
   const navigate = useNavigate();
 
   const [isScrolled, setIsScrolled] = useState(false);

@@ -1,9 +1,9 @@
 import { getSupabase, ApiResponse } from '@/network/apis/common';
-import { PostDetail, TagDetail } from './types';
+import { PostDetail } from './types';
 
-/** 포스트-태그 조인 결과 타입 */
+/** 포스트-태그 조인 결과 타입 (Supabase nested select → 배열로 반환) */
 interface PostTagJoin {
-  tag: TagDetail | null;
+  tag: { id: string; name: string; slug: string }[] | null;
 }
 
 /**
@@ -58,7 +58,7 @@ export async function getPostDetail(
       success: true,
       data: {
         ...data,
-        tags: postTags?.map((pt: PostTagJoin) => pt.tag).filter(Boolean) || [],
+        tags: postTags?.flatMap((pt: PostTagJoin) => pt.tag ?? []) || [],
       },
     };
   } catch (err) {

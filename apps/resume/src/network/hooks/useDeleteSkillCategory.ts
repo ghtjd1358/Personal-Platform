@@ -23,7 +23,7 @@ export function useDeleteSkillCategory(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                skillsApi.deleteCategory(id)
+                Promise.resolve(skillsApi.deleteCategory(id))
                     .then(({ error }) => {
                         if (error) throw error;
                         toastSuccess('카테고리가 삭제되었습니다');

@@ -5,6 +5,7 @@
  * 구조: cover → title block → properties → tech → 개요/도전/해결/성과 → 상세(HTML) → tags → links
  */
 import React, { useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import { Button, Badge, EmptyState, ErrorState, LoadingSpinner } from '@sonhoseong/mfa-lib';
 import { usePortfolioModal } from '@/hooks';
 import { PortfolioSummary } from '@/network/apis/portfolio/types';
@@ -196,7 +197,7 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolioId, onClose })
                     {portfolio.description && (
                       <section className="pm-section pm-rich">
                         <h2 className="pm-h2">상세 내용</h2>
-                        <div className="pm-rich-content" dangerouslySetInnerHTML={{ __html: portfolio.description }} />
+                        <div className="pm-rich-content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(portfolio.description) }} />
                       </section>
                     )}
                   </>

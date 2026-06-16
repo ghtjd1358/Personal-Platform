@@ -5,7 +5,7 @@ interface ResumeProfileSectionProps {
   name: string;
   title: string;
   summary: string;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isSaving: boolean;

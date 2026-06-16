@@ -73,7 +73,7 @@ const PostDetail: React.FC = () => {
         postSlug={post.slug}
         postId={post.id}
         postTitle={post.title}
-        postExcerpt={post.excerpt}
+        postExcerpt={post.excerpt ?? undefined}
         onDelete={handleDelete}
       />
       {/* comment */}

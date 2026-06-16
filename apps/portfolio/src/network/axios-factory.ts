@@ -1,4 +1,4 @@
-import Axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import Axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { v4 as uuid } from 'uuid';
 
 export type RequestConfig = Omit<AxiosRequestConfig, 'headers'> & { headers: Record<string, string> };
@@ -54,7 +54,7 @@ export class AxiosClientFactory {
 
     // 요청 인터셉터
     axiosInstance.interceptors.request.use((config) => {
-      config.headers = config.headers || {};
+      config.headers = (config.headers || {}) as AxiosRequestHeaders;
 
       // UUID 헤더 추가
       config.headers['X-Request-ID'] = uuid();
@@ -71,7 +71,8 @@ export class AxiosClientFactory {
 
       // 커스텀 요청 핸들러 실행
       if (customRequestHandler) {
-        return customRequestHandler(config as RequestConfig, axiosInstance);
+        return Promise.resolve(customRequestHandler(config as unknown as RequestConfig, axiosInstance))
+          .then((c) => c as unknown as InternalAxiosRequestConfig);
       }
 
       return config;

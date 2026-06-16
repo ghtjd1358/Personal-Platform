@@ -1,8 +1,8 @@
 import { useCallback, useRef } from 'react';
 import { useShowGlobalLoading, useToast } from '@sonhoseong/mfa-lib';
-import { updatePortfolio } from '@/network/apis/portfolio/manage-portfolio';
+import { updatePortfolio, UpdatePortfolioRequest } from '@/network/apis/portfolio/manage-portfolio';
 
-type Payload = Parameters<typeof updatePortfolio>[1];
+type Payload = Omit<UpdatePortfolioRequest, 'id'>;
 type UpdatedRow = NonNullable<Awaited<ReturnType<typeof updatePortfolio>>['data']>;
 
 export function useUpdatePortfolio(options: { silent?: boolean } = {}) {
@@ -17,7 +17,7 @@ export function useUpdatePortfolio(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                updatePortfolio(id, payload)
+                updatePortfolio({ id, ...payload })
                     .then((res) => {
                         if (!res.success || !res.data) throw new Error(res.error || '포트폴리오 수정 실패');
                         toastSuccess('포트폴리오가 수정되었습니다');

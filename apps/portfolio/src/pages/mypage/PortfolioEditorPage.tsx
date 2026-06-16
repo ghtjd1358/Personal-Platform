@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCurrentUser, useToast, EmptyState, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, EmptyState, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
 import {
     createPortfolio,
     updatePortfolio,
@@ -34,7 +34,7 @@ const PortfolioEditorPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const toast = useToast();
-    const currentUser = getCurrentUser();
+    const currentUser = useCurrentUser();
 
     const isEditing = !!id;
 
@@ -112,10 +112,10 @@ const PortfolioEditorPage: React.FC = () => {
             }
 
             if (p.techStack && p.techStack.length > 0) {
-                setTechStack(p.techStack.map((t: TechStackItem) => ({
+                setTechStack(p.techStack.map((t) => ({
                     name: t.name,
-                    icon: t.icon,
-                    icon_color: t.icon_color,
+                    icon: t.icon ?? undefined,
+                    icon_color: t.icon_color ?? undefined,
                 })));
             }
         } else {

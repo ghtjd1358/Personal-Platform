@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ScrollTopButton, getCurrentUser, storage, usePermission, EmptyState, Button } from '@sonhoseong/mfa-lib';
+import { ScrollTopButton, useCurrentUser, storage, usePermission, EmptyState, Button } from '@sonhoseong/mfa-lib';
 import { LINK_PREFIX } from '@/config/constants';
 import { PortfolioCard, PortfolioModal, PortfolioCardSkeleton } from '@/components/project';
 import NotionEmbedModal from '@/components/notion/NotionEmbedModal';
@@ -26,7 +26,7 @@ const ColsIcon: React.FC<{ n: ColsOpt; active: boolean }> = ({ n, active }) => {
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
   const { isAdmin } = usePermission();
   const {
     searchQuery, setSearchQuery,

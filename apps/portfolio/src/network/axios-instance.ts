@@ -1,53 +1,28 @@
 import { AxiosClientFactory, ServiceConfig, RequestConfig } from './axios-factory';
 
-/**
- * localStorage 에서 accessToken 가져오기 + 만료 검사.
- *
- * Why: supabase-js 와 달리 우리 axios 는 raw localStorage 를 신뢰함. 과거 로그인 잔존 JWT
- * 가 만료된 채로 남아 있으면 Bearer <expired> 가 그대로 가서 supabase 가 401 반환.
- * payload.exp 만 확인하면 충분 (서명 검증은 server 가 함). 만료 감지 시 즉시 정리해서
- * 인터셉터가 자동으로 anonKey 로 fallback 하도록 한다.
- */
+const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY must be set');
+}
+
+// 로그인 사용자의 JWT를 localStorage에서 가져옴. 서명 검증은 서버가 담당.
 const getAccessToken = (): string => {
   try {
-    const token = localStorage.getItem('accessToken') || '';
-    if (!token) return '';
-    const payload = JSON.parse(atob(token.split('.')[1] || ''));
-    if (payload?.exp && payload.exp * 1000 < Date.now()) {
-      localStorage.removeItem('accessToken');
-      return '';
-    }
-    return token;
+    return localStorage.getItem('accessToken') || '';
   } catch {
     return '';
   }
 };
 
-/**
- * Public Supabase 자격 fallback — lib initSupabase 와 동일 패턴.
- * webpack-dev-server 가 root .env 못 읽어 process.env 가 빈 문자열일 때 사용. anon key 는 public + RLS 가 진짜 보호.
- */
-const PUBLIC_SUPABASE_FALLBACK = {
-  url: 'https://ujhlgylnauzluttvmcrz.supabase.co',
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqaGxneWxuYXV6bHV0dHZtY3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU1MDA0MjcsImV4cCI6MjA4MTA3NjQyN30.UcOpbc6QDU-J2s_6eI5vEehvbgSRMCSHIjkFiHb0oRo',
-};
-
-/**
- * Supabase REST API 설정
- */
 const supabaseConfig: ServiceConfig = {
-  hostUrl: process.env.REACT_APP_SUPABASE_URL || PUBLIC_SUPABASE_FALLBACK.url,
+  hostUrl: SUPABASE_URL,
   basePath: '/rest/v1',
 };
 
-/**
- * Supabase 요청 핸들러
- * - apikey: 항상 anon key (REST 진입 인증)
- * - Authorization: 로그인 사용자의 JWT 우선, 없으면 anon
- *   이전 버전: 항상 anon 만 사용 → RLS `auth.uid() = user_id` 가 NULL 이라 INSERT/UPDATE 401.
- */
 const supabaseRequestHandler = (config: RequestConfig): RequestConfig => {
-  const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || PUBLIC_SUPABASE_FALLBACK.anonKey;
+  const anonKey = SUPABASE_ANON_KEY;
   const accessToken = getAccessToken();
 
   config.headers['apikey'] = anonKey;

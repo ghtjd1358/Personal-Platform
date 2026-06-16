@@ -131,8 +131,8 @@ export async function getPosts(
       const { blog_post_tags, ...restPost } = post;
       return {
         ...restPost,
-        tags: blog_post_tags?.map((pt) => pt.tag).filter(Boolean) || [],
-      };
+        tags: blog_post_tags?.map((pt) => pt.tag).filter((t): t is NonNullable<typeof t> => t !== null) || [],
+      } as PostSummary;
     });
 
     // 전체 통계 조회 (published만)

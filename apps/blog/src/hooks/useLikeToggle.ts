@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toggleLike, checkLiked } from "../network";
-import { getCurrentUser, useToast } from "@sonhoseong/mfa-lib";
+import { useCurrentUser, useToast } from "@sonhoseong/mfa-lib";
 
 interface UseLikeToggleOptions {
   postId: string;
@@ -25,26 +25,43 @@ export function useLikeToggle({
   const [animating, setAnimating] = useState(false);
   const isProcessingRef = useRef(false);
   const hasInteractedRef = useRef(false);
-  const currentUser = getCurrentUser();
+  const animatingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentUser = useCurrentUser();
   const toast = useToast();
 
+  // unmount 시 animating timeout 정리 (메모리/setState-after-unmount 누수 방지)
   useEffect(() => {
+    return () => {
+      if (animatingTimeoutRef.current) clearTimeout(animatingTimeoutRef.current);
+    };
+  }, []);
+
+  // postId 변경 시 interaction guard 초기화 — 다른 포스트로 이동 시 checkLiked 다시 실행되도록
+  useEffect(() => {
+    hasInteractedRef.current = false;
+    isProcessingRef.current = false; // postId 변경 시 처리 락도 초기화
+  }, [postId]);
+
+  useEffect(() => {
+    let cancelled = false;
     const checkUserLiked = async () => {
       if (!currentUser?.id) return;
       const result = await checkLiked(postId, currentUser.id);
+      // unmount/deps 변경 후 stale setState 방지
+      if (cancelled) return;
       if (hasInteractedRef.current) return;
       if (result.success && result.data !== undefined) {
         setLiked(result.data);
       }
     };
     checkUserLiked();
+    return () => { cancelled = true; };
   }, [postId, currentUser?.id]);
 
   const performLikeToggle = useCallback(
-    async (prevLiked: boolean, prevCount: number) => {
-      if (!currentUser?.id) return;
+    async (userId: string, prevLiked: boolean, prevCount: number) => {
       try {
-        const result = await toggleLike(postId, currentUser.id);
+        const result = await toggleLike(postId, userId);
         if (result.success && result.data) {
           setLiked(result.data.liked);
           setLikeCount(result.data.likeCount);
@@ -60,11 +77,13 @@ export function useLikeToggle({
         isProcessingRef.current = false;
       }
     },
-    [postId, currentUser?.id, onLikeChange]
+    [postId, onLikeChange]
   );
 
   const handleLike = useCallback(() => {
-    if (!currentUser?.id) {
+    // 호출 시점의 userId 를 snapshot — 비동기 진행 중 currentUser 변경돼도 안전
+    const userId = currentUser?.id;
+    if (!userId) {
       toast.info("좋아요를 누르려면 로그인이 필요합니다.");
       return;
     }
@@ -80,9 +99,10 @@ export function useLikeToggle({
     setLiked(newLiked);
     setLikeCount(newCount);
     setAnimating(true);
-    setTimeout(() => setAnimating(false), 300);
+    if (animatingTimeoutRef.current) clearTimeout(animatingTimeoutRef.current);
+    animatingTimeoutRef.current = setTimeout(() => setAnimating(false), 300);
 
-    performLikeToggle(prevLiked, prevCount);
+    performLikeToggle(userId, prevLiked, prevCount);
   }, [liked, likeCount, currentUser?.id, toast, performLikeToggle]);
 
   return { liked, likeCount, animating, handleLike };

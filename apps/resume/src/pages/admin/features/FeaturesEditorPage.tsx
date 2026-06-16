@@ -5,7 +5,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useToast, getCurrentUser } from '@sonhoseong/mfa-lib'
+import { useToast, useCurrentUser } from '@sonhoseong/mfa-lib'
 import type { FeatureInput } from '../../../network/apis/types'
 import {
     useFetchFeatureById,
@@ -25,7 +25,7 @@ const FeaturesEditorPage: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const toast = useToast()
-    const currentUser = getCurrentUser()
+    const currentUser = useCurrentUser()
     const fileInputRef = useRef<HTMLInputElement>(null)
     const isEdit = Boolean(id)
 

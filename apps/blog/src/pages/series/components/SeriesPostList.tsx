@@ -8,8 +8,8 @@ interface SeriesPost {
     id: string;
     slug: string;
     title: string;
-    excerpt?: string;
-    cover_image?: string;
+    excerpt?: string | null;
+    cover_image?: string | null;
     created_at: string;
     view_count: number;
     status: string;
