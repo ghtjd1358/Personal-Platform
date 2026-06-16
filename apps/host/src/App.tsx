@@ -26,7 +26,7 @@ const App = () => {
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const user = useSelector(selectUser);
     const { initialized } = useSupabaseInitialize();
-    const { filterMenus } = usePermission();
+    const { filterMenus, isOwner } = usePermission();
     const { logout: supabaseLogout } = useSupabaseLogout();
     const navigate = useNavigate();
 
@@ -36,19 +36,17 @@ const App = () => {
     }, [supabaseLogout, navigate]);
 
     const filteredLnbItems = useMemo(() => {
-        const baseItems = user
-            ? [
-                  ...lnbItems,
-                  {
-                      id: 'mypage',
-                      title: '마이페이지',
-                      path: `/container/user/${user.id}`,
-                      icon: MyPageIcon,
-                  },
-              ]
-            : lnbItems;
+        const baseItems = [...lnbItems];
+        if (user && isOwner) {
+            baseItems.push({
+                id: 'mypage',
+                title: '마이페이지',
+                path: `/container/user/${user.id}`,
+                icon: MyPageIcon,
+            });
+        }
         return filterMenus(baseItems);
-    }, [filterMenus, user]);
+    }, [filterMenus, user, isOwner]);
 
     if (!initialized) {
         return <HostShell>{null}</HostShell>;
