@@ -175,7 +175,7 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div className="meta-row">
                         <span className="meta-label">HOST</span>
-                        <span className="meta-value">:5000 / container</span>
+                        <span className="meta-value">:5000</span>
                     </div>
                 </div>
             </section>
