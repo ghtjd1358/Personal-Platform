@@ -1,40 +1,9 @@
 import React from 'react'
-import {
-    Container,
-    ModalContainer,
-    ToastContainer,
-    ErrorBoundary,
-    GlobalLoading,
-    ScrollTopButton,
-    storage,
-    useSimpleInitialize,
-} from '@sonhoseong/mfa-lib'
+import { RemoteRoot } from '@sonhoseong/mfa-lib'
 import App from './exposes/App'
 
-const isHost = storage.isHostApp()
-
 function Root() {
-    const { initialized } = useSimpleInitialize()
-
-    if (!initialized) return null
-
-    const content = (
-        <ErrorBoundary>
-            <main className="main-content">
-                <App />
-            </main>
-            <GlobalLoading />
-        </ErrorBoundary>
-    )
-
-    return (
-        <>
-            <ModalContainer />
-            <ToastContainer />
-            {isHost ? content : <Container>{content}</Container>}
-            {!isHost && <ScrollTopButton />}
-        </>
-    )
+    return <RemoteRoot><App /></RemoteRoot>
 }
 
 export default Root

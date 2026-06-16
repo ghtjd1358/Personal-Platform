@@ -6,13 +6,13 @@
 import { useSyncExternalStore } from 'react';
 import { User, HostRootState } from '../types';
 import { Reducer, UnknownAction } from '@reduxjs/toolkit';
-import type { HostStore } from './app-store';
+import type { AppStore } from './app-store';
 import { STORAGE_KEYS } from '../utils/storage';
 
 /**
  * Host Store 가져오기
  */
-export const getHostStore = (): HostStore | undefined => {
+export const getHostStore = (): AppStore | undefined => {
   return window.__REDUX_STORE__;
 };
 

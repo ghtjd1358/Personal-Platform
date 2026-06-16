@@ -1,0 +1,1 @@
+{"version":3,"file":"RemoteRoot.d.ts","sourceRoot":"","sources":["../../../src/components/remote/RemoteRoot.tsx"],"names":[],"mappings":"AAAA,OAAc,EAAE,SAAS,EAAE,MAAM,OAAO,CAAC;AAUzC,UAAU,eAAe;IACvB,QAAQ,EAAE,SAAS,CAAC;IACpB,aAAa,CAAC,EAAE,OAAO,CAAC;CACzB;AAID,wBAAgB,UAAU,CAAC,EAAE,QAAQ,EAAE,aAAa,EAAE,EAAE,eAAe,kDAoBtE"}

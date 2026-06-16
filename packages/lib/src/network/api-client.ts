@@ -10,7 +10,6 @@ const API_BASE = (
   'http://localhost:4000'
 ) + '/api';
 
-// refresh 전용 인스턴스 — 10초 타임아웃으로 hang 방어
 const refreshAxios = Axios.create({
   baseURL: API_BASE,
   withCredentials: true,
@@ -52,12 +51,15 @@ export function initApiClient(options: { onUnauthorized?: () => void } = {}) {
 
 type AxiosClientInstance = ReturnType<typeof AxiosClientFactory.createClient>;
 
-// import 시점에 _apiClient 가 없어도 메서드 호출 시점에 조회 — "import 먼저, 초기화 나중" 허용
+export function getApiClient(): AxiosClientInstance {
+  if (!_apiClient) throw new Error('[apiClient] initApiClient()가 먼저 호출되어야 합니다.');
+  return _apiClient;
+}
+
+// 하위 호환 — import 시점에 인스턴스가 없어도 호출 시점에 조회
 export const apiClient = new Proxy({} as AxiosClientInstance, {
   get(_target, prop) {
     if (typeof prop === 'symbol' || prop === 'then') return undefined;
-    if (!_apiClient) throw new Error('[apiClient] initApiClient()가 먼저 호출되어야 합니다.');
-    const value = Reflect.get(_apiClient, prop);
-    return typeof value === 'function' ? (value as Function).bind(_apiClient) : value;
+    return Reflect.get(getApiClient(), prop);
   },
 });

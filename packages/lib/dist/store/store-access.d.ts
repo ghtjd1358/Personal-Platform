@@ -4,11 +4,11 @@
  */
 import { User, HostRootState } from '../types';
 import { Reducer, UnknownAction } from '@reduxjs/toolkit';
-import type { HostStore } from './app-store';
+import type { AppStore } from './app-store';
 /**
  * Host Store 가져오기
  */
-export declare const getHostStore: () => HostStore | undefined;
+export declare const getHostStore: () => AppStore | undefined;
 /**
  * Host Store 상태 가져오기
  */

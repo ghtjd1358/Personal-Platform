@@ -27,7 +27,6 @@ export declare const getStore: () => import("@reduxjs/toolkit").EnhancedStore<{
 }>, import("redux").StoreEnhancer]>>;
 export declare const injectReducer: (key: string, reducer: Reducer) => void;
 export declare const exposeStore: (s: typeof store) => void;
-export type HostStore = typeof store;
 export type AppStore = typeof store;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

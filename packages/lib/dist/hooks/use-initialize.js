@@ -1,21 +1,16 @@
-/**
- * 앱 초기화 훅 모음
- *
- * 사용 가이드:
- * - useSupabaseInitialize: Supabase 인증 사용 시 (추천)
- * - useInitialize: Node.js 백엔드 인증 + 커스텀 refresh 로직 사용 시
- * - useSimpleInitialize: 인증이 필요 없거나 초기화 로직이 외부에 있을 때
- *
- * 세 훅을 동시에 사용하지 마세요 — 중복 dispatch가 발생합니다.
- */
+// useSupabaseInitialize: Supabase 인증 사용 시
+// useInitialize: Node.js JWT 기반 인증 사용 시
+// useSimpleInitialize: 인증 없이 초기화만 필요할 때
+// 셋 중 하나만 Root 당 한 번 마운트할 것
 import { useEffect, useRef, useState } from 'react';
 import { getStore, setAccessToken, setUser, logout } from '../store/app-store';
 import { setRecentMenuList } from '../store/recent-menu-slice';
 import { storage } from '../utils/storage';
 import { getSupabase } from '../network/supabase-client';
 import { applySession } from './use-supabase-auth';
-// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
+// 모듈 싱글톤 — 중복 마운트 시 첫 번째 init 완료까지 대기
 let _supabaseInitMounted = false;
+let _initPromise = null;
 const isSupabaseInitMounted = () => _supabaseInitMounted;
 const setSupabaseInitMounted = (v) => { _supabaseInitMounted = v; };
 // 세 가지 init hook이 공통으로 사용하는 localStorage 복구 로직
@@ -115,10 +110,9 @@ export function useSupabaseInitialize() {
     const ownedRef = useRef(false); // 이 인스턴스가 구독을 소유하는지 추적
     useEffect(() => {
         if (isSupabaseInitMounted()) {
-            console.warn('[Auth] useSupabaseInitialize가 중복 마운트됨. useSupabaseAuthSync와 함께 사용하지 마세요.');
-            // 이미 다른 인스턴스가 초기화 처리 중이므로 setInitialized 만 풀고 종료
-            setInitialized(true);
-            return; // cleanup 없음 — 소유권 없음. setSupabaseInitMounted(false) 호출 방지
+            // 첫 번째 init이 끝난 뒤 setInitialized — 미인증 상태에서 렌더 시작하는 race 방지
+            _initPromise?.finally(() => setInitialized(true)) ?? setInitialized(true);
+            return;
         }
         setSupabaseInitMounted(true);
         ownedRef.current = true;
@@ -212,10 +206,10 @@ export function useSupabaseInitialize() {
                 setInitialized(true);
             }
         };
-        initialize();
+        _initPromise = initialize().finally(() => { _initPromise = null; });
         return () => {
             if (!ownedRef.current)
-                return; // 소유권 없으면 cleanup 스킵 — 마운트 플래그 잘못 초기화 방지
+                return;
             setSupabaseInitMounted(false);
             ctrl.abort();
             subscription?.unsubscribe();

@@ -1,19 +1,9 @@
 import React from 'react'
-import { REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib'
+import { REMOTE_LINK_PREFIX, LnbMenuItem } from '@sonhoseong/mfa-lib'
 import { RoutePath } from '@/pages/routes/paths'
 
-// pathPrefix: Host(Container)가 라우트에 사용 — lib 단일 소스
 export const pathPrefix = REMOTE_LINK_PREFIX.blog
 
-export interface LnbItemData {
-    id: string
-    title: string
-    path?: string
-    icon?: React.ReactNode
-    children?: Omit<LnbItemData, 'icon' | 'children'>[]
-}
-
-// 아이콘
 const icons = {
     blog: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -29,30 +19,13 @@ const icons = {
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
         </svg>
     ),
-    dashboard: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-        </svg>
-    ),
-    mypage: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-        </svg>
-    ),
 }
 
-// Guest용 메뉴 (비로그인)
-const guestList: LnbItemData[] = [
+const guestList: LnbMenuItem[] = [
     { id: 'blog-home', title: '블로그', path: RoutePath.Blog, icon: icons.blog },
 ]
 
-// Auth용 메뉴 (로그인)
-// 마이페이지는 UserFloatingMenu에서 접근 (동적 userId 필요)
-const authList: LnbItemData[] = [
+const authList: LnbMenuItem[] = [
     { id: 'blog-home', title: '블로그', path: RoutePath.Blog, icon: icons.blog },
     { id: 'blog-write', title: '글쓰기', path: RoutePath.Write, icon: icons.write },
 ]

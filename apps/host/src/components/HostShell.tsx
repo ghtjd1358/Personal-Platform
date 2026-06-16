@@ -14,7 +14,7 @@ import {
 } from '@sonhoseong/mfa-lib';
 
 interface Props {
-    children: ReactNode;
+    children?: ReactNode;
 }
 
 const HostShell = ({ children }: Props) => (

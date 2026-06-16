@@ -11,11 +11,10 @@ import {
     Container,
     Lnb,
     Logo,
-    MyPageIcon,
     DeferredComponent,
 } from '@sonhoseong/mfa-lib';
 import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
-import { lnbItems } from './lnb-items';
+import { buildLnbItems } from './lnb-items';
 import HostShell from './components/HostShell';
 import { PageSkeleton } from './components/skeleton';
 import './App.css';
@@ -35,56 +34,46 @@ const App = () => {
         navigate('/');
     }, [supabaseLogout, navigate]);
 
-    const filteredLnbItems = useMemo(() => {
-        const baseItems = [...lnbItems];
-        if (user && isOwner) {
-            baseItems.push({
-                id: 'mypage',
-                title: '마이페이지',
-                path: `/container/user/${user.id}`,
-                icon: MyPageIcon,
-            });
-        }
-        return filterMenus(baseItems);
-    }, [filterMenus, user, isOwner]);
+    const lnbItems = useMemo(
+        () => filterMenus(buildLnbItems(user, isOwner)),
+        [filterMenus, user, isOwner]
+    );
 
-    if (!initialized) {
-        return <HostShell>{null}</HostShell>;
-    }
+    if (!initialized) return <HostShell />;
 
-    return  isAuthenticated ? (
+    return (
         <HostShell>
-            <Container>
-                <ErrorBoundary>
-                    <Lnb
-                        lnbItems={filteredLnbItems}
-                        onLogout={handleLogout}
-                        logo={
-                            <Logo
-                                customSize={36}
-                                sideColor="#2B1E14"
-                                centerColor="#8C1E1A"
-                                eyeColor="#FBF5E3"
-                            />
-                        }
-                    />
-                    <main className="main-content">
-                        <Suspense
-                            fallback={
-                                <DeferredComponent>
-                                    <PageSkeleton label="페이지를 불러오는 중입니다" />
-                                </DeferredComponent>
+            {isAuthenticated ? (
+                <Container>
+                    <ErrorBoundary>
+                        <Lnb
+                            lnbItems={lnbItems}
+                            onLogout={handleLogout}
+                            logo={
+                                <Logo
+                                    customSize={36}
+                                    sideColor="#2B1E14"
+                                    centerColor="#8C1E1A"
+                                    eyeColor="#FBF5E3"
+                                />
                             }
-                        >
-                            <RoutesAuthPages />
-                        </Suspense>
-                    </main>
-                </ErrorBoundary>
-            </Container>
-        </HostShell>
-    ): (
-        <HostShell>
-            <RoutesGuestPages />
+                        />
+                        <main className="main-content">
+                            <Suspense
+                                fallback={
+                                    <DeferredComponent>
+                                        <PageSkeleton label="페이지를 불러오는 중입니다" />
+                                    </DeferredComponent>
+                                }
+                            >
+                                <RoutesAuthPages />
+                            </Suspense>
+                        </main>
+                    </ErrorBoundary>
+                </Container>
+            ) : (
+                <RoutesGuestPages />
+            )}
         </HostShell>
     );
 };

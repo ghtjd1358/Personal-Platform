@@ -7,7 +7,6 @@ declare module 'axios' {
   }
 }
 
-// 하위 호환성 — 기존 소비처(supabase-axios.ts 등)가 RequestConfig를 참조함
 export type RequestConfig = InternalAxiosRequestConfig;
 export type Response<ResData> = AxiosResponse<ResData>;
 
@@ -36,6 +35,8 @@ export interface ExtendedAxiosError extends AxiosError {
   response?: AxiosResponse<ApiErrorResponse>;
 }
 
+export const isAxiosError = Axios.isAxiosError;
+
 export function isApiError(error: unknown): error is ExtendedAxiosError {
   if (!isAxiosError(error)) return false;
   const data = error.response?.data as ApiErrorResponse | undefined;
@@ -49,17 +50,6 @@ export function hasErrorDetails(error: unknown): ErrorDetail[] | undefined {
   return undefined;
 }
 
-export function isAxiosError(error: unknown): error is AxiosError {
-  if (!error || typeof error !== 'object') return false;
-  return Boolean((error as AxiosError).isAxiosError);
-}
-
-export interface ServiceConfig {
-  hostUrl: string;
-  basePath?: string;
-  timeout?: number;
-}
-
 export type RefreshTokenFn = () => Promise<string | null>;
 export type DispatchErrorFn = (errorDetails: ErrorDetail[]) => void;
 
@@ -71,7 +61,7 @@ export interface FactoryConfig {
   onUnauthorized?: () => void;
 }
 
-// Webpack MF shared: { singleton: true } 로 lib이 1회만 로드됨 → 모듈 레벨 변수로 충분
+// 모듈 싱글톤 — MF shared singleton 가정
 let _factoryConfig: FactoryConfig | null = null;
 
 export function initAxiosFactory(config: FactoryConfig) {
@@ -83,20 +73,18 @@ export class AxiosClientFactory {
     serviceConfig: AxiosConfig,
     customRequestHandler?: (config: InternalAxiosRequestConfig) => Promise<InternalAxiosRequestConfig> | InternalAxiosRequestConfig
   ): AxiosInstance {
+    const { hostUrl, basePath, timeout, ...rest } = serviceConfig;
     const axiosInstance = Axios.create({
-      baseURL: `${serviceConfig.hostUrl || ''}${serviceConfig.basePath || ''}`,
-      timeout: serviceConfig.timeout || 60000,
-      ...serviceConfig,
+      ...rest,
+      baseURL: `${hostUrl ?? ''}${basePath ?? ''}`,
+      timeout: timeout ?? 60000,
     });
 
-    // 요청 인터셉터 — 토큰 주입, 요청 ID, 빈 파라미터 제거
     axiosInstance.interceptors.request.use(async (config) => {
       const fc = _factoryConfig;
       if (fc) {
         const token = fc.getAccessToken();
-        if (token) {
-          config.headers['Authorization'] = `Bearer ${token}`;
-        }
+        if (token) config.headers['Authorization'] = `Bearer ${token}`;
       }
 
       if (!config.headers['X-Request-ID']) {
@@ -116,7 +104,7 @@ export class AxiosClientFactory {
       return customRequestHandler ? await customRequestHandler(config) : config;
     });
 
-    // 응답 인터셉터 — 401 시 토큰 갱신 후 재시도 (KOMCA _isRetry 패턴)
+    // 401 시 한 번만 refresh → 원요청 재시도. _isRetry 플래그로 무한 루프 방지
     axiosInstance.interceptors.response.use(
       (response) => response,
       async (error: AxiosError) => {
@@ -127,12 +115,13 @@ export class AxiosClientFactory {
         }
 
         const fc = _factoryConfig;
-        const originalRequest = error.config!;
+        const originalRequest = error.config;
         const status = error.response?.status;
 
         if (
           status === 401 &&
           fc?.refreshToken &&
+          originalRequest &&
           !originalRequest._isRetry &&
           !originalRequest.url?.includes('/auth/refresh')
         ) {
@@ -145,7 +134,6 @@ export class AxiosClientFactory {
               originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
               return axiosInstance(originalRequest);
             }
-
 
             fc.setAccessToken('');
             fc.onUnauthorized?.();

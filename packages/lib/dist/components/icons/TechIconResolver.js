@@ -47,8 +47,11 @@ const ICON_FACTORIES = {
     'Python': (c) => _jsx(SiPython, { color: c ?? '#3776AB' }),
     'Lighthouse': (c) => _jsx(SiLighthouse, { color: c ?? '#F44B21' }),
     'Axios': (c) => _jsx(SiAxios, { color: c ?? '#5A29E4' }),
-    'Node.js': (c) => _jsx(SiNodedotjs, { color: c ?? '#339933', style: { transform: 'scale(0.82)', transformOrigin: 'center' } }),
+    'Node.js': (c) => _jsx(SiNodedotjs, { color: c ?? '#339933' }),
+    'NodeJS': (c) => _jsx(SiNodedotjs, { color: c ?? '#339933' }),
+    'Node': (c) => _jsx(SiNodedotjs, { color: c ?? '#339933' }),
     'JWT': (c) => _jsx(SiJsonwebtokens, { color: c ?? '#000000' }),
+    'JSON Web Token': (c) => _jsx(SiJsonwebtokens, { color: c ?? '#000000' }),
 };
 // 대소문자 불일치 방어용 소문자 맵 (DB 값이 'react'로 저장된 경우 등)
 const ICON_FACTORIES_LOWER = Object.fromEntries(Object.entries(ICON_FACTORIES).map(([k, v]) => [k.toLowerCase(), v]));
