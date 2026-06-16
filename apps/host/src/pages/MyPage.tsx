@@ -12,7 +12,8 @@
  */
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getCurrentUser } from '@sonhoseong/mfa-lib';
+import { useSelector } from 'react-redux';
+import { selectUser } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './routes/paths';
 import './MyPage.css';
 
@@ -88,7 +89,7 @@ const DOMAIN_CARDS: DomainCard[] = [
 
 const MyPage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
-    const currentUser = getCurrentUser();
+    const currentUser = useSelector(selectUser);
     const isSelf = currentUser?.id === userId;
     const displayName = currentUser?.name || currentUser?.email || '방문자';
 

@@ -16,6 +16,7 @@ export const RoutePath = {
 
   // Auth 경로
   Login: '/login',
+  AuthCallback: '/auth/callback',
 } as const;
 
 /** 경로 타입 */

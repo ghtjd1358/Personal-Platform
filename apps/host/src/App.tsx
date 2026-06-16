@@ -1,51 +1,52 @@
-/**
- * App — Host Container
- *
- * 순수 컴포넌트: 인증 상태에 따라 Guest/Auth 라우팅 분기.
- * 초기화/부트스트랩은 모두 bootstrap.tsx 로 (Composition Root).
- * 공용 chrome (Modal/Toast/GlobalLoading) 은 HostShell.
- */
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
     selectIsAuthenticated,
+    selectUser,
     useSupabaseInitialize,
     usePermission,
-    getCurrentUser,
+    useSupabaseLogout,
     ErrorBoundary,
     Container,
     Lnb,
     Logo,
+    MyPageIcon,
 } from '@sonhoseong/mfa-lib';
 import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
 import { lnbItems } from './lnb-items';
-import { MyPageIcon } from '@sonhoseong/mfa-lib';
 import HostShell from './components/HostShell';
-import Dashboard from './pages/Dashboard';
 import './App.css';
 import './sidebar-editorial.css';
 import './theme-editorial.css';
 
 const App = () => {
     const isAuthenticated = useSelector(selectIsAuthenticated);
+    const user = useSelector(selectUser);
     const { initialized } = useSupabaseInitialize();
     const { filterMenus } = usePermission();
+    const { logout: supabaseLogout } = useSupabaseLogout();
+    const navigate = useNavigate();
+
+    const handleLogout = useCallback(async () => {
+        await supabaseLogout();
+        navigate('/');
+    }, [supabaseLogout, navigate]);
 
     const filteredLnbItems = useMemo(() => {
-        const currentUser = getCurrentUser();
-        const baseItems = currentUser
+        const baseItems = user
             ? [
                   ...lnbItems,
                   {
                       id: 'mypage',
                       title: '마이페이지',
-                      path: `/container/user/${currentUser.id}`,
+                      path: `/container/user/${user.id}`,
                       icon: MyPageIcon,
                   },
               ]
             : lnbItems;
         return filterMenus(baseItems);
-    }, [filterMenus, isAuthenticated]);
+    }, [filterMenus, user]);
 
     if (!initialized) {
         return <HostShell>{null}</HostShell>;
@@ -57,6 +58,7 @@ const App = () => {
                 <ErrorBoundary>
                     <Lnb
                         lnbItems={filteredLnbItems}
+                        onLogout={handleLogout}
                         logo={
                             <Logo
                                 customSize={36}

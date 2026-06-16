@@ -5,7 +5,6 @@
 
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { RecentMenu } from '../types';
-import { storage } from '../utils/storage';
 
 // ============================================
 // 타입 정의
@@ -64,9 +63,6 @@ export const recentMenuSlice = createSlice({
 
       // 현재 메뉴로 설정
       state.currentId = newMenu.id;
-
-      // localStorage에 저장
-      storage.setRecentMenu(state.list);
     },
 
     /** 최근 메뉴 제거 */
@@ -77,15 +73,10 @@ export const recentMenuSlice = createSlice({
       if (index >= 0) {
         state.list.splice(index, 1);
 
-        // 현재 메뉴가 제거되면 다른 메뉴로 전환
         if (state.currentId === id) {
-          // 이전 또는 다음 메뉴로 전환
           const newCurrent = state.list[Math.max(0, index - 1)];
           state.currentId = newCurrent?.id || '';
         }
-
-        // localStorage에 저장
-        storage.setRecentMenu(state.list);
       }
     },
 
@@ -94,20 +85,18 @@ export const recentMenuSlice = createSlice({
       state.currentId = action.payload;
     },
 
-    /** 메뉴 상태 업데이트 (스크롤 위치, 검색 조건 등) */
+    /** 메뉴 상태 업데이트 (스크롤 위치, 검색 조건, 데이터 등) */
     updateRecentMenuState: (
       state,
-      action: PayloadAction<{ id: string; state?: any; data?: any }>
+      action: PayloadAction<{ id: string; state?: unknown; data?: unknown; search?: string }>
     ) => {
-      const { id, state: menuState, data } = action.payload;
+      const { id, state: menuState, data, search } = action.payload;
       const menu = state.list.find((m) => m.id === id);
 
       if (menu) {
         if (menuState !== undefined) menu.state = menuState;
         if (data !== undefined) menu.data = data;
-
-        // localStorage에 저장
-        storage.setRecentMenu(state.list);
+        if (search !== undefined) menu.search = search;
       }
     },
 
@@ -115,14 +104,12 @@ export const recentMenuSlice = createSlice({
     clearRecentMenu: (state) => {
       state.list = [];
       state.currentId = '';
-      storage.setRecentMenu([]);
     },
 
     /** 현재 메뉴 외 모든 메뉴 제거 */
     closeOtherMenus: (state) => {
       const currentMenu = state.list.find((m) => m.id === state.currentId);
       state.list = currentMenu ? [currentMenu] : [];
-      storage.setRecentMenu(state.list);
     },
 
     /** 최대 탭 개수 설정 */

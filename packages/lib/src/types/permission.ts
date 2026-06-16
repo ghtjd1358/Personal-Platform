@@ -21,7 +21,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role?: UserRole | string;
+  role?: UserRole;
   avatar?: string;
   /** 사용자 권한 목록 */
   permissions?: Permission[];

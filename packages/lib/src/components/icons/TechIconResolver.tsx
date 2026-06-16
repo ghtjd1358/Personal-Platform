@@ -120,7 +120,7 @@ const ICON_FACTORIES: Record<string, IconFactory> = {
   'Python':            (c) => <SiPython color={c ?? '#3776AB'} />,
   'Lighthouse':        (c) => <SiLighthouse color={c ?? '#F44B21'} />,
   'Axios':             (c) => <SiAxios color={c ?? '#5A29E4'} />,
-  'Node.js':           (c) => <SiNodedotjs color={c ?? '#339933'} />,
+  'Node.js':           (c) => <SiNodedotjs color={c ?? '#339933'} style={{ transform: 'scale(0.82)', transformOrigin: 'center' }} />,
   'JWT':               (c) => <SiJsonwebtokens color={c ?? '#000000'} />,
 };
 

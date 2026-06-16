@@ -4,7 +4,8 @@
  * 토큰 갱신 지원
  */
 
-import { AxiosClientFactory, AxiosConfig, RequestConfig, initAxiosFactory } from './axios-factory';
+import { AxiosClientFactory, AxiosConfig, initAxiosFactory } from './axios-factory';
+import { InternalAxiosRequestConfig } from 'axios';
 import { AxiosInstance } from 'axios';
 
 /**
@@ -63,11 +64,10 @@ export function createSupabaseAxiosClient(config: SupabaseAxiosConfig): AxiosIns
       basePath: '/rest/v1',
       timeout,
     } as AxiosConfig,
-    (requestConfig: RequestConfig) => {
-      // Supabase 필수 헤더
-      requestConfig.headers['apikey'] = supabaseAnonKey;
-      requestConfig.headers['Content-Type'] = 'application/json';
-      requestConfig.headers['Prefer'] = 'return=representation';
+    (requestConfig: InternalAxiosRequestConfig) => {
+      requestConfig.headers.set('apikey', supabaseAnonKey);
+      requestConfig.headers.set('Content-Type', 'application/json');
+      requestConfig.headers.set('Prefer', 'return=representation');
       return requestConfig;
     }
   );
@@ -85,9 +85,9 @@ export function createSupabaseAuthClient(config: SupabaseAxiosConfig): AxiosInst
       basePath: '/auth/v1',
       timeout,
     } as AxiosConfig,
-    (requestConfig: RequestConfig) => {
-      requestConfig.headers['apikey'] = supabaseAnonKey;
-      requestConfig.headers['Content-Type'] = 'application/json';
+    (requestConfig: InternalAxiosRequestConfig) => {
+      requestConfig.headers.set('apikey', supabaseAnonKey);
+      requestConfig.headers.set('Content-Type', 'application/json');
       return requestConfig;
     }
   );

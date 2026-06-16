@@ -1,30 +1,22 @@
-/**
- * Lnb (Left Navigation Bar) Component - KOMCA 패턴
- *
- * lnbItems만 받고 내부에서 navigate 처리
- */
 import React, { useState, isValidElement, cloneElement } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout, selectAccessToken, selectUser } from '../../store/app-store';
-import { getSupabase } from '../../network/supabase-client';
+import { useSelector } from 'react-redux';
+import { selectAccessToken, selectUser } from '../../store/app-store';
 import { LnbMenuItem } from '../../types';
 
-// LnbMenuItem 타입 re-export (하위 호환)
 export type { LnbMenuItem } from '../../types';
-
 
 export interface LnbProps {
   lnbItems: LnbMenuItem[];
   title?: string;
   appName?: string;
   logo?: React.ReactNode;
+  onLogout?: () => void;
 }
 
-export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo }) => {
+export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -32,21 +24,7 @@ export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo }) => {
   const user = useSelector(selectUser);
   const isAuthenticated = !!accessToken;
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-  };
-
-  const handleLogout = async () => {
-    // Supabase 자체 session(`sb-<ref>-auth-token` localStorage) 까지 제거 — 안 부르면 새로고침 시 자동 hydrate 로 로그인 상태 복원되는 stale session 버그.
-    try {
-      await getSupabase().auth.signOut();
-    } catch (err) {
-      // signOut 실패해도 우리 store/storage 는 비워야 진짜 로그아웃 효과
-      console.warn('supabase signOut failed:', err);
-    }
-    dispatch(logout());
-    navigate('/');
-  };
+  const handleNavigate = (path: string) => navigate(path);
 
   const toggleExpand = (itemId: string) => {
     setExpandedItems((prev) =>
@@ -136,7 +114,7 @@ export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo }) => {
                 <span className="app-lnb-user-name">{user.name || user.email}</span>
               )}
             </div>
-            <button className="app-lnb-logout-icon" onClick={handleLogout} title="로그아웃">
+            <button className="app-lnb-logout-icon" onClick={onLogout} title="로그아웃">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" />

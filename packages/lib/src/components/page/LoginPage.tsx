@@ -12,20 +12,8 @@ import { getStore, setAccessToken, setUser } from '../../store/app-store';
 import { storage } from '../../utils/storage';
 import { User } from '../../types';
 import { getSupabase } from '../../network/supabase-client';
+import { applySession } from '../../hooks/use-supabase-auth';
 import './LoginPage.css';
-
-/**
- * Supabase User를 앱 User 타입으로 변환
- */
-function mapSupabaseUser(supabaseUser: any): User {
-  return {
-    id: supabaseUser.id,
-    email: supabaseUser.email || '',
-    name: supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || '',
-    role: supabaseUser.user_metadata?.role || 'user',
-    avatar: supabaseUser.user_metadata?.avatar_url,
-  };
-}
 
 export interface LoginPageProps {
     /** 로그인 성공 후 이동할 경로 (기본: /) */
@@ -36,12 +24,11 @@ export interface LoginPageProps {
     appName?: string;
     /** 커스텀 로고 컴포넌트 */
     logo?: React.ReactNode;
-    /** Google 로그인 핸들러 (Firebase 등) */
-    onGoogleLogin?: () => Promise<{ token: string; user: User }>;
-    /** 테스트 계정 표시 여부 */
-    showTestAccount?: boolean;
-    /** Supabase Auth 사용 여부 (기본: true) */
-    useSupabase?: boolean;
+    /** Google 로그인 핸들러 (Firebase 등)
+     * - Firebase 팝업 flow: { token, user } 반환 → LoginPage 가 store 동기화
+     * - Supabase OAuth redirect flow: void 반환 (브라우저가 외부로 redirect, 이후 코드 미실행)
+     */
+    onGoogleLogin?: () => Promise<{ token: string; user: User } | void>;
 }
 
 export function LoginPage({
@@ -50,8 +37,6 @@ export function LoginPage({
     appName = 'MFA',
     logo,
     onGoogleLogin,
-    showTestAccount = false,
-    useSupabase = true,
 }: LoginPageProps) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -73,14 +58,21 @@ export function LoginPage({
         setIsGoogleLoading(true);
 
         try {
-            const { token, user } = await onGoogleLogin();
+            const result = await onGoogleLogin();
 
-            // Redux store에 저장
+            // OAuth redirect flow: 브라우저가 외부로 redirect → 이후 코드 미실행
+            // 만약 redirect 가 시작되지 않고 result 가 void/undefined 면 그대로 종료
+            if (!result) {
+                return;
+            }
+
+            const { token, user } = result;
+
+            // Redux store에 저장 (token 은 메모리에만 — 보안: XSS exfiltration 방어)
             store.dispatch(setAccessToken(token));
             store.dispatch(setUser(user));
 
-            // localStorage에도 저장 (페이지 새로고침 대비)
-            storage.setAccessToken(token);
+            // localStorage 에는 user 만 저장 (token 은 새로고침 시 refresh flow 로 재발급)
             storage.setUser(user);
 
             onLoginSuccess?.(user);
@@ -99,93 +91,31 @@ export function LoginPage({
 
     // Supabase 로그인 핸들러
     const handleSupabaseLogin = useCallback(async () => {
-        try {
-            const supabase = getSupabase();
-            const { data, error: authError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
+        const supabase = getSupabase();
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
 
-            if (authError) {
-                // 에러 메시지 한글화
-                if (authError.message.includes('Invalid login credentials')) {
-                    throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
-                }
-                throw new Error(authError.message);
+        if (authError) {
+            // 에러 메시지 한글화
+            if (authError.message.includes('Invalid login credentials')) {
+                throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
             }
-
-            if (!data.session || !data.user) {
-                throw new Error('로그인 응답이 올바르지 않습니다.');
-            }
-
-            const user = mapSupabaseUser(data.user);
-
-            // Redux store에 저장
-            store.dispatch(setAccessToken(data.session.access_token));
-            store.dispatch(setUser(user));
-
-            // localStorage에도 저장
-            storage.setAccessToken(data.session.access_token);
-            storage.setUser(user);
-
-            onLoginSuccess?.(user);
-
-            // 페이지 이동
-            navigate(redirectPath);
-        } catch (err: any) {
-            throw err;
+            throw new Error(authError.message);
         }
-    }, [email, password, store, onLoginSuccess, redirectPath, navigate]);
 
-    // Mock 로그인 핸들러 (테스트용)
-    const handleMockLogin = useCallback(async () => {
-        if (email === 'admin@test.com' && password === '1234') {
-            const mockToken = `mock-token-${Date.now()}`;
-            const user: User = {
-                id: '1',
-                name: '관리자',
-                email: email,
-                role: 'admin',
-            };
-
-            store.dispatch(setAccessToken(mockToken));
-            store.dispatch(setUser(user));
-            storage.setAccessToken(mockToken);
-            storage.setUser(user);
-
-            onLoginSuccess?.(user);
-            navigate(redirectPath);
-        } else {
-            throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+        if (!data.session || !data.user) {
+            throw new Error('로그인 응답이 올바르지 않습니다.');
         }
-    }, [email, password, store, onLoginSuccess, redirectPath, navigate]);
 
-    const handleTestLogin = useCallback(async () => {
-        setEmail('admin@test.com');
-        setPassword('1234');
-        setError('');
-        setIsSubmitting(true);
-        try {
-            const supabase = getSupabase();
-            const { data, error: authError } = await supabase.auth.signInWithPassword({
-                email: 'admin@test.com',
-                password: '1234',
-            });
-            if (authError) throw new Error('테스트 계정 로그인에 실패했습니다.');
-            if (!data.session || !data.user) throw new Error('로그인 응답이 올바르지 않습니다.');
-            const user = mapSupabaseUser(data.user);
-            store.dispatch(setAccessToken(data.session.access_token));
-            store.dispatch(setUser(user));
-            storage.setAccessToken(data.session.access_token);
-            storage.setUser(user);
-            onLoginSuccess?.(user);
-            navigate(redirectPath);
-        } catch (err: any) {
-            setError(err.message || '테스트 로그인 중 오류가 발생했습니다.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    }, [store, onLoginSuccess, redirectPath, navigate]);
+        const user = await applySession(data.session);
+
+        onLoginSuccess?.(user);
+
+        // 페이지 이동
+        navigate(redirectPath);
+    }, [email, password, onLoginSuccess, redirectPath, navigate]);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -193,17 +123,13 @@ export function LoginPage({
         setIsSubmitting(true);
 
         try {
-            if (useSupabase) {
-                await handleSupabaseLogin();
-            } else {
-                await handleMockLogin();
-            }
+            await handleSupabaseLogin();
         } catch (err: any) {
             setError(err.message || '로그인 중 오류가 발생했습니다.');
         } finally {
             setIsSubmitting(false);
         }
-    }, [useSupabase, handleSupabaseLogin, handleMockLogin]);
+    }, [handleSupabaseLogin]);
 
     return (
         <div className="login-page">
@@ -344,29 +270,6 @@ export function LoginPage({
                             </>
                         )}
                     </button>
-
-                    {showTestAccount && (
-                        <button
-                            type="button"
-                            className="login-button login-button--test"
-                            onClick={handleTestLogin}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <span className="login-spinner" />
-                                    로그인 중...
-                                </>
-                            ) : (
-                                <>
-                                    테스트 계정으로 로그인
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
-                                    </svg>
-                                </>
-                            )}
-                        </button>
-                    )}
                 </form>
             </div>
         </div>
