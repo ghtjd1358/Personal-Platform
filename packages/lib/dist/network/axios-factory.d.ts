@@ -10,9 +10,8 @@ export interface AxiosConfig extends AxiosRequestConfig {
     hostUrl?: string;
     basePath?: string;
 }
-export type ErrorDetailCodeType = 'TYPE_MISMATCH' | 'NotBlank' | 'NotNull' | 'Pattern' | 'Min' | 'Max' | 'Size';
 export interface ErrorDetail {
-    code: ErrorDetailCodeType;
+    code: string;
     field?: string;
     message?: string;
 }

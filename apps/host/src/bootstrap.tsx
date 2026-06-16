@@ -50,10 +50,10 @@ async function start() {
     );
 }
 
+const LOAD_FAILURE_HTML = '<div style="padding:2rem;font-family:sans-serif"><h2>앱을 불러오지 못했습니다</h2><p>페이지를 새로고침 해주세요.</p></div>';
+
 start().catch((err) => {
     console.error('[Bootstrap] 앱 시작 실패:', err);
     const root = document.getElementById('root');
-    if (root) {
-        root.innerHTML = '<div style="padding:2rem;font-family:sans-serif"><h2>앱을 불러오지 못했습니다</h2><p>페이지를 새로고침 해주세요.</p></div>';
-    }
+    if (root) root.innerHTML = LOAD_FAILURE_HTML;
 });

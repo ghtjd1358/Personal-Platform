@@ -1,9 +1,3 @@
-/**
- * App Slice 파생 셀렉터 — createSelector 로 메모이제이션
- *
- * 단일 필드 조회는 app-slice.ts 의 기본 셀렉터, 파생/계산형은 여기.
- */
-/** 인증 여부 */
 export declare const selectIsAuthenticated: ((state: {
     app: import("..").AppState;
 }) => boolean) & {
@@ -29,7 +23,6 @@ export declare const selectIsAuthenticated: ((state: {
     memoize: typeof import("reselect").weakMapMemoize;
     argsMemoize: typeof import("reselect").weakMapMemoize;
 };
-/** 사용자 역할 */
 export declare const selectUserRole: ((state: {
     app: import("..").AppState;
 }) => import("..").UserRole) & {
@@ -55,7 +48,6 @@ export declare const selectUserRole: ((state: {
     memoize: typeof import("reselect").weakMapMemoize;
     argsMemoize: typeof import("reselect").weakMapMemoize;
 };
-/** 관리자 여부 */
 export declare const selectIsAdmin: ((state: {
     app: import("..").AppState;
 }) => boolean) & {
@@ -81,7 +73,6 @@ export declare const selectIsAdmin: ((state: {
     memoize: typeof import("reselect").weakMapMemoize;
     argsMemoize: typeof import("reselect").weakMapMemoize;
 };
-/** 사용자 권한 목록 */
 export declare const selectUserPermissions: ((state: {
     app: import("..").AppState;
 }) => import("..").Permission[]) & {

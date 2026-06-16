@@ -6,7 +6,7 @@ import { GlobalLoading } from '../loading';
 import { ScrollTopButton } from '../button';
 import { Container } from '../layout';
 import { storage } from '../../utils/storage';
-import { useSimpleInitialize } from '../../hooks/use-initialize';
+import { useSimpleInitialize } from '../../hooks/use-simple-initialize';
 
 interface RemoteRootProps {
   children: ReactNode;
