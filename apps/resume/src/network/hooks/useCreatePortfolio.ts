@@ -23,7 +23,7 @@ export function useCreatePortfolio(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                portfoliosApi.create(payload)
+                Promise.resolve(portfoliosApi.create(payload))
                     .then(({ data, error }) => {
                         if (error) throw error;
                         toastSuccess('포트폴리오가 추가되었습니다');

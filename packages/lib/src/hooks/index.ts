@@ -47,3 +47,6 @@ export * from './use-scroll-restoration';
 
 // Effect Once & Lifecycle Hooks
 export * from './use-effect-once';
+
+// Scroll Top Hook
+export * from './use-scroll-top';

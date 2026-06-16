@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useAsyncConfirm, usePermission } from '@sonhoseong/mfa-lib'
+import { useAsyncConfirm, usePermission, Badge, EmptyState } from '@sonhoseong/mfa-lib'
 import type { Experience, Portfolio } from '../../../network/apis/types'
 import {
     useFetchExperiences,
@@ -105,15 +105,17 @@ const ExperienceListPage: React.FC = () => {
                 </header>
 
                 {experiences.length === 0 ? (
-                    <div className="exp-empty">
-                        <p className="exp-empty-title">등록된 경력이 없습니다.</p>
-                        <Link
-                            to={withResumeId(`${LINK_PREFIX}/admin/experience/new`)}
-                            className="exp-btn exp-btn--ghost"
-                        >
-                            경력 추가하기
-                        </Link>
-                    </div>
+                    <EmptyState
+                        description="등록된 경력이 없습니다."
+                        action={
+                            <Link
+                                to={withResumeId(`${LINK_PREFIX}/admin/experience/new`)}
+                                className="exp-btn exp-btn--ghost"
+                            >
+                                경력 추가하기
+                            </Link>
+                        }
+                    />
                 ) : (
                     <ul className="exp-list">
                         {experiences.map((exp) => (
@@ -121,9 +123,12 @@ const ExperienceListPage: React.FC = () => {
                                 <div className="exp-row-main">
                                     <div className="exp-row-title">
                                         {exp.company}
-                                        <span className={`exp-badge ${exp.is_dev ? '' : 'exp-badge--muted'}`}>
+                                        <Badge
+                                            variant={exp.is_dev ? 'success' : 'warning'}
+                                            className={`exp-badge ${exp.is_dev ? '' : 'exp-badge--muted'}`}
+                                        >
                                             {exp.is_dev ? '개발' : '비개발'}
-                                        </span>
+                                        </Badge>
                                     </div>
                                     <div className="exp-row-sub">{exp.position}</div>
                                     <div className="exp-row-meta">
@@ -175,7 +180,7 @@ const ExperienceListPage: React.FC = () => {
                         <span className="exp-section-eyebrow">SECTION · PROJECTS</span>
                         <h2 className="exp-section-title">프로젝트</h2>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className="admin-sub-actions">
                         <Link
                             to={`${LINK_PREFIX}/admin/portfolio`}
                             className="exp-btn exp-btn--ghost"
@@ -193,15 +198,17 @@ const ExperienceListPage: React.FC = () => {
                 </header>
 
                 {projects.length === 0 ? (
-                    <div className="exp-empty">
-                        <p className="exp-empty-title">이력서에 연결된 프로젝트가 없습니다.</p>
-                        <Link
-                            to={`${LINK_PREFIX}/admin/portfolio/new?fromResume=1`}
-                            className="exp-btn exp-btn--ghost"
-                        >
-                            프로젝트 추가하기
-                        </Link>
-                    </div>
+                    <EmptyState
+                        description="이력서에 연결된 프로젝트가 없습니다."
+                        action={
+                            <Link
+                                to={`${LINK_PREFIX}/admin/portfolio/new?fromResume=1`}
+                                className="exp-btn exp-btn--ghost"
+                            >
+                                프로젝트 추가하기
+                            </Link>
+                        }
+                    />
                 ) : (
                     <ul className="exp-list">
                         {projects.map((proj) => (

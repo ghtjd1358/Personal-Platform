@@ -1,64 +1,41 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollTopButtonProps } from './types';
+import React from 'react';
+import { CommonButton } from './CommonButton';
+import { CommonButtonVariant, CommonButtonSize } from './CommonButton';
+import { useScrollTop } from '../../hooks/use-scroll-top';
+
+export interface ScrollTopButtonProps {
+  className?: string;
+  variant?: CommonButtonVariant;
+  size?: CommonButtonSize;
+  threshold?: number;
+  title?: string;
+}
 
 const ScrollTopButton: React.FC<ScrollTopButtonProps> = ({
   className = '',
-  variant = 'primary',
+  variant = 'ghost',
   size = 'md',
   threshold = 100,
   title = '맨 위로',
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const { isVisible, scrollToTop } = useScrollTop(threshold);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsVisible(window.scrollY > threshold);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [threshold]);
-
-  const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-  const sizeClasses = {
-    sm: 'scroll-top-btn--sm',
-    md: 'scroll-top-btn--md',
-    lg: 'scroll-top-btn--lg',
-  };
-
-  const variantClasses = {
-    primary: 'scroll-top-btn--primary',
-    secondary: 'scroll-top-btn--secondary',
-    ghost: 'scroll-top-btn--ghost',
-  };
+  if (!isVisible) return null;
 
   return (
-    <button
-      type="button"
-      className={`scroll-top-btn ${sizeClasses[size]} ${variantClasses[variant]} ${isVisible ? 'visible' : ''} ${className}`}
+    <CommonButton
+      variant={variant}
+      size={size}
+      className={`common-btn--icon-only scroll-top-btn ${className}`}
       onClick={scrollToTop}
-      title={title}
       aria-label={title}
+      title={title}
     >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="17 11 12 6 7 11" />
         <polyline points="17 18 12 13 7 18" />
       </svg>
-    </button>
+    </CommonButton>
   );
 };
 

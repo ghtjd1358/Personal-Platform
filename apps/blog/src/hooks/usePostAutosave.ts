@@ -87,6 +87,7 @@ export function usePostAutosave({
                 title: parsed.title || '',
                 content: parsed.content || '',
                 excerpt: parsed.excerpt || '',
+                status: parsed.status || 'draft',
                 tagIds: parsed.tagIds || [],
                 meta_title: parsed.meta_title || '',
                 meta_description: parsed.meta_description || '',

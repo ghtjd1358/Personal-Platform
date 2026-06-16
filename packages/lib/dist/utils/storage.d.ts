@@ -4,7 +4,6 @@
  */
 import { User, RecentMenu } from '../types';
 export declare const STORAGE_KEYS: {
-    ACCESS_TOKEN: string;
     USER: string;
     RECENT_MENU: string;
     IS_HOST_APP: string;
@@ -16,8 +15,6 @@ export declare const storage: {
     setHostApp: () => void;
     removeHostApp: () => void;
     isHostApp: () => boolean;
-    getAccessToken: () => string;
-    setAccessToken: (token: string) => void;
     getUser: () => User | null;
     setUser: (user: User | null) => void;
     getRecentMenu: () => RecentMenu[];

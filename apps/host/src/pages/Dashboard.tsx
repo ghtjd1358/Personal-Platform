@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
         <div className="dashboard-root">
             <Grain />
 
-            <section className="dashboard-hero" style={{ animationDelay: '0.1s' }}>
+            <section className="dashboard-hero">
                 <div>
                     <span className="hero-eyebrow">MFA // Portfolio // 2026</span>
                     <h1 className="hero-title">
@@ -175,19 +175,19 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div className="meta-row">
                         <span className="meta-label">HOST</span>
-                        <span className="meta-value">:5000 / container</span>
+                        <span className="meta-value">:5000</span>
                     </div>
                 </div>
             </section>
 
-            <section className="dashboard-intro" style={{ animationDelay: '0.3s' }}>
+            <section className="dashboard-intro">
                 <p>
                     이력서 · 블로그 · 포트폴리오 · 취업관리가 <em>각자의 속도로 개발되도록</em>,
                     <em>공통 인증과 상태</em>만 한 곳에 모았습니다.
                 </p>
             </section>
 
-            <section className="dashboard-stats" style={{ animationDelay: '0.4s' }}>
+            <section className="dashboard-stats">
                 {stats.map((s) => (
                     <div key={s.label} className="stat">
                         <span className="stat-num">{s.num}</span>
@@ -200,7 +200,7 @@ const Dashboard: React.FC = () => {
             </section>
 
             <section>
-                <header className="channels-header" style={{ animationDelay: '0.5s' }}>
+                <header className="channels-header">
                     <span className="channels-label">INDEX · REMOTE APPLICATIONS</span>
                     <h2 className="channels-title">
                         4<em> channels</em>
@@ -212,7 +212,7 @@ const Dashboard: React.FC = () => {
                         to={ch.path}
                         key={ch.num}
                         className="channel"
-                        style={{ animationDelay: `${0.7 + i * 0.15}s` }}
+                        style={{ '--i': i }}
                         aria-label={`${ch.ko} (${ch.en})`}
                     >
                         <span className="channel-num">{ch.num}</span>
@@ -236,7 +236,7 @@ const Dashboard: React.FC = () => {
                 ))}
             </section>
 
-            <footer className="stack-strip" style={{ animationDelay: '1.5s' }}>
+            <footer className="stack-strip">
                 <span>REACT 19</span><span className="stack-dot">·</span>
                 <span>MODULE FEDERATION</span><span className="stack-dot">·</span>
                 <span>WEBPACK 5</span><span className="stack-dot">·</span>

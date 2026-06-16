@@ -5,10 +5,8 @@
  * - iconMap 에 없는 커스텀 아이콘/이모지는 "+ 커스텀 아이콘" 링크로 editor 페이지로 fallback
  */
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAsyncConfirm, usePermission, CommonButton } from '@sonhoseong/mfa-lib';
-import { iconMap } from '../../../constants/iconMap';
-import { LINK_PREFIX } from '@/config/constants';
+import { useAsyncConfirm, usePermission, Button, EmptyState } from '@sonhoseong/mfa-lib';
+import { techIconMap as iconMap } from '@sonhoseong/mfa-lib';
 import type { SkillCategoryWithSkills } from '../../../network/apis/supabase';
 import {
     useFetchSkillCategories,
@@ -18,13 +16,11 @@ import {
     useCreateSkill,
     useDeleteSkill,
 } from '../../../network/hooks';
+import { SkillsCategorySection } from './components';
 import './Skills.editorial.css';
 
 const SkillsListPage: React.FC = () => {
-    const navigate = useNavigate();
     const confirmDialog = useAsyncConfirm();
-    // 현재 SkillCategoryWithSkills 는 user_id 를 포함하지 않아 row-level gating 이 어려움.
-    // 단일-Owner 운영 가정 하에 isOwner 로 전체 편집 UI gating.
     const { isOwner } = usePermission();
 
     // updater 증가 = 전체 재조회 트리거 (React Query invalidate 대용)
@@ -41,10 +37,10 @@ const SkillsListPage: React.FC = () => {
     const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
     const [editingCategoryName, setEditingCategoryName] = useState('');
 
-    // picker drawer 상태: 어떤 카테고리에 대해 열려있는지 (null = 닫힘), 검색 쿼리
+    // picker drawer 상태
     const [pickerOpenFor, setPickerOpenFor] = useState<string | null>(null);
     const [pickerSearch, setPickerSearch] = useState('');
-    const [busyBadge, setBusyBadge] = useState<string | null>(null); // "category.id::name" 키로 중복 클릭 방지
+    const [busyBadge, setBusyBadge] = useState<string | null>(null);
 
     const allBadgeNames = useMemo(() => Object.keys(iconMap), []);
     const filteredBadges = useMemo(() => {
@@ -123,6 +119,16 @@ const SkillsListPage: React.FC = () => {
         setPickerSearch('');
     };
 
+    const handleStartEdit = (id: string, currentName: string) => {
+        setEditingCategoryId(id);
+        setEditingCategoryName(currentName);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingCategoryId(null);
+        setEditingCategoryName('');
+    };
+
     const isEmpty = categories.length === 0;
 
     return (
@@ -133,9 +139,9 @@ const SkillsListPage: React.FC = () => {
                     <p className="skills-admin-sub">카테고리 만들고, 아래 뱃지에서 원하는 기술을 클릭해서 넣으세요.</p>
                 </div>
                 {!isEmpty && isOwner && (
-                    <CommonButton variant="primary" onClick={() => setCreatingCategory(true)}>
+                    <Button variant="primary" onClick={() => setCreatingCategory(true)}>
                         + 카테고리 추가
-                    </CommonButton>
+                    </Button>
                 )}
             </header>
 
@@ -145,21 +151,20 @@ const SkillsListPage: React.FC = () => {
             </div>
 
             {isEmpty && !creatingCategory && (
-                <div className="skills-empty">
-                    <p className="skills-empty-title">아직 등록된 카테고리가 없습니다.</p>
-                    {isOwner ? (
-                        <>
-                            <p className="skills-empty-sub">먼저 카테고리(예: 프론트엔드, 상태관리)를 만들어보세요.</p>
-                            <div className="skills-empty-actions">
-                                <CommonButton variant="primary" onClick={() => setCreatingCategory(true)}>
-                                    카테고리 추가
-                                </CommonButton>
-                            </div>
-                        </>
-                    ) : (
-                        <p className="skills-empty-sub">Owner 가 카테고리를 추가하면 여기에 표시됩니다. (열람만 가능)</p>
-                    )}
-                </div>
+                <EmptyState
+                    description={
+                        isOwner
+                            ? '아직 등록된 카테고리가 없습니다. 먼저 카테고리(예: 프론트엔드, 상태관리)를 만들어보세요.'
+                            : '아직 등록된 카테고리가 없습니다. Owner 가 카테고리를 추가하면 여기에 표시됩니다. (열람만 가능)'
+                    }
+                    action={
+                        isOwner ? (
+                            <Button variant="primary" onClick={() => setCreatingCategory(true)}>
+                                카테고리 추가
+                            </Button>
+                        ) : undefined
+                    }
+                />
             )}
 
             {creatingCategory && (
@@ -179,8 +184,8 @@ const SkillsListPage: React.FC = () => {
                             }
                         }}
                     />
-                    <CommonButton variant="primary" onClick={handleCreateCategory}>저장</CommonButton>
-                    <CommonButton
+                    <Button variant="primary" onClick={handleCreateCategory}>저장</Button>
+                    <Button
                         variant="ghost"
                         onClick={() => {
                             setCreatingCategory(false);
@@ -188,174 +193,34 @@ const SkillsListPage: React.FC = () => {
                         }}
                     >
                         취소
-                    </CommonButton>
+                    </Button>
                 </div>
             )}
 
             <div className="skills-categories">
-                {categories.map((category) => {
-                    const isPickerOpen = pickerOpenFor === category.id;
-                    return (
-                        <section key={category.id} className="skills-category">
-                            <header className="skills-category-header">
-                                {editingCategoryId === category.id ? (
-                                    <>
-                                        <input
-                                            type="text"
-                                            value={editingCategoryName}
-                                            onChange={(e) => setEditingCategoryName(e.target.value)}
-                                            className="skills-input"
-                                            autoFocus
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') handleUpdateCategory(category.id);
-                                                if (e.key === 'Escape') {
-                                                    setEditingCategoryId(null);
-                                                    setEditingCategoryName('');
-                                                }
-                                            }}
-                                        />
-                                        <CommonButton variant="primary" onClick={() => handleUpdateCategory(category.id)}>저장</CommonButton>
-                                        <CommonButton
-                                            variant="ghost"
-                                            onClick={() => {
-                                                setEditingCategoryId(null);
-                                                setEditingCategoryName('');
-                                            }}
-                                        >
-                                            취소
-                                        </CommonButton>
-                                    </>
-                                ) : (
-                                    <>
-                                        <h2 className="skills-category-name">{category.label}</h2>
-                                        {isOwner && (
-                                            <div className="skills-category-actions">
-                                                <CommonButton
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setEditingCategoryId(category.id);
-                                                        setEditingCategoryName(category.label);
-                                                    }}
-                                                >
-                                                    이름 수정
-                                                </CommonButton>
-                                                <CommonButton
-                                                    variant="danger"
-                                                    size="sm"
-                                                    onClick={() => handleDeleteCategory(category.id, category.label)}
-                                                >
-                                                    삭제
-                                                </CommonButton>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </header>
-
-                            <div className="skills-grid">
-                                {category.skills.map((skill) => (
-                                    <div key={skill.id} className="skills-item">
-                                        <span className="skills-item-icon">
-                                            {(skill.icon && iconMap[skill.icon]) ||
-                                                iconMap[skill.name] || (
-                                                    <span style={{ color: skill.icon_color || '#8B7355' }}>
-                                                        {skill.icon || '💻'}
-                                                    </span>
-                                                )}
-                                        </span>
-                                        <span className="skills-item-name">{skill.name}</span>
-                                        {isOwner && (
-                                            <div className="skills-item-actions">
-                                                <CommonButton
-                                                    variant="danger"
-                                                    size="sm"
-                                                    onClick={() => handleDeleteSkill(skill.id, skill.name)}
-                                                    title="삭제"
-                                                    aria-label={`${skill.name} 삭제`}
-                                                >
-                                                    ×
-                                                </CommonButton>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                                {/* grid 안에 들어가는 add-card 타일 — 일반 CommonButton 으로 치환 시 grid 레이아웃이
-                                    버튼 기본 padding 에 맞지 않음. 고유 .skills-add-card 스타일 유지. */}
-                                {isOwner && (
-                                    <button
-                                        type="button"
-                                        className={`skills-add-card ${isPickerOpen ? 'is-active' : ''}`}
-                                        onClick={() => togglePicker(category.id)}
-                                    >
-                                        {isPickerOpen ? '닫기 ▲' : '+ 스킬 추가'}
-                                    </button>
-                                )}
-                            </div>
-
-                            {isPickerOpen && (
-                                <div className="skills-picker">
-                                    <div className="skills-picker-head">
-                                        <input
-                                            type="text"
-                                            className="skills-input skills-picker-search"
-                                            placeholder="검색 (예: React, Python, AWS)"
-                                            value={pickerSearch}
-                                            onChange={(e) => setPickerSearch(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <CommonButton
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => navigate(`${LINK_PREFIX}/admin/skills/new?category=${category.id}`)}
-                                            title="iconMap 에 없는 기술은 여기서 수동으로 아이콘/이모지 지정"
-                                        >
-                                            + 커스텀 아이콘
-                                        </CommonButton>
-                                        <CommonButton
-                                            variant="text"
-                                            size="sm"
-                                            onClick={() => setPickerOpenFor(null)}
-                                            title="닫기"
-                                            aria-label="닫기"
-                                        >
-                                            ✕
-                                        </CommonButton>
-                                    </div>
-
-                                    {/* picker-grid 안 뱃지들 — button role 이지만 시각은 tech-icon tile.
-                                        고유 .skills-picker-badge 스타일 유지. */}
-                                    <div className="skills-picker-grid">
-                                        {filteredBadges.map((name) => {
-                                            const inCategory = category.skills.some((s) => s.name === name);
-                                            const busyKey = `${category.id}::${name}`;
-                                            const isBusy = busyBadge === busyKey;
-                                            return (
-                                                <button
-                                                    type="button"
-                                                    key={name}
-                                                    className={`skills-picker-badge ${inCategory ? 'is-added' : ''} ${isBusy ? 'is-busy' : ''}`}
-                                                    onClick={() => handleToggleBadge(category, name)}
-                                                    disabled={isBusy}
-                                                    title={inCategory ? `${name} — 클릭해서 제거` : `${name} — 클릭해서 추가`}
-                                                >
-                                                    <span className="skills-picker-badge-icon">{iconMap[name]}</span>
-                                                    <span className="skills-picker-badge-name">{name}</span>
-                                                    {inCategory && <span className="skills-picker-badge-check">✓</span>}
-                                                </button>
-                                            );
-                                        })}
-                                        {filteredBadges.length === 0 && (
-                                            <div className="skills-picker-empty">
-                                                "{pickerSearch}" 검색 결과 없음. "+ 커스텀 아이콘" 으로 직접 추가하세요.
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </section>
-                    );
-                })}
+                {categories.map((category) => (
+                    <SkillsCategorySection
+                        key={category.id}
+                        category={category}
+                        isOwner={isOwner}
+                        isPickerOpen={pickerOpenFor === category.id}
+                        pickerSearch={pickerSearch}
+                        filteredBadges={filteredBadges}
+                        busyBadge={busyBadge}
+                        editingCategoryId={editingCategoryId}
+                        editingCategoryName={editingCategoryName}
+                        onEditingNameChange={setEditingCategoryName}
+                        onStartEdit={handleStartEdit}
+                        onCancelEdit={handleCancelEdit}
+                        onUpdateCategory={handleUpdateCategory}
+                        onDeleteCategory={handleDeleteCategory}
+                        onDeleteSkill={handleDeleteSkill}
+                        onTogglePicker={togglePicker}
+                        onPickerSearchChange={setPickerSearch}
+                        onClosePicker={() => setPickerOpenFor(null)}
+                        onToggleBadge={handleToggleBadge}
+                    />
+                ))}
             </div>
         </div>
     );

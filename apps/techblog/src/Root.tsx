@@ -11,24 +11,28 @@ import {
 } from '@sonhoseong/mfa-lib';
 import App from './App';
 
+const isHost = storage.isHostApp();
+
 function Root() {
     const { initialized } = useSimpleInitialize();
 
     if (!initialized) return null;
 
+    const content = (
+        <ErrorBoundary>
+            <main className="main-content">
+                <App />
+            </main>
+            <GlobalLoading />
+        </ErrorBoundary>
+    );
+
     return (
         <>
             <ModalContainer />
             <ToastContainer />
-            <Container>
-                <ErrorBoundary>
-                    <main className="main-content">
-                        <App />
-                    </main>
-                    <GlobalLoading />
-                </ErrorBoundary>
-            </Container>
-            {!storage.isHostApp() && <ScrollTopButton />}
+            {isHost ? content : <Container>{content}</Container>}
+            {!isHost && <ScrollTopButton />}
         </>
     );
 }

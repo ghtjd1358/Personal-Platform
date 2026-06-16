@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { useToast, getCurrentUser } from '@sonhoseong/mfa-lib'
+import { useToast, useCurrentUser, Badge } from '@sonhoseong/mfa-lib'
 import { LINK_PREFIX } from '@/config/constants'
 import {
     useFetchExperienceByIdWithDetails,
@@ -20,7 +20,7 @@ const ExperienceEditorPage: React.FC = () => {
     const resumeId = searchParams.get('resumeId')
     const navigate = useNavigate()
     const toast = useToast()
-    const user = getCurrentUser()
+    const user = useCurrentUser()
     const isEdit = !!id
 
     const { experience: loadedExp } = useFetchExperienceByIdWithDetails(id)
@@ -229,7 +229,7 @@ const ExperienceEditorPage: React.FC = () => {
                         <div className="exp-chips">
                             {parsedTags.length > 0 ? (
                                 parsedTags.map((t) => (
-                                    <span key={t} className="exp-chip">{t}</span>
+                                    <Badge key={t} variant="default" className="exp-chip">{t}</Badge>
                                 ))
                             ) : (
                                 <span className="exp-chips-empty">쉼표로 구분하면 여기에 칩으로 나타나요.</span>

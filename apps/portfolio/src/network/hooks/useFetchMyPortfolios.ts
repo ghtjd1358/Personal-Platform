@@ -4,7 +4,7 @@ import { getMyPortfolios } from '@/network/apis/portfolio/manage-portfolio';
 
 type List = NonNullable<Awaited<ReturnType<typeof getMyPortfolios>>['data']>;
 
-export function useFetchMyPortfolios(updater?: number, options: { silent?: boolean } = {}) {
+export function useFetchMyPortfolios(userId: string, updater?: number, options: { silent?: boolean } = {}) {
     const [list, setList] = useState<List>([] as unknown as List);
     const showGlobalLoading = useShowGlobalLoading();
     const { error: toastError } = useToast();
@@ -13,7 +13,7 @@ export function useFetchMyPortfolios(updater?: number, options: { silent?: boole
         let cancelled = false;
 
         showGlobalLoading(
-            getMyPortfolios()
+            getMyPortfolios(userId)
                 .then((res) => {
                     if (cancelled) return;
                     if (!res.success || !res.data) throw new Error(res.error || '내 포트폴리오 조회 실패');
@@ -28,7 +28,7 @@ export function useFetchMyPortfolios(updater?: number, options: { silent?: boole
 
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [updater]);
+    }, [updater, userId]);
 
     return { list };
 }

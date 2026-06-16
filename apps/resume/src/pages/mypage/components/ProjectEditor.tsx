@@ -1,4 +1,5 @@
 import React from 'react';
+import { EmptyState } from '@sonhoseong/mfa-lib';
 
 export interface ProjectFormData {
   id?: string;
@@ -79,17 +80,19 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       </div>
 
       {projects.length === 0 ? (
-        <div className="inline-editor-empty">
-          <p>아직 등록된 프로젝트가 없습니다.</p>
-          <button
-            type="button"
-            className="inline-editor-empty-btn"
-            onClick={handleAdd}
-            disabled={disabled}
-          >
-            첫 프로젝트 추가하기
-          </button>
-        </div>
+        <EmptyState
+          description="아직 등록된 프로젝트가 없습니다."
+          action={
+            <button
+              type="button"
+              className="inline-editor-empty-btn"
+              onClick={handleAdd}
+              disabled={disabled}
+            >
+              첫 프로젝트 추가하기
+            </button>
+          }
+        />
       ) : (
         <div className="inline-editor-list">
           {projects.map((proj, index) => (

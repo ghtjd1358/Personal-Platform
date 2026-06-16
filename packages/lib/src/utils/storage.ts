@@ -7,7 +7,6 @@ import { User, RecentMenu } from '../types';
 
 // Storage 키 상수
 export const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'accessToken',
   USER: 'user',
   RECENT_MENU: 'recentMenu',
   IS_HOST_APP: 'isHostApp',
@@ -28,19 +27,6 @@ export const storage = {
 
   isHostApp: () => {
     return sessionStorage.getItem(STORAGE_KEYS.IS_HOST_APP) === 'true';
-  },
-
-  // Access Token
-  getAccessToken: (): string => {
-    return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) || '';
-  },
-
-  setAccessToken: (token: string) => {
-    if (token) {
-      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    }
   },
 
   // User 정보
@@ -77,7 +63,6 @@ export const storage = {
 
   // 인증 정보 전체 삭제
   clearAuth: () => {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER);
     localStorage.removeItem(STORAGE_KEYS.RECENT_MENU);
     sessionStorage.removeItem(STORAGE_KEYS.IS_HOST_APP);

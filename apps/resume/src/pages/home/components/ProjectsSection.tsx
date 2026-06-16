@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { usePortfolioModal } from '../../../components/modal';
 import type { PortfolioItem } from '../../../types';
-import { resolveIcon } from '../../../constants/iconResolver';
+import { resolveIcon, Badge } from '@sonhoseong/mfa-lib';
 import { FaGithub, FaExternalLinkAlt, FaBlog } from 'react-icons/fa';
 import { SectionEditButton } from '../../../components/common';
 import { ProjectCardSkeleton } from './ProjectCardSkeleton';
@@ -56,10 +56,10 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData,
                   {portfolio.tags.slice(0, CARD_TAG_LIMIT).map((tag) => {
                     const icon = resolveIcon(tag.iconKey, tag.iconColor);
                     return (
-                      <span key={tag.name} className="card-tag22">
+                      <Badge key={tag.name} variant="default" className="card-tag22">
                         {icon && <span className="tag-icon">{icon}</span>}
                         {tag.name}
-                      </span>
+                      </Badge>
                     );
                   })}
                 </div>
@@ -87,7 +87,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData,
           ))}
         </div>
 
-        <div className="project-more animate-on-scroll" style={{ display: showSkeleton ? 'none' : undefined }}>
+        <div className={`project-more animate-on-scroll ${showSkeleton ? 'project-more--hidden' : ''}`}>
           {portfolioData.length > 3 && (
             <button
               className={`show-more-btn ${showAllProjects ? 'collapsed' : ''}`}
@@ -100,7 +100,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ portfolioData,
             </button>
           )}
         </div>
-        <div style={{ display: showSkeleton ? 'none' : 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+        <div className={`project-edit-row ${showSkeleton ? 'project-edit-row--hidden' : ''}`}>
           <SectionEditButton editPath="/admin/projects" label="프로젝트 편집" />
         </div>
       </div>

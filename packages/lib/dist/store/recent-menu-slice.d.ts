@@ -21,8 +21,8 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
             search: string;
             title: string;
             service?: string | undefined;
-            state?: any;
-            data?: any;
+            state?: unknown;
+            data?: unknown;
         }[];
         currentId: string;
         maxTabs: number;
@@ -35,8 +35,8 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
             search: string;
             title: string;
             service?: string | undefined;
-            state?: any;
-            data?: any;
+            state?: unknown;
+            data?: unknown;
         }[];
         currentId: string;
         maxTabs: number;
@@ -49,8 +49,8 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
             search: string;
             title: string;
             service?: string | undefined;
-            state?: any;
-            data?: any;
+            state?: unknown;
+            data?: unknown;
         }[];
         currentId: string;
         maxTabs: number;
@@ -63,13 +63,13 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
             search: string;
             title: string;
             service?: string | undefined;
-            state?: any;
-            data?: any;
+            state?: unknown;
+            data?: unknown;
         }[];
         currentId: string;
         maxTabs: number;
     }, action: PayloadAction<string>) => void;
-    /** 메뉴 상태 업데이트 (스크롤 위치, 검색 조건 등) */
+    /** 메뉴 상태 업데이트 (스크롤 위치, 검색 조건, 데이터 등) */
     updateRecentMenuState: (state: {
         list: {
             id: string;
@@ -77,15 +77,16 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
             search: string;
             title: string;
             service?: string | undefined;
-            state?: any;
-            data?: any;
+            state?: unknown;
+            data?: unknown;
         }[];
         currentId: string;
         maxTabs: number;
     }, action: PayloadAction<{
         id: string;
-        state?: any;
-        data?: any;
+        state?: unknown;
+        data?: unknown;
+        search?: string;
     }>) => void;
     /** 모든 최근 메뉴 제거 */
     clearRecentMenu: (state: {
@@ -95,8 +96,8 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
             search: string;
             title: string;
             service?: string | undefined;
-            state?: any;
-            data?: any;
+            state?: unknown;
+            data?: unknown;
         }[];
         currentId: string;
         maxTabs: number;
@@ -109,8 +110,8 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
             search: string;
             title: string;
             service?: string | undefined;
-            state?: any;
-            data?: any;
+            state?: unknown;
+            data?: unknown;
         }[];
         currentId: string;
         maxTabs: number;
@@ -123,8 +124,8 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
             search: string;
             title: string;
             service?: string | undefined;
-            state?: any;
-            data?: any;
+            state?: unknown;
+            data?: unknown;
         }[];
         currentId: string;
         maxTabs: number;
@@ -132,8 +133,9 @@ export declare const recentMenuSlice: import("@reduxjs/toolkit").Slice<RecentMen
 }, "recentMenu", "recentMenu", import("@reduxjs/toolkit").SliceSelectors<RecentMenuState>>;
 export declare const setRecentMenuList: import("@reduxjs/toolkit").ActionCreatorWithPayload<RecentMenu[], "recentMenu/setRecentMenuList">, addRecentMenu: import("@reduxjs/toolkit").ActionCreatorWithPayload<RecentMenu, "recentMenu/addRecentMenu">, removeRecentMenu: import("@reduxjs/toolkit").ActionCreatorWithPayload<string, "recentMenu/removeRecentMenu">, setCurrentRecentMenu: import("@reduxjs/toolkit").ActionCreatorWithPayload<string, "recentMenu/setCurrentRecentMenu">, updateRecentMenuState: import("@reduxjs/toolkit").ActionCreatorWithPayload<{
     id: string;
-    state?: any;
-    data?: any;
+    state?: unknown;
+    data?: unknown;
+    search?: string;
 }, "recentMenu/updateRecentMenuState">, clearRecentMenu: import("@reduxjs/toolkit").ActionCreatorWithoutPayload<"recentMenu/clearRecentMenu">, closeOtherMenus: import("@reduxjs/toolkit").ActionCreatorWithoutPayload<"recentMenu/closeOtherMenus">, setMaxTabs: import("@reduxjs/toolkit").ActionCreatorWithPayload<number, "recentMenu/setMaxTabs">;
 interface RootStateWithRecentMenu {
     recentMenu: RecentMenuState;

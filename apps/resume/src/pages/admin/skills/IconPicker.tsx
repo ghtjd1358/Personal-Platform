@@ -3,7 +3,7 @@
  * 검색 필터 + 선택 highlight + "커스텀" 옵션 (iconMap 에 없는 emoji/텍스트 직접 입력)
  */
 import React, { useState, useMemo } from 'react';
-import { iconMap } from '../../../constants/iconMap';
+import { techIconMap as iconMap } from '@sonhoseong/mfa-lib';
 
 interface IconPickerProps {
     /** 현재 선택된 icon key 또는 커스텀 텍스트 */

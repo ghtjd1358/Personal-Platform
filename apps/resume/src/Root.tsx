@@ -1,5 +1,4 @@
-import React, { useMemo } from 'react'
-import { useSelector } from 'react-redux'
+import React from 'react'
 import {
     Container,
     ModalContainer,
@@ -9,37 +8,32 @@ import {
     ScrollTopButton,
     storage,
     useSimpleInitialize,
-    selectAccessToken
 } from '@sonhoseong/mfa-lib'
-import { lnbItems } from './exposes/lnb-items'
 import App from './exposes/App'
 
+const isHost = storage.isHostApp()
+
 function Root() {
-    const accessToken = useSelector(selectAccessToken)
-    const isAuthenticated = useMemo(() => !!accessToken, [accessToken])
     const { initialized } = useSimpleInitialize()
 
-    const sidebarItems = useMemo(() => {
-        return isAuthenticated ? lnbItems.hasPrefixAuthList : lnbItems.hasPrefixList
-    }, [isAuthenticated])
+    if (!initialized) return <></>
 
-    return  initialized ? (
+    const content = (
+        <ErrorBoundary>
+            <main className="main-content">
+                <App />
+            </main>
+            <GlobalLoading />
+        </ErrorBoundary>
+    )
+
+    return (
         <>
             <ModalContainer />
             <ToastContainer />
-            <Container>
-                <ErrorBoundary>
-                    {/*{isAuthenticated && <Lnb lnbItems={lnbItems} logo={<Logo customSize={36} />} />}*/}
-                    <main className="main-content">
-                        <App />
-                    </main>
-                    <GlobalLoading />
-                </ErrorBoundary>
-            </Container>
-            {!storage.isHostApp() && <ScrollTopButton />}
+            {isHost ? content : <Container>{content}</Container>}
+            {!isHost && <ScrollTopButton />}
         </>
-    ) : (
-        <></>
     )
 }
 

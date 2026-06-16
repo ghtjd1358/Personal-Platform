@@ -1,8 +1,9 @@
 import React, { useEffect, useCallback } from 'react';
+import { Button } from '@sonhoseong/mfa-lib';
 import { ModalCommonProps } from './types';
 import { popModal } from './modal-manager';
 import type { PortfolioItem } from '../../types';
-import { resolveIcon } from '../../constants/iconResolver';
+import { resolveIcon } from '@sonhoseong/mfa-lib';
 import { FaBlog, FaGlobe, FaGithub, FaBookOpen } from 'react-icons/fa';
 import NotionContent from '../notion/NotionContent';
 import './PortfolioModal.editorial.css';
@@ -41,12 +42,12 @@ export const PortfolioModal: React.FC<PortfolioModalProps> = ({ portfolio, onClo
   return (
     <div className="modal" onClick={handleBackdropClick}>
       <div className="modal-container modal-container--portfolio">
-        <button className="modal-close no-cover" onClick={handleClose}>
+        <Button.Icon aria-label="닫기" className="modal-close no-cover" onClick={handleClose}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-        </button>
+        </Button.Icon>
 
         <div className="modal-header">
           {/* notion_url 있을 땐 Notion 페이지 자체 title 이 본문에 들어가서 중복 → 코드 측 h1 숨김 */}

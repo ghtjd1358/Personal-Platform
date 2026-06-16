@@ -3,6 +3,7 @@
  * 에러 발생 시 Fallback UI 표시
  */
 import { Component, ErrorInfo, ReactNode } from 'react';
+import './ErrorBoundary.css';
 interface ErrorBoundaryProps {
     children: ReactNode;
     /** 커스텀 Fallback UI */

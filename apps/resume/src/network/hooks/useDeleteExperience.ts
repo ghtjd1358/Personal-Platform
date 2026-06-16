@@ -23,7 +23,7 @@ export function useDeleteExperience(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                experiencesApi.delete(id)
+                Promise.resolve(experiencesApi.delete(id))
                     .then(({ error }) => {
                         if (error) throw error;
                         toastSuccess('경력이 삭제되었습니다');

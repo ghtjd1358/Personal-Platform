@@ -1,12 +1,4 @@
-/**
- * App Slice — 인증/사용자/UI 상태
- *
- * Access Token / User 는 메모리(Redux)에만 저장.
- * 새로고침 시 Refresh Token(HttpOnly Cookie) 으로 재발급.
- */
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { storage } from '../utils/storage';
 import { User, AppState } from '../types';
 
 const initialAppState: AppState = {
@@ -39,7 +31,6 @@ export const appSlice = createSlice({
         logout: (state) => {
             state.accessToken = '';
             state.user = null;
-            storage.clearAuth();
         },
     },
 });
@@ -53,7 +44,6 @@ export const {
     logout,
 } = appSlice.actions;
 
-// 기본 셀렉터 (단일 필드 직접 조회 — memoization 불필요)
 export const selectAppState = (state: { app: AppState }) => state.app;
 export const selectAccessToken = (state: { app: AppState }) => state.app.accessToken;
 export const selectUser = (state: { app: AppState }) => state.app.user;

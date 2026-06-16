@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCurrentUser, useAsyncConfirm, useToast } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useAsyncConfirm, useToast, Badge, EmptyState, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
 import { getMyPortfolios, deletePortfolio, PortfolioSummary } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
 
@@ -15,7 +15,7 @@ const MyPage: React.FC = () => {
     const toast = useToast();
     const confirmDialog = useAsyncConfirm();
 
-    const currentUser = getCurrentUser();
+    const currentUser = useCurrentUser();
 
     useEffect(() => {
         if (currentUser?.id) {
@@ -64,9 +64,7 @@ const MyPage: React.FC = () => {
     if (!currentUser) {
         return (
             <div className="mypage-container">
-                <div className="mypage-empty">
-                    <p>로그인이 필요합니다.</p>
-                </div>
+                <EmptyState description="로그인이 필요합니다." />
             </div>
         );
     }
@@ -85,20 +83,22 @@ const MyPage: React.FC = () => {
             </div>
 
             {isLoading ? (
-                <div className="mypage-loading">
-                    <div className="spinner-large" />
-                </div>
+                <LoadingSpinner message="불러오는 중" />
             ) : portfolios.length === 0 ? (
-                <div className="mypage-empty">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                    </svg>
-                    <p>아직 등록된 포트폴리오가 없습니다.</p>
-                    <Link to={`${LINK_PREFIX}/mypage/new`} className="btn-primary">
-                        첫 프로젝트 추가하기
-                    </Link>
-                </div>
+                <EmptyState
+                    icon={(
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                        </svg>
+                    )}
+                    description="아직 등록된 포트폴리오가 없습니다."
+                    action={
+                        <Link to={`${LINK_PREFIX}/mypage/new`} className="btn-primary">
+                            첫 프로젝트 추가하기
+                        </Link>
+                    }
+                />
             ) : (
                 <div className="portfolio-list">
                     {portfolios.map((portfolio) => {
@@ -121,9 +121,12 @@ const MyPage: React.FC = () => {
                                 <div className="portfolio-info">
                                     <div className="portfolio-title-row">
                                         <h3>{portfolio.title}</h3>
-                                        <span className={`status-badge ${status.className}`}>
+                                        <Badge
+                                            variant={portfolio.status === 'published' ? 'success' : portfolio.status === 'archived' ? 'default' : 'warning'}
+                                            className={`status-badge ${status.className}`}
+                                        >
                                             {status.label}
-                                        </span>
+                                        </Badge>
                                     </div>
                                     <p className="portfolio-desc">
                                         {portfolio.short_description || portfolio.description || '설명 없음'}
@@ -131,10 +134,10 @@ const MyPage: React.FC = () => {
                                     {portfolio.techStack && portfolio.techStack.length > 0 && (
                                         <div className="portfolio-tech">
                                             {portfolio.techStack.slice(0, 5).map((tech, idx) => (
-                                                <span key={idx} className="tech-tag">{tech.name}</span>
+                                                <Badge key={idx} variant="default" className="tech-tag">{tech.name}</Badge>
                                             ))}
                                             {portfolio.techStack.length > 5 && (
-                                                <span className="tech-more">+{portfolio.techStack.length - 5}</span>
+                                                <Badge variant="ghost" className="tech-more">+{portfolio.techStack.length - 5}</Badge>
                                             )}
                                         </div>
                                     )}
@@ -172,7 +175,9 @@ const MyPage: React.FC = () => {
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                         </svg>
                                     </Link>
-                                    <button
+                                    <Button.Icon
+                                        variant="danger"
+                                        aria-label="삭제"
                                         className="btn-icon btn-danger"
                                         onClick={() => handleDelete(portfolio)}
                                         title="삭제"
@@ -181,7 +186,7 @@ const MyPage: React.FC = () => {
                                             <polyline points="3 6 5 6 21 6" />
                                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                         </svg>
-                                    </button>
+                                    </Button.Icon>
                                 </div>
                             </div>
                         );

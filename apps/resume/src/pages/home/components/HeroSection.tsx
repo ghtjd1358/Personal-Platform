@@ -127,7 +127,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ userName, heroSummary 
             안녕하세요,<br />
             프론트엔드 개발자<br />
             {/* em(italic)→upright 전환 시 기울기로 인한 시각 충돌 방지용 여백 */}
-            <em style={{ marginRight: '0.18em' }}>손호성</em>입니다.
+            <em className="hero-em-spaced">손호성</em>입니다.
           </h1>
           <p className="editorial-sub">
             {subLine1}<br />

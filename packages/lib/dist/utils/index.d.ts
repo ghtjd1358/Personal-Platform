@@ -5,4 +5,6 @@ export * from './validation';
 export * from './query-string';
 export * from './classnames';
 export * from './notion';
+export * from './setup-font-loading';
+export * from './init-remote-app';
 //# sourceMappingURL=index.d.ts.map

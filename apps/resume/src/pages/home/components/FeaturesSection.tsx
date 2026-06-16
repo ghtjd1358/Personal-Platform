@@ -1,6 +1,7 @@
 import React from 'react';
 import SectionEditButton from '../../../components/common/SectionEditButton';
 import { FeatureCardSkeleton } from './FeatureCardSkeleton';
+import { FeatureCard } from '../../../components/cards/FeatureCard';
 import { resolveFeatureImage } from '@/assets/images/hero';
 
 /**
@@ -42,24 +43,17 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ features, isLo
             : features.map((feature, index) => {
                 const imageSrc = resolveFeatureImage(feature.order_index, feature.image_url);
                 return (
-                  <div
-                    /* key 를 index 로 — mock('react')→DB(uuid) fetch 교체 시 React 가
-                       동일 컴포넌트로 보고 re-mount 하지 않음 → scroll animation 재트리거 방지. */
+                  <FeatureCard
                     key={index}
-                    className={`feature-card animate-on-scroll delay-${index + 1}`}
-                  >
-                    {imageSrc && (
-                      <div className="feature-image">
-                        <img src={imageSrc} alt={feature.title} />
-                      </div>
-                    )}
-                    <h3 className="feature-title">{feature.title}</h3>
-                    <p className="feature-desc">{feature.description}</p>
-                  </div>
+                    title={feature.title}
+                    description={feature.description}
+                    imageSrc={imageSrc}
+                    index={index}
+                  />
                 );
               })}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+        <div className="section-edit-row">
           <SectionEditButton editPath="/admin/features" label="핵심 역량 편집" />
         </div>
       </div>

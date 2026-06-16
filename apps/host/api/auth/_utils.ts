@@ -11,6 +11,9 @@
 import jwt from 'jsonwebtoken';
 
 // 환경 변수에서 시크릿 키 가져오기 (Vercel에서 설정)
+if (process.env.NODE_ENV === 'production' && (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET)) {
+  throw new Error('JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be set in production');
+}
 const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET || 'dev-access-secret-key-change-in-production';
 const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-key-change-in-production';
 

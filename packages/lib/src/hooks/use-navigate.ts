@@ -76,7 +76,6 @@ export function useMfaNavigate() {
       { ...options, service: undefined } as NavigateOptions
     );
 
-    console.log(`[Navigate] ${pathname}${search ? `?${search}` : ''}`);
   }, [navigate, currentService]);
 }
 

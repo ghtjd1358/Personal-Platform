@@ -12,7 +12,7 @@ interface Props {
 
 const DEFAULT_ITEMS: NavItem[] = [
   { label: '핵심 역량', id: 'core-summary' },
-  { label: '기술 스택', id: 'skills' },
+  { label: '기술 스택', id: 'tech-stack' },
   { label: '경력', id: 'experience' },
   { label: '프로젝트', id: 'projects' },
 ];

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Badge, EmptyState } from '@sonhoseong/mfa-lib';
 import { useFetchSkillCategories } from '@/network/hooks';
 
 interface SkillsSelectorProps {
@@ -80,9 +81,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
       </p>
 
       {categories.length === 0 ? (
-        <div className="skills-selector-empty">
-          <p>등록된 기술이 없습니다.</p>
-        </div>
+        <EmptyState description="등록된 기술이 없습니다." />
       ) : (
         <div className="skills-selector-categories">
           {categories.map((category) => {
@@ -165,7 +164,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
           <span className="skills-selector-selected-label">선택된 기술:</span>
           <div className="skills-selector-selected-tags">
             {selectedSkills.map((skill) => (
-              <span key={skill} className="skills-selector-tag">
+              <Badge key={skill} variant="default" className="skills-selector-tag">
                 {skill}
                 <button
                   type="button"
@@ -176,7 +175,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
                     <path d="M18 6L6 18M6 6l12 12"/>
                   </svg>
                 </button>
-              </span>
+              </Badge>
             ))}
           </div>
         </div>

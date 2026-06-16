@@ -7,7 +7,7 @@
  */
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAsyncConfirm, usePermission } from '@sonhoseong/mfa-lib'
+import { useAsyncConfirm, usePermission, Badge, EmptyState } from '@sonhoseong/mfa-lib'
 import type { Portfolio } from '../../../network/apis/types'
 import { useFetchPortfolios, useDeletePortfolio } from '../../../network/hooks'
 import { LINK_PREFIX } from '@/config/constants'
@@ -44,7 +44,7 @@ const PortfolioListPage: React.FC = () => {
                 <div className="exp-row-title">
                     {p.title}
                     {opts?.showResumeBadge && p.resume_id && (
-                        <span className="exp-row-badge" title="이력서에도 노출됨">이력서 노출</span>
+                        <Badge variant="info" className="exp-row-badge">이력서 노출</Badge>
                     )}
                 </div>
                 <div className="exp-row-sub">{p.role}</div>
@@ -118,15 +118,17 @@ const PortfolioListPage: React.FC = () => {
                 </header>
 
                 {resumeLinked.length === 0 ? (
-                    <div className="exp-empty">
-                        <p className="exp-empty-title">이력서에 연결된 프로젝트가 없습니다.</p>
-                        <Link
-                            to={`${LINK_PREFIX}/admin/portfolio/new?fromResume=1`}
-                            className="exp-btn exp-btn--ghost"
-                        >
-                            이력서용으로 추가
-                        </Link>
-                    </div>
+                    <EmptyState
+                        description="이력서에 연결된 프로젝트가 없습니다."
+                        action={
+                            <Link
+                                to={`${LINK_PREFIX}/admin/portfolio/new?fromResume=1`}
+                                className="exp-btn exp-btn--ghost"
+                            >
+                                이력서용으로 추가
+                            </Link>
+                        }
+                    />
                 ) : (
                     <ul className="exp-list">{resumeLinked.map((p) => renderRow(p))}</ul>
                 )}
@@ -151,15 +153,17 @@ const PortfolioListPage: React.FC = () => {
                 </header>
 
                 {items.length === 0 ? (
-                    <div className="exp-empty">
-                        <p className="exp-empty-title">포트폴리오에 작품이 없습니다.</p>
-                        <Link
-                            to={`${LINK_PREFIX}/admin/portfolio/new`}
-                            className="exp-btn exp-btn--ghost"
-                        >
-                            포트폴리오 추가
-                        </Link>
-                    </div>
+                    <EmptyState
+                        description="포트폴리오에 작품이 없습니다."
+                        action={
+                            <Link
+                                to={`${LINK_PREFIX}/admin/portfolio/new`}
+                                className="exp-btn exp-btn--ghost"
+                            >
+                                포트폴리오 추가
+                            </Link>
+                        }
+                    />
                 ) : (
                     <ul className="exp-list">
                         {items.map((p) => renderRow(p, { showResumeBadge: true }))}

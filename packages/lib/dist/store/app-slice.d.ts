@@ -1,9 +1,3 @@
-/**
- * App Slice — 인증/사용자/UI 상태
- *
- * Access Token / User 는 메모리(Redux)에만 저장.
- * 새로고침 시 Refresh Token(HttpOnly Cookie) 으로 재발급.
- */
 import { PayloadAction } from '@reduxjs/toolkit';
 import { User, AppState } from '../types';
 export declare const appSlice: import("@reduxjs/toolkit").Slice<AppState, {
@@ -13,7 +7,7 @@ export declare const appSlice: import("@reduxjs/toolkit").Slice<AppState, {
             id: string;
             name: string;
             email: string;
-            role?: (import("..").UserRole | string) | undefined;
+            role?: import("..").UserRole | undefined;
             avatar?: string | undefined;
             permissions?: {
                 code: string;
@@ -30,7 +24,7 @@ export declare const appSlice: import("@reduxjs/toolkit").Slice<AppState, {
             id: string;
             name: string;
             email: string;
-            role?: (import("..").UserRole | string) | undefined;
+            role?: import("..").UserRole | undefined;
             avatar?: string | undefined;
             permissions?: {
                 code: string;
@@ -47,7 +41,7 @@ export declare const appSlice: import("@reduxjs/toolkit").Slice<AppState, {
             id: string;
             name: string;
             email: string;
-            role?: (import("..").UserRole | string) | undefined;
+            role?: import("..").UserRole | undefined;
             avatar?: string | undefined;
             permissions?: {
                 code: string;
@@ -64,7 +58,7 @@ export declare const appSlice: import("@reduxjs/toolkit").Slice<AppState, {
             id: string;
             name: string;
             email: string;
-            role?: (import("..").UserRole | string) | undefined;
+            role?: import("..").UserRole | undefined;
             avatar?: string | undefined;
             permissions?: {
                 code: string;
@@ -81,7 +75,7 @@ export declare const appSlice: import("@reduxjs/toolkit").Slice<AppState, {
             id: string;
             name: string;
             email: string;
-            role?: (import("..").UserRole | string) | undefined;
+            role?: import("..").UserRole | undefined;
             avatar?: string | undefined;
             permissions?: {
                 code: string;
@@ -98,7 +92,7 @@ export declare const appSlice: import("@reduxjs/toolkit").Slice<AppState, {
             id: string;
             name: string;
             email: string;
-            role?: (import("..").UserRole | string) | undefined;
+            role?: import("..").UserRole | undefined;
             avatar?: string | undefined;
             permissions?: {
                 code: string;

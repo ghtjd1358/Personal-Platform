@@ -3,7 +3,7 @@ import { createHighlighter, Highlighter } from 'shiki';
 import DOMPurify from 'dompurify';
 
 // DOMPurify 설정 - 허용할 태그와 속성 정의
-const DOMPURIFY_CONFIG: DOMPurify.Config = {
+const DOMPURIFY_CONFIG = {
   ALLOWED_TAGS: [
     'p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre',
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -99,8 +99,7 @@ export function parseContent(content: string): string {
   
   parsed = convertImageUrls(parsed);
 
-  // XSS 방지: HTML Sanitize
-  parsed = DOMPurify.sanitize(parsed, DOMPURIFY_CONFIG);
+  parsed = DOMPurify.sanitize(parsed, DOMPURIFY_CONFIG) as string;
 
   return parsed;
 }

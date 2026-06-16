@@ -17,4 +17,5 @@ export * from './use-recent-menu';
 export * from './use-debounce';
 export * from './use-scroll-restoration';
 export * from './use-effect-once';
+export * from './use-scroll-top';
 //# sourceMappingURL=index.d.ts.map

@@ -22,7 +22,8 @@
       "@/*": ["./*"],
       "@resume/*": ["types/remote.d.ts"],
       "@blog/*": ["types/remote.d.ts"],
-      "@portfolio/*": ["types/remote.d.ts"]
+      "@portfolio/*": ["types/remote.d.ts"],
+      "@jobtracker/*": ["types/remote.d.ts"]
     }
   },
   "include": ["src/**/*"],

@@ -17,7 +17,7 @@ export function useFetchPortfolios(updater?: number, options: { silent?: boolean
         let cancelled = false;
 
         showGlobalLoading(
-            portfoliosApi.getAll()
+            Promise.resolve(portfoliosApi.getAll())
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

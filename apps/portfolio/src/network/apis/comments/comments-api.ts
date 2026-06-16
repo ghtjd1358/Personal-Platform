@@ -6,7 +6,7 @@ import { Comment, CreateCommentRequest, UpdateCommentRequest } from './types';
 /** Axios 에러에서 메시지 추출 */
 function getErrorMessage(err: unknown, fallback: string): string {
   if (isAxiosError(err)) {
-    return err.response?.data?.message || fallback;
+    return (err.response?.data as { message?: string } | undefined)?.message || fallback;
   }
   return err instanceof Error ? err.message : fallback;
 }

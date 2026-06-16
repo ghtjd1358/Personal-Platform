@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCurrentUser } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, EmptyState } from '@sonhoseong/mfa-lib';
 import { LoadingSpinner } from '@/components/loading';
 import { useMyPageData, useScrollAnimation } from '@/hooks';
 import { LINK_PREFIX } from '@/config/constants';
@@ -19,25 +19,24 @@ import './MyPage.editorial.css';
 const MyPage: React.FC = () => {
   const { userId } = useParams<{ userId?: string }>();
   const navigate = useNavigate();
+  const currentUser = useCurrentUser();
 
   // /my 접근 시 /container/user/:userId로 리다이렉트
   useEffect(() => {
     if (!userId) {
-      const currentUser = getCurrentUser();
       if (currentUser?.id) {
         navigate(`/container/user/${currentUser.id}`, { replace: true });
       }
     }
-  }, [userId, navigate]);
+  }, [userId, navigate, currentUser?.id]);
 
   // targetUserId - URL에서 직접 가져옴
   const targetUserId = userId;
 
   const isOwnProfile = useMemo(() => {
     if (!targetUserId) return false;
-    const currentUser = getCurrentUser();
     return currentUser?.id === targetUserId;
-  }, [targetUserId]);
+  }, [targetUserId, currentUser?.id]);
 
   const { profile, posts, series, stats, isLoading, refetch } = useMyPageData(targetUserId);
   const [activeTab, setActiveTab] = useState<TabType>('posts');
@@ -58,9 +57,7 @@ const MyPage: React.FC = () => {
     return (
       <div className="mypage">
         <div className="container">
-          <div className="mypage-empty">
-            <p>사용자 정보를 불러올 수 없습니다.</p>
-          </div>
+          <EmptyState description="사용자 정보를 불러올 수 없습니다." />
         </div>
       </div>
     );

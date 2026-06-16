@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { resolveIcon } from '../../../constants/iconResolver';
+import { resolveIcon } from '@sonhoseong/mfa-lib';
 import type { SkillCategoryDetail } from '../../../types';
 import { SectionEditButton } from '../../../components/common';
 
@@ -57,7 +57,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ categories }) => {
           )}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+        <div className="section-edit-row">
           <SectionEditButton editPath="/admin/skills" label="기술스택 편집" />
         </div>
       </div>

@@ -28,7 +28,7 @@ export function useFetchSkillById(
         let cancelled = false;
 
         showGlobalLoading(
-            skillsApi.getSkillById(id)
+            Promise.resolve(skillsApi.getSkillById(id))
                 .then(({ data, error }) => {
                     if (cancelled) return;
                     if (error) throw error;

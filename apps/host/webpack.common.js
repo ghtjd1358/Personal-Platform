@@ -2,7 +2,22 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ModuleFederationPlugin } = require('webpack').container;
 const webpack = require('webpack');
-require('dotenv').config();
+// CI/Vercel 환경에서는 .env 없이 시스템 환경변수를 직접 사용하므로 누락 경고 억제
+if (!process.env.CI && !process.env.VERCEL) {
+    const result = require('dotenv').config();
+    if (result.error && process.env.NODE_ENV !== 'production') {
+        console.warn('[webpack] .env 파일을 찾을 수 없습니다. 환경변수를 직접 설정해야 합니다.');
+    }
+}
+if (process.env.NODE_ENV === 'production') {
+    if (!process.env.REMOTE1_URL) throw new Error('REMOTE1_URL이 설정되지 않았습니다.');
+    if (!process.env.REMOTE2_URL) throw new Error('REMOTE2_URL이 설정되지 않았습니다.');
+    if (!process.env.REMOTE3_URL) throw new Error('REMOTE3_URL이 설정되지 않았습니다.');
+    if (!process.env.REMOTE4_URL) throw new Error('REMOTE4_URL이 설정되지 않았습니다.');
+    if (!process.env.REACT_APP_SUPABASE_URL) throw new Error('REACT_APP_SUPABASE_URL이 설정되지 않았습니다.');
+    if (!process.env.REACT_APP_SUPABASE_ANON_KEY) throw new Error('REACT_APP_SUPABASE_ANON_KEY가 설정되지 않았습니다.');
+    if (!process.env.REACT_APP_API_URL) throw new Error('REACT_APP_API_URL이 설정되지 않았습니다.');
+}
 
 // 환경 변수에서 Remote URL 가져오기
 const REMOTE1_URL = process.env.REMOTE1_URL || 'http://localhost:5001';
@@ -19,7 +34,9 @@ const REMOTE4_URL = process.env.REMOTE4_URL || 'http://localhost:5004';
 const dynamicRemoteLoader = (remoteName, remoteUrl) => {
   // ?t= 를 runtime Date.now() 로 박아 host main.js 가 stale cache 라도 remoteEntry 는 매 fetch fresh 보장
   // (build-time timestamp 였을 때는 옛 deploy cache + 같은 URL 로 stale remoteEntry 받는 케이스 존재)
+  // 캐시 방지: 매번 새로운 타임스탬프로 remoteEntry.js를 새로 가져옴
   return `promise new Promise((resolve, reject) => {
+    // 이미 로드됐으면 재사용 (중복 로드 방지)
     if (window['${remoteName}']) {
       resolve({
         get: (request) => window['${remoteName}'].get(request),
@@ -34,6 +51,7 @@ const dynamicRemoteLoader = (remoteName, remoteUrl) => {
       return;
     }
 
+    // 처음 로드: <script> 태그를 만들어 remoteEntry.js를 동적으로 불러옴
     const script = document.createElement('script');
     script.src = '${remoteUrl}' + '?t=' + Date.now();
     script.type = 'text/javascript';
@@ -41,7 +59,6 @@ const dynamicRemoteLoader = (remoteName, remoteUrl) => {
 
     script.onload = () => {
       if (window['${remoteName}']) {
-        console.log('[MFA] ${remoteName} loaded successfully');
         resolve({
           get: (request) => window['${remoteName}'].get(request),
           init: (arg) => {
@@ -64,7 +81,7 @@ const dynamicRemoteLoader = (remoteName, remoteUrl) => {
 
     script.onerror = (error) => {
       console.error('[MFA] Failed to load ${remoteName}:', error);
-      // Graceful fallback: 에러 시에도 앱 계속 동작
+      // 로드 실패해도 앱이 멈추지 않도록 빈 모듈을 반환 (Graceful Fallback)
       resolve({
         get: () => Promise.resolve(() => () => null),
         init: () => {}
@@ -150,22 +167,31 @@ module.exports = {
       name: 'container',
       remotes: {
         // 동적 로더 사용 (Graceful Fallback 포함)
+        // 이력서 앱 (port 5001)
         '@resume': dynamicRemoteLoader('remote1', `${REMOTE1_URL}/remoteEntry.js`),
+        // 블로그 앱 (port 5002)
         '@blog': dynamicRemoteLoader('blog', `${REMOTE2_URL}/remoteEntry.js`),
+        // 포트폴리오 앱 (port 5003)
         '@portfolio': dynamicRemoteLoader('portfolio', `${REMOTE3_URL}/remoteEntry.js`),
+        // 기술블로그 앱 (port 5004)
         '@jobtracker': dynamicRemoteLoader('jobtracker', `${REMOTE4_URL}/remoteEntry.js`)
       },
       shared: {
+        // React 핵심 — 앱 전체에서 하나만 사용 (singleton)
         react: { singleton: true, eager: true, requiredVersion: '19.2.0' },
         'react-dom': { singleton: true, eager: true, requiredVersion: '19.2.0' },
-        'react-router-dom': { singleton: true, eager: true },
-        '@reduxjs/toolkit': { singleton: true, eager: true },
-        'react-redux': { singleton: true, eager: true },
-        'react-promise-tracker': { singleton: true, eager: true },
+        // 라우팅 — singleton 은 exact version pin (caret range 면 remote 들이 서로 다른 minor 로 로드돼 store/router context 충돌)
+        'react-router-dom': { singleton: true, eager: true, requiredVersion: '7.11.0' },
+        // 전역 상태관리
+        '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: '2.11.2' },
+        'react-redux': { singleton: true, eager: true, requiredVersion: '9.2.0' },
+        // 로딩 상태 표시
+        'react-promise-tracker': { singleton: true, eager: true, requiredVersion: '2.1.1' },
+        // 이 모노레포 공유 라이브러리 — workspace 내부 패키지, 항상 함께 빌드됨
+        // requiredVersion 생략 — semver pin 은 외부 패키지에만 의미 있음
         '@sonhoseong/mfa-lib': {
           singleton: true,
           eager: true,
-          requiredVersion: '^1.3.10'
         }
       }
 
@@ -175,14 +201,12 @@ module.exports = {
     }),
 new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      'process.env.FIREBASE_API_KEY': JSON.stringify(process.env.FIREBASE_API_KEY),
-      'process.env.FIREBASE_AUTH_DOMAIN': JSON.stringify(process.env.FIREBASE_AUTH_DOMAIN),
-      'process.env.FIREBASE_PROJECT_ID': JSON.stringify(process.env.FIREBASE_PROJECT_ID),
-      'process.env.FIREBASE_STORAGE_BUCKET': JSON.stringify(process.env.FIREBASE_STORAGE_BUCKET),
-      'process.env.FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(process.env.FIREBASE_MESSAGING_SENDER_ID),
-      'process.env.FIREBASE_APP_ID': JSON.stringify(process.env.FIREBASE_APP_ID),
-      'process.env.REACT_APP_SUPABASE_URL': JSON.stringify(process.env.REACT_APP_SUPABASE_URL),
-      'process.env.REACT_APP_SUPABASE_ANON_KEY': JSON.stringify(process.env.REACT_APP_SUPABASE_ANON_KEY),
+      // undefined인 경우 JSON.stringify → undefined (literal) → 런타임 참조 시 SyntaxError
+      // || '' 또는 || undefined로 null-coalesce하여 항상 문자열 또는 undefined 리터럴 방지
+      'process.env.REACT_APP_SUPABASE_URL': JSON.stringify(process.env.REACT_APP_SUPABASE_URL || ''),
+      'process.env.REACT_APP_SUPABASE_ANON_KEY': JSON.stringify(process.env.REACT_APP_SUPABASE_ANON_KEY || ''),
+      'process.env.REACT_APP_OWNER_EMAIL': JSON.stringify(process.env.REACT_APP_OWNER_EMAIL || ''),
+      'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL || ''),
     })
   ]
 };

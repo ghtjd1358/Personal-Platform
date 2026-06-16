@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { Button, EmptyState, LoadingSpinner } from '@sonhoseong/mfa-lib';
 import { Job } from '@/types/job';
 import { useJobs, useJobBookmarks } from '@/hooks';
-import JobCard from '@/components/JobCard';
-import JobDetailModal from '@/components/JobDetailModal';
+import JobCard from '@/components/tracker/JobCard';
+import JobDetailModal from '@/components/modals/JobDetailModal';
 
 const JobSearchPage: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -60,34 +61,33 @@ const JobSearchPage: React.FC = () => {
       {/* 기술 스택 필터 */}
       <div className="filter-tags">
         {skills.map(skill => (
-          <button
+          <Button
             key={skill}
+            size="sm"
+            variant={currentSkill === skill ? 'primary' : 'ghost'}
             className={`filter-tag ${currentSkill === skill ? 'active' : ''}`}
             onClick={() => setSkill(skill)}
           >
             {skill}
-          </button>
+          </Button>
         ))}
       </div>
 
       {/* 검색 결과 */}
-      <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-        총 <strong style={{ color: 'var(--primary)' }}>{pagination.total}</strong>개의 채용공고
+      <div className="search-results-meta">
+        총 <strong className="search-results-meta-count">{pagination.total}</strong>개의 채용공고
       </div>
 
       {isLoading ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">⏳</div>
-          <div className="empty-state-title">로딩 중...</div>
-        </div>
+        <LoadingSpinner message="로딩 중" />
       ) : jobs.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">🔍</div>
-          <div className="empty-state-title">검색 결과가 없습니다</div>
-          <div className="empty-state-desc">다른 검색어나 필터를 시도해보세요</div>
-        </div>
+        <EmptyState
+          icon="🔍"
+          title="검색 결과가 없습니다"
+          description="다른 검색어나 필터를 시도해보세요"
+        />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '16px' }}>
+        <div className="search-results-grid">
           {jobs.map(job => (
             <JobCard
               key={job.id}

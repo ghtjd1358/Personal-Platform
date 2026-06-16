@@ -11,7 +11,7 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import { common, createLowlight } from 'lowlight';
 import { uploadImage } from '@/network';
-import { useToast } from '@sonhoseong/mfa-lib';
+import { useToast, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
 import { UPLOAD_CONFIG } from '@/config/constants';
 
 const lowlight = createLowlight(common);
@@ -55,6 +55,18 @@ const validateUrl = (url: string, type: 'link' | 'image'): { valid: boolean; url
 
   return { valid: true, url: trimmed };
 };
+
+const ToolbarButton: React.FC<{
+  onClick: () => void;
+  isActive?: boolean;
+  title?: string;
+  disabled?: boolean;
+  children: React.ReactNode;
+}> = ({ onClick, isActive, title, disabled, children }) => (
+  <Button type="button" variant="text" size="sm" onClick={onClick} className={isActive ? 'active' : ''} title={title} disabled={disabled}>
+    {children}
+  </Button>
+);
 
 interface TiptapEditorProps {
   content: string;
@@ -246,8 +258,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     <div className="tiptap-editor" ref={editorWrapperRef}>
       {uploading && (
         <div className="editor-upload-indicator">
-          <div className="upload-spinner" />
-          <span>이미지 업로드 중...</span>
+          <LoadingSpinner message="이미지 업로드 중..." />
         </div>
       )}
       {isDragging && (
@@ -265,68 +276,67 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
 
       <div className="editor-toolbar">
         <div className="toolbar-group">
-          <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'active' : ''} title="제목 1">H1</button>
-          <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? 'active' : ''} title="제목 2">H2</button>
-          <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={editor.isActive('heading', { level: 3 }) ? 'active' : ''} title="제목 3">H3</button>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} isActive={editor.isActive('heading', { level: 1 })} title="제목 1">H1</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })} title="제목 2">H2</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} isActive={editor.isActive('heading', { level: 3 })} title="제목 3">H3</ToolbarButton>
         </div>
         <div className="toolbar-divider" />
         <div className="toolbar-group">
-          <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''} title="굵게"><strong>B</strong></button>
-          <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'active' : ''} title="기울임"><em>I</em></button>
-          <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'active' : ''} title="밑줄"><u>U</u></button>
-          <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()} className={editor.isActive('strike') ? 'active' : ''} title="취소선"><s>S</s></button>
-          <button type="button" onClick={() => editor.chain().focus().toggleHighlight().run()} className={editor.isActive('highlight') ? 'active' : ''} title="형광펜"><span style={{ backgroundColor: '#fef08a', padding: '0 4px' }}>H</span></button>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} title="굵게"><strong>B</strong></ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')} title="기울임"><em>I</em></ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="밑줄"><u>U</u></ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} isActive={editor.isActive('strike')} title="취소선"><s>S</s></ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleHighlight().run()} isActive={editor.isActive('highlight')} title="형광펜"><span className="toolbar-highlight-preview">H</span></ToolbarButton>
         </div>
         <div className="toolbar-divider" />
         <div className="toolbar-group">
-          <button type="button" onClick={() => editor.chain().focus().setTextAlign('left').run()} className={editor.isActive({ textAlign: 'left' }) ? 'active' : ''} title="왼쪽 정렬">
+          <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} isActive={editor.isActive({ textAlign: 'left' })} title="왼쪽 정렬">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <button type="button" onClick={() => editor.chain().focus().setTextAlign('center').run()} className={editor.isActive({ textAlign: 'center' }) ? 'active' : ''} title="가운데 정렬">
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} isActive={editor.isActive({ textAlign: 'center' })} title="가운데 정렬">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <button type="button" onClick={() => editor.chain().focus().setTextAlign('right').run()} className={editor.isActive({ textAlign: 'right' }) ? 'active' : ''} title="오른쪽 정렬">
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} isActive={editor.isActive({ textAlign: 'right' })} title="오른쪽 정렬">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
+          </ToolbarButton>
         </div>
         <div className="toolbar-divider" />
         <div className="toolbar-group">
-          <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'active' : ''} title="글머리 기호">
+          <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive('bulletList')} title="글머리 기호">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
-          </button>
-          <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'active' : ''} title="번호 매기기">1.</button>
-          <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={editor.isActive('blockquote') ? 'active' : ''} title="인용구">
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive('orderedList')} title="번호 매기기">1.</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} isActive={editor.isActive('blockquote')} title="인용구">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
-          </button>
+          </ToolbarButton>
         </div>
-
         <div className="toolbar-divider" />
         <div className="toolbar-group">
-          <button type="button" onClick={() => editor.chain().focus().toggleCode().run()} className={editor.isActive('code') ? 'active' : ''} title="인라인 코드">
+          <ToolbarButton onClick={() => editor.chain().focus().toggleCode().run()} isActive={editor.isActive('code')} title="인라인 코드">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          </button>
-          <button type="button" onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={editor.isActive('codeBlock') ? 'active' : ''} title="코드 블록">
+          </ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().toggleCodeBlock().run()} isActive={editor.isActive('codeBlock')} title="코드 블록">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 8 5 12 9 16"/><polyline points="15 8 19 12 15 16"/></svg>
-          </button>
+          </ToolbarButton>
         </div>
         <div className="toolbar-divider" />
         <div className="toolbar-group">
-          <button type="button" onClick={setLink} className={editor.isActive('link') ? 'active' : ''} title="링크">
+          <ToolbarButton onClick={setLink} isActive={editor.isActive('link')} title="링크">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          </button>
-          <button type="button" onClick={addImage} title="이미지 업로드" disabled={uploading}>
+          </ToolbarButton>
+          <ToolbarButton onClick={addImage} title="이미지 업로드" disabled={uploading}>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          </button>
-          <button type="button" onClick={addImageUrl} title="이미지 URL">
+          </ToolbarButton>
+          <ToolbarButton onClick={addImageUrl} title="이미지 URL">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          </button>
-          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
+          </ToolbarButton>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="input-hidden" />
         </div>
         <div className="toolbar-divider" />
         <div className="toolbar-group">
-          <button type="button" onClick={() => editor.chain().focus().setHorizontalRule().run()} title="구분선">
+          <ToolbarButton onClick={() => editor.chain().focus().setHorizontalRule().run()} title="구분선">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>
-          </button>
+          </ToolbarButton>
         </div>
       </div>
       <EditorContent editor={editor} className="editor-content" />

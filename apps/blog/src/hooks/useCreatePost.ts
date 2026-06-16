@@ -1,4 +1,6 @@
 ﻿import { useState, useCallback } from 'react';
+import { useSelector } from 'react-redux';
+import { selectUser } from '@sonhoseong/mfa-lib';
 import { createPost, CreatePostRequest } from '@/network';
 
 interface UseCreatePostOptions {
@@ -13,11 +15,17 @@ interface UseCreatePostReturn {
 
 export function useCreatePost(options: UseCreatePostOptions = {}): UseCreatePostReturn {
   const [isCreating, setIsCreating] = useState(false);
+  const user = useSelector(selectUser);
 
   const handleCreate = useCallback((data: CreatePostRequest): Promise<string> => {
+    if (!user?.id) {
+      options.onError?.('로그인이 필요합니다.');
+      return Promise.resolve('');
+    }
+
     setIsCreating(true);
 
-    return createPost(data)
+    return createPost(user.id, data)
       .then((response) => {
         if (response.success && response.data) {
           options.onSuccess?.(response.data.id);
@@ -32,7 +40,7 @@ export function useCreatePost(options: UseCreatePostOptions = {}): UseCreatePost
         return '';
       })
       .finally(() => setIsCreating(false));
-  }, [options]);
+  }, [user, options]);
 
   return {
     createPost: handleCreate,

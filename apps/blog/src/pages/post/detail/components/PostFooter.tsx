@@ -1,5 +1,7 @@
 import React from 'react';
-import { Button, ShareButton } from '@/components';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@sonhoseong/mfa-lib';
+import { ShareButton } from '@/components';
 import { LINK_PREFIX } from '@/config/constants';
 
 interface PostFooterProps {
@@ -11,16 +13,21 @@ interface PostFooterProps {
 }
 
 const PostFooter: React.FC<PostFooterProps> = ({ postSlug, postId, postTitle, postExcerpt, onDelete }) => {
+  const navigate = useNavigate();
+
   return (
     <footer className="post-footer">
       <div className="container">
         <div className="post-actions">
-          <Button as="link" to={`${LINK_PREFIX}/`} variant="secondary">
+          <Button variant="secondary" onClick={() => navigate(`${LINK_PREFIX}/`)}>
             ← 목록으로
           </Button>
           <div className="post-action-buttons">
             <ShareButton title={postTitle} description={postExcerpt} />
-            <Button as="link" to={`${LINK_PREFIX}/edit/${postSlug || postId}`} variant="secondary">
+            <Button
+              variant="secondary"
+              onClick={() => navigate(`${LINK_PREFIX}/edit/${postSlug || postId}`)}
+            >
               수정
             </Button>
             <Button variant="danger" onClick={onDelete}>

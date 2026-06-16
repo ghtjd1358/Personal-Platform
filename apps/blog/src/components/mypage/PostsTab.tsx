@@ -1,6 +1,7 @@
 import React from 'react';
+import { EmptyState, LoadingSpinner } from '@sonhoseong/mfa-lib';
 import { PostSummary } from '@/network';
-import { PostCard } from '@/components/PostCard';
+import { PostCard } from '@/components/post/PostCard';
 
 interface PostsTabProps {
   posts: PostSummary[];
@@ -12,7 +13,7 @@ const PostsTab: React.FC<PostsTabProps> = ({ posts, isLoading }) => {
     return (
       <div className="mypage-content">
         <div className="container">
-          <div className="mypage-loading">로딩 중...</div>
+          <LoadingSpinner message="로딩 중..." />
         </div>
       </div>
     );
@@ -22,9 +23,7 @@ const PostsTab: React.FC<PostsTabProps> = ({ posts, isLoading }) => {
     return (
       <div className="mypage-content">
         <div className="container">
-          <div className="mypage-empty">
-            <p>작성한 글이 없습니다.</p>
-          </div>
+          <EmptyState description="작성한 글이 없습니다." />
         </div>
       </div>
     );

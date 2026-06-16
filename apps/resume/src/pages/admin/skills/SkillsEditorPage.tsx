@@ -7,7 +7,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useToast } from '@sonhoseong/mfa-lib';
-import { iconMap } from '../../../constants/iconMap';
+import { techIconMap as iconMap } from '@sonhoseong/mfa-lib';
 import { LINK_PREFIX } from '@/config/constants';
 import {
     useFetchSkillCategories,
@@ -173,8 +173,7 @@ const SkillsEditorPage: React.FC = () => {
                                 value={iconColor}
                                 onChange={(e) => setIconColor(e.target.value)}
                                 placeholder="#2B1E14"
-                                className="skills-input"
-                                style={{ maxWidth: 140 }}
+                                className="skills-input admin-skills-input-narrow"
                             />
                         </div>
                     </label>

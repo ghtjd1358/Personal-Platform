@@ -23,7 +23,7 @@ export function useDeleteSkill(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                skillsApi.deleteSkill(id)
+                Promise.resolve(skillsApi.deleteSkill(id))
                     .then(({ error }) => {
                         if (error) throw error;
                         toastSuccess('스킬이 삭제되었습니다');

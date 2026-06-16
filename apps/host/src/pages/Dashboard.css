@@ -534,3 +534,12 @@
         font-size: 22px;
     }
 }
+
+/* ===== Animation delay utilities (replacement for inline animationDelay) ===== */
+.dashboard-hero { animation-delay: 0.1s; }
+.dashboard-intro { animation-delay: 0.3s; }
+.dashboard-stats { animation-delay: 0.4s; }
+.channels-header { animation-delay: 0.5s; }
+.stack-strip { animation-delay: 1.5s; }
+/* Channel link delay — uses --i index var passed by inline style */
+.channel { animation-delay: calc(0.7s + var(--i, 0) * 0.15s); }

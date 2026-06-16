@@ -1,4 +1,5 @@
 import React from 'react';
+import { EmptyState } from '@sonhoseong/mfa-lib';
 import { TagDetail } from '@/network';
 
 interface TagListProps {
@@ -10,9 +11,7 @@ const TagList: React.FC<TagListProps> = ({ tags }) => {
     <div className="manage-list">
       <h3>등록된 태그 ({tags.length})</h3>
       {tags.length === 0 ? (
-        <div className="empty-state">
-          <p>등록된 태그가 없습니다.</p>
-        </div>
+        <EmptyState description="등록된 태그가 없습니다." />
       ) : (
         <div className="manage-tags-grid">
           {tags.map((tag) => (

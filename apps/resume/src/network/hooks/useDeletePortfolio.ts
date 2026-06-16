@@ -19,7 +19,7 @@ export function useDeletePortfolio(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                portfoliosApi.delete(id)
+                Promise.resolve(portfoliosApi.delete(id))
                     .then(({ error }) => {
                         if (error) throw error;
                         toastSuccess('포트폴리오가 삭제되었습니다');

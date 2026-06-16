@@ -1,4 +1,5 @@
 import React from 'react';
+import { EmptyState } from '@sonhoseong/mfa-lib';
 
 export interface ExperienceFormData {
   id?: string;
@@ -81,17 +82,19 @@ const ExperienceEditor: React.FC<ExperienceEditorProps> = ({
       </div>
 
       {experiences.length === 0 ? (
-        <div className="inline-editor-empty">
-          <p>아직 등록된 경력이 없습니다.</p>
-          <button
-            type="button"
-            className="inline-editor-empty-btn"
-            onClick={handleAdd}
-            disabled={disabled}
-          >
-            첫 경력 추가하기
-          </button>
-        </div>
+        <EmptyState
+          description="아직 등록된 경력이 없습니다."
+          action={
+            <button
+              type="button"
+              className="inline-editor-empty-btn"
+              onClick={handleAdd}
+              disabled={disabled}
+            >
+              첫 경력 추가하기
+            </button>
+          }
+        />
       ) : (
         <div className="inline-editor-list">
           {experiences.map((exp, index) => (

@@ -63,7 +63,7 @@ export async function getBookmarks(): Promise<ApiResponse<BookmarkWithJob[]>> {
       .map(item => ({
         id: item.id,
         jobId: item.job_id,
-        job: transformJob(item.job),
+        job: transformJob(item.job as unknown as Record<string, unknown>),
         createdAt: item.created_at,
       }));
 

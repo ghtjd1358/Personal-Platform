@@ -1,8 +1,3 @@
-/**
- * Lnb (Left Navigation Bar) Component - KOMCA 패턴
- *
- * lnbItems만 받고 내부에서 navigate 처리
- */
 import React from 'react';
 import { LnbMenuItem } from '../../types';
 export type { LnbMenuItem } from '../../types';
@@ -11,6 +6,7 @@ export interface LnbProps {
     title?: string;
     appName?: string;
     logo?: React.ReactNode;
+    onLogout?: () => void;
 }
 export declare const Lnb: React.FC<LnbProps>;
 export default Lnb;

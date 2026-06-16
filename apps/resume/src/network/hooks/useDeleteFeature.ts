@@ -20,7 +20,7 @@ export function useDeleteFeature(options: { silent?: boolean } = {}) {
             prevAbortRef.current = controller;
 
             return showGlobalLoading(
-                featuresApi.delete(id)
+                Promise.resolve(featuresApi.delete(id))
                     .then(({ error }) => {
                         if (error) throw error;
                         toastSuccess('Feature 가 삭제되었습니다');

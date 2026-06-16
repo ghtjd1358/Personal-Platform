@@ -1,3 +1,11 @@
 export { default as ExperienceEditor, type ExperienceFormData } from './ExperienceEditor';
 export { default as ProjectEditor, type ProjectFormData } from './ProjectEditor';
 export { default as SkillsSelector } from './SkillsSelector';
+export { default as ResumeBasicSection } from './ResumeBasicSection';
+export { default as ResumeProfileSection } from './ResumeProfileSection';
+export { default as ResumeContactSection } from './ResumeContactSection';
+export { default as ResumeVisibilitySection } from './ResumeVisibilitySection';
+export { default as ResumeEditorActions } from './ResumeEditorActions';
+export { default as ResumeManagementHeader } from './ResumeManagementHeader';
+export { default as ResumeHero } from './ResumeHero';
+export { default as ResumeTimelineSection, type ExperienceDetail, type ProjectDetail } from './ResumeTimelineSection';

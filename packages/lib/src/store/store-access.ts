@@ -3,9 +3,11 @@
  * Remote 앱에서 Host의 Redux Store에 접근
  */
 
+import { useSyncExternalStore } from 'react';
 import { User, HostRootState } from '../types';
 import { Reducer, UnknownAction } from '@reduxjs/toolkit';
 import type { HostStore } from './app-store';
+import { STORAGE_KEYS } from '../utils/storage';
 
 /**
  * Host Store 가져오기
@@ -38,8 +40,7 @@ export const getCurrentUser = (): User | null => {
     if (state) {
       return state.app?.user || null;
     }
-    // Store가 없으면 localStorage에서 직접 가져오기 (fallback)
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem(STORAGE_KEYS.USER);
     return userStr ? JSON.parse(userStr) : null;
   } catch {
     return null;
@@ -48,15 +49,12 @@ export const getCurrentUser = (): User | null => {
 
 /**
  * accessToken 가져오기
+ * 보안: token 은 메모리(Redux)에만 존재. localStorage fallback 없음 (XSS exfiltration 방어)
  */
 export const getAccessToken = (): string => {
   try {
     const state = getHostState();
-    if (state) {
-      return state.app?.accessToken || '';
-    }
-    // Store가 없으면 localStorage에서 직접 가져오기 (fallback)
-    return localStorage.getItem('accessToken') || '';
+    return state?.app?.accessToken || '';
   } catch {
     return '';
   }
@@ -110,6 +108,23 @@ export const subscribeToHost = (listener: () => void): (() => void) => {
     return () => {};
   }
 };
+
+/**
+ * 현재 사용자를 React 상태로 구독 (login/logout 시 자동 리렌더링)
+ *
+ * getCurrentUser() 대신 이 훅을 사용하세요.
+ * React 컴포넌트 안에서 비반응형으로 읽으면 로그인/로그아웃 시 화면이 갱신되지 않습니다.
+ */
+export const useCurrentUser = (): User | null =>
+  useSyncExternalStore(subscribeToHost, getCurrentUser, getCurrentUser);
+
+/** accessToken을 React 상태로 구독 */
+export const useReactiveAccessToken = (): string =>
+  useSyncExternalStore(subscribeToHost, getAccessToken, getAccessToken);
+
+/** 인증 여부를 React 상태로 구독 */
+export const useReactiveIsAuthenticated = (): boolean =>
+  useSyncExternalStore(subscribeToHost, isAuthenticated, isAuthenticated);
 
 /**
  * 동적으로 Reducer 주입 (Remote 앱에서 자체 상태 관리 시 사용)

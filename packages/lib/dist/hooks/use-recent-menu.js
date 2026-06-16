@@ -100,10 +100,10 @@ export function useRecentMenu(options = {}) {
             dispatch(setCurrentRecentMenu(id));
             navigate(`${menu.pathname}${menu.search || ''}`);
             // 저장된 스크롤 위치 복구
-            if (menu.state?.scrollY !== undefined) {
-                setTimeout(() => {
-                    window.scrollTo(menu.state.scrollX || 0, menu.state.scrollY);
-                }, 100);
+            const s = menu.state;
+            if (s !== null && typeof s === 'object' && 'scrollY' in s) {
+                const { scrollX, scrollY } = s;
+                setTimeout(() => window.scrollTo(scrollX ?? 0, scrollY), 100);
             }
         }
     }, [recentMenuList, dispatch, navigate]);

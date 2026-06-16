@@ -7,9 +7,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectAccessToken, getCurrentUser, ScrollTopButton, storage } from '@sonhoseong/mfa-lib';
+import { selectAccessToken, useCurrentUser, ScrollTopButton, storage, LoadingSpinner, ErrorState, Badge } from '@sonhoseong/mfa-lib';
 import { getPortfolioDetail, incrementViewCount } from '@/network/apis/portfolio';
 import { PortfolioSummary } from '@/network/apis/portfolio/types';
 import { Comments, ShareButton, LikeButton } from '@/components';
@@ -26,7 +27,7 @@ const ProjectDetail: React.FC = () => {
 
   const accessToken = useSelector(selectAccessToken);
   const isAuthenticated = !!accessToken;
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
   const isOwner = currentUser && project?.user_id === currentUser.id;
 
   useEffect(() => {
@@ -65,27 +66,8 @@ const ProjectDetail: React.FC = () => {
     navigate(`${LINK_PREFIX}/`);
   };
 
-  if (loading) {
-    return (
-      <div className="portfolio-loading">
-        <div className="loading-spinner"></div>
-        <p>프로젝트를 불러오는 중...</p>
-      </div>
-    );
-  }
-
-  if (error || !project) {
-    return (
-      <div className="project-error">
-        <div className="error-icon">😢</div>
-        <h2>프로젝트를 찾을 수 없습니다</h2>
-        <p>{error}</p>
-        <button className="back-btn" onClick={handleBack}>
-          목록으로 돌아가기
-        </button>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner fullPage message="프로젝트를 불러오는 중" />;
+  if (error || !project) return <ErrorState message={error || '프로젝트를 찾을 수 없습니다.'} onBack={handleBack} backLabel="목록으로 돌아가기" />;
 
   return (
     <div className="pd-page">
@@ -104,10 +86,10 @@ const ProjectDetail: React.FC = () => {
           <header className="pd-title-block">
             <div className="pd-eyebrow">
               {project.category && (
-                <span className="pd-eyebrow-cat">{project.category.name}</span>
+                <Badge variant="info" className="pd-eyebrow-cat">{project.category.name}</Badge>
               )}
               {project.is_featured && (
-                <span className="pd-eyebrow-featured">★ FEATURED</span>
+                <Badge variant="primary" className="pd-eyebrow-featured">★ FEATURED</Badge>
               )}
             </div>
             <h1 className="pd-title">{project.title}</h1>
@@ -149,7 +131,7 @@ const ProjectDetail: React.FC = () => {
               <h2 className="pd-h2">상세</h2>
               <div
                 className="pd-rich-content"
-                dangerouslySetInnerHTML={{ __html: project.description }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(project.description) }}
               />
             </section>
           )}
@@ -157,7 +139,7 @@ const ProjectDetail: React.FC = () => {
           {project.tags && project.tags.length > 0 && (
             <div className="pd-tags">
               {project.tags.map((t) => (
-                <span key={t.id} className="pd-tag">#{t.tag}</span>
+                <Badge key={t.id} variant="default" className="pd-tag">#{t.tag}</Badge>
               ))}
             </div>
           )}
@@ -215,7 +197,7 @@ const ProjectDetail: React.FC = () => {
               <span className="pd-tech-key">기술 스택</span>
               <div className="pd-chips">
                 {project.techStack.map((tech) => (
-                  <span key={tech.id} className="pd-chip">{tech.name}</span>
+                  <Badge key={tech.id} variant="default" className="pd-chip">{tech.name}</Badge>
                 ))}
               </div>
             </div>

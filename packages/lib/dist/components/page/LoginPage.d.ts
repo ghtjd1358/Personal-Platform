@@ -17,16 +17,15 @@ export interface LoginPageProps {
     appName?: string;
     /** 커스텀 로고 컴포넌트 */
     logo?: React.ReactNode;
-    /** Google 로그인 핸들러 (Firebase 등) */
+    /** Google 로그인 핸들러 (Firebase 등)
+     * - Firebase 팝업 flow: { token, user } 반환 → LoginPage 가 store 동기화
+     * - Supabase OAuth redirect flow: void 반환 (브라우저가 외부로 redirect, 이후 코드 미실행)
+     */
     onGoogleLogin?: () => Promise<{
         token: string;
         user: User;
-    }>;
-    /** 테스트 계정 표시 여부 */
-    showTestAccount?: boolean;
-    /** Supabase Auth 사용 여부 (기본: true) */
-    useSupabase?: boolean;
+    } | void>;
 }
-export declare function LoginPage({ redirectPath, onLoginSuccess, appName, logo, onGoogleLogin, showTestAccount, useSupabase, }: LoginPageProps): import("react/jsx-runtime").JSX.Element;
+export declare function LoginPage({ redirectPath, onLoginSuccess, appName, logo, onGoogleLogin, }: LoginPageProps): import("react/jsx-runtime").JSX.Element;
 export default LoginPage;
 //# sourceMappingURL=LoginPage.d.ts.map

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { getCurrentUser } from '@sonhoseong/mfa-lib';
+import { useCurrentUser } from '@sonhoseong/mfa-lib';
 import { getTags, getPostDetail, getSeries, getSeriesByPostId, TagDetail, PostDetail, SeriesDetail } from '@/network';
 
 type PostStatus = 'draft' | 'published';
@@ -48,7 +48,7 @@ export function usePostEditorData(slug: string | undefined): UsePostEditorDataRe
   const [error, setError] = useState<string | null>(null);
 
   const isEditMode = Boolean(slug);
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
 
   useEffect(() => {
     setIsLoading(true);

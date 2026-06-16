@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from '@sonhoseong/mfa-lib';
 import { ProfileDetail, updateProfile, UpdateProfileRequest } from '@/network';
 
 interface ProfileEditModalProps {
@@ -108,23 +109,24 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
           {error && <div className="form-error">{error}</div>}
 
-          <div className="modal-actions">
-            <button
+          <Button.Group gap="sm" align="end" className="modal-actions">
+            <Button
               type="button"
-              className="btn btn-secondary"
+              variant="ghost"
               onClick={onClose}
               disabled={saving}
             >
               취소
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="btn btn-primary"
+              variant="primary"
               disabled={saving}
+              loading={saving}
             >
-              {saving ? '저장 중...' : '저장'}
-            </button>
-          </div>
+              저장
+            </Button>
+          </Button.Group>
         </form>
       </div>
     </div>
