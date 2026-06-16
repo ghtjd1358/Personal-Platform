@@ -185,37 +185,29 @@ export interface FactoryConfig {
   silentStatusCodes?: number[];
 }
 
-// MF 환경에서 lib 가 두 인스턴스로 로드될 수 있으므로 모듈 레벨 상태는 신뢰 불가.
-// 모든 공유 상태를 globalThis + Symbol.for 로 관리 — cross-instance 단일 소유권 보장.
-const FACTORY_INITIALIZED_KEY = Symbol.for('mfa:factoryInitialized');
-const AXIOS_INSTANCE_KEY     = Symbol.for('mfa:axiosInstance');
-const FACTORY_CONFIG_KEY     = Symbol.for('mfa:factoryConfig');
-const REFRESH_STATE_KEY      = Symbol.for('mfa:refreshState');
-
+// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
 type RefreshState = {
   isRefreshing: boolean;
   subscribers: Array<{ resolve: (token: string) => void; reject: (error: Error) => void }>;
 };
 
-type GlobalStore = Record<symbol, unknown>;
-const _g = globalThis as unknown as GlobalStore;
+let _factoryInitialized = false;
+let _factoryConfig: FactoryConfig | null = null;
+let _axiosInstance: AxiosInstance | undefined;
 
-const isFactoryInitialized = () => Boolean(_g[FACTORY_INITIALIZED_KEY]);
-const setFactoryInitialized = () => { _g[FACTORY_INITIALIZED_KEY] = true; };
+const isFactoryInitialized = () => _factoryInitialized;
+const setFactoryInitialized = () => { _factoryInitialized = true; };
 
-// factoryConfig — globalThis에 보관: dual-load 시 두 인스턴스가 동일 config 공유
-const getFactoryConfig = () => _g[FACTORY_CONFIG_KEY] as FactoryConfig | null ?? null;
-const setFactoryConfigGlobal = (c: FactoryConfig) => { _g[FACTORY_CONFIG_KEY] = c; };
+const getFactoryConfig = () => _factoryConfig;
+const setFactoryConfigGlobal = (c: FactoryConfig) => { _factoryConfig = c; };
 
 // RefreshState를 모듈 로드 시 1회만 초기화 — lazy create를 금지해 concurrent 401이
 // 각자 새 객체를 얻는 race(큐 분리 → 중복 갱신) 원천 차단
-_g[REFRESH_STATE_KEY] ??= { isRefreshing: false, subscribers: [] as RefreshState['subscribers'] };
-const getRefreshState = (): RefreshState => _g[REFRESH_STATE_KEY] as RefreshState;
+const _refreshState: RefreshState = { isRefreshing: false, subscribers: [] };
+const getRefreshState = (): RefreshState => _refreshState;
 
 // ============================================
 // 토큰 갱신 큐 헬퍼 — 모듈 스코프에 정의
-// createClient 클로저에 두면 미래에 인스턴스가 둘 이상 생길 때 각자 다른 함수 객체가
-// 같은 globalThis subscribers 배열을 mutate해 동작은 맞지만 의도가 불명확해짐.
 // 모듈 스코프 = "이 함수들은 인스턴스 생명주기가 아닌 전역 상태에 종속됨"을 구조로 표현.
 // ============================================
 
@@ -411,14 +403,11 @@ export class AxiosClientFactory {
     // factoryConfig 는 모듈 전역이지만 isRefreshing/refreshSubscribers 는 createClient 클로저에 격리됨.
     // 두 client 가 생성되면 같은 refreshToken 을 사용하면서 큐가 분리되어 중복 갱신 호출이 발생하므로
     // 단일 인스턴스 패턴을 강제한다 (dev: 경고, prod: 에러).
-    // globalThis에 저장된 인스턴스 직접 확인 — setFlag/getInstance 사이 throw 시 flag=true·instance=undefined
-    // 가 되는 원자성 버그를 피하기 위해 단일 키로 체크+반환 처리
-    const existing = _g[AXIOS_INSTANCE_KEY] as AxiosInstance | undefined;
-    if (existing) {
+    if (_axiosInstance) {
       if (process.env.NODE_ENV !== 'production') {
         console.warn('[axiosFactory] createClient 중복 호출 — 기존 인스턴스 반환');
       }
-      return existing;
+      return _axiosInstance;
     }
 
     // hostUrl/basePath는 커스텀 필드라 Axios에 그대로 넘기면 오염됨.
@@ -484,8 +473,8 @@ export class AxiosClientFactory {
       }
     );
 
-    // globalThis에 캐시 — lib가 두 번 로드되는 MF 환경에서도 두 번째 호출이 같은 인스턴스를 반환함
-    _g[AXIOS_INSTANCE_KEY] = axiosInstance;
+    // 인스턴스 캐시 — 중복 createClient 호출 시 같은 인스턴스 반환
+    _axiosInstance = axiosInstance;
     return axiosInstance;
   }
 }

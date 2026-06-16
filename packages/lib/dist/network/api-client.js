@@ -8,11 +8,9 @@ import Axios from 'axios';
 import { AxiosClientFactory, initAxiosFactory } from './axios-factory';
 import { getStore } from '../store/app-store';
 import { setAccessToken } from '../store/app-slice';
-// MF dual-load 방어: _apiClient를 globalThis에 보관 — 두 lib 인스턴스가 각자 null을 가지면
-// 두 번째 initApiClient가 factoryConfig를 덮어쓰고 initAxiosFactory를 재호출하는 문제 방지
-const API_CLIENT_KEY = Symbol.for('mfa:apiClient');
-const _g = globalThis;
-const getApiClientInstance = () => _g[API_CLIENT_KEY];
+// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
+let _apiClient;
+const getApiClientInstance = () => _apiClient;
 const API_BASE = ((typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
     'http://localhost:4000') + '/api';
 // refresh 전용 인스턴스 — apiClient 자체를 사용하면 순환 참조 발생
@@ -43,7 +41,7 @@ async function refreshAccessToken() {
 // AxiosClientFactory 전역 설정 — 앱 부트 시 한 번만 실행
 // onUnauthorized: 401 최종 실패 시 호출. 라우팅은 host가 결정한다.
 export function initApiClient(options = {}) {
-    // 멱등성 보장 — globalThis 체크로 MF dual-load 시에도 1회만 초기화
+    // 멱등성 보장 — 중복 호출 시에도 한 번만 초기화
     if (getApiClientInstance())
         return;
     const store = getStore();
@@ -57,7 +55,7 @@ export function initApiClient(options = {}) {
         },
     });
     // factory 초기화 이후에 client 생성 — 인터셉터가 factoryConfig 를 정상 참조할 수 있는 시점.
-    _g[API_CLIENT_KEY] = AxiosClientFactory.createClient({
+    _apiClient = AxiosClientFactory.createClient({
         hostUrl: API_BASE,
         withCredentials: true, // refresh cookie 전송을 위해 필요
     });

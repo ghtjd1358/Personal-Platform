@@ -14,11 +14,10 @@ import { setRecentMenuList } from '../store/recent-menu-slice';
 import { storage } from '../utils/storage';
 import { getSupabase } from '../network/supabase-client';
 import { applySession } from './use-supabase-auth';
-// MF 환경에서 lib 가 두 인스턴스로 로드될 수 있으므로 모듈 레벨 플래그는 신뢰 불가.
-// globalThis + Symbol.for 로 진짜 단일 인스턴스 가드를 만든다.
-const MFA_SUPABASE_INIT = Symbol.for('mfa:supabaseInitMounted');
-const isSupabaseInitMounted = () => !!globalThis[MFA_SUPABASE_INIT];
-const setSupabaseInitMounted = (v) => { globalThis[MFA_SUPABASE_INIT] = v; };
+// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
+let _supabaseInitMounted = false;
+const isSupabaseInitMounted = () => _supabaseInitMounted;
+const setSupabaseInitMounted = (v) => { _supabaseInitMounted = v; };
 // 세 가지 init hook이 공통으로 사용하는 localStorage 복구 로직
 // 보안: access token 은 localStorage 에서 복구하지 않음 (XSS exfiltration 방어)
 //      token 은 Redux 메모리에만 존재, 새로고침 시 refresh flow 로 재발급
@@ -216,7 +215,7 @@ export function useSupabaseInitialize() {
         initialize();
         return () => {
             if (!ownedRef.current)
-                return; // 소유권 없으면 cleanup 스킵 — globalThis 플래그 잘못 초기화 방지
+                return; // 소유권 없으면 cleanup 스킵 — 마운트 플래그 잘못 초기화 방지
             setSupabaseInitMounted(false);
             ctrl.abort();
             subscription?.unsubscribe();

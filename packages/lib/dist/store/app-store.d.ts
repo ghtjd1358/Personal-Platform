@@ -3,7 +3,7 @@ import { InjectReducerFn } from '../types';
 import { RecentMenuState } from './recent-menu-slice';
 export * from './app-slice';
 export * from './app-selectors';
-declare function createLocalStore(): import("@reduxjs/toolkit").EnhancedStore<{
+export declare const store: import("@reduxjs/toolkit").EnhancedStore<{
     app: import("..").AppState;
     menu: import("./menu-slice").MenuState;
     recentMenu: RecentMenuState;
@@ -14,7 +14,6 @@ declare function createLocalStore(): import("@reduxjs/toolkit").EnhancedStore<{
         recentMenu: RecentMenuState;
     }, undefined, import("redux").UnknownAction>;
 }>, import("redux").StoreEnhancer]>>;
-export declare const store: ReturnType<typeof createLocalStore>;
 export declare const getStore: () => import("@reduxjs/toolkit").EnhancedStore<{
     app: import("..").AppState;
     menu: import("./menu-slice").MenuState;

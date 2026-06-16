@@ -5,8 +5,7 @@ import menuReducer from './menu-slice';
 import recentMenuReducer from './recent-menu-slice';
 export * from './app-slice';
 export * from './app-selectors';
-// MF dual-load 방어: globalThis Symbol.for 키로 공유 상태 관리
-const _g = globalThis;
+// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
 // 앱이 시작될 때부터 항상 존재하는 Redux 슬라이스
 const staticReducers = {
     app: appSlice.reducer,
@@ -14,10 +13,7 @@ const staticReducers = {
     recentMenu: recentMenuReducer,
 };
 // 리모트 앱이 로드될 때 추가되는 Redux 슬라이스 (지연 등록)
-// globalThis 보관 — 두 lib 인스턴스가 각자 replaceReducer 하면 서로의 동적 reducer를 덮어씀
-const DYNAMIC_REDUCERS_KEY = Symbol.for('mfa:dynamicReducers');
-_g[DYNAMIC_REDUCERS_KEY] ?? (_g[DYNAMIC_REDUCERS_KEY] = {});
-const dynamicReducers = _g[DYNAMIC_REDUCERS_KEY];
+const dynamicReducers = {};
 const createRootReducer = () => combineReducers({
     ...staticReducers,
     ...dynamicReducers,
@@ -50,13 +46,8 @@ function createLocalStore() {
             .concat(recentMenuPersistMiddleware),
     });
 }
-// 로컬 폴백 스토어 — globalThis에 보관해 MF dual-load 시에도 단일 인스턴스 보장
-// (singleton:true가 보장되면 실제로는 1회 생성이지만, singleton 실패 시 방어)
-const LOCAL_STORE_KEY = Symbol.for('mfa:localStore');
-if (!_g[LOCAL_STORE_KEY]) {
-    _g[LOCAL_STORE_KEY] = createLocalStore();
-}
-export const store = _g[LOCAL_STORE_KEY];
+// 로컬 폴백 스토어 — singleton lib 가정 하에 모듈 로드 시 1회만 생성됨
+export const store = createLocalStore();
 // 호스트 앱의 전역 스토어 반환
 // 리모트 앱은 window.__REDUX_STORE__를 통해 호스트 스토어를 공유받음
 // split-brain 위험: 호스트 내에서 동작 중인데 호스트 스토어를 찾을 수 없으면
@@ -66,16 +57,15 @@ export const store = _g[LOCAL_STORE_KEY];
 // exposeStore()가 sessionStorage.isHostApp을 설정하는 시점보다 이 모듈이 먼저 로드되므로
 // IIFE로 모듈 로드 시점에 캡처하면 항상 false가 된다.
 // 대신 lazy memoization: true가 확인되면 캐시, false는 캐시하지 않음 (아직 미설정일 수 있음)
-// globalThis에 보관 — dual-load 시 두 인스턴스가 각자 캐시해서 불일치하는 것을 방지
-const HOST_CHECK_KEY = Symbol.for('mfa:hostCheckCached');
+let _hostCheckCached = false;
 const isRunningInHost = () => {
-    if (_g[HOST_CHECK_KEY] === true)
+    if (_hostCheckCached)
         return true;
     try {
         const result = typeof sessionStorage !== 'undefined' &&
             sessionStorage.getItem('isHostApp') === 'true';
         if (result)
-            _g[HOST_CHECK_KEY] = true; // true 확인되면 globalThis에 캐시
+            _hostCheckCached = true; // true 확인되면 캐시
         return result;
     }
     catch {

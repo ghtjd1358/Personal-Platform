@@ -20,8 +20,6 @@ export declare function useSupabaseSession(): {
     isLoading: boolean;
     isAuthenticated: boolean;
 };
-/** @deprecated 이전 버전 호환용. 실제 값은 globalThis Symbol에서 읽음 — 직접 import 하지 마세요. */
-export declare const _authSyncMounted: boolean;
 export declare function useSupabaseAuthSync(): void;
 export declare function useTokenAutoRefresh(refreshBeforeMinutes?: number): {
     lastRefreshed: Date | null;

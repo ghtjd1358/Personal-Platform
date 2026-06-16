@@ -18,12 +18,8 @@ function mapSupabaseUser(supabaseUser: SupabaseUser, role: UserRole = 'user'): U
 }
 
 const ROLE_CACHE_TTL = 5 * 60 * 1000; // 5분
-// MF dual-load 방어: 두 lib 인스턴스가 각자 roleCache를 가지면 한 쪽 캐시만 히트됨
-// globalThis에 보관해 단일 캐시 인스턴스 보장
-const ROLE_CACHE_KEY = Symbol.for('mfa:roleCache');
-const _g = globalThis as unknown as Record<symbol, unknown>;
-if (!_g[ROLE_CACHE_KEY]) _g[ROLE_CACHE_KEY] = new Map<string, { role: UserRole; ts: number }>();
-const roleCache = _g[ROLE_CACHE_KEY] as Map<string, { role: UserRole; ts: number }>;
+// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
+const roleCache = new Map<string, { role: UserRole; ts: number }>();
 
 /** 특정 사용자(또는 전체) roleCache 무효화 — 로그아웃 또는 권한 변경 즉시 반영 시 호출 */
 export function clearRoleCache(userId?: string): void {
@@ -193,15 +189,10 @@ export function useSupabaseSession() {
   };
 }
 
-// MF 환경에서 lib 가 두 인스턴스로 로드될 수 있으므로 모듈 레벨 플래그는 신뢰 불가.
-// globalThis + Symbol.for 로 진짜 단일 인스턴스 가드를 만든다.
-const MFA_AUTH_SYNC = Symbol.for('mfa:authSyncMounted');
-type G = Record<symbol, boolean>;
-const isAuthSyncMounted = () => !!(globalThis as unknown as G)[MFA_AUTH_SYNC];
-const setAuthSyncMounted = (v: boolean) => { (globalThis as unknown as G)[MFA_AUTH_SYNC] = v; };
-
-/** @deprecated 이전 버전 호환용. 실제 값은 globalThis Symbol에서 읽음 — 직접 import 하지 마세요. */
-export const _authSyncMounted: boolean = false; // getter 대신 false 상수 (consumer는 isAuthSyncMounted() 사용)
+// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
+let _authSyncMounted = false;
+const isAuthSyncMounted = () => _authSyncMounted;
+const setAuthSyncMounted = (v: boolean) => { _authSyncMounted = v; };
 
 export function useSupabaseAuthSync() {
   const ownedRef = useRef(false); // 이 인스턴스가 구독을 소유하는지 추적
