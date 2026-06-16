@@ -32,18 +32,18 @@ export declare const selectIsAuthenticated: ((state: {
 /** 사용자 역할 */
 export declare const selectUserRole: ((state: {
     app: import("..").AppState;
-}) => string) & {
+}) => import("..").UserRole) & {
     clearCache: () => void;
     resultsCount: () => number;
     resetResultsCount: () => void;
 } & {
-    resultFunc: (resultFuncArgs_0: import("..").User | null) => string;
-    memoizedResultFunc: ((resultFuncArgs_0: import("..").User | null) => string) & {
+    resultFunc: (resultFuncArgs_0: import("..").User | null) => import("..").UserRole;
+    memoizedResultFunc: ((resultFuncArgs_0: import("..").User | null) => import("..").UserRole) & {
         clearCache: () => void;
         resultsCount: () => number;
         resetResultsCount: () => void;
     };
-    lastResult: () => string;
+    lastResult: () => import("..").UserRole;
     dependencies: [(state: {
         app: import("..").AppState;
     }) => import("..").User | null];

@@ -1,7 +1,3 @@
-/**
- * Initialize Hook
- * 앱 시작시 초기화 (토큰 갱신, 사용자 정보 로드)
- */
 import { User } from '../types';
 export interface InitializeOptions {
     refreshToken?: () => Promise<string | null>;

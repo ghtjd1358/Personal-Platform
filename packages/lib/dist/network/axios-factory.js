@@ -2,7 +2,6 @@
  * Axios Factory
  * 401 에러시 자동 토큰 갱신 포함
  */
-var _a;
 import Axios from 'axios';
 import { v4 as uuid } from 'uuid';
 // API 에러 여부 확인
@@ -94,39 +93,181 @@ export const NETWORK_ERROR_MESSAGE = {
     title: '네트워크 오류',
     type: 'toast',
 };
-let factoryConfig = null;
+// MF 환경에서 lib 가 두 인스턴스로 로드될 수 있으므로 모듈 레벨 상태는 신뢰 불가.
+// 모든 공유 상태를 globalThis + Symbol.for 로 관리 — cross-instance 단일 소유권 보장.
+const FACTORY_INITIALIZED_KEY = Symbol.for('mfa:factoryInitialized');
+const AXIOS_INSTANCE_KEY = Symbol.for('mfa:axiosInstance');
+const FACTORY_CONFIG_KEY = Symbol.for('mfa:factoryConfig');
+const REFRESH_STATE_KEY = Symbol.for('mfa:refreshState');
+const _g = globalThis;
+const isFactoryInitialized = () => Boolean(_g[FACTORY_INITIALIZED_KEY]);
+const setFactoryInitialized = () => { _g[FACTORY_INITIALIZED_KEY] = true; };
+// factoryConfig — globalThis에 보관: dual-load 시 두 인스턴스가 동일 config 공유
+const getFactoryConfig = () => _g[FACTORY_CONFIG_KEY] ?? null;
+const setFactoryConfigGlobal = (c) => { _g[FACTORY_CONFIG_KEY] = c; };
+// RefreshState를 모듈 로드 시 1회만 초기화 — lazy create를 금지해 concurrent 401이
+// 각자 새 객체를 얻는 race(큐 분리 → 중복 갱신) 원천 차단
+_g[REFRESH_STATE_KEY] ?? (_g[REFRESH_STATE_KEY] = { isRefreshing: false, subscribers: [] });
+const getRefreshState = () => _g[REFRESH_STATE_KEY];
 // ============================================
-// 토큰 갱신 큐 (동시 요청 시 중복 갱신 방지)
-// KOMCA 스타일 패턴: 동시 401 발생 시 하나만 갱신 요청
+// 토큰 갱신 큐 헬퍼 — 모듈 스코프에 정의
+// createClient 클로저에 두면 미래에 인스턴스가 둘 이상 생길 때 각자 다른 함수 객체가
+// 같은 globalThis subscribers 배열을 mutate해 동작은 맞지만 의도가 불명확해짐.
+// 모듈 스코프 = "이 함수들은 인스턴스 생명주기가 아닌 전역 상태에 종속됨"을 구조로 표현.
 // ============================================
-let isRefreshing = false;
-let refreshSubscribers = [];
-/**
- * 토큰 갱신 대기 큐에 콜백 추가
- * @returns Promise<string> 새 토큰
- */
-const subscribeTokenRefresh = () => {
+// 토큰 갱신 대기 큐에 콜백 추가
+// signal: 원본 요청 취소 시 큐에서 제거하고 reject — 대기 누수 방지
+// cleanup: settle 시 abort listener 제거 — listener 누수 방지
+function subscribeTokenRefresh(signal) {
     return new Promise((resolve, reject) => {
-        refreshSubscribers.push({ resolve, reject });
+        if (signal?.aborted) {
+            // CanceledError: Axios.isCancel(err) === true → 하위 .catch에서 toast/retry 방지
+            reject(new Axios.CanceledError('Request canceled before token refresh'));
+            return;
+        }
+        let abortHandler;
+        const cleanup = () => {
+            if (abortHandler && signal) {
+                signal.removeEventListener('abort', abortHandler);
+                abortHandler = undefined;
+            }
+        };
+        const sub = {
+            resolve: (token) => { cleanup(); resolve(token); },
+            reject: (err) => { cleanup(); reject(err); },
+        };
+        getRefreshState().subscribers.push(sub);
+        if (signal) {
+            abortHandler = () => {
+                const rs = getRefreshState();
+                const idx = rs.subscribers.indexOf(sub);
+                if (idx !== -1)
+                    rs.subscribers.splice(idx, 1);
+                reject(new Axios.CanceledError('Request canceled during token refresh'));
+            };
+            signal.addEventListener('abort', abortHandler, { once: true });
+        }
     });
-};
+}
+// 토큰 갱신 완료 시 대기 중인 모든 요청에 새 토큰 전달
+function onTokenRefreshed(token) {
+    const rs = getRefreshState();
+    rs.subscribers.forEach(({ resolve }) => resolve(token));
+    rs.subscribers = [];
+}
+// 토큰 갱신 실패 시 대기 중인 모든 요청 거부
+// Object.assign으로 cause 보존 — 스택 트레이스를 잃지 않고 호출자가 원인을 추적할 수 있게 함
+function onTokenRefreshFailed(error) {
+    const rs = getRefreshState();
+    rs.subscribers.forEach(({ reject }) => reject(Object.assign(new Error(error.message), { cause: error })));
+    rs.subscribers = [];
+}
+// ============================================
+// 응답 인터셉터 핸들러 — 각 에러 케이스를 독립 함수로 분리해 인터셉터 본문을 단순하게 유지
+// ============================================
+/** 취소된 요청 여부 (AbortController / axios CancelToken 모두 대응) */
+function isCanceledRequest(error) {
+    return (Axios.isCancel(error) ||
+        error?.code === 'ERR_CANCELED' ||
+        error?.name === 'CanceledError');
+}
+/** 네트워크 에러 감지 후 onHttpError 호출 */
+function handleNetworkError(error) {
+    console.error('[Network Error] 네트워크 연결을 확인해주세요.');
+    getFactoryConfig()?.onHttpError?.({
+        status: 0,
+        message: NETWORK_ERROR_MESSAGE.message,
+        title: NETWORK_ERROR_MESSAGE.title,
+        type: NETWORK_ERROR_MESSAGE.type,
+        error,
+    });
+    return Promise.reject(error);
+}
 /**
- * 토큰 갱신 완료 시 대기 중인 모든 요청에 새 토큰 전달
+ * 401 응답 처리 — 토큰 갱신 후 원 요청 재시도
+ *
+ * 동시에 여러 401이 오면 첫 번째 요청만 갱신을 수행하고
+ * 나머지는 refreshSubscribers 큐에서 대기 (single-flight 패턴)
+ *
+ * null 반환 = 리프레시 토큰 만료 → 로그아웃
+ * throw     = 네트워크/서버 일시 오류 → 세션 유지
  */
-const onTokenRefreshed = (token) => {
-    refreshSubscribers.forEach(({ resolve }) => resolve(token));
-    refreshSubscribers = [];
-};
-/**
- * 토큰 갱신 실패 시 대기 중인 모든 요청 거부
- */
-const onTokenRefreshFailed = (error) => {
-    refreshSubscribers.forEach(({ reject }) => reject(error));
-    refreshSubscribers = [];
-};
+async function handle401Refresh(error, axiosInstance) {
+    const fc = getFactoryConfig();
+    const originalRequest = error.config;
+    // refresh 엔드포인트 자체의 401 또는 이미 재시도한 요청 → 무한 루프 방지
+    if (originalRequest.url?.endsWith('/auth/refresh') || originalRequest._isRetry) {
+        return Promise.reject(error);
+    }
+    const rs = getRefreshState();
+    if (rs.isRefreshing) {
+        // 다른 요청이 이미 갱신 중 — 완료될 때까지 대기 후 재시도
+        await subscribeTokenRefresh(originalRequest.signal);
+        originalRequest._isRetry = true;
+        return axiosInstance(originalRequest);
+    }
+    // 갱신 소유권 획득 — await 이전에 set해 동시 401이 큐로 진입하게 함
+    rs.isRefreshing = true;
+    originalRequest._isRetry = true;
+    try {
+        const newToken = await fc.refreshToken();
+        if (newToken) {
+            fc.setAccessToken(newToken);
+            onTokenRefreshed(newToken); // 큐 대기 요청 통지
+            return axiosInstance(originalRequest); // 원 요청 재시도
+        }
+        // null = 리프레시 토큰 만료 → 로그아웃
+        console.error('[Token Refresh] refreshToken returned null — session expired');
+        const authFailure = new Error('Token refresh returned null');
+        fc.setAccessToken('');
+        fc.onUnauthorized?.();
+        onTokenRefreshFailed(authFailure);
+        return Promise.reject(authFailure);
+    }
+    catch (err) {
+        // 일시적 오류 (5xx, 네트워크) — 로그아웃하지 않고 세션 유지
+        console.warn('[Token Refresh] transient error — keeping session:', err);
+        onTokenRefreshFailed(err);
+        return Promise.reject(err);
+    }
+    finally {
+        rs.isRefreshing = false; // 반드시 해제 — 누락 시 이후 모든 요청이 큐에 영구 적체
+    }
+}
+/** HTTP 상태 코드별 에러 핸들러 호출 (toast / modal) */
+function handleHttpStatusError(error, status, silentCodes) {
+    if (!status || silentCodes.includes(status) || status === 401)
+        return;
+    const fc = getFactoryConfig();
+    if (isApiError(error)) {
+        const details = hasErrorDetails(error);
+        if (details)
+            fc?.onError?.(details);
+    }
+    if (fc?.onHttpError) {
+        const cfg = HTTP_ERROR_MESSAGES[status] ?? {
+            message: `알 수 없는 오류가 발생했습니다. (${status})`,
+            title: '오류',
+            type: 'toast',
+        };
+        const serverMsg = error.response?.data?.message;
+        fc.onHttpError({
+            status,
+            message: String(serverMsg || cfg.message).slice(0, 500), // XSS echo 방어
+            title: cfg.title,
+            type: cfg.type,
+            error,
+        });
+    }
+}
 // Factory 초기화
+// 다중 호출 시 이전 config 가 덮어쓰여진다 — 단일 인스턴스 패턴 강제 (개발 시 경고)
 export function initAxiosFactory(config) {
-    factoryConfig = config;
+    if (isFactoryInitialized() && process.env.NODE_ENV !== 'production') {
+        console.warn('[axiosFactory] initAxiosFactory called more than once — previous config overwritten. Only one axios client instance is supported.');
+    }
+    setFactoryInitialized();
+    setFactoryConfigGlobal(config);
 }
 /**
  * Axios Client Factory
@@ -136,154 +277,70 @@ export class AxiosClientFactory {
      * Axios 클라이언트 생성
      */
     static createClient(serviceConfig, customRequestHandler) {
+        // factoryConfig 는 모듈 전역이지만 isRefreshing/refreshSubscribers 는 createClient 클로저에 격리됨.
+        // 두 client 가 생성되면 같은 refreshToken 을 사용하면서 큐가 분리되어 중복 갱신 호출이 발생하므로
+        // 단일 인스턴스 패턴을 강제한다 (dev: 경고, prod: 에러).
+        // globalThis에 저장된 인스턴스 직접 확인 — setFlag/getInstance 사이 throw 시 flag=true·instance=undefined
+        // 가 되는 원자성 버그를 피하기 위해 단일 키로 체크+반환 처리
+        const existing = _g[AXIOS_INSTANCE_KEY];
+        if (existing) {
+            if (process.env.NODE_ENV !== 'production') {
+                console.warn('[axiosFactory] createClient 중복 호출 — 기존 인스턴스 반환');
+            }
+            return existing;
+        }
+        // hostUrl/basePath는 커스텀 필드라 Axios에 그대로 넘기면 오염됨.
+        // 화이트리스트 spread: Axios 표준 필드만 전달하고 baseURL/timeout은 명시적으로 설정.
+        const { hostUrl: _h, basePath: _b, timeout: _t, ...axiosRest } = serviceConfig;
         const axiosInstance = Axios.create({
+            ...axiosRest,
             baseURL: `${serviceConfig.hostUrl || ''}${serviceConfig.basePath || ''}`,
             timeout: serviceConfig.timeout || 60000,
-            ...serviceConfig,
         });
         // 요청 인터셉터
-        axiosInstance.interceptors.request.use((config) => {
-            config.headers = config.headers || {};
-            // Access Token 추가
-            if (factoryConfig) {
-                const token = factoryConfig.getAccessToken();
+        // Axios 1.x의 config.headers는 AxiosHeaders 인스턴스 — 절대 { }로 덮어쓰지 않음
+        // 덮어쓰면 Axios 내부의 헤더 정규화(Content-Type 협상, default headers merge 등)가 깨짐
+        axiosInstance.interceptors.request.use(async (config) => {
+            const fc = getFactoryConfig();
+            if (fc) {
+                const token = fc.getAccessToken();
                 if (token) {
-                    config.headers['Authorization'] = `Bearer ${token}`;
+                    // AxiosHeaders.set() — 타입 안전한 헤더 설정 (bracket 할당과 달리 헤더 정규화 보장)
+                    config.headers.set('Authorization', `Bearer ${token}`);
                 }
             }
-            // UUID 추가 (요청 추적용)
-            config.headers['X-Request-ID'] = uuid();
-            // 빈 값 필터링
+            // 재시도 요청은 원본 ID 유지 — 서버 측 idempotency 추적/중복 제거에 필요
+            if (!config.headers.has('X-Request-ID')) {
+                config.headers.set('X-Request-ID', uuid());
+            }
             if (config.params) {
                 config.params = Object.entries(config.params).reduce((acc, [key, value]) => {
-                    if (value !== '' && value != null) {
+                    if (value !== '' && value != null)
                         acc[key] = value;
-                    }
                     return acc;
                 }, {});
             }
-            // 커스텀 요청 핸들러 실행
             if (customRequestHandler) {
-                customRequestHandler(config);
+                return await customRequestHandler(config);
             }
             return config;
         });
-        // 응답 인터셉터
+        // 응답 인터셉터 — 각 케이스는 위의 named handler 함수로 위임
         axiosInstance.interceptors.response.use((response) => response, async (error) => {
-            const status = error.response?.status;
-            const silentCodes = factoryConfig?.silentStatusCodes || [];
-            // ============================================
-            // 네트워크 에러 처리
-            // ============================================
-            if (error.message === 'Network Error' || !error.response) {
-                console.error('[Network Error] 네트워크 연결을 확인해주세요.');
-                if (factoryConfig?.onHttpError) {
-                    factoryConfig.onHttpError({
-                        status: 0,
-                        message: NETWORK_ERROR_MESSAGE.message,
-                        title: NETWORK_ERROR_MESSAGE.title,
-                        type: NETWORK_ERROR_MESSAGE.type,
-                        error,
-                    });
-                }
+            if (isCanceledRequest(error))
                 return Promise.reject(error);
+            if (error.message === 'Network Error' || !error.response)
+                return handleNetworkError(error);
+            const status = error.response?.status;
+            const fc = getFactoryConfig();
+            if (status === 401 && fc?.refreshToken) {
+                return handle401Refresh(error, axiosInstance);
             }
-            // ============================================
-            // 401 에러 - 토큰 갱신 시도
-            // ============================================
-            if (status === 401 && factoryConfig?.refreshToken) {
-                const originalRequest = error.config;
-                // refresh 엔드포인트 자체의 401은 처리하지 않음
-                if (originalRequest.url?.includes('/auth/refresh')) {
-                    return Promise.reject(error);
-                }
-                // 이미 재시도한 요청은 처리하지 않음
-                if (originalRequest._isRetry) {
-                    return Promise.reject(error);
-                }
-                // 토큰 갱신 중이면 대기 큐에 추가
-                if (isRefreshing) {
-                    try {
-                        const newToken = await subscribeTokenRefresh();
-                        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-                        originalRequest._isRetry = true;
-                        return axiosInstance(originalRequest);
-                    }
-                    catch (refreshError) {
-                        return Promise.reject(refreshError);
-                    }
-                }
-                // 첫 번째 401 요청: 토큰 갱신 수행
-                originalRequest._isRetry = true;
-                isRefreshing = true;
-                try {
-                    const newToken = await factoryConfig.refreshToken();
-                    if (newToken) {
-                        factoryConfig.setAccessToken(newToken);
-                        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-                        console.log('[Token Refresh] 토큰이 갱신되었습니다.');
-                        // 대기 중인 모든 요청에 새 토큰 전달
-                        onTokenRefreshed(newToken);
-                        return axiosInstance(originalRequest);
-                    }
-                    else {
-                        // 토큰 갱신 실패 (null 반환)
-                        throw new Error('Token refresh returned null');
-                    }
-                }
-                catch (refreshError) {
-                    console.error('[Token Refresh Failed]', refreshError);
-                    onTokenRefreshFailed(refreshError);
-                    factoryConfig.setAccessToken('');
-                    factoryConfig.onUnauthorized?.();
-                    return Promise.reject(refreshError);
-                }
-                finally {
-                    isRefreshing = false;
-                }
-            }
-            // ============================================
-            // HTTP 상태 코드별 에러 처리
-            // ============================================
-            if (status && !silentCodes.includes(status)) {
-                // API 에러 상세 정보 처리
-                if (isApiError(error)) {
-                    const errorDetails = hasErrorDetails(error);
-                    if (errorDetails && factoryConfig?.onError) {
-                        factoryConfig.onError(errorDetails);
-                    }
-                }
-                // HTTP 에러 핸들러 호출
-                if (factoryConfig?.onHttpError) {
-                    const errorConfig = HTTP_ERROR_MESSAGES[status] || {
-                        message: `알 수 없는 오류가 발생했습니다. (${status})`,
-                        title: '오류',
-                        type: 'toast',
-                    };
-                    // 401은 토큰 갱신 실패 후에만 표시 (위에서 이미 처리됨)
-                    if (status !== 401) {
-                        // 서버 응답에 메시지가 있으면 우선 사용
-                        const serverMessage = error.response?.data?.message;
-                        const finalMessage = serverMessage || errorConfig.message;
-                        factoryConfig.onHttpError({
-                            status,
-                            message: finalMessage,
-                            title: errorConfig.title,
-                            type: errorConfig.type,
-                            error,
-                        });
-                    }
-                }
-            }
+            handleHttpStatusError(error, status ?? 0, fc?.silentStatusCodes ?? []);
             return Promise.reject(error);
         });
+        // globalThis에 캐시 — lib가 두 번 로드되는 MF 환경에서도 두 번째 호출이 같은 인스턴스를 반환함
+        _g[AXIOS_INSTANCE_KEY] = axiosInstance;
         return axiosInstance;
     }
 }
-_a = AxiosClientFactory;
-/**
- * 기본 요청 핸들러
- */
-AxiosClientFactory.defaultRequestHandler = async (config) => {
-    return config;
-};

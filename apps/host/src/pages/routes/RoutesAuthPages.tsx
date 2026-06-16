@@ -11,7 +11,7 @@
  * /container/user/:userId → 마이페이지 (admin은 접근 불가)
  * /login                  → 이미 로그인 상태이므로 대시보드로 이동
  */
-import { lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { trackPromise } from 'react-promise-tracker';
 import { RemoteErrorBoundary, REMOTE_LINK_PREFIX } from '@sonhoseong/mfa-lib';
@@ -41,44 +41,26 @@ const blogPathPrefix = REMOTE_LINK_PREFIX.blog;
 const portfolioPathPrefix = REMOTE_LINK_PREFIX.portfolio;
 const jobtrackerPathPrefix = REMOTE_LINK_PREFIX.jobtracker;
 
+const remoteRoutes: { path: string; name: string; App: React.ComponentType }[] = [
+  { path: `${resumePathPrefix}/*`,    name: '이력서',   App: ResumeApp },
+  { path: `${blogPathPrefix}/*`,      name: '블로그',   App: BlogApp },
+  { path: `${portfolioPathPrefix}/*`, name: '포트폴리오', App: PortfolioApp },
+  { path: `${jobtrackerPathPrefix}/*`,name: '취업관리', App: JobTrackerApp },
+];
+
 function RoutesAuthPages() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to={RoutePath.Dashboard} replace />} />
       <Route path={RoutePath.Dashboard} element={<Suspense fallback=""><Dashboard /></Suspense>} />
 
-      <Route
-        path={`${resumePathPrefix}/*`}
-        element={
-          <RemoteErrorBoundary remoteName="이력서">
-            <Suspense fallback=""><ResumeApp /></Suspense>
+      {remoteRoutes.map(({ path, name, App }) => (
+        <Route key={path} path={path} element={
+          <RemoteErrorBoundary remoteName={name}>
+            <Suspense fallback=""><App /></Suspense>
           </RemoteErrorBoundary>
-        }
-      />
-      <Route
-        path={`${blogPathPrefix}/*`}
-        element={
-          <RemoteErrorBoundary remoteName="블로그">
-            <Suspense fallback=""><BlogApp /></Suspense>
-          </RemoteErrorBoundary>
-        }
-      />
-      <Route
-        path={`${portfolioPathPrefix}/*`}
-        element={
-          <RemoteErrorBoundary remoteName="포트폴리오">
-            <Suspense fallback=""><PortfolioApp /></Suspense>
-          </RemoteErrorBoundary>
-        }
-      />
-      <Route
-        path={`${jobtrackerPathPrefix}/*`}
-        element={
-          <RemoteErrorBoundary remoteName="취업관리">
-            <Suspense fallback=""><JobTrackerApp /></Suspense>
-          </RemoteErrorBoundary>
-        }
-      />
+        } />
+      ))}
 
       <Route path="/container/user/:userId" element={<MyPageGuard />} />
       <Route path={RoutePath.Login} element={<Navigate to={RoutePath.Dashboard} replace />} />

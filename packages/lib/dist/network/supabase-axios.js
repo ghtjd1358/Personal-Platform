@@ -29,10 +29,9 @@ export function createSupabaseAxiosClient(config) {
         basePath: '/rest/v1',
         timeout,
     }, (requestConfig) => {
-        // Supabase 필수 헤더
-        requestConfig.headers['apikey'] = supabaseAnonKey;
-        requestConfig.headers['Content-Type'] = 'application/json';
-        requestConfig.headers['Prefer'] = 'return=representation';
+        requestConfig.headers.set('apikey', supabaseAnonKey);
+        requestConfig.headers.set('Content-Type', 'application/json');
+        requestConfig.headers.set('Prefer', 'return=representation');
         return requestConfig;
     });
 }
@@ -46,8 +45,8 @@ export function createSupabaseAuthClient(config) {
         basePath: '/auth/v1',
         timeout,
     }, (requestConfig) => {
-        requestConfig.headers['apikey'] = supabaseAnonKey;
-        requestConfig.headers['Content-Type'] = 'application/json';
+        requestConfig.headers.set('apikey', supabaseAnonKey);
+        requestConfig.headers.set('Content-Type', 'application/json');
         return requestConfig;
     });
 }

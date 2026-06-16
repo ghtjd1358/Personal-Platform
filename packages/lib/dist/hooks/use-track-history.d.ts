@@ -20,15 +20,11 @@ export interface TrackHistoryOptions {
 export declare function useTrackHistory(options: TrackHistoryOptions): {
     loaded: boolean;
 };
-/**
- * Recent Menu 상태 Hook
- * useSelector를 사용하여 상태 변경 시 리렌더링 보장
- */
-export declare function useRecentMenuState<D = any>(): {
+export declare function useRecentMenuState<D = unknown>(): {
     list: RecentMenu[];
     currentId: string;
     currentMenu: RecentMenu | undefined;
     data: D | undefined;
-    state: any;
+    state: unknown;
 };
 //# sourceMappingURL=use-track-history.d.ts.map

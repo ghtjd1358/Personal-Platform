@@ -51,7 +51,6 @@ export function useMfaNavigate() {
         }
         // 네비게이션 실행
         navigate({ pathname, search, hash }, { ...options, service: undefined });
-        console.log(`[Navigate] ${pathname}${search ? `?${search}` : ''}`);
     }, [navigate, currentService]);
 }
 /**

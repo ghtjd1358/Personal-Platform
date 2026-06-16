@@ -2,11 +2,13 @@
  * Axios Factory
  * 401 에러시 자동 토큰 갱신 포함
  */
-import { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-export type RequestConfig = Omit<AxiosRequestConfig, 'headers'> & {
-    headers: Record<string, string>;
-    _isRetry?: boolean;
-};
+import { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+declare module 'axios' {
+    interface InternalAxiosRequestConfig {
+        _isRetry?: boolean;
+    }
+}
+export type RequestConfig = InternalAxiosRequestConfig;
 export type Response<ResData> = AxiosResponse<ResData>;
 export interface AxiosConfig extends AxiosRequestConfig {
     hostUrl?: string;
@@ -22,6 +24,7 @@ export interface ApiErrorResponse {
     code: string;
     statusCode: number;
     timestamp: string;
+    message?: string;
     errorDetails?: ErrorDetail[];
 }
 export interface ExtendedAxiosError extends AxiosError {
@@ -79,12 +82,8 @@ export declare function initAxiosFactory(config: FactoryConfig): void;
  */
 export declare class AxiosClientFactory {
     /**
-     * 기본 요청 핸들러
-     */
-    private static defaultRequestHandler;
-    /**
      * Axios 클라이언트 생성
      */
-    static createClient(serviceConfig: AxiosConfig, customRequestHandler?: (config: RequestConfig) => Promise<RequestConfig> | RequestConfig): AxiosInstance;
+    static createClient(serviceConfig: AxiosConfig, customRequestHandler?: (config: InternalAxiosRequestConfig) => Promise<InternalAxiosRequestConfig> | InternalAxiosRequestConfig): AxiosInstance;
 }
 //# sourceMappingURL=axios-factory.d.ts.map

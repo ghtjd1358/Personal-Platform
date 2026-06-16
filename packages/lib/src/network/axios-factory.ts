@@ -273,6 +273,118 @@ function onTokenRefreshFailed(error: Error): void {
   rs.subscribers = [];
 }
 
+// ============================================
+// 응답 인터셉터 핸들러 — 각 에러 케이스를 독립 함수로 분리해 인터셉터 본문을 단순하게 유지
+// ============================================
+
+/** 취소된 요청 여부 (AbortController / axios CancelToken 모두 대응) */
+function isCanceledRequest(error: unknown): boolean {
+  return (
+    Axios.isCancel(error) ||
+    (error as AxiosError)?.code === 'ERR_CANCELED' ||
+    (error as AxiosError)?.name === 'CanceledError'
+  );
+}
+
+/** 네트워크 에러 감지 후 onHttpError 호출 */
+function handleNetworkError(error: AxiosError): Promise<never> {
+  console.error('[Network Error] 네트워크 연결을 확인해주세요.');
+  getFactoryConfig()?.onHttpError?.({
+    status: 0,
+    message: NETWORK_ERROR_MESSAGE.message,
+    title: NETWORK_ERROR_MESSAGE.title,
+    type: NETWORK_ERROR_MESSAGE.type,
+    error,
+  });
+  return Promise.reject(error);
+}
+
+/**
+ * 401 응답 처리 — 토큰 갱신 후 원 요청 재시도
+ *
+ * 동시에 여러 401이 오면 첫 번째 요청만 갱신을 수행하고
+ * 나머지는 refreshSubscribers 큐에서 대기 (single-flight 패턴)
+ *
+ * null 반환 = 리프레시 토큰 만료 → 로그아웃
+ * throw     = 네트워크/서버 일시 오류 → 세션 유지
+ */
+async function handle401Refresh(
+  error: AxiosError,
+  axiosInstance: AxiosInstance
+): Promise<AxiosResponse> {
+  const fc = getFactoryConfig()!;
+  const originalRequest = error.config!;
+
+  // refresh 엔드포인트 자체의 401 또는 이미 재시도한 요청 → 무한 루프 방지
+  if (originalRequest.url?.endsWith('/auth/refresh') || originalRequest._isRetry) {
+    return Promise.reject(error);
+  }
+
+  const rs = getRefreshState();
+  if (rs.isRefreshing) {
+    // 다른 요청이 이미 갱신 중 — 완료될 때까지 대기 후 재시도
+    await subscribeTokenRefresh(originalRequest.signal as AbortSignal | undefined);
+    originalRequest._isRetry = true;
+    return axiosInstance(originalRequest);
+  }
+
+  // 갱신 소유권 획득 — await 이전에 set해 동시 401이 큐로 진입하게 함
+  rs.isRefreshing = true;
+  originalRequest._isRetry = true;
+
+  try {
+    const newToken = await fc.refreshToken!();
+
+    if (newToken) {
+      fc.setAccessToken(newToken);
+      onTokenRefreshed(newToken);         // 큐 대기 요청 통지
+      return axiosInstance(originalRequest); // 원 요청 재시도
+    }
+
+    // null = 리프레시 토큰 만료 → 로그아웃
+    console.error('[Token Refresh] refreshToken returned null — session expired');
+    const authFailure = new Error('Token refresh returned null');
+    fc.setAccessToken('');
+    fc.onUnauthorized?.();
+    onTokenRefreshFailed(authFailure);
+    return Promise.reject(authFailure);
+  } catch (err) {
+    // 일시적 오류 (5xx, 네트워크) — 로그아웃하지 않고 세션 유지
+    console.warn('[Token Refresh] transient error — keeping session:', err);
+    onTokenRefreshFailed(err as Error);
+    return Promise.reject(err);
+  } finally {
+    rs.isRefreshing = false; // 반드시 해제 — 누락 시 이후 모든 요청이 큐에 영구 적체
+  }
+}
+
+/** HTTP 상태 코드별 에러 핸들러 호출 (toast / modal) */
+function handleHttpStatusError(error: AxiosError, status: number, silentCodes: number[]): void {
+  if (!status || silentCodes.includes(status) || status === 401) return;
+
+  const fc = getFactoryConfig();
+  if (isApiError(error)) {
+    const details = hasErrorDetails(error);
+    if (details) fc?.onError?.(details);
+  }
+
+  if (fc?.onHttpError) {
+    const cfg = HTTP_ERROR_MESSAGES[status] ?? {
+      message: `알 수 없는 오류가 발생했습니다. (${status})`,
+      title: '오류',
+      type: 'toast' as HttpErrorType,
+    };
+    const serverMsg = (error.response?.data as ApiErrorResponse)?.message;
+    fc.onHttpError({
+      status,
+      message: String(serverMsg || cfg.message).slice(0, 500), // XSS echo 방어
+      title: cfg.title,
+      type: cfg.type,
+      error,
+    });
+  }
+}
+
 // Factory 초기화
 // 다중 호출 시 이전 config 가 덮어쓰여진다 — 단일 인스턴스 패턴 강제 (개발 시 경고)
 export function initAxiosFactory(config: FactoryConfig) {
@@ -353,158 +465,21 @@ export class AxiosClientFactory {
       return config;
     });
 
-    // 응답 인터셉터
+    // 응답 인터셉터 — 각 케이스는 위의 named handler 함수로 위임
     axiosInstance.interceptors.response.use(
       (response) => response,
-      async (error) => {
+      async (error: AxiosError) => {
+        if (isCanceledRequest(error)) return Promise.reject(error);
+        if (error.message === 'Network Error' || !error.response) return handleNetworkError(error);
+
         const status = error.response?.status;
-        const silentCodes = getFactoryConfig()?.silentStatusCodes || [];
-
-        // ============================================
-        // 취소된 요청(AbortController)은 별도 처리 없이 통과
-        // ============================================
-        if (Axios.isCancel(error) || error.code === 'ERR_CANCELED' || error.name === 'CanceledError') {
-          return Promise.reject(error);
-        }
-
-        // ============================================
-        // 네트워크 에러 처리
-        // ============================================
-        if (error.message === 'Network Error' || !error.response) {
-          console.error('[Network Error] 네트워크 연결을 확인해주세요.');
-
-          const fc = getFactoryConfig();
-          if (fc?.onHttpError) {
-            fc.onHttpError({
-              status: 0,
-              message: NETWORK_ERROR_MESSAGE.message,
-              title: NETWORK_ERROR_MESSAGE.title,
-              type: NETWORK_ERROR_MESSAGE.type,
-              error,
-            });
-          }
-
-          return Promise.reject(error);
-        }
-
-        // ============================================
-        // 401 에러 - 토큰 갱신 시도
-        // ============================================
         const fc = getFactoryConfig();
+
         if (status === 401 && fc?.refreshToken) {
-          const originalRequest = error.config;
-
-          // refresh 엔드포인트 자체의 401은 처리하지 않음
-          if (originalRequest.url?.endsWith('/auth/refresh')) {
-            return Promise.reject(error);
-          }
-
-          // 이미 재시도한 요청은 처리하지 않음
-          if (originalRequest._isRetry) {
-            return Promise.reject(error);
-          }
-
-          // 원자적으로 소유권 확인+획득 — rs를 한 번만 읽어 check와 set 사이의 window를 제거
-          // (두 401 응답이 같은 tick에 도착하면 둘 다 await 이전에 실행되므로 반드시 같은 참조를 씀)
-          const rs = getRefreshState();
-          if (rs.isRefreshing) {
-            try {
-              await subscribeTokenRefresh(originalRequest.signal); // 갱신 완료 대기 (retry 시 request interceptor가 헤더 재주입)
-              originalRequest._isRetry = true;
-              return axiosInstance(originalRequest);
-            } catch (refreshError) {
-              return Promise.reject(refreshError);
-            }
-          }
-
-          // 첫 번째 401: await 이전에 플래그를 세워 이후 동시 401이 큐로 진입하게 함
-          rs.isRefreshing = true;
-          originalRequest._isRetry = true;
-
-          // 성공 path: subscribers 통지 + isRefreshing 해제를 retry 이전에 수행한다.
-          // retry 도중 새 요청이 들어와도 isRefreshing=false / subscribers=[] 라
-          // 정상 토큰으로 즉시 진행됨 → race window 제거.
-          //
-          // 시맨틱 분리:
-          //  - null 반환 = 진짜 만료 → 로그아웃 + 대기 요청은 영구 거부 (auth 에러)
-          //  - throw    = 일시적 오류 (5xx/네트워크) → 로그아웃 하지 않음.
-          //               대기 요청은 retriable 에러로 거부되어 호출자(또는 axios retry)가
-          //               네트워크 에러로 처리하도록 한다 (401 영구 실패로 위장 X).
-          try {
-            const refreshedToken = await fc.refreshToken!();
-
-            if (refreshedToken) {
-              fc.setAccessToken(refreshedToken);
-              // 헤더 수동 주입 제거 — retry 시 request interceptor가 factoryConfig.getAccessToken()으로
-              // Authorization 헤더를 재설정한다. 수동 주입은 토큰 소스 혼동을 야기할 수 있으므로 의도적으로 제거.
-
-              // 1) 대기 요청 통지 → 2) 원 요청 재시도
-              onTokenRefreshed(refreshedToken);
-
-              return axiosInstance(originalRequest);
-            } else {
-              // null = 리프레시 토큰 만료 → 정상 로그아웃 흐름.
-              // 대기 요청들도 함께 거부 — 모두 미인증 상태.
-              console.error('[Token Refresh Failed] refreshToken returned null — session expired');
-              const authFailure = new Error('Token refresh returned null');
-              fc.setAccessToken('');
-              fc.onUnauthorized?.();
-              onTokenRefreshFailed(authFailure);
-              return Promise.reject(authFailure);
-            }
-          } catch (refreshError) {
-            // throw = 일시적 오류 (5xx, 네트워크) → 로그아웃 하지 않음, 세션 유지.
-            // 대기 요청은 일시적 에러로 거부되어 각 호출자에게 네트워크 에러로 surface 된다
-            // (영구 auth 실패 아님 — 사용자가 재시도하면 성공할 수 있음).
-            // onUnauthorized 는 호출하지 않음 — 사용자는 로그인 상태 유지.
-            console.warn('[Token Refresh Failed] transient error — keeping session:', refreshError);
-            onTokenRefreshFailed(refreshError as Error);
-            return Promise.reject(refreshError);
-          } finally {
-            // 성공/실패 path 모두에서 반드시 isRefreshing 해제.
-            // 누락 시 isRefreshing=true 로 박혀 이후 모든 요청이 대기 큐에 무한 적체.
-            getRefreshState().isRefreshing = false;
-          }
+          return handle401Refresh(error, axiosInstance);
         }
 
-        // ============================================
-        // HTTP 상태 코드별 에러 처리
-        // ============================================
-        if (status && !silentCodes.includes(status)) {
-          // API 에러 상세 정보 처리
-          const httpFc = getFactoryConfig();
-          if (isApiError(error)) {
-            const errorDetails = hasErrorDetails(error);
-            if (errorDetails && httpFc?.onError) {
-              httpFc.onError(errorDetails);
-            }
-          }
-
-          // HTTP 에러 핸들러 호출
-          if (httpFc?.onHttpError) {
-            const errorConfig = HTTP_ERROR_MESSAGES[status] || {
-              message: `알 수 없는 오류가 발생했습니다. (${status})`,
-              title: '오류',
-              type: 'toast' as HttpErrorType,
-            };
-
-            // 401은 토큰 갱신 실패 후에만 표시 (위에서 이미 처리됨)
-            if (status !== 401) {
-              // 서버 응답 메시지 사용 시 길이 제한 — XSS echo 방어 (toast renderer가 textContent만 써야 함)
-              const serverMessage = error.response?.data?.message;
-              const finalMessage = String(serverMessage || errorConfig.message).slice(0, 500);
-
-              httpFc.onHttpError({
-                status,
-                message: finalMessage,
-                title: errorConfig.title,
-                type: errorConfig.type,
-                error,
-              });
-            }
-          }
-        }
-
+        handleHttpStatusError(error, status ?? 0, fc?.silentStatusCodes ?? []);
         return Promise.reject(error);
       }
     );

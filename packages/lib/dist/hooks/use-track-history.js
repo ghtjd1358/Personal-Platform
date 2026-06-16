@@ -2,10 +2,11 @@
  * Track History Hook
  * 라우팅 변경 감지 및 자동 탭(Recent Menu) 관리
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { dispatchToHost, getHostStore } from '../store/store-access';
+import { setRecentMenuList, addRecentMenu, setCurrentRecentMenu, updateRecentMenuState, } from '../store/recent-menu-slice';
 import { storage } from '../utils/storage';
 import { getServiceFromPath } from '../types/service';
 /**
@@ -44,42 +45,20 @@ export function useTrackHistory(options) {
         const existingIndex = list.findIndex((item) => item.pathname === pathname);
         const service = getServiceFromPath(pathname);
         if (existingIndex === -1) {
-            // 새 메뉴 추가
             const id = uuid();
             const title = findTitleByPath(pathname, lnbItems) || pathname.split('/').pop() || '페이지';
-            dispatchToHost({
-                type: 'recentMenu/addRecentMenu',
-                payload: {
-                    id,
-                    pathname,
-                    search,
-                    title,
-                    service,
-                    data: state,
-                },
-            });
-            dispatchToHost({ type: 'recentMenu/setCurrentMenuId', payload: id });
+            dispatchToHost(addRecentMenu({ id, pathname, search, title, service: service ?? undefined, data: state }));
         }
         else {
-            // 기존 메뉴 활성화
             const existingMenu = list[existingIndex];
-            dispatchToHost({ type: 'recentMenu/setCurrentMenuId', payload: existingMenu.id });
-            // 검색 파라미터 업데이트
+            dispatchToHost(setCurrentRecentMenu(existingMenu.id));
             if (search !== existingMenu.search) {
-                dispatchToHost({
-                    type: 'recentMenu/updateMenuSearch',
-                    payload: { id: existingMenu.id, search },
-                });
+                dispatchToHost(updateRecentMenuState({ id: existingMenu.id, search }));
             }
-            // 데이터 업데이트
             if (state) {
-                dispatchToHost({
-                    type: 'recentMenu/updateMenuData',
-                    payload: { id: existingMenu.id, data: state },
-                });
+                dispatchToHost(updateRecentMenuState({ id: existingMenu.id, data: state }));
             }
         }
-        // 서비스 타입 업데이트
         if (service) {
             dispatchToHost({ type: 'app/setService', payload: service });
         }
@@ -92,10 +71,7 @@ export function useTrackHistory(options) {
         // Storage에서 Recent Menu 복구
         const savedList = storage.getRecentMenu();
         if (savedList.length > 0) {
-            dispatchToHost({
-                type: 'recentMenu/setRecentMenu',
-                payload: { list: savedList },
-            });
+            dispatchToHost(setRecentMenuList(savedList));
         }
         // 현재 페이지 추가
         const { pathname, search } = window.location;
@@ -104,7 +80,6 @@ export function useTrackHistory(options) {
         }
         prevLocationRef.current = { pathname, search };
         setLoaded(true);
-        console.log('[TrackHistory] 초기화 완료:', pathname);
     }, [addPageInfo, excludePaths]);
     // 라우팅 변경 감지
     useEffect(() => {
@@ -129,32 +104,18 @@ export function useTrackHistory(options) {
         addPageInfo(pathname, search, state);
         onPageView?.(pathname);
         prevLocationRef.current = { pathname, search };
-        console.log('[TrackHistory] 페이지 변경:', pathname);
     }, [location, loaded, addPageInfo, excludePaths, onPageView]);
     return { loaded };
 }
-/**
- * Recent Menu 상태 Hook
- * useSelector를 사용하여 상태 변경 시 리렌더링 보장
- */
 export function useRecentMenuState() {
     const store = getHostStore();
-    // useSelector 대신 useSyncExternalStore 패턴 사용 (Host store 구독)
-    const [state, setState] = useState(() => store?.getState().recentMenu);
-    useEffect(() => {
-        if (!store)
-            return;
-        // Store 변경 구독
-        const unsubscribe = store.subscribe(() => {
-            const newState = store.getState().recentMenu;
-            setState(newState);
-        });
-        return unsubscribe;
-    }, [store]);
+    const subscribe = useCallback((cb) => store?.subscribe(cb) ?? (() => { }), [store]);
+    const getSnapshot = useCallback(() => store?.getState().recentMenu ?? null, [store]);
+    const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
     const currentMenu = state?.list?.find((menu) => menu.id === state?.currentId);
     return {
-        list: state?.list || [],
-        currentId: state?.currentId || '',
+        list: state?.list ?? [],
+        currentId: state?.currentId ?? '',
         currentMenu,
         data: currentMenu?.data,
         state: currentMenu?.state,
