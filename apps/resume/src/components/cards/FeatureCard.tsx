@@ -21,7 +21,9 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, imageSrc,
   return (
     <Card className={`feature-card animate-on-scroll delay-${index + 1}`}>
       {imageSrc && (
-        <Card.Image src={imageSrc} alt={title} className="feature-image" />
+        <div className="feature-image">
+          <img src={imageSrc} alt={title} loading="lazy" decoding="async" />
+        </div>
       )}
       <Card.Body>
         <Card.Title className="feature-title">{title}</Card.Title>
