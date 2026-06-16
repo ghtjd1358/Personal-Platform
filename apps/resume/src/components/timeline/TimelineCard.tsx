@@ -44,20 +44,20 @@ const TimelineCard: React.FC<TimelineCardProps> = ({
           <Card.Tags className="timeline-tech-icons">
             {(tags as Array<PortfolioTag | string>).map((tag, index) => {
               if (isPortfolioTag(tag)) {
-                const icon = resolveIcon(tag.iconKey, tag.iconColor);
+                const icon = resolveIcon(tag.iconKey, tag.iconColor) ?? resolveIcon(tag.name, tag.iconColor);
                 return (
                   <div
                     className="tech-icon"
                     key={`tag-${index}-${tag.name}`}
                     data-tooltip={tag.name}
                   >
-                    {icon || <span>💻</span>}
+                    {icon ?? <span>{tag.name}</span>}
                   </div>
                 );
               }
               return (
                 <div className="tech-icon" key={`tag-${index}-${tag}`} data-tooltip={tag}>
-                  {resolveIcon(tag) || <span>💻</span>}
+                  {resolveIcon(tag) ?? <span>{tag}</span>}
                 </div>
               );
             })}

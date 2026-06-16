@@ -120,8 +120,11 @@ const ICON_FACTORIES: Record<string, IconFactory> = {
   'Python':            (c) => <SiPython color={c ?? '#3776AB'} />,
   'Lighthouse':        (c) => <SiLighthouse color={c ?? '#F44B21'} />,
   'Axios':             (c) => <SiAxios color={c ?? '#5A29E4'} />,
-  'Node.js':           (c) => <SiNodedotjs color={c ?? '#339933'} style={{ transform: 'scale(0.82)', transformOrigin: 'center' }} />,
-  'JWT':               (c) => <SiJsonwebtokens color={c ?? '#000000'} />,
+  'Node.js':           (c) => <SiNodedotjs color={c ?? '#339933'} style={{ width: '42px', height: '42px' }} />,
+  'NodeJS':            (c) => <SiNodedotjs color={c ?? '#339933'} style={{ width: '42px', height: '42px' }} />,
+  'Node':              (c) => <SiNodedotjs color={c ?? '#339933'} style={{ width: '42px', height: '42px' }} />,
+  'JWT':               (c) => <SiJsonwebtokens color={c ?? '#000000'} style={{ width: '40px', height: '40px' }} />,
+  'JSON Web Token':    (c) => <SiJsonwebtokens color={c ?? '#000000'} style={{ width: '40px', height: '40px' }} />,
 };
 
 // 대소문자 불일치 방어용 소문자 맵 (DB 값이 'react'로 저장된 경우 등)
