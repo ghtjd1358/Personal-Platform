@@ -16,24 +16,31 @@ const isHost = storage.isHostApp()
 function Root() {
     const { initialized } = useSimpleInitialize()
 
-    if (!initialized) return <></>
-
-    const content = (
-        <ErrorBoundary>
-            <main className="main-content">
-                <App />
-            </main>
-            <GlobalLoading />
-        </ErrorBoundary>
-    )
-
-    return (
+    return initialized ? (
         <>
             <ModalContainer />
             <ToastContainer />
-            {isHost ? content : <Container>{content}</Container>}
+            {isHost ? (
+                <ErrorBoundary>
+                    <main className="main-content">
+                        <App />
+                    </main>
+                    <GlobalLoading />
+                </ErrorBoundary>
+            ) : (
+                <Container>
+                    <ErrorBoundary>
+                        <main className="main-content">
+                            <App />
+                        </main>
+                        <GlobalLoading />
+                    </ErrorBoundary>
+                </Container>
+            )}
             {!isHost && <ScrollTopButton />}
         </>
+    ) : (
+        <></>
     )
 }
 
