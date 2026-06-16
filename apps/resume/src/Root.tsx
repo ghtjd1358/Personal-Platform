@@ -1,5 +1,4 @@
-import React, { useMemo } from 'react'
-import { useSelector } from 'react-redux'
+import React from 'react'
 import {
     Container,
     ModalContainer,
@@ -9,30 +8,32 @@ import {
     ScrollTopButton,
     storage,
     useSimpleInitialize,
-    selectAccessToken
 } from '@sonhoseong/mfa-lib'
-import { lnbItems } from './exposes/lnb-items'
 import App from './exposes/App'
+
+const isHost = storage.isHostApp()
 
 function Root() {
     const { initialized } = useSimpleInitialize()
 
-    return  initialized ? (
+    if (!initialized) return <></>
+
+    const content = (
+        <ErrorBoundary>
+            <main className="main-content">
+                <App />
+            </main>
+            <GlobalLoading />
+        </ErrorBoundary>
+    )
+
+    return (
         <>
             <ModalContainer />
             <ToastContainer />
-            <Container>
-                <ErrorBoundary>
-                    <main className="main-content">
-                        <App />
-                    </main>
-                    <GlobalLoading />
-                </ErrorBoundary>
-            </Container>
-            {!storage.isHostApp() && <ScrollTopButton />}
+            {isHost ? content : <Container>{content}</Container>}
+            {!isHost && <ScrollTopButton />}
         </>
-    ) : (
-        <></>
     )
 }
 
