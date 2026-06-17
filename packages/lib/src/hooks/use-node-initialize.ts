@@ -12,7 +12,6 @@ const API_BASE = (process.env.REACT_APP_API_URL ?? 'http://localhost:4000') + '/
 const initAxios = Axios.create({ baseURL: API_BASE, withCredentials: true, timeout: 3000 });
 
 export function useNodeInitialize() {
-  const [initialized, setInitialized] = useState(false);
   const ranRef = useRef(false);
 
   useEffect(() => {
@@ -22,7 +21,7 @@ export function useNodeInitialize() {
     const controller = new AbortController();
     const { signal } = controller;
 
-    const initialize = async () => {
+    const restoreSession = async () => {
       initApiClient();
       const store = getStore();
 
@@ -51,15 +50,13 @@ export function useNodeInitialize() {
           console.warn('[NodeInitialize] 세션 복구 실패:', err);
         }
       }
-
-      if (!signal.aborted) setInitialized(true);
     };
 
-    initialize();
+    restoreSession();
     return () => { controller.abort(); };
   }, []);
 
-  return { initialized };
+  return { initialized: true };
 }
 
 export function useNodeLogout() {

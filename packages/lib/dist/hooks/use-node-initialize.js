@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import Axios from 'axios';
 import { getStore, logout } from '../store/app-store';
 import { setAccessToken, setUser } from '../store/app-slice';
@@ -8,7 +8,6 @@ const API_BASE = (process.env.REACT_APP_API_URL ?? 'http://localhost:4000') + '/
 // 초기화 전용 plain axios — 인터셉터 없이 refresh를 호출해 401 retry 루프 차단
 const initAxios = Axios.create({ baseURL: API_BASE, withCredentials: true, timeout: 3000 });
 export function useNodeInitialize() {
-    const [initialized, setInitialized] = useState(false);
     const ranRef = useRef(false);
     useEffect(() => {
         if (ranRef.current)
@@ -16,7 +15,7 @@ export function useNodeInitialize() {
         ranRef.current = true;
         const controller = new AbortController();
         const { signal } = controller;
-        const initialize = async () => {
+        const restoreSession = async () => {
             initApiClient();
             const store = getStore();
             try {
@@ -42,13 +41,11 @@ export function useNodeInitialize() {
                     console.warn('[NodeInitialize] 세션 복구 실패:', err);
                 }
             }
-            if (!signal.aborted)
-                setInitialized(true);
         };
-        initialize();
+        restoreSession();
         return () => { controller.abort(); };
     }, []);
-    return { initialized };
+    return { initialized: true };
 }
 export function useNodeLogout() {
     const doLogout = useCallback(async () => {

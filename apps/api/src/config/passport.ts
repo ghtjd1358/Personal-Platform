@@ -22,7 +22,10 @@ export function configurePassport() {
             profile.displayName,
             profile.photos?.[0]?.value,
           )
-          if (error || !data) return done(error ?? new Error('upsertUser 실패'))
+          if (error || !data) {
+            console.error('[Passport] upsertUser 실패:', error)
+            return done(error ?? new Error('upsertUser 실패'))
+          }
           return done(null, { userId: data.id, email: data.email })
         } catch (err) {
           return done(err)
