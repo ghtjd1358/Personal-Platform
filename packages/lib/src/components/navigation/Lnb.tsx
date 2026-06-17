@@ -3,6 +3,15 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectAccessToken, selectUser } from '../../store/app-store';
 import { LnbMenuItem } from '../../types';
+import { Badge, BadgeVariant } from '../badge/Badge';
+
+const BADGE_VARIANT_MAP: Record<NonNullable<LnbMenuItem['badge']>['variant'] & string, BadgeVariant> = {
+  primary: 'primary',
+  secondary: 'default',
+  success: 'success',
+  warning: 'warning',
+  error: 'danger',
+};
 
 export type { LnbMenuItem } from '../../types';
 
@@ -82,6 +91,11 @@ export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo, onLogo
                   >
                     {item.icon && <span className="app-lnb-icon">{item.icon}</span>}
                     {!collapsed && <span className="app-lnb-text">{item.title}</span>}
+                    {!collapsed && item.badge && (
+                      <Badge variant={BADGE_VARIANT_MAP[item.badge.variant ?? 'primary'] ?? 'primary'}>
+                        {item.badge.text}
+                      </Badge>
+                    )}
                     {!collapsed && (
                       <span className="app-lnb-arrow" aria-hidden="true">
                         {expanded ? '▼' : '▶'}
@@ -117,6 +131,11 @@ export const Lnb: React.FC<LnbProps> = ({ lnbItems, title, appName, logo, onLogo
                 >
                   {item.icon && <span className="app-lnb-icon">{item.icon}</span>}
                   {!collapsed && <span className="app-lnb-text">{item.title}</span>}
+                  {!collapsed && item.badge && (
+                    <Badge variant={BADGE_VARIANT_MAP[item.badge.variant ?? 'primary'] ?? 'primary'}>
+                      {item.badge.text}
+                    </Badge>
+                  )}
                 </button>
               )}
             </div>

@@ -9,7 +9,7 @@ import { User } from '../types';
 const API_BASE = (process.env.REACT_APP_API_URL ?? 'http://localhost:4000') + '/api';
 
 // 초기화 전용 plain axios — 인터셉터 없이 refresh를 호출해 401 retry 루프 차단
-const initAxios = Axios.create({ baseURL: API_BASE, withCredentials: true, timeout: 10000 });
+const initAxios = Axios.create({ baseURL: API_BASE, withCredentials: true, timeout: 3000 });
 
 export function useNodeInitialize() {
   const [initialized, setInitialized] = useState(false);
