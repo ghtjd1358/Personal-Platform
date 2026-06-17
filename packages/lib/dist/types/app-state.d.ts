@@ -4,6 +4,7 @@ import { LnbMenuItem } from './menu';
 export interface AppState {
     accessToken: string;
     user: User | null;
+    sessionRestoring: boolean;
 }
 export interface UiState {
     globalLoadingTitle: string;

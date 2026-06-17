@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import Axios from 'axios';
 import { getStore, logout } from '../store/app-store';
-import { setAccessToken, setUser } from '../store/app-slice';
+import { setAccessToken, setUser, setSessionRestoring } from '../store/app-slice';
 import { clearRecentMenu } from '../store/recent-menu-slice';
 import { getApiClient, initApiClient } from '../network/api-client';
 const API_BASE = (process.env.REACT_APP_API_URL ?? 'http://localhost:4000') + '/api';
@@ -23,8 +23,10 @@ export function useNodeInitialize() {
                 if (signal.aborted)
                     return;
                 const accessToken = refreshRes.data?.data?.accessToken;
-                if (!accessToken)
+                if (!accessToken) {
+                    store.dispatch(setSessionRestoring(false));
                     return;
+                }
                 store.dispatch(setAccessToken(accessToken));
                 const meRes = await getApiClient().get('/user/me', { signal });
                 if (signal.aborted)
@@ -40,6 +42,10 @@ export function useNodeInitialize() {
                 if (!Axios.isAxiosError(err) || (err.response?.status !== 401 && err.response?.status !== 403)) {
                     console.warn('[NodeInitialize] 세션 복구 실패:', err);
                 }
+            }
+            finally {
+                if (!signal.aborted)
+                    store.dispatch(setSessionRestoring(false));
             }
         };
         restoreSession();
