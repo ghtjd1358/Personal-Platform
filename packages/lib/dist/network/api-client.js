@@ -3,8 +3,7 @@ import { AxiosClientFactory, initAxiosFactory } from './axios-factory';
 import { getStore } from '../store/app-store';
 import { setAccessToken } from '../store/app-slice';
 let _apiClient;
-const API_BASE = ((typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
-    'http://localhost:4000') + '/api';
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:4000') + '/api';
 const refreshAxios = Axios.create({
     baseURL: API_BASE,
     withCredentials: true,

@@ -38,7 +38,7 @@ export function useNodeInitialize() {
 
         store.dispatch(setAccessToken(accessToken));
 
-        const meRes = await getApiClient().get<{ data: User }>('/user/me', { signal });
+        const meRes = await getApiClient().get<{ data: User }>('/auth/me', { signal });
         if (signal.aborted) return;
 
         const user = meRes.data?.data;
