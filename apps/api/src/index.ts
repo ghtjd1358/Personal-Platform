@@ -14,6 +14,8 @@ import blogRouter from './modules/blog/blog.router'
 
 const app = express()
 
+// Vercel/nginx 등 리버스 프록시 뒤에서 X-Forwarded-For 신뢰 (rate-limit IP 식별)
+app.set('trust proxy', 1)
 app.use(helmet())
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use(cors({
