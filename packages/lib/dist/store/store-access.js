@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { STORAGE_KEYS } from '../utils/storage';
+import { storage } from '../utils/storage';
 export const getHostStore = () => window.__REDUX_STORE__;
 export const getHostState = () => {
     try {
@@ -12,10 +12,7 @@ export const getHostState = () => {
 export const getCurrentUser = () => {
     try {
         const state = getHostState();
-        if (state)
-            return state.app?.user || null;
-        const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-        return userStr ? JSON.parse(userStr) : null;
+        return state?.app?.user ?? storage.getUser();
     }
     catch {
         return null;

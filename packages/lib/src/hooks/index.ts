@@ -1,4 +1,3 @@
-export * from './use-auth';
 export * from './use-supabase-auth';
 export * from './use-initialize';
 export * from './use-simple-initialize';

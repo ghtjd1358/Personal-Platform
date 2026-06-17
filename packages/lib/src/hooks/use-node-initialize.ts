@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Axios from 'axios';
 import { getStore, logout } from '../store/app-store';
 import { setAccessToken, setUser } from '../store/app-slice';
 import { clearRecentMenu } from '../store/recent-menu-slice';
 import { getApiClient, initApiClient } from '../network/api-client';
 import { User } from '../types';
+
+const API_BASE = (process.env.REACT_APP_API_URL ?? 'http://localhost:4000') + '/api';
+
+// 초기화 전용 plain axios — 인터셉터 없이 refresh를 호출해 401 retry 루프 차단
+const initAxios = Axios.create({ baseURL: API_BASE, withCredentials: true, timeout: 10000 });
 
 export function useNodeInitialize() {
   const [initialized, setInitialized] = useState(false);
@@ -21,7 +27,7 @@ export function useNodeInitialize() {
       const store = getStore();
 
       try {
-        const refreshRes = await getApiClient().post<{ data: { accessToken: string } }>(
+        const refreshRes = await initAxios.post<{ data: { accessToken: string } }>(
           '/auth/refresh',
           undefined,
           { signal }
@@ -38,15 +44,18 @@ export function useNodeInitialize() {
 
         const user = meRes.data?.data;
         if (user) store.dispatch(setUser(user));
-      } catch {
-        // 비로그인 상태 / abort — 정상 케이스
+      } catch (err) {
+        if (signal.aborted) return;
+        // 비로그인(401/403)은 정상 케이스, 그 외는 경고
+        if (!Axios.isAxiosError(err) || (err.response?.status !== 401 && err.response?.status !== 403)) {
+          console.warn('[NodeInitialize] 세션 복구 실패:', err);
+        }
       }
 
       if (!signal.aborted) setInitialized(true);
     };
 
     initialize();
-
     return () => { controller.abort(); };
   }, []);
 
@@ -59,7 +68,7 @@ export function useNodeLogout() {
     try {
       await getApiClient().post('/auth/logout');
     } catch {
-      // logout API 실패해도 로컬 상태는 반드시 클리어
+      // 서버 실패해도 로컬 상태는 반드시 클리어
     } finally {
       store.dispatch(logout());
       store.dispatch(clearRecentMenu());

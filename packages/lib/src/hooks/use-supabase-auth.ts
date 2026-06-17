@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { User as SupabaseUser, Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { useCallback, useState } from 'react';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { getSupabase } from '../network/supabase-client';
 import { getStore, setAccessToken, setUser, logout } from '../store/app-store';
 import { clearRecentMenu } from '../store/recent-menu-slice';
@@ -17,11 +17,11 @@ function mapSupabaseUser(supabaseUser: SupabaseUser, role: UserRole = 'user'): U
   };
 }
 
-const ROLE_CACHE_TTL = 5 * 60 * 1000; // 5분
-// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
+const ROLE_CACHE_TTL = 5 * 60 * 1000;
+// MF shared singleton 가정 — lib이 1회만 로드되므로 모듈 레벨 Map으로 충분
 const roleCache = new Map<string, { role: UserRole; ts: number }>();
 
-/** 특정 사용자(또는 전체) roleCache 무효화 — 로그아웃 또는 권한 변경 즉시 반영 시 호출 */
+/** 특정 사용자(또는 전체) roleCache 무효화 */
 export function clearRoleCache(userId?: string): void {
   if (userId) roleCache.delete(userId);
   else roleCache.clear();
@@ -32,12 +32,11 @@ async function fetchProfileRole(userId: string, signal?: AbortSignal): Promise<U
   const cached = roleCache.get(userId);
   if (cached) {
     if (Date.now() - cached.ts < ROLE_CACHE_TTL) return cached.role;
-    roleCache.delete(userId); // TTL 만료 엔트리 즉시 evict — 메모리 누적 방지
+    roleCache.delete(userId);
   }
   if (signal?.aborted) return 'user';
-  // 내부 AbortController: 외부 signal + 4초 타임아웃을 단일 abort 소스로 합침
-  // Promise.race 패턴은 JS promise만 reject하고 실제 fetch는 계속 실행됨(zombie 응답 캐시 오염 가능)
-  // abort()를 써야 supabase-js가 실제 네트워크 요청을 취소함
+
+  // Promise.race 대신 AbortController — supabase-js가 실제 네트워크 요청을 취소하도록
   const inner = new AbortController();
   if (signal) signal.addEventListener('abort', () => inner.abort(), { once: true });
   const timerId = setTimeout(() => inner.abort(), 4000);
@@ -47,11 +46,9 @@ async function fetchProfileRole(userId: string, signal?: AbortSignal): Promise<U
       .from('profiles').select('role').eq('id', userId)
       .abortSignal(inner.signal)
       .single();
-    clearTimeout(timerId); // 성공 시 타이머 취소 — 타이머 누수 방지
+    clearTimeout(timerId);
 
     if (error) {
-      // PGRST116 = 행 없음 (신규 가입 등) → 'user'로 fall-back (정상 케이스)
-      // 그 외 = 네트워크/서버 오류 → catch 블록에서 fail-close 처리
       if (error.code === 'PGRST116') {
         roleCache.set(userId, { role: 'user', ts: Date.now() });
         return 'user';
@@ -60,19 +57,16 @@ async function fetchProfileRole(userId: string, signal?: AbortSignal): Promise<U
     }
 
     const role = (data?.role as UserRole | undefined) ?? 'user';
-    roleCache.set(userId, { role, ts: Date.now() }); // 성공 시 캐시 저장
+    roleCache.set(userId, { role, ts: Date.now() });
     return role;
   } catch (err) {
     clearTimeout(timerId);
-    // 프로필 조회 실패 시 최소 권한으로 fail-close
-    // localStorage 캐시는 신뢰하지 않음 (권한 상승 취약점 방지)
     console.warn('[Auth] profiles 권한 조회 실패, user로 기본 설정:', err);
     return 'user';
   }
 }
 
-// 로그인·토큰갱신·세션복구에서 반복되는 store+storage 동기화를 단일 진입점으로
-// signal: 컴포넌트 언마운트 시 abort → 이미 언마운트된 컴포넌트에 zombie dispatch 방지
+// 로그인·토큰갱신·세션복구 공통 진입점. signal로 좀비 dispatch 방지
 export async function applySession(session: Session, signal?: AbortSignal): Promise<User> {
   const store = getStore();
   const role = await fetchProfileRole(session.user.id, signal);
@@ -84,51 +78,11 @@ export async function applySession(session: Session, signal?: AbortSignal): Prom
   return user;
 }
 
-export function useSupabaseLogin() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const supabase = getSupabase();
-
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      if (!data.session || !data.user) {
-        throw new Error('로그인 응답이 올바르지 않습니다.');
-      }
-
-      const user = await applySession(data.session);
-      return { session: data.session, user };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : '로그인에 실패했습니다.';
-      setError(message);
-      console.error('[Supabase Login] 로그인 실패:', message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  return { login, isLoading, error };
-}
-
 export function useSupabaseLogout() {
   const [isLoading, setIsLoading] = useState(false);
 
   const doLogout = useCallback(async () => {
     setIsLoading(true);
-
     const supabase = getSupabase();
     const store = getStore();
 
@@ -137,9 +91,7 @@ export function useSupabaseLogout() {
     } catch (err) {
       console.error('[Supabase Logout] 로그아웃 실패:', err);
     } finally {
-      // signOut 성공/실패 무관하게 Redux 상태도 반드시 로그아웃 처리
-      // storage.clearAuth() 는 authMiddleware 가 logout 액션을 감지하여 자동 호출
-      // roleCache.clear(): 로그아웃 직후 재로그인 시 stale role(admin→user 강등 등) 사용 방지
+      // storage.clearAuth()는 authMiddleware가 logout 액션 감지 시 자동 호출
       clearRoleCache();
       store.dispatch(logout());
       store.dispatch(clearRecentMenu());
@@ -148,169 +100,4 @@ export function useSupabaseLogout() {
   }, []);
 
   return { logout: doLogout, isLoading };
-}
-
-export function useSupabaseSession() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true; // 언마운트 후 비동기 콜백이 setState 호출하는 것 방지
-    const supabase = getSupabase();
-
-    // 현재 세션 가져오기
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      setSession(session);
-      setIsLoading(false);
-    });
-
-    // 세션 변경 구독
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, session: Session | null) => {
-        if (!mounted) return;
-        setSession(session);
-      }
-    );
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // user 필드 미노출 — mapSupabaseUser의 기본 role='user'로 admin이 user로 다운그레이드됨.
-  // 인증된 사용자 정보는 Redux store(useSelector(selectUser))에서 읽어야 함
-  // (applySession이 profiles 테이블에서 서버 role을 조회한 뒤 dispatch함)
-  return {
-    session,
-    isLoading,
-    isAuthenticated: !!session,
-  };
-}
-
-// Webpack MF의 shared: { singleton: true } 가 lib을 1회만 로드함 → 모듈 레벨 변수로 충분
-let _authSyncMounted = false;
-const isAuthSyncMounted = () => _authSyncMounted;
-const setAuthSyncMounted = (v: boolean) => { _authSyncMounted = v; };
-
-export function useSupabaseAuthSync() {
-  const ownedRef = useRef(false); // 이 인스턴스가 구독을 소유하는지 추적
-
-  useEffect(() => {
-    if (isAuthSyncMounted()) {
-      console.warn('[Auth] useSupabaseAuthSync가 중복 마운트됨. useSupabaseInitialize와 함께 사용하지 마세요.');
-      return; // cleanup 없음 — 소유권 없음. subscription이 undefined인 상태에서 unsubscribe() 호출 방지
-    }
-    setAuthSyncMounted(true);
-    ownedRef.current = true;
-
-    const supabase = getSupabase();
-    const store = getStore();
-    // AbortController: cleanup 시 abort → 진행 중인 applySession이 dispatch 전에 조기 종료
-    // zombie dispatch (언마운트 후 store 변경) 방지
-    const ctrl = new AbortController();
-
-    // onAuthStateChange 콜백을 직렬화 — Supabase는 async 콜백을 await하지 않으므로
-    // 연속 이벤트(TOKEN_REFRESHED 직후 SIGNED_IN 등)가 동시에 applySession을 실행하면
-    // fetchProfileRole 응답 순서에 따라 최종 Redux 상태가 결정됨 (비결정론적)
-    let authQueue: Promise<void> = Promise.resolve();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, session: Session | null) => {
-        // INITIAL_SESSION은 useSupabaseInitialize에서 이미 처리됨
-        if (event === 'INITIAL_SESSION') return;
-
-        authQueue = authQueue.then(async () => {
-          if (session) {
-            // 큐 실행 시점의 store 값과 비교 — 이벤트 도착 시점 비교는 pending task의 dispatch를 무시함
-            if (event === 'SIGNED_IN' && session.access_token === store.getState().app.accessToken) return;
-            await applySession(session, ctrl.signal);
-          } else {
-            // SIGNED_OUT, USER_DELETED, 세션 만료 등 — 모든 null 세션 케이스 처리
-            if (!ctrl.signal.aborted) store.dispatch(logout());
-          }
-        }).catch(err => {
-          if (err?.message !== 'applySession aborted') {
-            console.error('[Auth] applySession 실패:', err);
-          }
-        });
-      }
-    );
-
-    return () => {
-      if (!ownedRef.current) return; // 소유권 없으면 cleanup 스킵 (subscription이 없음)
-      setAuthSyncMounted(false);
-      ctrl.abort();
-      subscription.unsubscribe();
-    };
-  }, []);
-}
-
-export function useTokenAutoRefresh(refreshBeforeMinutes: number = 5) {
-  const isRefreshingRef = useRef(false);
-  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
-
-  useEffect(() => {
-    const supabase = getSupabase();
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-    const scheduleRefresh = async () => {
-      if (timeoutId) clearTimeout(timeoutId);
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.expires_at) return;
-
-        const timeout = session.expires_at * 1000 - refreshBeforeMinutes * 60 * 1000 - Date.now();
-
-        if (timeout <= 0) {
-          await performRefresh();
-          return;
-        }
-
-        timeoutId = setTimeout(() => { performRefresh(); }, timeout);
-      } catch (err) {
-        console.error('[Token Auto Refresh] 갱신 스케줄링 실패:', err);
-      }
-    };
-
-    const performRefresh = async () => {
-      if (isRefreshingRef.current) return;
-      isRefreshingRef.current = true;
-
-      try {
-        const { data, error } = await supabase.auth.refreshSession();
-        if (error) throw error;
-
-        if (data.session) {
-          await applySession(data.session);
-          setLastRefreshed(new Date());
-          scheduleRefresh();
-        }
-      } catch (err) {
-        console.error('[Token Auto Refresh] 토큰 갱신 실패:', err);
-      } finally {
-        isRefreshingRef.current = false;
-      }
-    };
-
-    scheduleRefresh();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          scheduleRefresh();
-        }
-      }
-    );
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      subscription.unsubscribe();
-    };
-  }, [refreshBeforeMinutes]);
-
-  // isRefreshing 은 ref 라 reactive 하지 않아 consumer 에게 잘못된 값 노출 → 제거
-  return { lastRefreshed };
 }

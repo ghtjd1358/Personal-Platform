@@ -58,7 +58,7 @@ export const getStore = () =>
 
 export const injectReducer = (key: string, reducer: Reducer) => {
     dynamicReducers[key] = reducer;
-    store.replaceReducer(createRootReducer());
+    getStore().replaceReducer(createRootReducer());
 };
 
 export const exposeStore = (s: typeof store) => {

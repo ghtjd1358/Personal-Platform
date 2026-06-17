@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { User, HostRootState } from '../types';
 import { Reducer, UnknownAction } from '@reduxjs/toolkit';
 import type { AppStore } from './app-store';
-import { STORAGE_KEYS } from '../utils/storage';
+import { storage } from '../utils/storage';
 
 export const getHostStore = (): AppStore | undefined => window.__REDUX_STORE__;
 
@@ -17,9 +17,7 @@ export const getHostState = (): HostRootState | null => {
 export const getCurrentUser = (): User | null => {
   try {
     const state = getHostState();
-    if (state) return state.app?.user || null;
-    const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-    return userStr ? JSON.parse(userStr) : null;
+    return state?.app?.user ?? storage.getUser();
   } catch {
     return null;
   }

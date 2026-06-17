@@ -15,8 +15,3 @@ export const selectIsAdmin = createSelector(
     [selectUser],
     (user) => user?.role === 'admin'
 );
-
-export const selectUserPermissions = createSelector(
-    [selectUser],
-    (user) => user?.permissions || []
-);

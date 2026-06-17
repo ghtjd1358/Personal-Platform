@@ -45,7 +45,7 @@ export const store = createLocalStore();
 export const getStore = () => (typeof window !== 'undefined' && window.__REDUX_STORE__) || store;
 export const injectReducer = (key, reducer) => {
     dynamicReducers[key] = reducer;
-    store.replaceReducer(createRootReducer());
+    getStore().replaceReducer(createRootReducer());
 };
 export const exposeStore = (s) => {
     if (typeof window === 'undefined')

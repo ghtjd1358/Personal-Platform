@@ -73,29 +73,4 @@ export declare const selectIsAdmin: ((state: {
     memoize: typeof import("reselect").weakMapMemoize;
     argsMemoize: typeof import("reselect").weakMapMemoize;
 };
-export declare const selectUserPermissions: ((state: {
-    app: import("..").AppState;
-}) => import("..").Permission[]) & {
-    clearCache: () => void;
-    resultsCount: () => number;
-    resetResultsCount: () => void;
-} & {
-    resultFunc: (resultFuncArgs_0: import("..").User | null) => import("..").Permission[];
-    memoizedResultFunc: ((resultFuncArgs_0: import("..").User | null) => import("..").Permission[]) & {
-        clearCache: () => void;
-        resultsCount: () => number;
-        resetResultsCount: () => void;
-    };
-    lastResult: () => import("..").Permission[];
-    dependencies: [(state: {
-        app: import("..").AppState;
-    }) => import("..").User | null];
-    recomputations: () => number;
-    resetRecomputations: () => void;
-    dependencyRecomputations: () => number;
-    resetDependencyRecomputations: () => void;
-} & {
-    memoize: typeof import("reselect").weakMapMemoize;
-    argsMemoize: typeof import("reselect").weakMapMemoize;
-};
 //# sourceMappingURL=app-selectors.d.ts.map

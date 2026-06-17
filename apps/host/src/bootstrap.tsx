@@ -27,7 +27,11 @@ try {
 exposeStore(store);
 
 initApiClient({
-    onUnauthorized: () => window.location.replace(RoutePath.Login),
+    onUnauthorized: () => {
+        if (window.location.pathname !== RoutePath.Login) {
+            window.location.replace(RoutePath.Login);
+        }
+    },
 });
 
 async function start() {

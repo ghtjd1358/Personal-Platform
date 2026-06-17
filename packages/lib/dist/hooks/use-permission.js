@@ -9,8 +9,8 @@ export function usePermission() {
     const canAny = useCallback((codes, action = 'read') => hasAnyPermission(user, codes, action), [user]);
     const canAll = useCallback((codes, action = 'read') => hasAllPermissions(user, codes, action), [user]);
     const isRole = useCallback((roles) => hasRole(user, roles), [user]);
-    // Owner는 env로 지정된 단일 계정, Admin은 role='admin' + Owner 포함
-    const isOwner = useMemo(() => !!user?.email && user.email === OWNER_EMAIL, [user]);
+    // OWNER_EMAIL 미설정(빈 문자열) 시 isOwner는 항상 false — 빈 email과의 우발적 매치 방지
+    const isOwner = useMemo(() => !!OWNER_EMAIL && !!user?.email && user.email === OWNER_EMAIL, [user]);
     const isAdmin = useMemo(() => isOwner || user?.role === 'admin', [user, isOwner]);
     const canEditResource = useCallback((resourceUserId) => {
         if (!user)
