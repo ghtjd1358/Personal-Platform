@@ -20,6 +20,7 @@ import {
     LoginPage,
     setAccessToken,
     setUser,
+    getSupabase,
 } from '@sonhoseong/mfa-lib';
 import { useDispatch } from 'react-redux';
 import { RoutePath } from './pages/routes/paths';
@@ -118,20 +119,32 @@ const App = () => {
     }, []);
 
     const handleTestLogin = useCallback(async () => {
-        const loginRes = await axios.post<{ data: { accessToken: string } }>(
-            `${API_URL}/api/auth/login`,
-            { email: 'admin@test.com', password: '1234' },
-            { withCredentials: true }
-        );
-        const { accessToken } = loginRes.data.data;
-        dispatch(setAccessToken(accessToken));
-
-        const meRes = await axios.get<{ data: { user: { id: string; email: string; name: string; role?: 'admin' | 'user'; avatar_url?: string } } }>(
-            `${API_URL}/api/auth/me`,
-            { headers: { Authorization: `Bearer ${accessToken}` }, withCredentials: true }
-        );
-        const u = meRes.data.data.user;
-        dispatch(setUser({ id: u.id, email: u.email, name: u.name, role: u.role ?? 'user', avatar: u.avatar_url }));
+        try {
+            // Node.js API 우선 (배포 완료 후)
+            const loginRes = await axios.post<{ data: { accessToken: string } }>(
+                `${API_URL}/api/auth/login`,
+                { email: 'admin@test.com', password: '1234' },
+                { withCredentials: true, timeout: 4000 }
+            );
+            const { accessToken } = loginRes.data.data;
+            dispatch(setAccessToken(accessToken));
+            const meRes = await axios.get<{ data: { user: { id: string; email: string; name: string; role?: 'admin' | 'user'; avatar_url?: string } } }>(
+                `${API_URL}/api/auth/me`,
+                { headers: { Authorization: `Bearer ${accessToken}` }, withCredentials: true }
+            );
+            const u = meRes.data.data.user;
+            dispatch(setUser({ id: u.id, email: u.email, name: u.name, role: u.role ?? 'user', avatar: u.avatar_url }));
+        } catch {
+            // Fallback: Supabase auth (API 미배포 환경)
+            const supabase = getSupabase();
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: 'admin@test.com',
+                password: '1234',
+            });
+            if (error || !data.session) throw new Error('테스트 로그인 실패. API 서버 또는 Supabase 계정을 확인하세요.');
+            dispatch(setAccessToken(data.session.access_token));
+            dispatch(setUser({ id: data.user.id, email: 'admin@test.com', name: '데모 계정', role: 'admin' }));
+        }
         navigate(RoutePath.Dashboard, { replace: true });
     }, [dispatch, navigate]);
 
