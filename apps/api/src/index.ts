@@ -35,6 +35,9 @@ app.use(passport.initialize() as any)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false }) as any)
+// refresh는 페이지 로드마다 자동 호출 — 로그인/OAuth 엔드포인트보다 느슨하게
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.use('/api/auth/refresh', rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false }) as any)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false }) as any)
 
