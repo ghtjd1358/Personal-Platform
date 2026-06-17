@@ -97,12 +97,16 @@ export const portfolioService = {
       .select('id')
       .eq('portfolio_id', portfolioId)
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
     if (existing) {
       await supabase.from('portfolio_likes').delete().eq('id', existing.id)
       return { isLiked: false }
     }
-    await supabase.from('portfolio_likes').insert({ portfolio_id: portfolioId, user_id: userId })
+    // onConflict: (portfolio_id, user_id) unique constraint — 동시 요청 경합 시 duplicate 방지
+    const { error } = await supabase
+      .from('portfolio_likes')
+      .upsert({ portfolio_id: portfolioId, user_id: userId }, { onConflict: 'portfolio_id,user_id', ignoreDuplicates: true })
+    if (error) throw error
     return { isLiked: true }
   },
 }

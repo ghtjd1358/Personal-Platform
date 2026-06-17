@@ -1,6 +1,8 @@
-import express from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import passport from 'passport'
 import { env } from './config/env'
 import { configurePassport } from './config/passport'
@@ -12,21 +14,27 @@ import blogRouter from './modules/blog/blog.router'
 
 const app = express()
 
+app.use(helmet())
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use(cors({
   origin: (origin, callback) => {
-    // origin이 없으면 서버간 요청 (Postman, curl 등) — 허용
     if (!origin || env.clientUrls.includes(origin)) return callback(null, true)
     callback(new Error(`CORS: ${origin} 허용되지 않음`))
   },
   credentials: true,
 }) as any)
-app.use(express.json())
+app.use(express.json({ limit: '1mb' }))
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use(cookieParser() as any)
+
 configurePassport()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use(passport.initialize() as any)
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false }) as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false }) as any)
 
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
@@ -35,6 +43,12 @@ app.use('/api/upload', uploadRouter)
 app.use('/api/blog', blogRouter)
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('[Unhandled Error]', err)
+  res.status(500).json({ code: 'INTERNAL_SERVER_ERROR' })
+})
 
 if (process.env.VERCEL) {
   module.exports = app

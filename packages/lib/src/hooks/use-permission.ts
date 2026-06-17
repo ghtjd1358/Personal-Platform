@@ -69,7 +69,7 @@ export function usePermission() {
     [user]
   );
 
-  return {
+  return useMemo(() => ({
     user,
     can,
     canAny,
@@ -81,7 +81,7 @@ export function usePermission() {
     checkMenu,
     filterMenus,
     canAccess,
-  };
+  }), [user, can, canAny, canAll, isRole, isOwner, isAdmin, canEditResource, checkMenu, filterMenus, canAccess]);
 }
 
 
