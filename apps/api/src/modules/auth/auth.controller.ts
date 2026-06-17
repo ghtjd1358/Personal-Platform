@@ -47,7 +47,7 @@ export const authController = {
   me: async (req: Request, res: Response) => {
     const { data, error } = await userService.getUserWithRole(req.user!.userId)
     if (error || !data) { notFound(res, 'USER_NOT_FOUND'); return }
-    ok(res, { user: data })
+    ok(res, data)
   },
 
   // 포트폴리오 체험용 데모 로그인 — DEMO_ACCOUNT_EMAIL/PASSWORD 환경변수로 제어
