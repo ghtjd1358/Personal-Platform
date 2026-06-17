@@ -79,10 +79,10 @@ module.exports = {
           eager: true,
           requiredVersion: deps['react-dom']
         },
-        'react-router-dom': { singleton: true, eager: true },
-        '@reduxjs/toolkit': { singleton: true, eager: true },
-        'react-redux': { singleton: true, eager: true },
-        'react-promise-tracker': { singleton: true, eager: true },
+        'react-router-dom': { singleton: true, eager: true, requiredVersion: deps['react-router-dom'] },
+        '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: deps['@reduxjs/toolkit'] },
+        'react-redux': { singleton: true, eager: true, requiredVersion: deps['react-redux'] },
+        'react-promise-tracker': { singleton: true, eager: true, requiredVersion: deps['react-promise-tracker'] },
         '@sonhoseong/mfa-lib': { singleton: true, eager: true }
       }
     }),

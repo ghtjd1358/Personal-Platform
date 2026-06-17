@@ -2,6 +2,16 @@ import { supabase } from '../../lib/supabase'
 
 const SELECT_PORTFOLIO = '*, portfolio_tags(*), portfolio_tech_stack(*), portfolio_details(*)'
 
+interface PortfolioWriteBody {
+  title?: string
+  description?: string
+  thumbnail_url?: string
+  status?: string
+  is_featured?: boolean
+  show_on_resume?: boolean
+  order_index?: number
+}
+
 export const portfolioService = {
   getPortfolios: (query: Record<string, string>) => {
     let q = supabase.from('portfolios').select(SELECT_PORTFOLIO).order('order_index')
@@ -19,13 +29,35 @@ export const portfolioService = {
     void supabase.from('portfolios').update({ view_count: current + 1 }).eq('id', id)
   },
 
-  createPortfolio: (body: Record<string, unknown>, userId: string) =>
-    supabase.from('portfolios').insert({ ...body, user_id: userId }).select().single(),
-
-  updatePortfolio: (id: string, userId: string, body: Record<string, unknown>) =>
+  createPortfolio: (body: PortfolioWriteBody, userId: string) =>
     supabase
       .from('portfolios')
-      .update({ ...body, updated_at: new Date().toISOString() })
+      .insert({
+        title: body.title,
+        description: body.description,
+        thumbnail_url: body.thumbnail_url,
+        status: body.status,
+        is_featured: body.is_featured,
+        show_on_resume: body.show_on_resume,
+        order_index: body.order_index,
+        user_id: userId,
+      })
+      .select()
+      .single(),
+
+  updatePortfolio: (id: string, userId: string, body: PortfolioWriteBody) =>
+    supabase
+      .from('portfolios')
+      .update({
+        title: body.title,
+        description: body.description,
+        thumbnail_url: body.thumbnail_url,
+        status: body.status,
+        is_featured: body.is_featured,
+        show_on_resume: body.show_on_resume,
+        order_index: body.order_index,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', id)
       .eq('user_id', userId)
       .select()

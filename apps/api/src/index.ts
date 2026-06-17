@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import passport from 'passport'
 import { env } from './config/env'
+import { configurePassport } from './config/passport'
 import authRouter from './modules/auth/auth.router'
 import userRouter from './modules/user/user.router'
 import portfolioRouter from './modules/portfolio/portfolio.router'
@@ -23,6 +24,7 @@ app.use(cors({
 app.use(express.json())
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use(cookieParser() as any)
+configurePassport()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use(passport.initialize() as any)
 

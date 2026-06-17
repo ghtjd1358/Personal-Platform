@@ -1,8 +1,9 @@
-import { Suspense, useMemo, useCallback } from 'react';
+import { Suspense, lazy, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { trackPromise } from 'react-promise-tracker';
 import {
-    selectIsAuthenticated,
     selectUser,
     useNodeInitialize,
     useNodeLogout,
@@ -12,17 +13,91 @@ import {
     Lnb,
     Logo,
     DeferredComponent,
+    RemoteErrorBoundary,
+    REMOTE_LINK_PREFIX,
+    LnbMenuItem,
+    LoginPage,
+    getSupabase,
 } from '@sonhoseong/mfa-lib';
-import { RoutesGuestPages, RoutesAuthPages } from './pages/routes';
+import { RoutePath } from './pages/routes/paths';
+import { RequireAuth } from './pages/routes/RequireAuth';
+import MyPageGuard from './pages/routes/MyPageGuard';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import { buildLnbItems } from './lnb-items';
 import HostShell from './components/HostShell';
-import { PageSkeleton } from './components/skeleton';
+import { PageSkeleton, DashboardSkeleton } from './components/skeleton';
 import './App.css';
 import './sidebar-editorial.css';
 import './theme-editorial.css';
 
+const LOADING_AREA = 'GLOBAL';
+const OAUTH_REDIRECT = `${process.env.REACT_APP_API_URL ?? 'http://localhost:4000'}/api/auth/google/callback`;
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ResumeApp = lazy(() =>
+    trackPromise(import('@resume/App').catch(() => ({ default: () => null })), LOADING_AREA)
+);
+const BlogApp = lazy(() =>
+    trackPromise(import('@blog/App').catch(() => ({ default: () => null })), LOADING_AREA)
+);
+const PortfolioApp = lazy(() =>
+    trackPromise(import('@portfolio/App').catch(() => ({ default: () => null })), LOADING_AREA)
+);
+const JobTrackerApp = lazy(() =>
+    trackPromise(import('@jobtracker/App').catch(() => ({ default: () => null })), LOADING_AREA)
+);
+
+const resumePathPrefix = REMOTE_LINK_PREFIX.resume;
+const blogPathPrefix = REMOTE_LINK_PREFIX.blog;
+const portfolioPathPrefix = REMOTE_LINK_PREFIX.portfolio;
+const jobtrackerPathPrefix = REMOTE_LINK_PREFIX.jobtracker;
+
+const remoteRoutes: { path: string; name: string; App: React.ComponentType }[] = [
+    { path: `${resumePathPrefix}/*`,     name: '이력서',    App: ResumeApp },
+    { path: `${blogPathPrefix}/*`,       name: '블로그',    App: BlogApp },
+    { path: `${portfolioPathPrefix}/*`,  name: '포트폴리오', App: PortfolioApp },
+    { path: `${jobtrackerPathPrefix}/*`, name: '취업관리',  App: JobTrackerApp },
+];
+
+const remoteFallback = (name: string) => (
+    <DeferredComponent>
+        <PageSkeleton label={`${name}을 불러오는 중입니다`} />
+    </DeferredComponent>
+);
+
+function AuthLayout({ lnbItems, onLogout }: { lnbItems: LnbMenuItem[]; onLogout: () => Promise<void> }) {
+    return (
+        <Container>
+            <ErrorBoundary>
+                <Lnb
+                    lnbItems={lnbItems}
+                    onLogout={onLogout}
+                    logo={
+                        <Logo
+                            customSize={36}
+                            sideColor="#2B1E14"
+                            centerColor="#8C1E1A"
+                            eyeColor="#FBF5E3"
+                        />
+                    }
+                />
+                <main className="main-content">
+                    <Suspense
+                        fallback={
+                            <DeferredComponent>
+                                <PageSkeleton label="페이지를 불러오는 중입니다" />
+                            </DeferredComponent>
+                        }
+                    >
+                        <Outlet />
+                    </Suspense>
+                </main>
+            </ErrorBoundary>
+        </Container>
+    );
+}
+
 const App = () => {
-    const isAuthenticated = useSelector(selectIsAuthenticated);
     const user = useSelector(selectUser);
     const { initialized } = useNodeInitialize();
     const { filterMenus, isOwner } = usePermission();
@@ -31,8 +106,20 @@ const App = () => {
 
     const handleLogout = useCallback(async () => {
         await nodeLogout();
-        navigate('/');
+        navigate(RoutePath.Login);
     }, [nodeLogout, navigate]);
+
+    const handleGoogleLogin = useCallback(async () => {
+        const supabase = getSupabase();
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: OAUTH_REDIRECT },
+        });
+        if (error) {
+            console.error('[Auth] Google 로그인 실패:', error);
+            throw error;
+        }
+    }, []);
 
     const lnbItems = useMemo(
         () => filterMenus(buildLnbItems(user, isOwner)),
@@ -44,37 +131,52 @@ const App = () => {
 
     return (
         <HostShell>
-            {isAuthenticated ? (
-                <Container>
-                    <ErrorBoundary>
-                        <Lnb
-                            lnbItems={lnbItems}
-                            onLogout={handleLogout}
-                            logo={
-                                <Logo
-                                    customSize={36}
-                                    sideColor="#2B1E14"
-                                    centerColor="#8C1E1A"
-                                    eyeColor="#FBF5E3"
-                                />
+            <Routes>
+                {/* Guest routes */}
+                <Route
+                    path={RoutePath.Login}
+                    element={
+                        <LoginPage
+                            appName="Portfolio"
+                            redirectPath={RoutePath.Dashboard}
+                            onGoogleLogin={handleGoogleLogin}
+                        />
+                    }
+                />
+                <Route path={RoutePath.AuthCallback} element={<AuthCallbackPage />} />
+
+                {/* Protected routes — RequireAuth redirects to /login with state.from if unauthenticated */}
+                <Route element={<RequireAuth />}>
+                    <Route element={<AuthLayout lnbItems={lnbItems} onLogout={handleLogout} />}>
+                        <Route path="/" element={<Navigate to={RoutePath.Dashboard} replace />} />
+                        <Route
+                            path={RoutePath.Dashboard}
+                            element={
+                                <Suspense fallback={<DeferredComponent><DashboardSkeleton /></DeferredComponent>}>
+                                    <Dashboard />
+                                </Suspense>
                             }
                         />
-                        <main className="main-content">
-                            <Suspense
-                                fallback={
-                                    <DeferredComponent>
-                                        <PageSkeleton label="페이지를 불러오는 중입니다" />
-                                    </DeferredComponent>
+                        {remoteRoutes.map(({ path, name, App }) => (
+                            <Route
+                                key={path}
+                                path={path}
+                                element={
+                                    <RemoteErrorBoundary remoteName={name}>
+                                        <Suspense fallback={remoteFallback(name)}>
+                                            <App />
+                                        </Suspense>
+                                    </RemoteErrorBoundary>
                                 }
-                            >
-                                <RoutesAuthPages />
-                            </Suspense>
-                        </main>
-                    </ErrorBoundary>
-                </Container>
-            ) : (
-                <RoutesGuestPages />
-            )}
+                            />
+                        ))}
+                        <Route path="/container/user/:userId" element={<MyPageGuard />} />
+                        <Route path={RoutePath.Login} element={<Navigate to={RoutePath.Dashboard} replace />} />
+                    </Route>
+                </Route>
+
+                <Route path="*" element={<Navigate to={RoutePath.Login} replace />} />
+            </Routes>
         </HostShell>
     );
 };
