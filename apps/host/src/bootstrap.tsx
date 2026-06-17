@@ -14,6 +14,15 @@ import { RoutePath } from './pages/routes/paths';
 
 setupFontLoading();
 
+// webpack MF 런타임에서 터지는 uncaught rejection을 전역에서 억제
+// (ErrorBoundary/Promise.catch 레이어보다 낮은 모듈 초기화 단계 에러)
+window.addEventListener('unhandledrejection', (event) => {
+    const msg = event.reason?.message ?? String(event.reason ?? '');
+    if (msg.includes('Cannot read properties') || msg.includes('Shared module is not available')) {
+        event.preventDefault();
+    }
+});
+
 try {
     initSupabase({
         supabaseUrl: process.env.REACT_APP_SUPABASE_URL || '',
