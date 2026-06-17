@@ -9,7 +9,7 @@ const getAccessToken = () => getStore().getState().app.accessToken;
 const supabaseRequestHandler = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     const accessToken = getAccessToken();
     config.headers['apikey'] = SUPABASE_ANON_KEY;
-    config.headers['Authorization'] = `Bearer ${accessToken || SUPABASE_ANON_KEY}`;
+    config.headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
     config.headers['Content-Type'] = 'application/json';
     config.headers['Prefer'] = 'return=representation';
     return config;
