@@ -1,23 +1,20 @@
 import { supabase } from '../../lib/supabase'
 
 export const userService = {
-  getMe: (userId: string) =>
-    supabase
-      .from('users')
-      .select('id, email, name, avatar_url, created_at')
-      .eq('id', userId)
-      .single(),
-
   getUserWithRole: async (userId: string) => {
-    const [userResult, profileResult] = await Promise.all([
-      supabase.from('users').select('id, email, name, avatar_url').eq('id', userId).single(),
-      supabase.from('profiles').select('role').eq('id', userId).maybeSingle(),
-    ])
-    if (userResult.error) return { data: null, error: userResult.error }
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, email, name, avatar_url, role')
+      .eq('id', userId)
+      .single()
+    if (error) return { data: null, error }
     return {
       data: {
-        ...userResult.data,
-        role: (profileResult.data?.role ?? 'user') as 'admin' | 'user',
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        avatar_url: data.avatar_url,
+        role: (data.role === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
       },
       error: null,
     }
