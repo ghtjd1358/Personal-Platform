@@ -260,25 +260,6 @@ export function LoginPage({
                     </>
                 )}
 
-                {/* Test Login */}
-                {onTestLogin && (
-                    <button
-                        type="button"
-                        className="login-button login-button--test"
-                        onClick={handleTestLoginClick}
-                        disabled={isTestLoading || isSubmitting}
-                    >
-                        {isTestLoading ? (
-                            <>
-                                <span className="login-spinner" aria-hidden="true" />
-                                로그인 중...
-                            </>
-                        ) : (
-                            '테스트 계정으로 로그인'
-                        )}
-                    </button>
-                )}
-
                 {/* Form */}
                 <form className="login-form" onSubmit={handleSubmit} noValidate>
                     <div className={`login-input-group ${focusedField === 'email' ? 'focused' : ''}`}>
@@ -347,6 +328,30 @@ export function LoginPage({
                         )}
                     </button>
                 </form>
+
+                {/* Test Login — form 아래 보조 버튼 */}
+                {onTestLogin && (
+                    <>
+                        <div className="login-divider" aria-hidden="true">
+                            <span>또는</span>
+                        </div>
+                        <button
+                            type="button"
+                            className="login-button login-button--test"
+                            onClick={handleTestLoginClick}
+                            disabled={isTestLoading || isSubmitting}
+                        >
+                            {isTestLoading ? (
+                                <>
+                                    <span className="login-spinner login-spinner--dark" aria-hidden="true" />
+                                    로그인 중...
+                                </>
+                            ) : (
+                                '테스트 계정으로 로그인'
+                            )}
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );
