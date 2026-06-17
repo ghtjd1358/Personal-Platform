@@ -327,14 +327,8 @@ export function LoginPage({
                             </>
                         )}
                     </button>
-                </form>
 
-                {/* Test Login — form 아래 보조 버튼 */}
-                {onTestLogin && (
-                    <>
-                        <div className="login-divider" aria-hidden="true">
-                            <span>또는</span>
-                        </div>
+                    {onTestLogin && (
                         <button
                             type="button"
                             className="login-button"
@@ -350,8 +344,8 @@ export function LoginPage({
                                 '테스트 계정 로그인'
                             )}
                         </button>
-                    </>
-                )}
+                    )}
+                </form>
             </div>
         </div>
     );
