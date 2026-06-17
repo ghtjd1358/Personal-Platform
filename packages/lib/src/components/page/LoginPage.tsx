@@ -337,17 +337,17 @@ export function LoginPage({
                         </div>
                         <button
                             type="button"
-                            className="login-button login-button--test"
+                            className="login-button"
                             onClick={handleTestLoginClick}
                             disabled={isTestLoading || isSubmitting}
                         >
                             {isTestLoading ? (
                                 <>
-                                    <span className="login-spinner login-spinner--dark" aria-hidden="true" />
+                                    <span className="login-spinner" aria-hidden="true" />
                                     로그인 중...
                                 </>
                             ) : (
-                                '테스트 계정으로 로그인'
+                                '테스트 계정 로그인'
                             )}
                         </button>
                     </>
