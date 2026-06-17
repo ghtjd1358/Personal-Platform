@@ -15,10 +15,10 @@ import { RoutePath } from './pages/routes/paths';
 setupFontLoading();
 
 // webpack MF 런타임에서 터지는 uncaught rejection을 전역에서 억제
-// (ErrorBoundary/Promise.catch 레이어보다 낮은 모듈 초기화 단계 에러)
+// "Shared module is not available" 에러만 타깃 — React 내부 에러는 절대 삼키지 않음
 window.addEventListener('unhandledrejection', (event) => {
     const msg = event.reason?.message ?? String(event.reason ?? '');
-    if (msg.includes('Cannot read properties') || msg.includes('Shared module is not available')) {
+    if (msg.includes('Shared module is not available')) {
         event.preventDefault();
     }
 });

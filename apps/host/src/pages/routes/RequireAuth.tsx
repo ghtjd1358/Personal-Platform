@@ -10,8 +10,8 @@ export function RequireAuth() {
     const sessionRestoring = useSelector(selectSessionRestoring);
     const location = useLocation();
 
-    // 세션 복구 중에는 redirect 금지 — 복구 완료 후 인증 상태 확정
-    if (sessionRestoring) return null;
+    // 복구 중이고 아직 미인증이면 대기 — 이미 인증된 경우(OAuth 직후)엔 즉시 통과
+    if (sessionRestoring && !isAuthenticated) return null;
 
     if (!isAuthenticated) {
         // OAuth flow는 외부 리다이렉트가 React Router state를 초기화하므로 sessionStorage에 보존
