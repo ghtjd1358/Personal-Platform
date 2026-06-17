@@ -4,6 +4,8 @@ import { env } from './env'
 import { authService } from '../modules/auth/auth.service'
 
 export function configurePassport() {
+  if (!env.googleClientId || !env.googleClientSecret) return
+
   passport.use(
     new GoogleStrategy(
       {
