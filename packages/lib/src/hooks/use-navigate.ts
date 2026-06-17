@@ -1,8 +1,3 @@
-/**
- * MFA Navigate Hook
- * 서비스 인식 네비게이션
- */
-
 import { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, NavigateOptions } from 'react-router-dom';
 import { storage } from '../utils/storage';
@@ -13,30 +8,25 @@ import {
   prefixToServiceType,
   getServiceFromPath
 } from '../types/service';
-import { getHostStore } from '../store/store-access';
 
 export interface MfaNavigateOptions extends NavigateOptions {
   service?: ServiceType;
 }
 
-/**
- * MFA Navigate Hook
- * 서비스 prefix를 자동으로 처리하는 네비게이션
- */
 export function useMfaNavigate() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 현재 서비스 타입
-  const currentService = useMemo(() => {
-    return getServiceFromPath(location.pathname);
-  }, [location.pathname]);
+  const currentService = useMemo(
+    () => getServiceFromPath(location.pathname),
+    [location.pathname]
+  );
 
   return useCallback((
     to: string | { pathname?: string; search?: string; hash?: string },
     options?: MfaNavigateOptions
   ) => {
-    const isHostApp = storage.isHostApp();
+    storage.isHostApp(); // 호출 시점에 host 여부 확인
 
     let pathname: string;
     let search: string | undefined;
@@ -50,38 +40,26 @@ export function useMfaNavigate() {
       hash = to.hash;
     }
 
-    // 서비스 prefix 결정
     let targetService = options?.service || currentService;
 
-    // 이미 prefix가 있으면 그대로 사용
-    if (pathname.startsWith('/@') || pathname.startsWith('/')) {
-      // prefix가 이미 있는 경우
-      if (pathname.startsWith('/@')) {
-        const prefix = pathname.split('/')[1] as ServicePrefixType;
-        if (prefixToServiceType[prefix]) {
-          targetService = prefixToServiceType[prefix];
-        }
-      }
-    } else {
-      // prefix가 없으면 현재 서비스의 prefix 추가
+    if (pathname.startsWith('/@')) {
+      // 이미 서비스 prefix 포함 — prefix로 targetService 갱신
+      const prefix = pathname.split('/')[1] as ServicePrefixType;
+      if (prefixToServiceType[prefix]) targetService = prefixToServiceType[prefix];
+    } else if (!pathname.startsWith('/')) {
+      // 상대 경로 — 현재 서비스 prefix 자동 추가
       if (targetService) {
         const prefix = serviceTypeToPrefix[targetService];
-        pathname = `/${prefix}${pathname.startsWith('/') ? '' : '/'}${pathname}`;
+        pathname = `/${prefix}/${pathname}`;
       }
     }
+    // 절대 경로('/'로 시작)는 그대로 사용
 
-    // 네비게이션 실행
-    navigate(
-      { pathname, search, hash },
-      { ...options, service: undefined } as NavigateOptions
-    );
-
+    const { service: _, ...navOptions } = options ?? {};
+    navigate({ pathname, search, hash }, navOptions as NavigateOptions);
   }, [navigate, currentService]);
 }
 
-/**
- * 현재 위치 정보 Hook
- */
 export function useCurrentLocation() {
   const location = useLocation();
 
@@ -95,9 +73,6 @@ export function useCurrentLocation() {
   }), [location]);
 }
 
-/**
- * 경로 빌더
- */
 export function buildPath(
   pathname: string,
   service?: ServiceType,
@@ -105,7 +80,6 @@ export function buildPath(
 ): string {
   let path = pathname;
 
-  // 서비스 prefix 추가
   if (service) {
     const prefix = serviceTypeToPrefix[service];
     if (!pathname.startsWith(`/${prefix}`)) {
@@ -113,10 +87,8 @@ export function buildPath(
     }
   }
 
-  // 쿼리 파라미터 추가
   if (params && Object.keys(params).length > 0) {
-    const searchParams = new URLSearchParams(params);
-    path += `?${searchParams.toString()}`;
+    path += `?${new URLSearchParams(params).toString()}`;
   }
 
   return path;

@@ -7,11 +7,13 @@ import {
   clearRefreshCookie,
   verifyRefreshToken,
 } from '../../lib/token'
+import { userService } from '../user/user.service'
+import { ok } from '../../common/response'
 
 export const authController = {
   googleCallback: (req: Request, res: Response) => {
-    const user = req.user as unknown as { id: string; email: string }
-    const payload = { userId: user.id, email: user.email }
+    // req.user = JwtPayload { userId, email } — passport done()에서 설정
+    const payload = { userId: req.user!.userId, email: req.user!.email }
 
     const accessToken = signAccessToken(payload)
     const refreshToken = signRefreshToken(payload)
@@ -26,7 +28,7 @@ export const authController = {
       maxAge: 60 * 1000,
       path: '/',
     })
-    res.redirect(`${env.clientUrl}/auth/callback`)
+    res.redirect(`${env.clientUrls[0]}/auth/callback`)
   },
 
   refresh: (req: Request, res: Response) => {
@@ -46,5 +48,11 @@ export const authController = {
   logout: (_req: Request, res: Response) => {
     clearRefreshCookie(res)
     res.json({ data: { message: '로그아웃 완료' } })
+  },
+
+  me: async (req: Request, res: Response) => {
+    const { data, error } = await userService.getUserWithRole(req.user!.userId)
+    if (error || !data) { res.status(404).json({ code: 'USER_NOT_FOUND' }); return }
+    ok(res, { user: data })
   },
 }

@@ -12,7 +12,14 @@ import blogRouter from './modules/blog/blog.router'
 const app = express()
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-app.use(cors({ origin: env.clientUrl, credentials: true }) as any)
+app.use(cors({
+  origin: (origin, callback) => {
+    // origin이 없으면 서버간 요청 (Postman, curl 등) — 허용
+    if (!origin || env.clientUrls.includes(origin)) return callback(null, true)
+    callback(new Error(`CORS: ${origin} 허용되지 않음`))
+  },
+  credentials: true,
+}) as any)
 app.use(express.json())
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use(cookieParser() as any)
@@ -27,7 +34,6 @@ app.use('/api/blog', blogRouter)
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 
-// Vercel: export app / 로컬: listen
 if (process.env.VERCEL) {
   module.exports = app
 } else {

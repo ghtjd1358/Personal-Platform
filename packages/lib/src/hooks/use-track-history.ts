@@ -1,12 +1,8 @@
-/**
- * Track History Hook
- * 라우팅 변경 감지 및 자동 탭(Recent Menu) 관리
- */
-
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { dispatchToHost, getHostStore } from '../store/store-access';
+import { setService } from '../store/app-slice';
 import {
   setRecentMenuList,
   addRecentMenu,
@@ -32,12 +28,11 @@ export interface TrackHistoryOptions {
   onPageView?: (pathname: string) => void;  // 페이지 조회 콜백
 }
 
-/**
- * 경로에서 타이틀 찾기
- */
 function findTitleByPath(pathname: string, lnbItems: LnbItem[]): string {
   for (const item of lnbItems) {
-    if (pathname.includes(item.link) || item.link.includes(pathname)) {
+    // 정확한 세그먼트 경계 prefix 매칭 — '/blog'.includes('/') 같은 false positive 방지
+    const normalizedLink = item.link.endsWith('/') ? item.link : item.link + '/';
+    if (pathname === item.link || pathname.startsWith(normalizedLink)) {
       return item.title;
     }
     if (item.children) {
@@ -48,9 +43,6 @@ function findTitleByPath(pathname: string, lnbItems: LnbItem[]): string {
   return '';
 }
 
-/**
- * Track History Hook
- */
 export function useTrackHistory(options: TrackHistoryOptions) {
   const location = useLocation();
   const { lnbItems, excludePaths = [], onPageView } = options;
@@ -89,7 +81,7 @@ export function useTrackHistory(options: TrackHistoryOptions) {
     }
 
     if (service) {
-      dispatchToHost({ type: 'app/setService', payload: service });
+      dispatchToHost(setService(service));
     }
   }, [lnbItems]);
 

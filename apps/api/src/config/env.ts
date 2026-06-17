@@ -20,8 +20,8 @@ export const env = {
   supabaseUrl: process.env.SUPABASE_URL!,
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
 
-  // Client
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
+  // Client — 쉼표 구분 다중 origin 지원 (로컬 + Vercel preview 등)
+  clientUrls: (process.env.CLIENT_URL || 'http://localhost:5000').split(',').map(u => u.trim()),
 
   // Cookie
   cookieSecure: process.env.NODE_ENV === 'production',

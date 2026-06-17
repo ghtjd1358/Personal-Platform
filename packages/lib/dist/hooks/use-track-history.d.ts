@@ -1,7 +1,3 @@
-/**
- * Track History Hook
- * 라우팅 변경 감지 및 자동 탭(Recent Menu) 관리
- */
 import { RecentMenu } from '../types';
 export interface LnbItem {
     title: string;
@@ -14,9 +10,6 @@ export interface TrackHistoryOptions {
     excludePaths?: string[];
     onPageView?: (pathname: string) => void;
 }
-/**
- * Track History Hook
- */
 export declare function useTrackHistory(options: TrackHistoryOptions): {
     loaded: boolean;
 };

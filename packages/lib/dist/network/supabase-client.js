@@ -1,45 +1,25 @@
-/**
- * Supabase Client
- * Supabase Auth를 위한 공식 SDK 클라이언트
- */
 import { createClient } from '@supabase/supabase-js';
-// Supabase 클라이언트 싱글톤
 let supabaseInstance = null;
-/**
- * Supabase 클라이언트 초기화
- * 앱 시작 시 한 번만 호출
- */
 export function initSupabase(config) {
-    if (supabaseInstance) {
+    if (supabaseInstance)
         return supabaseInstance;
-    }
     const { supabaseUrl, supabaseAnonKey } = config;
     if (!supabaseUrl || !supabaseAnonKey) {
         throw new Error('[Supabase] REACT_APP_SUPABASE_URL / REACT_APP_SUPABASE_ANON_KEY 환경변수가 필요합니다.');
     }
+    // Google OAuth signInWithOAuth 트리거 전용 — 세션 관리는 Node.js JWT flow가 담당
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
-            autoRefreshToken: true,
-            persistSession: true,
-            detectSessionInUrl: true,
+            autoRefreshToken: false,
+            persistSession: false,
+            detectSessionInUrl: false,
         },
     });
     return supabaseInstance;
 }
-/**
- * Supabase 클라이언트 가져오기
- * 반드시 initSupabase()로 먼저 초기화해야 함
- */
 export function getSupabase() {
     if (!supabaseInstance) {
-        throw new Error('[Supabase] 클라이언트가 초기화되지 않았습니다. ' +
-            'initSupabase()를 먼저 호출해주세요.');
+        throw new Error('[Supabase] initSupabase()를 먼저 호출해주세요.');
     }
     return supabaseInstance;
-}
-/**
- * Supabase 클라이언트 리셋 (테스트용)
- */
-export function resetSupabase() {
-    supabaseInstance = null;
 }
