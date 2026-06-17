@@ -13,6 +13,7 @@ import { storage } from '../../utils/storage';
 import { User } from '../../types';
 import { getSupabase } from '../../network/supabase-client';
 import { applySession } from '../../hooks/use-supabase-auth';
+import { Button } from '../button/Button';
 import './LoginPage.css';
 
 export interface LoginPageProps {
@@ -312,38 +313,32 @@ export function LoginPage({
                         </div>
                     </div>
 
-                    <button type="submit" className="login-button" disabled={isSubmitting}>
-                        {isSubmitting ? (
-                            <>
-                                <span className="login-spinner" aria-hidden="true" />
-                                로그인 중...
-                            </>
-                        ) : (
-                            <>
-                                로그인
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                    <path d="M5 12h14M12 5l7 7-7 7" />
-                                </svg>
-                            </>
-                        )}
-                    </button>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        loading={isSubmitting}
+                        disabled={isSubmitting}
+                        className="login-button"
+                        rightIcon={
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        }
+                    >
+                        로그인
+                    </Button>
 
                     {onTestLogin && (
-                        <button
+                        <Button
                             type="button"
-                            className="login-button"
-                            onClick={handleTestLoginClick}
+                            fullWidth
+                            loading={isTestLoading}
                             disabled={isTestLoading || isSubmitting}
+                            onClick={handleTestLoginClick}
+                            className="login-button"
                         >
-                            {isTestLoading ? (
-                                <>
-                                    <span className="login-spinner" aria-hidden="true" />
-                                    로그인 중...
-                                </>
-                            ) : (
-                                '테스트 계정 로그인'
-                            )}
-                        </button>
+                            테스트 계정 로그인
+                        </Button>
                     )}
                 </form>
             </div>
