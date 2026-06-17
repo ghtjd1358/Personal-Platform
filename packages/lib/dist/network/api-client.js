@@ -45,11 +45,3 @@ export function getApiClient() {
         throw new Error('[apiClient] initApiClient()가 먼저 호출되어야 합니다.');
     return _apiClient;
 }
-// 하위 호환 — import 시점에 인스턴스가 없어도 호출 시점에 조회
-export const apiClient = new Proxy({}, {
-    get(_target, prop) {
-        if (typeof prop === 'symbol' || prop === 'then')
-            return undefined;
-        return Reflect.get(getApiClient(), prop);
-    },
-});

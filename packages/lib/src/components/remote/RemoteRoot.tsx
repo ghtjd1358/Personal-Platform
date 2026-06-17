@@ -13,9 +13,8 @@ interface RemoteRootProps {
   hideScrollTop?: boolean;
 }
 
-const isHost = storage.isHostApp();
-
 export function RemoteRoot({ children, hideScrollTop }: RemoteRootProps) {
+  const isHost = storage.isHostApp();
   const { initialized } = useSimpleInitialize();
 
   if (!initialized) return null;

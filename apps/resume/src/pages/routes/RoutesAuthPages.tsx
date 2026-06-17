@@ -2,8 +2,6 @@ import React, { lazy } from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import { PREFIX } from '@/config/constants'
 import { RoutePath } from './paths'
-// admin 전용 CSS — 이 파일은 로그인 사용자 라우트 전체를 담당하므로 로그인 후에만 로드.
-// 완전 lazy 하게 하려면 각 admin page 파일에 분산해야 하지만 8 파일 중복 회피로 여기 묶음.
 import '@/styles/admin.css'
 
 // 홈 페이지 (포트폴리오 소개)
@@ -32,7 +30,6 @@ const FeaturesEditorPage = lazy(() => import('../admin/features/FeaturesEditorPa
 function RoutesAuthPages() {
     return (
         <Routes>
-            {/* 메인 페이지 = 포트폴리오 홈 (이력서는 /resumes, 본인 이력서는 /mypage) */}
             <Route path="/" element={<HomePage />} />
             {PREFIX && <Route path={PREFIX} element={<HomePage />} />}
 

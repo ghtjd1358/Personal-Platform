@@ -14,7 +14,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
-import { setAccessToken, setUser, logout, apiClient } from '@sonhoseong/mfa-lib';
+import { setAccessToken, setUser, logout, getApiClient } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './routes/paths';
 
 export default function AuthCallbackPage() {
@@ -83,7 +83,7 @@ export default function AuthCallbackPage() {
         // 2단계: 서버에서 사용자 정보(이름, 이메일, 권한) 가져오기
         // setAccessToken을 /auth/me 이전에 dispatch하면 토큰만 있고 user가 없는 broken state 창이 생긴다.
         // token은 헤더에 직접 주입 — 인터셉터가 store에서 읽는 것을 기다릴 필요 없음
-        apiClient
+        getApiClient()
             .get<{ data: { user: { id: string; email: string; name: string; role?: 'admin' | 'user'; avatar_url?: string } } }>('/auth/me', {
                 signal: ctrl.signal,
                 headers: { Authorization: `Bearer ${token}` }, // 토큰을 직접 헤더에 추가 — store 미반영 상태에서도 인증 보장

@@ -7,8 +7,8 @@ import { ScrollTopButton } from '../button';
 import { Container } from '../layout';
 import { storage } from '../../utils/storage';
 import { useSimpleInitialize } from '../../hooks/use-simple-initialize';
-const isHost = storage.isHostApp();
 export function RemoteRoot({ children, hideScrollTop }) {
+    const isHost = storage.isHostApp();
     const { initialized } = useSimpleInitialize();
     if (!initialized)
         return null;

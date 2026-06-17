@@ -24,7 +24,7 @@ const createRootReducer = () => combineReducers({
 // logout 액션 감지 시 localStorage 인증 정보 삭제 — XSS exfiltration 방어
 const authMiddleware: Middleware = () => (next) => (action) => {
     const result = next(action);
-    if (logout.match(action as ReturnType<typeof logout>)) {
+    if (logout.match(action)) {
         storage.clearAuth();
     }
     return result;

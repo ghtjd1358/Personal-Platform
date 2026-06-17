@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { getStore } from '../store/app-store';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getStore, logout } from '../store/app-store';
 import { setAccessToken, setUser } from '../store/app-slice';
-import { apiClient, initApiClient } from '../network/api-client';
+import { clearRecentMenu } from '../store/recent-menu-slice';
+import { getApiClient, initApiClient } from '../network/api-client';
 export function useNodeInitialize() {
     const [initialized, setInitialized] = useState(false);
-    // Strict Mode 이중 마운트 + zombie dispatch 방지
     const ranRef = useRef(false);
     useEffect(() => {
         if (ranRef.current)
@@ -16,14 +16,14 @@ export function useNodeInitialize() {
             initApiClient();
             const store = getStore();
             try {
-                const refreshRes = await apiClient.post('/auth/refresh', undefined, { signal });
+                const refreshRes = await getApiClient().post('/auth/refresh', undefined, { signal });
                 if (signal.aborted)
                     return;
                 const accessToken = refreshRes.data?.data?.accessToken;
                 if (!accessToken)
                     return;
                 store.dispatch(setAccessToken(accessToken));
-                const meRes = await apiClient.get('/user/me', { signal });
+                const meRes = await getApiClient().get('/user/me', { signal });
                 if (signal.aborted)
                     return;
                 const user = meRes.data?.data;
@@ -40,4 +40,20 @@ export function useNodeInitialize() {
         return () => { controller.abort(); };
     }, []);
     return { initialized };
+}
+export function useNodeLogout() {
+    const doLogout = useCallback(async () => {
+        const store = getStore();
+        try {
+            await getApiClient().post('/auth/logout');
+        }
+        catch {
+            // logout API 실패해도 로컬 상태는 반드시 클리어
+        }
+        finally {
+            store.dispatch(logout());
+            store.dispatch(clearRecentMenu());
+        }
+    }, []);
+    return { logout: doLogout };
 }

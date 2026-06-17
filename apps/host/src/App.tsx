@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import {
     selectIsAuthenticated,
     selectUser,
-    useSupabaseInitialize,
+    useNodeInitialize,
+    useNodeLogout,
     usePermission,
-    useSupabaseLogout,
     ErrorBoundary,
     Container,
     Lnb,
@@ -24,19 +24,20 @@ import './theme-editorial.css';
 const App = () => {
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const user = useSelector(selectUser);
-    const { initialized } = useSupabaseInitialize();
+    const { initialized } = useNodeInitialize();
     const { filterMenus, isOwner } = usePermission();
-    const { logout: supabaseLogout } = useSupabaseLogout();
+    const { logout: nodeLogout } = useNodeLogout();
     const navigate = useNavigate();
 
     const handleLogout = useCallback(async () => {
-        await supabaseLogout();
+        await nodeLogout();
         navigate('/');
-    }, [supabaseLogout, navigate]);
+    }, [nodeLogout, navigate]);
 
     const lnbItems = useMemo(
         () => filterMenus(buildLnbItems(user, isOwner)),
-        [filterMenus, user, isOwner]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [filterMenus, user?.id, isOwner]
     );
 
     if (!initialized) return <HostShell />;

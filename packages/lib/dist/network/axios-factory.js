@@ -15,6 +15,8 @@ export function hasErrorDetails(error) {
 }
 // 모듈 싱글톤 — MF shared singleton 가정
 let _factoryConfig = null;
+// concurrent 401 refresh 직렬화 — 동시 401 시 하나만 refresh 하고 나머지는 결과 대기
+let _pendingRefresh = null;
 export function initAxiosFactory(config) {
     _factoryConfig = config;
 }
@@ -61,9 +63,12 @@ export class AxiosClientFactory {
                 originalRequest &&
                 !originalRequest._isRetry &&
                 !originalRequest.url?.includes('/auth/refresh')) {
+                originalRequest._isRetry = true;
                 try {
-                    originalRequest._isRetry = true;
-                    const newToken = await fc.refreshToken();
+                    if (!_pendingRefresh) {
+                        _pendingRefresh = fc.refreshToken().finally(() => { _pendingRefresh = null; });
+                    }
+                    const newToken = await _pendingRefresh;
                     if (newToken) {
                         fc.setAccessToken(newToken);
                         originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
