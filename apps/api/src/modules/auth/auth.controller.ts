@@ -20,15 +20,9 @@ export const authController = {
 
     setRefreshCookie(res, refreshToken)
 
-    // access_token_once: JS 접근 허용 non-HttpOnly 쿠키 — 5초 내 AuthCallbackPage가 읽고 즉시 삭제
-    res.cookie('access_token_once', accessToken, {
-      httpOnly: false,
-      secure: env.cookieSecure,
-      sameSite: 'lax',
-      maxAge: 5 * 1000,
-      path: '/',
-    })
-    res.redirect(`${env.clientUrls[0]}/auth/callback`)
+    // accessToken을 URL hash로 전달 — 쿠키는 크로스 도메인 불가(api ↔ frontend 별개 vercel.app)
+    // hash fragment는 서버 로그에 남지 않고 AuthCallbackPage가 읽은 즉시 history.replaceState로 제거
+    res.redirect(`${env.clientUrls[0]}/auth/callback#token=${accessToken}`)
   },
 
   refresh: (req: Request, res: Response) => {

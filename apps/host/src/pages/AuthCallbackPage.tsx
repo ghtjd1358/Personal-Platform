@@ -34,19 +34,11 @@ export default function AuthCallbackPage() {
             navigate(RoutePath.Login + '?error=timeout', { replace: true });
         }, 5000);
 
-        // access_token_once: 백엔드가 non-HttpOnly로 set한 1회용 쿠키
-        const match = document.cookie.match(/(?:^|;\s*)access_token_once=([^;]+)/);
-        let token: string | null = null;
-        try {
-            token = match ? decodeURIComponent(match[1]) : null;
-        } catch {
-            console.error('[AuthCallback] 토큰 쿠키 디코딩 실패');
-        }
-
-        // 읽은 즉시 삭제 — Domain 유무 두 가지 방어
-        const secureAttr = window.location.protocol === 'https:' ? '; Secure' : '';
-        document.cookie = `access_token_once=; Max-Age=0; path=/; SameSite=Lax${secureAttr}`;
-        document.cookie = `access_token_once=; Max-Age=0; path=/; SameSite=Lax${secureAttr}; Domain=${window.location.hostname}`;
+        // URL hash fragment에서 토큰 읽기 — 크로스 도메인 쿠키 불가 문제 우회
+        // hash는 서버 로그에 남지 않으며, 읽은 즉시 history.replaceState로 제거
+        const hash = new URLSearchParams(window.location.hash.slice(1));
+        const token = hash.get('token');
+        window.history.replaceState(null, '', window.location.pathname);
 
         if (!token) {
             if (finish()) navigate(RoutePath.Login, { replace: true });
