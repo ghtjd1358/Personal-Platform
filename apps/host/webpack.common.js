@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ModuleFederationPlugin } = require('webpack').container;
 const webpack = require('webpack');
+const deps = require('./package.json').dependencies;
 // CI/Vercel 환경에서는 .env 없이 시스템 환경변수를 직접 사용하므로 누락 경고 억제
 if (!process.env.CI && !process.env.VERCEL) {
     const result = require('dotenv').config();
@@ -177,16 +178,12 @@ module.exports = {
         '@jobtracker': dynamicRemoteLoader('jobtracker', `${REMOTE4_URL}/remoteEntry.js`)
       },
       shared: {
-        // React 핵심 — 앱 전체에서 하나만 사용 (singleton)
-        react: { singleton: true, eager: true, requiredVersion: '19.2.0' },
-        'react-dom': { singleton: true, eager: true, requiredVersion: '19.2.0' },
-        // 라우팅 — singleton 은 exact version pin (caret range 면 remote 들이 서로 다른 minor 로 로드돼 store/router context 충돌)
-        'react-router-dom': { singleton: true, eager: true, requiredVersion: '7.11.0' },
-        // 전역 상태관리
-        '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: '2.11.2' },
-        'react-redux': { singleton: true, eager: true, requiredVersion: '9.2.0' },
-        // 로딩 상태 표시
-        'react-promise-tracker': { singleton: true, eager: true, requiredVersion: '2.1.1' },
+        react: { singleton: true, eager: true, requiredVersion: deps.react },
+        'react-dom': { singleton: true, eager: true, requiredVersion: deps['react-dom'] },
+        'react-router-dom': { singleton: true, eager: true, requiredVersion: deps['react-router-dom'] },
+        '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: deps['@reduxjs/toolkit'] },
+        'react-redux': { singleton: true, eager: true, requiredVersion: deps['react-redux'] },
+        'react-promise-tracker': { singleton: true, eager: true, requiredVersion: deps['react-promise-tracker'] },
         // 이 모노레포 공유 라이브러리 — workspace 내부 패키지, 항상 함께 빌드됨
         // requiredVersion 생략 — semver pin 은 외부 패키지에만 의미 있음
         '@sonhoseong/mfa-lib': {
