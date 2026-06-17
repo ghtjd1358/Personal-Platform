@@ -40,7 +40,7 @@ export const authController = {
       ok(res, { accessToken: newAccessToken })
     } catch {
       clearRefreshCookie(res)
-      res.status(401).json({ code: 'REFRESH_TOKEN_EXPIRED' })
+      unauthorized(res, 'REFRESH_TOKEN_EXPIRED')
     }
   },
 

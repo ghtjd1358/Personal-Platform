@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { setAccessToken, setUser, logout, getApiClient } from '@sonhoseong/mfa-lib';
 import { RoutePath } from './routes/paths';
+import { consumeRedirectFrom } from './routes/RequireAuth';
 
 export default function AuthCallbackPage() {
     const navigate = useNavigate();
@@ -64,7 +65,7 @@ export default function AuthCallbackPage() {
                 const u = res.data.data.user;
                 dispatch(setAccessToken(token as string));
                 dispatch(setUser({ id: u.id, email: u.email, name: u.name, role: u.role ?? 'user', avatar: u.avatar_url }));
-                navigate(RoutePath.Dashboard, { replace: true });
+                navigate(consumeRedirectFrom(), { replace: true });
             })
             .catch((err) => {
                 if (axios.isCancel(err) || err?.name === 'CanceledError') return;

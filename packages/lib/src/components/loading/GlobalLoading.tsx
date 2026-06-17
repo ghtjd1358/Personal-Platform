@@ -28,7 +28,7 @@ const GLOBAL_AREA_CONFIG = { area: LOADING_AREA_GLOBAL };
 
 const GlobalLoading: React.FC<GlobalLoadingProps> = ({ message, force }) => {
     const { promiseInProgress } = usePromiseTracker(GLOBAL_AREA_CONFIG);
-    const globalLoadingTitle = useSelector((state: HostRootState) => state.app?.globalLoadingTitle);
+    const globalLoadingTitle = useSelector((state: HostRootState) => state.ui?.globalLoadingTitle);
 
     // 500ms debounce on hide — 연속 호출 시 깜빡임 방지
     const [visible, setVisible] = useState(false);

@@ -26,7 +26,8 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     const payload = jwt.verify(token, env.jwtAccessSecret) as JwtPayload
     req.user = payload
     next()
-  } catch {
-    res.status(401).json({ code: 'TOKEN_EXPIRED', message: '토큰이 만료되었습니다.' })
+  } catch (err) {
+    const code = (err instanceof jwt.TokenExpiredError) ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN'
+    res.status(401).json({ code })
   }
 }

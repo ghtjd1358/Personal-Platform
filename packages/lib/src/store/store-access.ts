@@ -36,7 +36,7 @@ export const isAuthenticated = (): boolean => !!getAccessToken();
 
 export const getCurrentService = (): string => {
   try {
-    return getHostState()?.app?.service || '';
+    return getHostState()?.ui?.service || '';
   } catch {
     return '';
   }

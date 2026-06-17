@@ -79,7 +79,7 @@ module.exports = {
         '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: deps['@reduxjs/toolkit'] },
         'react-redux': { singleton: true, eager: true, requiredVersion: deps['react-redux'] },
         'react-promise-tracker': { singleton: true, eager: true, requiredVersion: deps['react-promise-tracker'] },
-        '@sonhoseong/mfa-lib': { singleton: true, eager: true }
+        '@sonhoseong/mfa-lib': { singleton: true, eager: true, requiredVersion: deps['@sonhoseong/mfa-lib'] }
       }
     }),
 

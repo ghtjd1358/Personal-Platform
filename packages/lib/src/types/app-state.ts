@@ -5,6 +5,9 @@ import { LnbMenuItem } from './menu';
 export interface AppState {
   accessToken: string;
   user: User | null;
+}
+
+export interface UiState {
   globalLoadingTitle: string;
   service: string;
   selectedGnb: string;
@@ -22,6 +25,7 @@ export interface RecentMenu {
 
 export interface HostRootState {
   app: AppState;
+  ui: UiState;
   recentMenu: {
     list: RecentMenu[];
     currentId: string;
