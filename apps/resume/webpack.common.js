@@ -73,16 +73,8 @@ module.exports = {
         './LnbItems': './src/exposes/lnb-items.tsx'
       },
       shared: {
-        react: {
-          singleton: true,
-          eager: true,
-          requiredVersion: deps.react
-        },
-        'react-dom': {
-          singleton: true,
-          eager: true,
-          requiredVersion: deps['react-dom']
-        },
+        react: { singleton: true, eager: true, requiredVersion: false },
+        'react-dom': { singleton: true, eager: true, requiredVersion: false },
         'react-router-dom': { singleton: true, eager: true, requiredVersion: deps['react-router-dom'] },
         '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: deps['@reduxjs/toolkit'] },
         'react-redux': { singleton: true, eager: true, requiredVersion: deps['react-redux'] },
