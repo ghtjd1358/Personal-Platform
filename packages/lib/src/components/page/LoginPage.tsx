@@ -28,7 +28,9 @@ export interface LoginPageProps {
      * - Firebase 팝업 flow: { token, user } 반환 → LoginPage 가 store 동기화
      * - Supabase OAuth redirect flow: void 반환 (브라우저가 외부로 redirect, 이후 코드 미실행)
      */
-    onGoogleLogin?: () => Promise<{ token: string; user: User } | void>;
+    onGoogleLogin?: () => (Promise<{ token: string; user: User } | void> | void);
+    /** 테스트 계정 로그인 핸들러 — 제공 시 버튼 표시 */
+    onTestLogin?: () => Promise<void>;
 }
 
 /**
@@ -57,12 +59,14 @@ export function LoginPage({
     appName = 'MFA',
     logo,
     onGoogleLogin,
+    onTestLogin,
 }: LoginPageProps) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const [isTestLoading, setIsTestLoading] = useState(false);
     const [focusedField, setFocusedField] = useState<string | null>(null);
 
     // React 18+ useId — SSR / 다중 인스턴스에서도 안정적인 id-htmlFor 매칭 보장
@@ -116,6 +120,20 @@ export function LoginPage({
             setIsGoogleLoading(false);
         }
     }, [onGoogleLogin, store, onLoginSuccess, redirectPath, navigate]);
+
+    const handleTestLoginClick = useCallback(async () => {
+        if (!onTestLogin) return;
+        setError('');
+        setIsTestLoading(true);
+        try {
+            await onTestLogin();
+        } catch (err: unknown) {
+            const { message } = getErrorInfo(err);
+            setError(message || '테스트 로그인 중 오류가 발생했습니다.');
+        } finally {
+            setIsTestLoading(false);
+        }
+    }, [onTestLogin]);
 
     // Supabase 로그인 핸들러
     const handleSupabaseLogin = useCallback(async () => {
@@ -240,6 +258,25 @@ export function LoginPage({
                             <span>또는</span>
                         </div>
                     </>
+                )}
+
+                {/* Test Login */}
+                {onTestLogin && (
+                    <button
+                        type="button"
+                        className="login-button login-button--test"
+                        onClick={handleTestLoginClick}
+                        disabled={isTestLoading || isSubmitting}
+                    >
+                        {isTestLoading ? (
+                            <>
+                                <span className="login-spinner" aria-hidden="true" />
+                                로그인 중...
+                            </>
+                        ) : (
+                            '테스트 계정으로 로그인'
+                        )}
+                    </button>
                 )}
 
                 {/* Form */}

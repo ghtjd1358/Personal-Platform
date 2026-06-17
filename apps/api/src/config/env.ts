@@ -26,4 +26,8 @@ export const env = {
   // Cookie
   cookieSecure: process.env.NODE_ENV === 'production',
   cookieDomain: process.env.COOKIE_DOMAIN || 'localhost',
+
+  // Demo account — 포트폴리오 체험용, production 에도 노출됨
+  demoEmail: process.env.DEMO_ACCOUNT_EMAIL || '',
+  demoPassword: process.env.DEMO_ACCOUNT_PASSWORD || '',
 }

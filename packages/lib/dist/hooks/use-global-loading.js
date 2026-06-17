@@ -45,7 +45,7 @@ export function useShowGlobalLoading() {
         const store = getHostStore();
         if (store && title) {
             store.dispatch({
-                type: 'app/setGlobalLoadingTitle',
+                type: 'ui/setGlobalLoadingTitle',
                 payload: title,
             });
         }

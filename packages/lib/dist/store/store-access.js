@@ -30,7 +30,7 @@ export const getAccessToken = () => {
 export const isAuthenticated = () => !!getAccessToken();
 export const getCurrentService = () => {
     try {
-        return getHostState()?.app?.service || '';
+        return getHostState()?.ui?.service || '';
     }
     catch {
         return '';

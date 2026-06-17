@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { trackPromise } from 'react-promise-tracker';
+import axios from 'axios';
 import {
     selectUser,
     useNodeInitialize,
@@ -17,8 +18,10 @@ import {
     REMOTE_LINK_PREFIX,
     LnbMenuItem,
     LoginPage,
-    getSupabase,
+    setAccessToken,
+    setUser,
 } from '@sonhoseong/mfa-lib';
+import { useDispatch } from 'react-redux';
 import { RoutePath } from './pages/routes/paths';
 import { RequireAuth } from './pages/routes/RequireAuth';
 import MyPageGuard from './pages/routes/MyPageGuard';
@@ -31,7 +34,7 @@ import './sidebar-editorial.css';
 import './theme-editorial.css';
 
 const LOADING_AREA = 'GLOBAL';
-const OAUTH_REDIRECT = `${process.env.REACT_APP_API_URL ?? 'http://localhost:4000'}/api/auth/google/callback`;
+const API_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:4000';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ResumeApp = lazy(() =>
@@ -103,23 +106,34 @@ const App = () => {
     const { filterMenus, isOwner } = usePermission();
     const { logout: nodeLogout } = useNodeLogout();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleLogout = useCallback(async () => {
         await nodeLogout();
         navigate(RoutePath.Login);
     }, [nodeLogout, navigate]);
 
-    const handleGoogleLogin = useCallback(async () => {
-        const supabase = getSupabase();
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: OAUTH_REDIRECT },
-        });
-        if (error) {
-            console.error('[Auth] Google 로그인 실패:', error);
-            throw error;
-        }
+    const handleGoogleLogin = useCallback(() => {
+        window.location.href = `${API_URL}/api/auth/google`;
     }, []);
+
+    const handleTestLogin = useCallback(async () => {
+        const loginRes = await axios.post<{ data: { accessToken: string } }>(
+            `${API_URL}/api/auth/login`,
+            { email: 'admin@test.com', password: '1234' },
+            { withCredentials: true }
+        );
+        const { accessToken } = loginRes.data.data;
+        dispatch(setAccessToken(accessToken));
+
+        const meRes = await axios.get<{ data: { user: { id: string; email: string; name: string; role?: 'admin' | 'user'; avatar_url?: string } } }>(
+            `${API_URL}/api/auth/me`,
+            { headers: { Authorization: `Bearer ${accessToken}` }, withCredentials: true }
+        );
+        const u = meRes.data.data.user;
+        dispatch(setUser({ id: u.id, email: u.email, name: u.name, role: u.role ?? 'user', avatar: u.avatar_url }));
+        navigate(RoutePath.Dashboard, { replace: true });
+    }, [dispatch, navigate]);
 
     const lnbItems = useMemo(
         () => filterMenus(buildLnbItems(user, isOwner)),
@@ -140,6 +154,7 @@ const App = () => {
                             appName="Portfolio"
                             redirectPath={RoutePath.Dashboard}
                             onGoogleLogin={handleGoogleLogin}
+                            onTestLogin={handleTestLogin}
                         />
                     }
                 />

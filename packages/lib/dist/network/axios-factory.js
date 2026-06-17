@@ -19,7 +19,16 @@ let _pendingRefresh = null;
 // refresh 실패 후 onUnauthorized 중복 호출 방지 — setAccessToken('') 시 리셋
 let _unauthorizedFired = false;
 export function initAxiosFactory(config) {
-    _factoryConfig = config;
+    const originalSetAccessToken = config.setAccessToken;
+    _factoryConfig = {
+        ...config,
+        // truthy 토큰이 들어올 때 guard 리셋 — 재로그인 후 다음 401 사이클에서 onUnauthorized 재발동 가능
+        setAccessToken: (token) => {
+            if (token)
+                _unauthorizedFired = false;
+            originalSetAccessToken(token);
+        },
+    };
     _unauthorizedFired = false;
 }
 export class AxiosClientFactory {

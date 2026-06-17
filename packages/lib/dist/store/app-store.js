@@ -1,12 +1,15 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { storage } from '../utils/storage';
 import { appSlice, logout } from './app-slice';
+import { uiSlice } from './ui-slice';
 import menuReducer from './menu-slice';
 import recentMenuReducer from './recent-menu-slice';
 export * from './app-slice';
 export * from './app-selectors';
+export * from './ui-slice';
 const staticReducers = {
     app: appSlice.reducer,
+    ui: uiSlice.reducer,
     menu: menuReducer,
     recentMenu: recentMenuReducer,
 };

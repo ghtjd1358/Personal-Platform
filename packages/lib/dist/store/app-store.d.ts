@@ -3,24 +3,29 @@ import { InjectReducerFn } from '../types';
 import { RecentMenuState } from './recent-menu-slice';
 export * from './app-slice';
 export * from './app-selectors';
+export * from './ui-slice';
 export declare const store: import("@reduxjs/toolkit").EnhancedStore<{
     app: import("..").AppState;
+    ui: import("..").UiState;
     menu: import("./menu-slice").MenuState;
     recentMenu: RecentMenuState;
 }, import("redux").UnknownAction, import("@reduxjs/toolkit").Tuple<[import("redux").StoreEnhancer<{
     dispatch: import("redux-thunk").ThunkDispatch<{
         app: import("..").AppState;
+        ui: import("..").UiState;
         menu: import("./menu-slice").MenuState;
         recentMenu: RecentMenuState;
     }, undefined, import("redux").UnknownAction>;
 }>, import("redux").StoreEnhancer]>>;
 export declare const getStore: () => import("@reduxjs/toolkit").EnhancedStore<{
     app: import("..").AppState;
+    ui: import("..").UiState;
     menu: import("./menu-slice").MenuState;
     recentMenu: RecentMenuState;
 }, import("redux").UnknownAction, import("@reduxjs/toolkit").Tuple<[import("redux").StoreEnhancer<{
     dispatch: import("redux-thunk").ThunkDispatch<{
         app: import("..").AppState;
+        ui: import("..").UiState;
         menu: import("./menu-slice").MenuState;
         recentMenu: RecentMenuState;
     }, undefined, import("redux").UnknownAction>;

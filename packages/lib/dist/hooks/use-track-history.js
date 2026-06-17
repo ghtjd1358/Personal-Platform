@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import { useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { dispatchToHost, getHostStore } from '../store/store-access';
-import { setService } from '../store/app-slice';
+import { setService } from '../store/ui-slice';
 import { setRecentMenuList, addRecentMenu, setCurrentRecentMenu, updateRecentMenuState, } from '../store/recent-menu-slice';
 import { storage } from '../utils/storage';
 import { getServiceFromPath } from '../types/service';

@@ -7,6 +7,7 @@ import {
   clearRefreshCookie,
   verifyRefreshToken,
 } from '../../lib/token'
+import { authService } from './auth.service'
 import { userService } from '../user/user.service'
 import { ok, unauthorized, notFound } from '../../common/response'
 
@@ -53,5 +54,21 @@ export const authController = {
     const { data, error } = await userService.getUserWithRole(req.user!.userId)
     if (error || !data) { notFound(res, 'USER_NOT_FOUND'); return }
     ok(res, { user: data })
+  },
+
+  // 포트폴리오 체험용 데모 로그인 — DEMO_ACCOUNT_EMAIL/PASSWORD 환경변수로 제어
+  demoLogin: async (req: Request, res: Response) => {
+    const { email, password } = req.body ?? {}
+    if (!env.demoEmail || !env.demoPassword) { unauthorized(res, 'DEMO_NOT_CONFIGURED'); return }
+    if (email !== env.demoEmail || password !== env.demoPassword) { unauthorized(res, 'INVALID_CREDENTIALS'); return }
+
+    const { data, error } = await authService.upsertUser(env.demoEmail, '데모 계정')
+    if (error || !data) { unauthorized(res, 'DEMO_USER_ERROR'); return }
+
+    const payload = { userId: data.id, email: data.email }
+    const accessToken = signAccessToken(payload)
+    const refreshToken = signRefreshToken(payload)
+    setRefreshCookie(res, refreshToken)
+    ok(res, { accessToken })
   },
 }

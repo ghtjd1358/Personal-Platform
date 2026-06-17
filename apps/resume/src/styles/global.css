@@ -6764,7 +6764,8 @@ body.has-header {
   flex-wrap: wrap;
 }
 
-/* Project edit button row (Section bottom) */
+/* Section edit button row (Section bottom) — 모든 섹션 공통 */
+.section-edit-row,
 .project-edit-row {
   display: flex;
   justify-content: flex-end;

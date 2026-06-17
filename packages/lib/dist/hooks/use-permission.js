@@ -24,7 +24,7 @@ export function usePermission() {
     const checkMenu = useCallback((permission) => checkMenuPermission(user, permission), [user]);
     const filterMenus = useCallback((menus) => filterMenusByPermission(menus, user), [user]);
     const canAccess = useCallback((menus, path) => canAccessPath(menus, path, user), [user]);
-    return {
+    return useMemo(() => ({
         user,
         can,
         canAny,
@@ -36,6 +36,6 @@ export function usePermission() {
         checkMenu,
         filterMenus,
         canAccess,
-    };
+    }), [user, can, canAny, canAll, isRole, isOwner, isAdmin, canEditResource, checkMenu, filterMenus, canAccess]);
 }
 export default usePermission;
