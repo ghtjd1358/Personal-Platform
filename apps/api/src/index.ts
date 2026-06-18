@@ -34,15 +34,16 @@ configurePassport()
 app.use(passport.initialize() as any)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false }) as any)
-// 페이지 로드마다 자동 호출되는 엔드포인트 — 로그인보다 느슨하게
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false }) as any)
+// 로그인/데모로그인 전용 — refresh·me는 skip하여 이 버킷 제외
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-app.use('/api/auth/refresh', rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false }) as any)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-app.use('/api/auth/me', rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false }) as any)
-// 로그인/회원가입 등 인증 액션 — 엄격하게 유지
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false }) as any)
+app.use('/api/auth', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.path === '/refresh' || req.path === '/me',
+}) as any)
 
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
