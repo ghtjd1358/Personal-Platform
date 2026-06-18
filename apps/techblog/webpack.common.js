@@ -65,13 +65,13 @@ module.exports = {
         './LnbItems': './src/exposes/lnb-items'
       },
       shared: {
-        react: { singleton: true, eager: true, requiredVersion: false },
-        'react-dom': { singleton: true, eager: true, requiredVersion: false },
-        'react-router-dom': { singleton: true, eager: true, requiredVersion: deps['react-router-dom'] },
-        '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: deps['@reduxjs/toolkit'] },
-        'react-redux': { singleton: true, eager: true, requiredVersion: deps['react-redux'] },
-        'react-promise-tracker': { singleton: true, eager: true, requiredVersion: deps['react-promise-tracker'] },
-        '@sonhoseong/mfa-lib': { singleton: true, eager: true, requiredVersion: deps['@sonhoseong/mfa-lib'] }
+        react: { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
+        'react-router-dom': { singleton: true, requiredVersion: deps['react-router-dom'] },
+        '@reduxjs/toolkit': { singleton: true, requiredVersion: deps['@reduxjs/toolkit'] },
+        'react-redux': { singleton: true, requiredVersion: deps['react-redux'] },
+        'react-promise-tracker': { singleton: true, requiredVersion: deps['react-promise-tracker'] },
+        '@sonhoseong/mfa-lib': { singleton: true, requiredVersion: deps['@sonhoseong/mfa-lib'] }
       }
     }),
 
