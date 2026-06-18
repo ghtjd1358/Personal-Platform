@@ -16,10 +16,11 @@ import { usePromiseTracker } from 'react-promise-tracker';
 import { useSelector } from 'react-redux';
 import { LOADING_AREA_GLOBAL } from '../../hooks/use-global-loading';
 const GLOBAL_AREA_CONFIG = { area: LOADING_AREA_GLOBAL };
-const GlobalLoading = ({ message, force }) => {
+// Hook 호출을 분리 — remote가 host 모드에서 마운트될 때 usePromiseTracker가 실행되지 않도록
+// (react-promise-tracker getSnapshot이 매 호출마다 새 객체 반환 → React 19 무한루프 방지)
+const GlobalLoadingImpl = ({ message, force }) => {
     const { promiseInProgress } = usePromiseTracker(GLOBAL_AREA_CONFIG);
     const globalLoadingTitle = useSelector((state) => state.ui?.globalLoadingTitle);
-    // 500ms debounce on hide — 연속 호출 시 깜빡임 방지
     const [visible, setVisible] = useState(false);
     useEffect(() => {
         if (promiseInProgress) {
@@ -30,11 +31,6 @@ const GlobalLoading = ({ message, force }) => {
             return () => clearTimeout(timer);
         }
     }, [promiseInProgress]);
-    // Host 모드 + force=false → host 자신이 force=true 로 별도 마운트 → 이중 overlay 방지
-    const isHostApp = typeof window !== 'undefined'
-        && window.sessionStorage?.getItem('isHostApp') === 'true';
-    if (!force && isHostApp)
-        return null;
     if (!visible)
         return null;
     const displayMessage = message || globalLoadingTitle || 'Loading';
@@ -121,5 +117,13 @@ const GlobalLoading = ({ message, force }) => {
                     50%      { opacity: 1;    transform: scale(1.1); background: #8C1E1A; }
                 }
             ` })] }));
+};
+// Outer wrapper — host 모드일 때 Impl 마운트 자체를 차단 (hooks 호출 방지)
+const GlobalLoading = ({ message, force }) => {
+    const isHostApp = typeof window !== 'undefined'
+        && window.sessionStorage?.getItem('isHostApp') === 'true';
+    if (!force && isHostApp)
+        return null;
+    return _jsx(GlobalLoadingImpl, { message: message, force: force });
 };
 export default GlobalLoading;
