@@ -115,12 +115,17 @@ const FeaturesEditorPage: React.FC = () => {
                     type="button"
                     className="exp-editor-back"
                     onClick={() => navigate(`${LINK_PREFIX}/admin/features`)}
+                    aria-label="목록으로"
+                    title="목록으로"
                 >
-                    ← 목록으로
+                    ←
                 </button>
-                <h1 className="exp-editor-title">
-                    {isEdit ? '핵심 역량 카드 수정' : '핵심 역량 카드 추가'}
-                </h1>
+                <div className="exp-editor-titles">
+                    <span className="exp-editor-eyebrow">SECTION · FEATURES</span>
+                    <h1 className="exp-editor-title">
+                        {isEdit ? '핵심 역량 카드 수정' : '핵심 역량 카드 추가'}
+                    </h1>
+                </div>
             </header>
 
             <form onSubmit={handleSubmit} className="exp-editor-form">

@@ -65,7 +65,6 @@ export const storage = {
   clearAuth: () => {
     localStorage.removeItem(STORAGE_KEYS.USER);
     localStorage.removeItem(STORAGE_KEYS.RECENT_MENU);
-    sessionStorage.removeItem(STORAGE_KEYS.IS_HOST_APP);
   },
 
   // 전체 삭제
