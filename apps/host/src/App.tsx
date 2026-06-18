@@ -128,12 +128,12 @@ const App = () => {
             );
             const { accessToken } = loginRes.data.data;
             dispatch(setAccessToken(accessToken));
-            const meRes = await axios.get<{ data: { id: string; email: string; name: string; role?: 'admin' | 'user'; avatar_url?: string } }>(
+            const meRes = await axios.get<{ data: { id: string; email: string; name: string; role?: 'admin' | 'user'; avatar?: string } }>(
                 `${API_URL}/api/auth/me`,
                 { headers: { Authorization: `Bearer ${accessToken}` }, withCredentials: true }
             );
             const u = meRes.data.data;
-            dispatch(setUser({ id: u.id, email: u.email, name: u.name, role: u.role ?? 'user', avatar: u.avatar_url }));
+            dispatch(setUser({ id: u.id, email: u.email, name: u.name, role: u.role ?? 'user', avatar: u.avatar }));
         } catch {
             // Fallback: Supabase auth (API 미배포 환경)
             const supabase = getSupabase();

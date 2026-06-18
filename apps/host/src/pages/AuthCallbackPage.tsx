@@ -48,15 +48,15 @@ export default function AuthCallbackPage() {
         // setAccessToken을 /auth/me 이전에 dispatch하면 token만 있고 user 없는 broken state 발생
         // → 헤더에 직접 주입해 store 미반영 상태에서도 인증 보장
         getApiClient()
-            .get<{ data: { user: { id: string; email: string; name: string; role?: 'admin' | 'user'; avatar_url?: string } } }>('/auth/me', {
+            .get<{ data: { id: string; email: string; name: string; role?: 'admin' | 'user'; avatar?: string } }>('/auth/me', {
                 signal: ctrl.signal,
                 headers: { Authorization: `Bearer ${token}` },
             })
             .then((res) => {
                 if (!finish()) return;
-                const u = res.data.data.user;
+                const u = res.data.data;
                 dispatch(setAccessToken(token as string));
-                dispatch(setUser({ id: u.id, email: u.email, name: u.name, role: u.role ?? 'user', avatar: u.avatar_url }));
+                dispatch(setUser({ id: u.id, email: u.email, name: u.name, role: u.role ?? 'user', avatar: u.avatar }));
                 navigate(consumeRedirectFrom(), { replace: true });
             })
             .catch((err) => {
