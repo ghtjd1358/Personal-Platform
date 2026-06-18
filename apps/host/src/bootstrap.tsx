@@ -45,36 +45,27 @@ initApiClient({
 
 const LOAD_FAILURE_HTML = '<div style="padding:2rem;font-family:sans-serif"><h2>앱을 불러오지 못했습니다</h2><p>페이지를 새로고침 해주세요.</p></div>';
 
-async function start(retries = 0): Promise<void> {
+async function start(): Promise<void> {
     const container = document.getElementById('root');
     if (!container) throw new Error('Failed to find the root element');
 
     const { default: App } = await import('./App');
 
-    // root는 최초 1회만 생성 — 재시도 시 기존 root 재사용
-    const reactRoot = (container as any).__reactRoot ?? createRoot(container);
-    (container as any).__reactRoot = reactRoot;
+    // MF 공유 모듈 레지스트리 초기화 완료 대기 (KOMCA 패턴)
+    await new Promise(r => setTimeout(r, 100));
 
-    try {
-        reactRoot.render(
-            <Provider store={store}>
-                <ToastProvider>
-                    <ModalProvider>
-                        <BrowserRouter>
-                            <App />
-                        </BrowserRouter>
-                    </ModalProvider>
-                </ToastProvider>
-            </Provider>
-        );
-    } catch (err) {
-        if (retries < 3) {
-            console.warn(`[Bootstrap] 렌더 실패, 재시도 ${retries + 1}/3`);
-            await new Promise(r => setTimeout(r, 600));
-            return start(retries + 1);
-        }
-        container.innerHTML = LOAD_FAILURE_HTML;
-    }
+    const reactRoot = createRoot(container);
+    reactRoot.render(
+        <Provider store={store}>
+            <ToastProvider>
+                <ModalProvider>
+                    <BrowserRouter>
+                        <App />
+                    </BrowserRouter>
+                </ModalProvider>
+            </ToastProvider>
+        </Provider>
+    );
 }
 
 start().catch((err) => {
