@@ -45,25 +45,21 @@ initApiClient({
 
 const LOAD_FAILURE_HTML = '<div style="padding:2rem;font-family:sans-serif"><h2>앱을 불러오지 못했습니다</h2><p>페이지를 새로고침 해주세요.</p></div>';
 
-// Remote entry 사전 로딩 — 공유 모듈 협상을 render 전에 시작 (fire-and-forget)
-// Vercel cold start 실패해도 앱 렌더를 막지 않음
-function preloadRemotes() {
-    Promise.allSettled([
-        import('@resume/App'),
-        import('@blog/App'),
-        import('@portfolio/App'),
-        import('@jobtracker/App'),
-    ]).catch(() => {});
-}
-
 async function start(): Promise<void> {
     const container = document.getElementById('root');
     if (!container) throw new Error('Failed to find the root element');
 
-    preloadRemotes();
+    // 모든 remote entry 사전 로딩 — MF 공유 모듈 협상 완료 후 render (KOMCA 패턴)
+    // allSettled: 일부 실패해도 앱 렌더 차단하지 않음
+    await Promise.allSettled([
+        import('@resume/App'),
+        import('@blog/App'),
+        import('@portfolio/App'),
+        import('@jobtracker/App'),
+    ]);
+
     const { default: App } = await import('./App');
 
-    // MF 공유 모듈 레지스트리 초기화 완료 대기 (KOMCA 패턴)
     await new Promise(r => setTimeout(r, 100));
 
     const reactRoot = createRoot(container);
