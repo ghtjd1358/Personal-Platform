@@ -1,9 +1,21 @@
-import React from 'react'
-import { RemoteRoot } from '@sonhoseong/mfa-lib'
+import { useEffect, useState } from 'react'
+import { getStore, restoreFromStorage, ModalContainer, ToastContainer } from '@sonhoseong/mfa-lib'
 import App from './exposes/App'
 
 function Root() {
-    return <RemoteRoot><App /></RemoteRoot>
+    const [initialized, setInitialized] = useState(false)
+    useEffect(() => {
+        restoreFromStorage(getStore())
+        setInitialized(true)
+    }, [])
+    if (!initialized) return null
+    return (
+        <>
+            <ModalContainer />
+            <ToastContainer />
+            <App />
+        </>
+    )
 }
 
 export default Root

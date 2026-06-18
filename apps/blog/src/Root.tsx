@@ -1,10 +1,21 @@
-import { useLocation } from 'react-router-dom'
-import { RemoteRoot } from '@sonhoseong/mfa-lib'
+import { useEffect, useState } from 'react'
+import { getStore, restoreFromStorage, ModalContainer, ToastContainer } from '@sonhoseong/mfa-lib'
 import App from '@/App'
 
 function Root() {
-    const { pathname } = useLocation()
-    return <RemoteRoot hideScrollTop={pathname.endsWith('/login')}><App /></RemoteRoot>
+    const [initialized, setInitialized] = useState(false)
+    useEffect(() => {
+        restoreFromStorage(getStore())
+        setInitialized(true)
+    }, [])
+    if (!initialized) return null
+    return (
+        <>
+            <ModalContainer />
+            <ToastContainer />
+            <App />
+        </>
+    )
 }
 
 export default Root
