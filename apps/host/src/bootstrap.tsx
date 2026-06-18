@@ -65,8 +65,17 @@ async function start() {
 
 const LOAD_FAILURE_HTML = '<div style="padding:2rem;font-family:sans-serif"><h2>앱을 불러오지 못했습니다</h2><p>페이지를 새로고침 해주세요.</p></div>';
 
-start().catch((err) => {
-    console.error('[Bootstrap] 앱 시작 실패:', err);
-    const root = document.getElementById('root');
-    if (root) root.innerHTML = LOAD_FAILURE_HTML;
-});
+let _retries = 0;
+function tryStart() {
+    start().catch((err) => {
+        console.error(`[Bootstrap] 앱 시작 실패 (시도 ${_retries + 1}):`, err);
+        if (_retries < 3) {
+            _retries++;
+            setTimeout(tryStart, 600);
+        } else {
+            const root = document.getElementById('root');
+            if (root) root.innerHTML = LOAD_FAILURE_HTML;
+        }
+    });
+}
+tryStart();
