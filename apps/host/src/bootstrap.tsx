@@ -49,31 +49,37 @@ async function start(): Promise<void> {
     const container = document.getElementById('root');
     if (!container) throw new Error('Failed to find the root element');
 
-    // 모든 remote entry 사전 로딩 — MF 공유 모듈 협상 완료 후 render (KOMCA 패턴)
-    // allSettled: 일부 실패해도 앱 렌더 차단하지 않음
-    await Promise.allSettled([
-        import('@resume/App'),
-        import('@blog/App'),
-        import('@portfolio/App'),
-        import('@jobtracker/App'),
-    ]);
+    // KOMCA 패턴: 순차(sequential) 로드 — 각 remote가 MF 공유 모듈 레지스트리 협상을 완전히 끝낸 뒤 다음 로드
+    // 병렬(allSettled)은 레지스트리에 동시 등록 시 race condition 발생 → 1/3 확률 crash
+    await import('@resume/App').catch(() => null);
+    await import('@blog/App').catch(() => null);
+    await import('@portfolio/App').catch(() => null);
+    await import('@jobtracker/App').catch(() => null);
 
     const { default: App } = await import('./App');
 
-    await new Promise(r => setTimeout(r, 100));
-
-    const reactRoot = createRoot(container);
-    reactRoot.render(
-        <Provider store={store}>
-            <ToastProvider>
-                <ModalProvider>
-                    <BrowserRouter>
-                        <App />
-                    </BrowserRouter>
-                </ModalProvider>
-            </ToastProvider>
-        </Provider>
-    );
+    // KOMCA 패턴: render는 setTimeout 매크로태스크에서 실행
+    // await new Promise(setTimeout)은 마이크로태스크 연속이라 MF pending async가 아직 남을 수 있음
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            try {
+                createRoot(container).render(
+                    <Provider store={store}>
+                        <ToastProvider>
+                            <ModalProvider>
+                                <BrowserRouter>
+                                    <App />
+                                </BrowserRouter>
+                            </ModalProvider>
+                        </ToastProvider>
+                    </Provider>
+                );
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
+        }, 100);
+    });
 }
 
 start().catch((err) => {
