@@ -51,7 +51,8 @@ module.exports = {
       'node_modules'
     ],
     alias: {
-      '@': path.resolve(__dirname, 'src')
+      '@': path.resolve(__dirname, 'src'),
+      '@sonhoseong/mfa-lib': path.resolve(__dirname, '../../packages/lib/dist')
     }
   },
 
