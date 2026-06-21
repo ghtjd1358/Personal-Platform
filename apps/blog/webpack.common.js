@@ -52,7 +52,9 @@ module.exports = {
     ],
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@sonhoseong/mfa-lib': path.resolve(__dirname, '../../packages/lib/dist')
+      // main entry는 packages/lib/package.json의 main(dist/index.js)로 자동 해석,
+      // subpath import(`/dist/styles/...`)도 정상 resolve. dist까지 매핑하면 중복됨.
+      '@sonhoseong/mfa-lib': path.resolve(__dirname, '../../packages/lib')
     }
   },
 
