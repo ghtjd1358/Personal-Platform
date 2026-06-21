@@ -58,7 +58,10 @@ module.exports = {
       'node_modules'
     ],
     alias: {
-      '@': path.resolve(__dirname, 'src')
+      '@': path.resolve(__dirname, 'src'),
+      // npm published @sonhoseong/mfa-lib(1.3.10)에 initRemoteApp 없음 → 로컬 packages/lib(1.3.11) 강제 매핑.
+      // dist까지 매핑하면 subpath import(`/dist/styles/...`)가 중복 경로로 깨짐 → packages/lib까지만.
+      '@sonhoseong/mfa-lib': path.resolve(__dirname, '../../packages/lib')
     }
   },
 

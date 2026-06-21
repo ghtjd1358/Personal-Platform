@@ -58,9 +58,13 @@ export const subscribeToHost = (listener: () => void): (() => void) => {
   }
 };
 
+// useSyncExternalStore용 stable snapshot — localStorage fallback 제거.
+// storage.getUser()는 매번 JSON.parse로 새 객체 반환 → React 19 getSnapshot 계약 위반(무한루프).
+const getUserSnapshot = (): User | null => getHostStore()?.getState()?.app?.user ?? null;
+
 // getCurrentUser() 대신 사용 — 로그인/로그아웃 시 자동 리렌더링
 export const useCurrentUser = (): User | null =>
-  useSyncExternalStore(subscribeToHost, getCurrentUser, getCurrentUser);
+  useSyncExternalStore(subscribeToHost, getUserSnapshot, getUserSnapshot);
 
 export const useReactiveAccessToken = (): string =>
   useSyncExternalStore(subscribeToHost, getAccessToken, getAccessToken);
