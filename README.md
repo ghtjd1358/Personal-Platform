@@ -34,70 +34,178 @@
 
 ## 아키텍처
 
-호스트(컨테이너) 앱이 4 개의 리모트 앱(이력서·블로그·포트폴리오·기술블로그)을 런타임에 통합하는 Webpack 5 Module Federation 구조입니다. 각 리모트는 단독 실행도 가능하고, 호스트에 붙으면 하나의 SPA 처럼 동작합니다.
+> 독립 배포와 단일 사용자 경험을 동시에 만족시키기 위한 설계 결정들.
 
-### 핵심 설계
+### 공유 스토어
 
-- **공유 스토어** — 호스트의 Redux store 인스턴스를 리모트들이 참조해 인증 상태가 페이지 이동 후에도 일관되게 유지됩니다.
-- **동적 라우팅 PREFIX** — 동일 URL 이 호스트 통합 / 단독 실행에 따라 다르게 해석되어야 해서, 실행 컨텍스트 플래그로 PREFIX 를 런타임에 계산합니다.
-- **LNB 동적 조합** — 리모트가 자신의 메뉴 항목을 내보내고, 호스트가 런타임에 수집해 사이드바를 구성합니다. 리모트를 추가해도 호스트 코드를 손댈 일이 없습니다.
-- **공유 라이브러리** — 공통 컴포넌트·훅·스토어·유틸은 `@sonhoseong/mfa-lib` 한 패키지에 모아 모든 앱이 동일한 단일 인스턴스를 공유합니다.
+호스트의 Redux 스토어 인스턴스를 `window.__REDUX_STORE__` 전역 객체로 노출해 모든 리모트가 동일 인스턴스를 참조하도록 했습니다. Module Federation 의 `singleton: true` 설정만으로는 React Redux 컨텍스트가 리모트마다 분리되어 `useSelector` 가 비어 있는 문제가 있었습니다. *전역 객체 노출이 본질적인 해결* 이었고, 덕분에 인증·사용자 상태가 페이지 이동 후에도 일관되게 유지됩니다.
+
+### 동적 라우팅 PREFIX
+
+단독 실행과 호스트 통합, 두 컨텍스트에서 동일 URL 이 다르게 해석되어야 합니다. 실행 컨텍스트 플래그(`sessionStorage.isHostApp`) 로 PREFIX 를 런타임에 계산해 양쪽 모두 자연스럽게 동작하도록 했습니다.
+
+### LNB 동적 조합
+
+리모트가 자신의 메뉴 항목을 `expose` 로 내보내고, 호스트가 런타임에 수집해 사이드바를 구성합니다. 리모트마다 자기 영역의 네비게이션 정책을 가져갈 수 있습니다.
+
+### 공유 라이브러리
+
+공통 컴포넌트·훅·스토어·유틸은 `@sonhoseong/mfa-lib` 한 패키지에 모아 모든 앱이 동일한 단일 인스턴스를 공유합니다.
 
 ---
 
-## 폴더 구조
+## 🛠 기술 스택
 
+### Frontend
+<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=black"> <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=TypeScript&logoColor=white"> <img src="https://img.shields.io/badge/Webpack-8DD6F9?style=for-the-badge&logo=Webpack&logoColor=black"> <img src="https://img.shields.io/badge/Module Federation-1C78C0?style=for-the-badge&logo=webpack&logoColor=white">
+
+<img src="https://img.shields.io/badge/Redux Toolkit-764ABC?style=for-the-badge&logo=Redux&logoColor=white"> <img src="https://img.shields.io/badge/React Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white"> <img src="https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white"> <img src="https://img.shields.io/badge/Tiptap-000000?style=for-the-badge&logo=tiptap&logoColor=white">
+
+### Backend
+<img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white"> <img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white"> <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON web tokens&logoColor=white">
+
+### Infrastructure
+<img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white"> <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white"> <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
+
+---
+
+## 📌 기능
+
+### 이력서
+- 직무별로 여러 개의 이력서를 작성하고 공개·비공개·메인 설정으로 노출 관리
+- 경력·프로젝트·기술스택·학력·자격증을 각각 별도 항목으로 추가
+- 기술스택은 카테고리부터 직접 만들어 자유롭게 구성
+- **노션 페이지 연동** — 본인 노션에 정리한 이력 콘텐츠를 그대로 임베드해 노출
+
+### 블로그
+- 리치 텍스트 에디터(Tiptap) 기반 글 작성, 코드 블록은 구문 강조 지원
+- 태그·시리즈로 글 그룹화, 좋아요·댓글·대댓글
+- 발행 / 임시 저장 / 비공개 상태 관리
+
+### 포트폴리오
+- 프로젝트 카드 + 상세 모달로 기간·기술·역할·기여 내용 표시
+- 이력서별로 노출할 프로젝트 조합을 따로 지정
+- 카테고리·이미지·마일스톤·성과 지표 관리
+- **노션 페이지 연동** — 포트폴리오 본문을 노션에서 작성하고 그대로 노출
+
+### 공통
+- Google OAuth 로그인 + 자체 JWT(AccessToken + HttpOnly RefreshToken) 인증
+- 다른 유저의 이력서·블로그·포트폴리오 둘러보기 + 팔로우 / 좋아요 / 댓글 / SNS 공유
+- 대시보드에서 본인의 글·프로젝트·지원 현황 한눈에 확인
+
+---
+
+## 🚀 성과
+
+### Remote 간 인증 상태 동기화
+
+**고민** — 독립적으로 실행되는 리모트들이 동일한 인증 상태를 바라보도록 호스트의 인증 스토어를 공유해야 했다. 개인 프로젝트 규모에서는 인증 상태 일관성과 독립 개발 환경 유지에 우선순위를 두었다.
+
+**해결** — 호스트가 자신의 Redux 스토어 인스턴스를 전역 객체로 노출하고, 리모트들이 이를 참조해 동일한 인증 상태를 공유하도록 했다. 리모트가 단독 실행될 때는 자체 로컬 스토어로 자동 fallback 한다.
+
+**결과** — 사용자는 앱 간 이동 시 재로그인할 필요가 없고, 로그아웃 한 번으로 모든 리모트의 인증 상태가 즉시 동기화된다.
+
+---
+
+### MFA 환경을 위한 중앙 집중형 인증 시스템
+
+**고민** — 호스트와 리모트가 하나의 서비스처럼 동작하려면 인증 상태를 일관되게 유지해야 했다. Access Token 은 짧은 수명(15 분) 으로 Redux 메모리에만 두고, Refresh Token 은 7 일 HttpOnly 쿠키로 분리 관리하는 구조를 설계했다.
+
+**세션 복원 UX 이슈** — Access Token 이 휘발되는 순간 로그인 페이지가 잠깐 노출되는 플리커가 발생했다. 인증 복원이 끝날 때까지 전역 로딩(GlobalLoading) 으로 화면 렌더링을 지연시켜 해당 현상을 제거했다.
+
+**선제 갱신 스케줄링** — Access Token 만료 5 분 전 `setTimeout` 으로 갱신을 예약, 사용자 체감 만료를 제거했다.
+
+**결과** — 인증 로직을 중앙화해 앱을 이동해도 재로그인이 필요 없고, Refresh Token 을 HttpOnly Cookie 로 관리해 토큰 노출 위험을 줄였다.
+
+---
+
+### Module Federation 환경에서 단일 장애점 제거
+
+**고민** — 리모트 4 개를 독립 배포하는 과정에서 *특정 리모트 장애가 호스트 전체에 영향을 주는* 문제를 발견했다. 리모트 로딩 과정을 직접 제어하는 동적 로더로 해결하기로 했다.
+
+**해결** — 자체 동적 로더(~ 60 LOC) 가 ① 1 분 단위 타임스탬프로 최신 `remoteEntry.js` 로드, ② 이미 로드된 리모트 재사용, ③ 로드 실패 시 fallback UI 제공을 담당한다.
+
+**결과** — 리모트 장애가 발생해도 다른 기능은 정상 동작하며, 재배포 후 최신 번들이 즉시 반영된다.
+
+---
+
+## 🔥 트러블슈팅
+
+### 1. 페이지 이동 시 사용자 정보가 사라지는 무한 리렌더링
+
+**문제** — 페이지를 이동하면 사용자 정보가 사라지고 로그인이 풀린 것처럼 보였다. 동시에 컴포넌트가 의미 없이 계속 재렌더링되었다.
+
+**추적** — 초기에는 인증 로직과 스토어 동기화를 의심했지만, 실제 Redux state 는 정상이었다. 인증 로직 / 스토어 동기화 / `useSyncExternalStore` 세 가지 가설을 세우고 하나씩 좁힌 끝에, `getSnapshot` 이 매 호출마다 *새로운 객체 참조* 를 반환하는 지점을 발견했다.
+
+**원인** — React 19 의 `useSyncExternalStore` 는 같은 데이터에 대해 같은 참조를 반환하는 `getSnapshot` 을 요구한다. 기존 구현은 Redux state 가 비어 있을 때 localStorage fallback 으로 떨어졌고, 이 fallback 이 `JSON.parse` 로 매번 새 객체를 만들었다. 데이터는 같아도 참조가 달라 React 는 변경으로 인식, 무한 리렌더링이 발생했다.
+
+**해결** — localStorage fallback 을 제거하고 Redux 메모리를 단일 source 로 통일했다. Redux 는 동일 state 에 대해 같은 참조를 유지하므로 참조 안정성이 자동으로 충족된다.
+
+---
+
+### 2. 특정 리모트 진입 시 Invalid Hook Call
+
+**문제** — 호스트에서 특정 리모트로 진입하면 `Invalid Hook Call` 에러가 발생하며 화면이 렌더링되지 않았다. 같은 리모트를 단독으로 실행하면 정상이었다.
+
+**원인** — 호스트와 리모트가 *각자 즉시 React 를 초기화* 하면서 동일 페이지에 서로 다른 React 인스턴스가 충돌했다. React 는 모듈 단위로 내부 상태를 유지하기 때문에 인스턴스가 둘이면 hook dispatcher 가 어긋난다.
+
+**고민** — Module Federation 의 `shared` 모듈에 `singleton: true` 만 주면 충분할 줄 알았지만 충돌이 계속됐다. `eager: true / false` 사이에서 *언제 누가* React 를 로드하는지 협상 동작을 추적하다가, `eager: true` 가 협상 단계를 건너뛰고 동기 초기화를 강제한다는 점을 확인했다. 호스트와 리모트가 모두 `eager: true` 면 둘 다 자기 React 를 들고 와버린다.
+
+**해결** — 리모트의 `shared` 에서 `eager: true` 를 빼고, 즉시 초기화는 호스트만 담당하도록 분리했다. 리모트는 `eager: false` 로 두어 협상 단계에서 호스트가 이미 로드한 React 를 재사용한다.
+
+---
+
+## 로컬 실행
+
+```bash
+# 루트에서 전체 설치
+npm install
+
+# 전체 동시 실행 (권장)
+npm run dev
+
+# 앱별 개별 실행
+npm run dev:host      # http://localhost:5000
+npm run dev:resume    # http://localhost:5001
+npm run dev:blog      # http://localhost:5002
+npm run dev:portfolio # http://localhost:5003
 ```
-mfa-monorepo/
-├── apps/
-│   ├── host/               # 컨테이너 앱 (port 5000)
-│   ├── resume/             # 이력서 앱 (port 5001)
-│   ├── blog/               # 블로그 앱 (port 5002)
-│   ├── portfolio/          # 포트폴리오 앱 (port 5003)
-│   ├── techblog/           # 기술블로그 앱 (port 5004)
-│   └── api/                # Express API 서버 (port 4000)
-│
-└── packages/
-    └── lib/                # @sonhoseong/mfa-lib
-        └── src/
-            ├── components/ # DeferredComponent, ErrorBoundary 등
-            ├── hooks/      # useAuth, useLocalInitialize 등
-            ├── store/      # authSlice, Redux 설정
-            └── network/    # apiClient, 공유 axios 인스턴스
+
+> Remote가 먼저 떠 있어야 Host에서 정상 로드됩니다. `npm run dev`는 concurrently로 동시에 올립니다.
+
+### 환경 변수
+
+루트에 `.env` 생성:
+
+```env
+REACT_APP_SUPABASE_URL=your_supabase_url
+REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+REMOTE1_URL=http://localhost:5001   # 로컬
+REMOTE2_URL=http://localhost:5002
+REMOTE3_URL=http://localhost:5003
 ```
 
 ---
 
-## 기술 스택
+## 배포 구조 (Vercel)
 
-| 영역 | 기술 |
-|------|------|
-| Frontend | React 19, TypeScript 5 |
-| 상태관리 | Redux Toolkit, React Redux |
-| 빌드 | Webpack 5 Module Federation |
-| 백엔드 API | Express.js (Node.js, MVC 패턴) |
-| 인증 | Google OAuth 2.0 + JWT (AccessToken + HttpOnly RefreshToken) |
-| 데이터베이스 | Supabase (PostgreSQL 17 + RLS + Storage) |
-| 배포 | Vercel (앱별 독립 프로젝트) |
-| 공유 라이브러리 | `@sonhoseong/mfa-lib` (자체 패키지) |
+앱마다 독립 Vercel 프로젝트로 배포합니다.
 
----
+| 앱 | Root Directory |
+|----|---------------|
+| host | `apps/host` |
+| resume | `apps/resume` |
+| blog | `apps/blog` |
+| portfolio | `apps/portfolio` |
+| api | `apps/api` |
 
-## 기술 의사결정 (선택 근거)
+Host가 Remote의 `remoteEntry.js`를 fetch하므로, **Remote 앱의 Deployment Protection을 반드시 비활성화**해야 합니다.
 
-> 단순 사용 기술이 아니라 "왜 이걸 골랐는가" 의 근거. 면접 단골 질문 선점용.
-
-| 결정 영역 | 선택 | 검토했던 대안 | 선택 이유 |
-|---|---|---|---|
-| FE 아키텍처 | **Module Federation (Webpack 5)** | Next.js 단일 앱 · Nx workspace · iframe 임베드 | Remote 4 개를 *런타임* 에 통합해야 했고, 각 앱이 단독 배포·실행 가능해야 함. 빌드 시 의존성 0 |
-| 상태관리 | **Redux Toolkit + `window.__REDUX_STORE__`** | Zustand · Jotai · Context API | Host 와 Remote 가 **동일 store 인스턴스** 를 공유해야 인증 상태가 일관됨. Context 는 각 Remote 가 자기 React 트리를 갖기 때문에 분리됨 |
-| 인증 구현 | **자체 JWT (Express + jose)** | Supabase Auth · NextAuth · Auth0 | JWT 구조·Refresh Rotation·HttpOnly Cookie 직접 학습 + Refresh Token DB 저장으로 *서버 측 revoke* 가능 |
-| Refresh Token 저장 | **HttpOnly Cookie (7 일)** | localStorage · sessionStorage · Redux | XSS 차단 (JS 접근 불가). Access Token 은 Redux 메모리만 — 새로고침마다 silent refresh |
-| Access Token 콜백 전달 | **1 분짜리 단기 쿠키** (`access_token_once`) | URL 쿼리스트링 · postMessage · 페이지 변수 | URL/Referer/히스토리 노출 차단. 1 분 TTL 로 탈취 시점 제한 |
-| 백엔드 | **Express MVC (별도 Vercel 프로젝트)** | Next.js API Routes · Fastify · NestJS | FE 와 BE 배포 주기·언어·런타임 분리. MVC 3 파일(router/controller/service) 강제로 응집도 ↑ |
-| DB & 권한 | **Supabase RLS + Express middleware 이중** | Firebase · 자체 PG | RLS 로 *데이터 레이어* 권한 1 차 차단, middleware 로 *비즈니스 레이어* 2 차 차단. Defense in depth |
-| 공유 코드 배포 | **자체 npm 패키지** `@sonhoseong/mfa-lib` | npm workspaces symlink · git submodule | Module Federation `shared.requiredVersion` 협상이 정식 패키지 메타데이터를 요구. symlink 만으로는 version 매칭 실패 가능 |
-| Remote 로더 | **자체 동적 로더 (~60 LOC)** | `@module-federation/runtime` 공식 패키지 | 캐시 무효화 정책(1 분 타임스탬프)·fallback UI·timeout 을 프로젝트 정책대로 직접 제어 |
+```bash
+# 빌드 (lib 먼저 빌드해야 Remote들이 최신 반영)
+npm run build:lib
+npm run build:all
+```
 
 ---
 
@@ -459,131 +567,6 @@ erDiagram
 
 ---
 
-## 로컬 실행
-
-```bash
-# 루트에서 전체 설치
-npm install
-
-# 전체 동시 실행 (권장)
-npm run dev
-
-# 앱별 개별 실행
-npm run dev:host      # http://localhost:5000
-npm run dev:resume    # http://localhost:5001
-npm run dev:blog      # http://localhost:5002
-npm run dev:portfolio # http://localhost:5003
-```
-
-> Remote가 먼저 떠 있어야 Host에서 정상 로드됩니다. `npm run dev`는 concurrently로 동시에 올립니다.
-
-### 환경 변수
-
-루트에 `.env` 생성:
-
-```env
-REACT_APP_SUPABASE_URL=your_supabase_url
-REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
-REMOTE1_URL=http://localhost:5001   # 로컬
-REMOTE2_URL=http://localhost:5002
-REMOTE3_URL=http://localhost:5003
-```
-
----
-
-## 배포 구조 (Vercel)
-
-앱마다 독립 Vercel 프로젝트로 배포합니다.
-
-| 앱 | Root Directory |
-|----|---------------|
-| host | `apps/host` |
-| resume | `apps/resume` |
-| blog | `apps/blog` |
-| portfolio | `apps/portfolio` |
-| api | `apps/api` |
-
-Host가 Remote의 `remoteEntry.js`를 fetch하므로, **Remote 앱의 Deployment Protection을 반드시 비활성화**해야 합니다.
-
-```bash
-# 빌드 (lib 먼저 빌드해야 Remote들이 최신 반영)
-npm run build:lib
-npm run build:all
-```
-
----
-
-## 기능
-
-### 이력서
-- 직무별로 여러 개의 이력서를 작성하고 공개·비공개·메인 설정으로 노출 관리
-- 경력·프로젝트·기술스택·학력·자격증을 각각 별도 항목으로 추가
-- 기술스택은 카테고리부터 직접 만들어 자유롭게 구성
-
-### 블로그
-- 리치 텍스트 에디터(Tiptap) 기반 글 작성, 코드 블록은 구문 강조 지원
-- 태그·시리즈로 글 그룹화, 좋아요·댓글·대댓글
-- 발행 / 임시 저장 / 비공개 상태 관리
-
-### 포트폴리오
-- 프로젝트 카드 + 상세 모달로 기간·기술·역할·기여 내용 표시
-- 이력서별로 노출할 프로젝트 조합을 따로 지정
-- 카테고리·이미지·마일스톤·성과 지표 관리
-
-### 공통
-- Google OAuth 로그인 + 자체 JWT(AccessToken + HttpOnly RefreshToken) 인증
-- 다른 유저의 이력서·블로그·포트폴리오 둘러보기 + 팔로우 / 좋아요 / 댓글 / SNS 공유
-- 대시보드에서 본인의 글·프로젝트·지원 현황 한눈에 확인
-
----
-
-## 성과
-
-- **MFA 4 개 앱 + Express API + Supabase** 로 구성된 풀스택 프로젝트를 1 인 설계·구현·배포까지 끝까지 끌고 갔다.
-- **런타임 통합** — 호스트·리모트 모두 단독 실행 가능하면서, 통합 시에는 인증·스토어·라우팅이 끊김 없이 이어지는 구조를 직접 설계했다.
-- **인증 보안** — Refresh Token DB 저장(서버 측 revoke), HttpOnly 쿠키, 1 분짜리 단기 쿠키 콜백, Supabase RLS + Express 미들웨어 이중 권한 검증까지 *defense in depth* 로 구성했다.
-- **트러블슈팅 경험치** — `useSyncExternalStore` 의 getSnapshot 참조 안정성, Module Federation 의 shared 모듈 협상 같은 *공식 문서만 보고는 잡기 어려운* 이슈를 직접 추적·해결했다.
-
----
-
-## 트러블슈팅
-
-### 1. 페이지 이동 시 사용자 정보가 사라지는 무한 리렌더링
-
-**문제** — 페이지를 이동하면 사용자 정보가 사라지고 로그인이 풀린 것처럼 보였다. 동시에 컴포넌트가 의미 없이 계속 재렌더링되었다.
-
-**추적** — 초기에는 인증 로직과 스토어 동기화를 의심했지만, 실제 Redux state 는 정상이었다. 인증 로직 / 스토어 동기화 / `useSyncExternalStore` 세 가지 가설을 세우고 하나씩 좁힌 끝에, `getSnapshot` 이 매 호출마다 *새로운 객체 참조* 를 반환하는 지점을 발견했다.
-
-**원인** — React 19 의 `useSyncExternalStore` 는 같은 데이터에 대해 같은 참조를 반환하는 `getSnapshot` 을 요구한다. 기존 구현은 Redux state 가 비어 있을 때 localStorage fallback 으로 떨어졌고, 이 fallback 이 `JSON.parse` 로 매번 새 객체를 만들었다. 데이터는 같아도 참조가 달라 React 는 변경으로 인식, 무한 리렌더링이 발생했다.
-
-**해결** — localStorage fallback 을 제거하고 Redux 메모리를 단일 source 로 통일했다. Redux 는 동일 state 에 대해 같은 참조를 유지하므로 참조 안정성이 자동으로 충족된다.
-
----
-
-### 2. 특정 리모트 진입 시 Invalid Hook Call
-
-**문제** — 호스트에서 특정 리모트로 진입하면 `Invalid Hook Call` 에러가 발생하며 화면이 렌더링되지 않았다. 같은 리모트를 단독으로 실행하면 정상이었다.
-
-**원인** — 호스트와 리모트가 *각자 즉시 React 를 초기화* 하면서 동일 페이지에 서로 다른 React 인스턴스가 충돌했다. React 는 모듈 단위로 내부 상태를 유지하기 때문에 인스턴스가 둘이면 hook dispatcher 가 어긋난다.
-
-**고민** — Module Federation 의 `shared` 모듈에 `singleton: true` 만 주면 충분할 줄 알았지만 충돌이 계속됐다. `eager: true / false` 사이에서 *언제 누가* React 를 로드하는지 협상 동작을 추적하다가, `eager: true` 가 협상 단계를 건너뛰고 동기 초기화를 강제한다는 점을 확인했다. 호스트와 리모트가 모두 `eager: true` 면 둘 다 자기 React 를 들고 와버린다.
-
-**해결** — 리모트의 `shared` 에서 `eager: true` 를 빼고, 즉시 초기화는 호스트만 담당하도록 분리했다. 리모트는 `eager: false` 로 두어 협상 단계에서 호스트가 이미 로드한 React 를 재사용한다.
-
----
-
-### 그 밖에 마주친 이슈
-
-| 이슈 | 해결 |
-|---|---|
-| 배포 후 `remoteEntry.js` 가 CDN 캐싱되어 구버전 리모트 로드 | 1 분 단위 타임스탬프 쿼리스트링으로 캐시 무효화 |
-| 단독 / 호스트 통합 시 동일 URL 이 다르게 파싱되어야 함 | `sessionStorage` 플래그로 PREFIX 를 런타임에 계산 |
-| 빠른 로딩에서도 스켈레톤이 잠깐 노출되는 플리커 | `DeferredComponent` 로 지연 마운트 처리 |
-| 토큰 만료 시 동시 요청이 각자 `/auth/refresh` 호출 | axios 인터셉터에서 갱신 플래그 + Promise 큐로 일괄 재시도 |
-| 서버 경유 업로드 시 API 메모리에 파일이 통과 | Presigned URL 발급 후 클라이언트가 Supabase Storage 에 직접 PUT |
-
----
-
 ## 향후 개선 로드맵
 
 - **이력서별 독립 URL 발급** — 회사별 맞춤 노출을 위한 JWT 서명 URL + per-resume slug 도입
@@ -592,3 +575,25 @@ npm run build:all
 - **E2E 테스트(Playwright)** — 리모트 간 인증 전파·라우팅·LNB 동적 조합 통합 시나리오 자동화
 - **모바일 PWA** — 반응형을 넘어 Service Worker + 오프라인 캐시까지 확장
 
+---
+
+## 🗂 폴더 구조
+
+```
+mfa-monorepo/
+├── apps/
+│   ├── host/               # 컨테이너 앱 (port 5000)
+│   ├── resume/             # 이력서 앱 (port 5001)
+│   ├── blog/               # 블로그 앱 (port 5002)
+│   ├── portfolio/          # 포트폴리오 앱 (port 5003)
+│   ├── techblog/           # 기술블로그 앱 (port 5004)
+│   └── api/                # Express API 서버 (port 4000)
+│
+└── packages/
+    └── lib/                # @sonhoseong/mfa-lib
+        └── src/
+            ├── components/ # DeferredComponent, ErrorBoundary 등
+            ├── hooks/      # useAuth, useLocalInitialize 등
+            ├── store/      # authSlice, Redux 설정
+            └── network/    # apiClient, 공유 axios 인스턴스
+```
