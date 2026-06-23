@@ -2,7 +2,7 @@
 
 > 이력서, 블로그, 포트폴리오를 한 곳에서 작성하고 발행할 수 있는 개인 커리어 관리 플랫폼
 
-커리어허브는 자신의 커리어를 정리하고 공유할 수 있는 SNS형 커리어 관리 플랫폼입니다.
+커리어허브는 자신의 커리어를 정리하고 공유할 수 있는 커리어 관리 플랫폼입니다.
 지원 직무에 맞춰 여러 개의 이력서를 작성하고 노출할 프로젝트 조합을 관리할 수 있습니다.
 포트폴리오에 진행한 프로젝트의 기간·기술·역할·고민과 해결 과정을 정리해 카드와 상세 모달로 보여줍니다.
 블로그에 학습 기록과 트러블슈팅을 글로 정리해 공개/비공개로 발행할 수 있습니다.
@@ -16,87 +16,32 @@
 
 ![대시보드](docs/dashboard.png)
 
-Host가 올라오면 보이는 메인 화면. LNB는 각 Remote 앱이 자신의 메뉴 항목을 `expose`로 내보내고, Host가 런타임에 동적으로 조합합니다.
+로그인 후 처음 보이는 메인 화면. 좌측 사이드바에서 이력서·블로그·포트폴리오로 이동할 수 있고, 작성한 글과 프로젝트 현황을 한눈에 확인합니다.
 
-### 기술스택 관리 (Remote 에디터)
+### 기술스택 관리
 
 ![기술스택 관리](docs/remote_editor.png)
 
-Resume 앱 안의 어드민 기능. 카테고리를 직접 만들고 기술을 쌓는 방식으로 이력서 기술스택을 관리합니다.
+이력서에 노출할 기술스택을 카테고리별로 직접 추가하고 관리합니다. 카테고리·기술 항목·숙련도까지 모두 사용자가 정의합니다.
 
 ### 포트폴리오 상세 모달
 
 ![포트폴리오 모달](docs/remote1_modal.png)
 
-Portfolio 앱의 프로젝트 상세 모달. 기간, 스택, 링크, 기여 내용을 한번에 볼 수 있습니다.
-
----
-
-## 왜 MFA로 만들었나
-
-처음엔 단순히 "기술 공부용"이었는데, 실제로 만들다 보니 개인 포트폴리오 사이트로 딱 맞는 구조였습니다.
-
-- **이력서 앱**은 관리자만 편집, 방문자는 읽기만
-- **블로그 앱**은 글쓰기 에디터와 뷰어가 분리
-- **포트폴리오 앱**은 프로젝트 카드 + 상세 모달
-
-기능 단위로 팀을 나누거나 배포 주기가 다르다면 MFA가 맞는 선택입니다. 그걸 개인 프로젝트 규모에서 한번 해봤습니다.
-
-다만 솔직히 말하면, 초기 설정 비용이 꽤 높습니다. 공유 라이브러리 빌드 순서, 타입 공유, singleton 설정까지 하나라도 빠지면 빈 화면입니다. "그냥 Next.js 하나로 만들 걸"이라는 생각을 여러 번 했습니다.
+프로젝트 카드를 클릭하면 기간·기술스택·링크·기여 내용·성과를 한 화면에서 확인할 수 있습니다.
 
 ---
 
 ## 아키텍처
 
-```
-┌────────────────────────────────────────────────────────┐
-│                  Host (port 5000)                      │
-│                                                        │
-│  React Router  ·  Redux Store  ·  Auth  ·  LNB        │
-│                                                        │
-│   ┌──────────┐   ┌──────────┐   ┌──────────────────┐  │
-│   │  resume  │   │   blog   │   │    portfolio     │  │
-│   │  :5001   │   │  :5002   │   │      :5003       │  │
-│   └──────────┘   └──────────┘   └──────────────────┘  │
-│                                                        │
-│   (런타임에 remoteEntry.js 로드 — 빌드 시 의존 없음)   │
-└────────────────────────────────────────────────────────┘
-                         │
-              @sonhoseong/mfa-lib
-         (공유 컴포넌트 · 훅 · 스토어 · 유틸)
-```
+호스트(컨테이너) 앱이 4 개의 리모트 앱(이력서·블로그·포트폴리오·기술블로그)을 런타임에 통합하는 Webpack 5 Module Federation 구조입니다. 각 리모트는 단독 실행도 가능하고, 호스트에 붙으면 하나의 SPA 처럼 동작합니다.
 
-각 Remote는 Host 없이도 `localhost:500x`에서 단독 실행됩니다. Host가 올라오면 `remoteEntry.js`를 런타임에 fetch해서 통합합니다.
+### 핵심 설계
 
-### 핵심 설계 결정들
-
-### Redux Store 공유
-
-Host가 `window.__REDUX_STORE__`에 스토어를 노출하고 Remote들이 참조합니다. Module Federation의 `singleton` 설정으로 `react-redux`를 단일 인스턴스로 묶지 않으면, Remote마다 별도 React 컨텍스트가 생겨서 `useSelector`가 아무것도 읽지 못합니다. 실제로 이 설정 빠진 상태에서 인증 상태가 통째로 날아가는 걸 겪어봤습니다.
-
-### 라우팅 PREFIX 동적 계산
-
-```
-Host 통합 시:   /blog/post/123  →  Remote는 /post/123 으로 받음  (PREFIX = '')
-단독 실행 시:   /blog/post/123  →  Remote는 /blog/post/123     (PREFIX = '/blog')
-```
-
-`sessionStorage.isHostApp` 플래그로 실행 컨텍스트를 판별합니다.
-
-### LNB 동적 조합
-
-```typescript
-// Remote가 직접 메뉴 항목을 내보냄
-export const lnbItems = {
-    hasPrefixList: [{ id: 'blog-home', path: '/blog', ... }],
-    hasPrefixAuthList: [...],
-};
-
-// Host가 런타임에 수집
-const { lnbItems: blogItems } = await import('@blog/LnbItems');
-```
-
-Remote를 새로 붙여도 Host 건드릴 일이 없습니다.
+- **공유 스토어** — 호스트의 Redux store 인스턴스를 리모트들이 참조해 인증 상태가 페이지 이동 후에도 일관되게 유지됩니다.
+- **동적 라우팅 PREFIX** — 동일 URL 이 호스트 통합 / 단독 실행에 따라 다르게 해석되어야 해서, 실행 컨텍스트 플래그로 PREFIX 를 런타임에 계산합니다.
+- **LNB 동적 조합** — 리모트가 자신의 메뉴 항목을 내보내고, 호스트가 런타임에 수집해 사이드바를 구성합니다. 리모트를 추가해도 호스트 코드를 손댈 일이 없습니다.
+- **공유 라이브러리** — 공통 컴포넌트·훅·스토어·유틸은 `@sonhoseong/mfa-lib` 한 패키지에 모아 모든 앱이 동일한 단일 인스턴스를 공유합니다.
 
 ---
 
@@ -568,93 +513,82 @@ npm run build:all
 
 ---
 
-## 겪었던 문제들
+## 기능
 
-### 1. 페이지 이동 시 사용자 정보가 사라지는 무한 리렌더링 (`useSyncExternalStore`)
+### 이력서
+- 직무별로 여러 개의 이력서를 작성하고 공개·비공개·메인 설정으로 노출 관리
+- 경력·프로젝트·기술스택·학력·자격증을 각각 별도 항목으로 추가
+- 기술스택은 카테고리부터 직접 만들어 자유롭게 구성
 
-**문제** — 페이지 이동 시 사용자 정보가 사라지는 문제가 발생했다. 로그인이 풀린 것처럼 보이고, 불필요한 재렌더링이 반복되었다.
+### 블로그
+- 리치 텍스트 에디터(Tiptap) 기반 글 작성, 코드 블록은 구문 강조 지원
+- 태그·시리즈로 글 그룹화, 좋아요·댓글·대댓글
+- 발행 / 임시 저장 / 비공개 상태 관리
 
-**추적** — 초기에는 인증 로직이나 Store 동기화 문제를 의심했지만, 실제 데이터는 변경되지 않고 있었다. 인증 로직 / 스토어 동기화 / `useSyncExternalStore` 셋 중 어디에 문제가 있는지 가설을 세우고 좁혔고, `getSnapshot` 이 매 호출마다 새로운 객체 참조를 반환하는 지점을 발견했다.
+### 포트폴리오
+- 프로젝트 카드 + 상세 모달로 기간·기술·역할·기여 내용 표시
+- 이력서별로 노출할 프로젝트 조합을 따로 지정
+- 카테고리·이미지·마일스톤·성과 지표 관리
 
-**원인** — `useSyncExternalStore` 의 `getSnapshot` 은 같은 데이터에 대해 **같은 참조** 를 반환해야 한다(React 19 계약). 기존 구현은 Redux state 가 비어 있을 때 `storage.getUser()` (localStorage fallback) 로 떨어졌는데, 이 함수는 매 호출마다 `JSON.parse` 결과를 새로 만들었다. 결과적으로 데이터가 동일해도 React 는 참조 비교에서 변경으로 판단해 무한 리렌더링을 일으켰다.
-
-**해결** — localStorage fallback 을 제거하고 Redux 메모리만 단일 source 로 사용하도록 변경했다. Redux 는 변경되지 않은 state 에 대해 동일 객체 참조를 유지하므로, 참조 안정성이 자동으로 충족된다.
-
-```diff
-// packages/lib/src/store/store-access.ts
-- export const getCurrentUser = (): User | null => {
--   const state = getHostState();
--   return state?.app?.user ?? storage.getUser();   // ← JSON.parse 매번 새 객체
-- };
-- // useSyncExternalStore(subscribe, getCurrentUser, getCurrentUser) → 무한 리렌더
-+ // localStorage fallback 제거 — Redux 만 단일 source
-+ const getUserSnapshot = (): User | null =>
-+   getHostStore()?.getState()?.app?.user ?? null;
-+
-+ export const useCurrentUser = (): User | null =>
-+   useSyncExternalStore(subscribeToHost, getUserSnapshot, getUserSnapshot);
-```
+### 공통
+- Google OAuth 로그인 + 자체 JWT(AccessToken + HttpOnly RefreshToken) 인증
+- 다른 유저의 이력서·블로그·포트폴리오 둘러보기 + 팔로우 / 좋아요 / 댓글 / SNS 공유
+- 대시보드에서 본인의 글·프로젝트·지원 현황 한눈에 확인
 
 ---
 
-### 2. 특정 Remote 진입 시 Invalid Hook Call (Module Federation singleton)
+## 성과
 
-**문제** — 특정 Remote 진입 시 `Invalid Hook Call` 에러가 발생하며 화면이 정상적으로 렌더링되지 않았다.
+- **MFA 4 개 앱 + Express API + Supabase** 로 구성된 풀스택 프로젝트를 1 인 설계·구현·배포까지 끝까지 끌고 갔다.
+- **런타임 통합** — 호스트·리모트 모두 단독 실행 가능하면서, 통합 시에는 인증·스토어·라우팅이 끊김 없이 이어지는 구조를 직접 설계했다.
+- **인증 보안** — Refresh Token DB 저장(서버 측 revoke), HttpOnly 쿠키, 1 분짜리 단기 쿠키 콜백, Supabase RLS + Express 미들웨어 이중 권한 검증까지 *defense in depth* 로 구성했다.
+- **트러블슈팅 경험치** — `useSyncExternalStore` 의 getSnapshot 참조 안정성, Module Federation 의 shared 모듈 협상 같은 *공식 문서만 보고는 잡기 어려운* 이슈를 직접 추적·해결했다.
 
-**원인** — Host 의 React singleton 초기화가 끝나기 전에 Remote 가 자기 React 를 먼저 로드하면서, 동일 페이지에 서로 다른 React 인스턴스가 충돌했다. React 는 모듈 단위로 내부 상태를 유지하기 때문에, 인스턴스가 둘이면 hook dispatcher 가 어긋난다.
+---
 
-**고민** — Remote 빌드 산출물의 문제를 의심했지만, 같은 Remote 를 standalone 으로 실행하면 정상이었다. 통합 환경에서만 발생하는 차이라고 판단해 Module Federation 의 `shared` 모듈 협상과 React 초기화 순서를 추적했고, Host 와 Remote 가 *각자 즉시 초기화* 하면서 충돌하는 패턴을 발견했다. `eager: true` 는 동기 초기화를 강제해 협상 단계를 건너뛴다.
+## 트러블슈팅
 
-**해결** — Remote 의 `shared` 에서 `eager: true` 를 제거하고, React singleton 의 즉시 초기화는 Host 만 담당하도록 변경했다. Remote 는 `eager: false` 상태에서 협상을 통해 Host 가 이미 로드한 React 를 재사용한다.
+### 1. 페이지 이동 시 사용자 정보가 사라지는 무한 리렌더링
 
-```diff
-// apps/blog/webpack.common.js — Remote 측 shared 설정
-shared: {
--   react:       { singleton: true, eager: true },
--   'react-dom': { singleton: true, eager: true },
-+   react:       { singleton: true, requiredVersion: false },
-+   'react-dom': { singleton: true, requiredVersion: false },
-    'react-router-dom': { singleton: true, requiredVersion: deps['react-router-dom'] },
-    '@reduxjs/toolkit': { singleton: true, requiredVersion: deps['@reduxjs/toolkit'] },
-    'react-redux':      { singleton: true, requiredVersion: deps['react-redux'] },
-    '@sonhoseong/mfa-lib': { singleton: true, requiredVersion: deps['@sonhoseong/mfa-lib'] }
-}
-```
+**문제** — 페이지를 이동하면 사용자 정보가 사라지고 로그인이 풀린 것처럼 보였다. 동시에 컴포넌트가 의미 없이 계속 재렌더링되었다.
+
+**추적** — 초기에는 인증 로직과 스토어 동기화를 의심했지만, 실제 Redux state 는 정상이었다. 인증 로직 / 스토어 동기화 / `useSyncExternalStore` 세 가지 가설을 세우고 하나씩 좁힌 끝에, `getSnapshot` 이 매 호출마다 *새로운 객체 참조* 를 반환하는 지점을 발견했다.
+
+**원인** — React 19 의 `useSyncExternalStore` 는 같은 데이터에 대해 같은 참조를 반환하는 `getSnapshot` 을 요구한다. 기존 구현은 Redux state 가 비어 있을 때 localStorage fallback 으로 떨어졌고, 이 fallback 이 `JSON.parse` 로 매번 새 객체를 만들었다. 데이터는 같아도 참조가 달라 React 는 변경으로 인식, 무한 리렌더링이 발생했다.
+
+**해결** — localStorage fallback 을 제거하고 Redux 메모리를 단일 source 로 통일했다. Redux 는 동일 state 에 대해 같은 참조를 유지하므로 참조 안정성이 자동으로 충족된다.
+
+---
+
+### 2. 특정 리모트 진입 시 Invalid Hook Call
+
+**문제** — 호스트에서 특정 리모트로 진입하면 `Invalid Hook Call` 에러가 발생하며 화면이 렌더링되지 않았다. 같은 리모트를 단독으로 실행하면 정상이었다.
+
+**원인** — 호스트와 리모트가 *각자 즉시 React 를 초기화* 하면서 동일 페이지에 서로 다른 React 인스턴스가 충돌했다. React 는 모듈 단위로 내부 상태를 유지하기 때문에 인스턴스가 둘이면 hook dispatcher 가 어긋난다.
+
+**고민** — Module Federation 의 `shared` 모듈에 `singleton: true` 만 주면 충분할 줄 알았지만 충돌이 계속됐다. `eager: true / false` 사이에서 *언제 누가* React 를 로드하는지 협상 동작을 추적하다가, `eager: true` 가 협상 단계를 건너뛰고 동기 초기화를 강제한다는 점을 확인했다. 호스트와 리모트가 모두 `eager: true` 면 둘 다 자기 React 를 들고 와버린다.
+
+**해결** — 리모트의 `shared` 에서 `eager: true` 를 빼고, 즉시 초기화는 호스트만 담당하도록 분리했다. 리모트는 `eager: false` 로 두어 협상 단계에서 호스트가 이미 로드한 React 를 재사용한다.
 
 ---
 
 ### 그 밖에 마주친 이슈
 
-| 이슈 | 원인 | 해결 |
-|---|---|---|
-| **캐시 버스팅** | 배포 후 `remoteEntry.js` 가 CDN 에 캐싱되어 구버전 Remote 로드 | 타임스탬프 쿼리스트링으로 1 분 단위 캐시 무효화 |
-| **단독/Host 혼용 라우팅** | 동일 URL 이 실행 컨텍스트(standalone vs Host 통합)에 따라 다르게 파싱되어야 함 | `sessionStorage.isHostApp` 플래그로 PREFIX 를 런타임에 계산 |
-| **스켈레톤 깜빡임** | 빠른 로딩(150 ms 미만) 에서도 스켈레톤이 잠깐 노출되는 플리커 | `DeferredComponent` 로 지연 마운트 처리 |
-| **lib 빌드 순서** | `@sonhoseong/mfa-lib` 변경 후 빌드 없이 Remote 실행 시 이전 `dist` 가 참조되어 런타임 에러 | `build:all` 스크립트에 lib 빌드를 앞에 강제 |
-| **Access Token 갱신 race condition** | 토큰 만료 시 동시 요청이 각자 `/auth/refresh` 호출 | axios 인터셉터에서 갱신 플래그 + Promise 큐 → 갱신 완료 후 일괄 재시도 |
-| **이미지 업로드 경로** | 서버 경유 업로드 시 파일이 API 서버 메모리를 통과 | API 는 Presigned URL 발급만 담당, 클라이언트가 Supabase Storage 에 직접 PUT |
+| 이슈 | 해결 |
+|---|---|
+| 배포 후 `remoteEntry.js` 가 CDN 캐싱되어 구버전 리모트 로드 | 1 분 단위 타임스탬프 쿼리스트링으로 캐시 무효화 |
+| 단독 / 호스트 통합 시 동일 URL 이 다르게 파싱되어야 함 | `sessionStorage` 플래그로 PREFIX 를 런타임에 계산 |
+| 빠른 로딩에서도 스켈레톤이 잠깐 노출되는 플리커 | `DeferredComponent` 로 지연 마운트 처리 |
+| 토큰 만료 시 동시 요청이 각자 `/auth/refresh` 호출 | axios 인터셉터에서 갱신 플래그 + Promise 큐로 일괄 재시도 |
+| 서버 경유 업로드 시 API 메모리에 파일이 통과 | Presigned URL 발급 후 클라이언트가 Supabase Storage 에 직접 PUT |
 
 ---
 
 ## 향후 개선 로드맵
 
-> "지금은 못 한 것" 을 솔직히 적는 자리. 한계 인정 + 다음 액션이 명확하면 신뢰가 올라갑니다.
-
-### 단기 (1~2 주)
-
-- **이력서별 독립 URL 발급** — 현재 단일 URL 만 발급되어 회사별 맞춤 노출이 불가. JWT 서명 URL + per-resume slug 로 *시크릿 링크* 발급 패턴 도입 예정
-- **monorepo 도구 도입 (Turborepo)** — 현재 `packages/lib/dist` 를 git 에 강제 commit 해서 Vercel 빌드 의존성을 회피 중. Turborepo 의 `dependsOn` + remote cache 로 정식 해결
-- **Module Federation 2.0 마이그레이션** — 자체 동적 로더(~60 LOC) 를 `@module-federation/runtime` 으로 교체. shared 모듈 협상·HMR·타입 공유가 공식 지원됨
-
-### 중기 (1~2 개월)
-
-- **E2E 테스트 (Playwright)** — Remote 간 인증 전파, 라우팅 PREFIX 동적 계산, LNB 동적 조합은 단위 테스트로 잡기 어려운 통합 시나리오. CI 에서 Host 부팅 후 시나리오 검증
-- **성능 측정 자동화** — Lighthouse CI + Web Vitals 트래킹. 현재는 *체감* 으로만 판단 중이라 정량 데이터 부재
-- **이미지 최적화** — 현재 원본 업로드. `next/image` 없이 직접 처리하려면 Supabase Storage Transform 또는 `sharp` 기반 변환 함수 도입 필요
-
-### 장기 (분기 단위)
-
-- **에디터 협업 기능** — 블로그·포트폴리오 에디터에 CRDT(Yjs) 기반 동시 편집. 현재는 단일 사용자 전제
-- **검색 기능** — 블로그/포트폴리오 전문 검색(PostgreSQL `tsvector` 또는 Meilisearch)
-- **모바일 PWA** — 현재 반응형만 지원. Service Worker + 오프라인 캐시까지 확장
+- **이력서별 독립 URL 발급** — 회사별 맞춤 노출을 위한 JWT 서명 URL + per-resume slug 도입
+- **Turborepo 도입** — `packages/lib/dist` 를 git 에 강제 commit 하는 임시 방편 정리
+- **Module Federation 2.0 마이그레이션** — 자체 동적 로더를 `@module-federation/runtime` 으로 교체
+- **E2E 테스트(Playwright)** — 리모트 간 인증 전파·라우팅·LNB 동적 조합 통합 시나리오 자동화
+- **모바일 PWA** — 반응형을 넘어 Service Worker + 오프라인 캐시까지 확장
 
