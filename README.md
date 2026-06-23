@@ -38,11 +38,11 @@
 
 ### 공유 스토어
 
-호스트의 Redux 스토어 인스턴스를 `window.__REDUX_STORE__` 전역 객체로 노출해 모든 리모트가 동일 인스턴스를 참조하도록 했습니다. Module Federation 의 `singleton: true` 설정만으로는 React Redux 컨텍스트가 리모트마다 분리되어 `useSelector` 가 비어 있는 문제가 있었습니다. *전역 객체 노출이 본질적인 해결* 이었고, 덕분에 인증·사용자 상태가 페이지 이동 후에도 일관되게 유지됩니다.
+호스트의 Redux 스토어 인스턴스를 `window.__REDUX_STORE__` 전역 객체로 노출해 모든 리모트가 동일 인스턴스를 참조하도록 했습니다. Module Federation 의 `singleton: true` 설정만으로는 React Redux 컨텍스트가 리모트마다 분리되어 `useSelector` 가 비어 있는 문제가 있었습니다.
 
 ### 동적 라우팅 PREFIX
 
-단독 실행과 호스트 통합, 두 컨텍스트에서 동일 URL 이 다르게 해석되어야 합니다. 실행 컨텍스트 플래그(`sessionStorage.isHostApp`) 로 PREFIX 를 런타임에 계산해 양쪽 모두 자연스럽게 동작하도록 했습니다.
+단독 실행과 호스트 통합, 두 컨텍스트에서 동일 URL 이 다르게 해석되어야 합니다. 호스트가 마운트될 때 통합 실행을 알리는 플래그를 심어 두고, 리모트는 자기 라우터가 초기화될 때 그 플래그를 읽어 자신의 베이스 경로를 런타임에 계산합니다. 같은 코드베이스로 단독 실행과 통합 실행 모두 자연스럽게 동작합니다.
 
 ### LNB 동적 조합
 
@@ -75,7 +75,7 @@
 - 직무별로 여러 개의 이력서를 작성하고 공개·비공개·메인 설정으로 노출 관리
 - 경력·프로젝트·기술스택·학력·자격증을 각각 별도 항목으로 추가
 - 기술스택은 카테고리부터 직접 만들어 자유롭게 구성
-- **노션 페이지 연동** — 본인 노션에 정리한 이력 콘텐츠를 그대로 임베드해 노출
+- 본인 노션 페이지를 연동해 이력 콘텐츠를 그대로 임베드 노출
 
 ### 블로그
 - 리치 텍스트 에디터(Tiptap) 기반 글 작성, 코드 블록은 구문 강조 지원
@@ -86,7 +86,7 @@
 - 프로젝트 카드 + 상세 모달로 기간·기술·역할·기여 내용 표시
 - 이력서별로 노출할 프로젝트 조합을 따로 지정
 - 카테고리·이미지·마일스톤·성과 지표 관리
-- **노션 페이지 연동** — 포트폴리오 본문을 노션에서 작성하고 그대로 노출
+- 노션 페이지를 연동해 포트폴리오 본문을 노션에서 작성하고 그대로 노출
 
 ### 공통
 - Google OAuth 로그인 + 자체 JWT(AccessToken + HttpOnly RefreshToken) 인증
@@ -110,6 +110,33 @@
 ### MFA 환경을 위한 중앙 집중형 인증 시스템
 
 **고민** — 호스트와 리모트가 하나의 서비스처럼 동작하려면 인증 상태를 일관되게 유지해야 했다. Access Token 은 짧은 수명(15 분) 으로 Redux 메모리에만 두고, Refresh Token 은 7 일 HttpOnly 쿠키로 분리 관리하는 구조를 설계했다.
+
+**인증 플로우 전체**
+
+```mermaid
+sequenceDiagram
+    participant B as Browser (FE)
+    participant N as Node.js Server
+
+    Note over B,N: 로그인
+    B->>N: 구글 로그인
+    N->>N: access token(15분) + refresh token(7일) 발급
+    N-->>B: body ← access token · HttpOnly Cookie ← refresh token
+    B->>B: access token만 Redux 메모리에 저장 (localStorage ❌)
+
+    Note over B,N: 새로고침 · 재진입 시
+    B->>B: GlobalLoading 표시 · 화면 렌더링 차단
+    B->>N: 토큰 갱신 요청 (HttpOnly 쿠키 자동 전송)
+    N->>N: refresh token 검증
+    N-->>B: 새 access token 발급 (유효)
+    B->>B: Redux 저장 → GlobalLoading 해제 → 화면 렌더링
+
+    Note over B,N: access token 만료 5분 전
+    B->>B: setTimeout으로 선제 갱신 스케줄링
+    B->>N: 토큰 갱신 요청 (쿠키 자동 전송)
+    N-->>B: 새 access token
+    B->>B: Redux 업데이트 (사용자 체감 만료 없음)
+```
 
 **세션 복원 UX 이슈** — Access Token 이 휘발되는 순간 로그인 페이지가 잠깐 노출되는 플리커가 발생했다. 인증 복원이 끝날 때까지 전역 로딩(GlobalLoading) 으로 화면 렌더링을 지연시켜 해당 현상을 제거했다.
 
@@ -567,16 +594,6 @@ erDiagram
 
 ---
 
-## 향후 개선 로드맵
-
-- **이력서별 독립 URL 발급** — 회사별 맞춤 노출을 위한 JWT 서명 URL + per-resume slug 도입
-- **Turborepo 도입** — `packages/lib/dist` 를 git 에 강제 commit 하는 임시 방편 정리
-- **Module Federation 2.0 마이그레이션** — 자체 동적 로더를 `@module-federation/runtime` 으로 교체
-- **E2E 테스트(Playwright)** — 리모트 간 인증 전파·라우팅·LNB 동적 조합 통합 시나리오 자동화
-- **모바일 PWA** — 반응형을 넘어 Service Worker + 오프라인 캐시까지 확장
-
----
-
 ## 🗂 폴더 구조
 
 ```
@@ -597,3 +614,13 @@ mfa-monorepo/
             ├── store/      # authSlice, Redux 설정
             └── network/    # apiClient, 공유 axios 인스턴스
 ```
+
+---
+
+## 향후 개선 로드맵
+
+- **이력서별 독립 URL 발급** — 회사별 맞춤 노출을 위한 JWT 서명 URL + per-resume slug 도입
+- **Turborepo 도입** — `packages/lib/dist` 를 git 에 강제 commit 하는 임시 방편 정리
+- **Module Federation 2.0 마이그레이션** — 자체 동적 로더를 `@module-federation/runtime` 으로 교체
+- **E2E 테스트(Playwright)** — 리모트 간 인증 전파·라우팅·LNB 동적 조합 통합 시나리오 자동화
+- **모바일 PWA** — 반응형을 넘어 Service Worker + 오프라인 캐시까지 확장
