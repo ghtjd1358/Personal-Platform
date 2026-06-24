@@ -15,6 +15,7 @@ export interface ExperienceWithDetails {
     end_date: string | null;
     is_current: boolean;
     is_dev: boolean;
+    is_hidden: boolean;
     description?: string | null;
     order_index: number;
     tasks: { id: string; task: string }[];

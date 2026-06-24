@@ -40,6 +40,7 @@ const FeaturesEditorPage: React.FC = () => {
         description: '',
         image_url: null,
         order_index: 0,
+        is_hidden: false,
     })
     const [previewUrl, setPreviewUrl] = useState<string | null>(null) // 업로드 전 로컬 blob
     const [existingUrl, setExistingUrl] = useState<string | null>(null) // 이전 Storage URL (교체 시 삭제 대상)
@@ -52,6 +53,7 @@ const FeaturesEditorPage: React.FC = () => {
             description: loadedFeature.description,
             image_url: loadedFeature.image_url,
             order_index: loadedFeature.order_index,
+            is_hidden: loadedFeature.is_hidden ?? false,
         })
         setExistingUrl(loadedFeature.image_url ?? null)
     }, [isEdit, loadedFeature])
@@ -205,6 +207,25 @@ const FeaturesEditorPage: React.FC = () => {
                         min={0}
                     />
                 </label>
+
+                <div className="exp-field">
+                    <div className="exp-field-label">
+                        <span className="exp-field-name">플래그</span>
+                        <span className="exp-field-hint">FLAGS</span>
+                    </div>
+                    <div className="exp-checks">
+                        {/* DB 는 is_hidden 으로 저장하지만 UI 는 "노출" 체크가 직관적이라 반전. */}
+                        <label className="exp-check">
+                            <input
+                                type="checkbox"
+                                checked={!form.is_hidden}
+                                onChange={(e) => setField('is_hidden', !e.target.checked)}
+                            />
+                            <span className="exp-check-box" aria-hidden="true"></span>
+                            <span className="exp-check-label">노출</span>
+                        </label>
+                    </div>
+                </div>
 
                 <footer className="exp-editor-actions">
                     <button

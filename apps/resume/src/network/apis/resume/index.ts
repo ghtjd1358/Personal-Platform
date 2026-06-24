@@ -131,18 +131,22 @@ export const resumesApi = {
     if (error) throw error;
     if (!resume) return null;
 
-    // 2. Experiences (resume_id로 조회, fallback으로 user_id)
+    // 2. Experiences (resume_id 기준, 관리자가 숨긴 항목은 제외)
     const { data: experiences } = await getSupabase()
       .from('experiences')
       .select('*')
       .eq('resume_id', id)
+      .eq('is_hidden', false)
       .order('order_index');
 
-    // 3. Projects/portfolios (resume_id로 조회)
+    // 3. Projects/portfolios — "프로젝트" 섹션은 회사 작업물(category='work') 만.
+    //    개인 작업물(personal)은 별도 "주요 작업물" 섹션 (추후 추가) 영역.
     const { data: projects } = await getSupabase()
       .from('portfolios')
       .select('*')
       .eq('resume_id', id)
+      .eq('show_on_resume', true)
+      .eq('category', 'work')
       .order('order_index');
 
     return {
@@ -173,18 +177,21 @@ export const resumesApi = {
 
     const resume = resumes[0];
 
-    // 2. Experiences (resume_id로 조회)
+    // 2. Experiences (관리자 숨김 항목 제외)
     const { data: experiences } = await getSupabase()
       .from('experiences')
       .select('*')
       .eq('resume_id', resume.id)
+      .eq('is_hidden', false)
       .order('order_index');
 
-    // 3. Projects/portfolios (resume_id로 조회)
+    // 3. Projects/portfolios — "프로젝트" 섹션은 회사 작업물만.
     const { data: projects } = await getSupabase()
       .from('portfolios')
       .select('*')
       .eq('resume_id', resume.id)
+      .eq('show_on_resume', true)
+      .eq('category', 'work')
       .order('order_index');
 
     return {

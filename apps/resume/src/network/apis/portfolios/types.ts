@@ -14,6 +14,8 @@ export interface PortfolioWithDetails {
     is_current: boolean;
     image_url?: string | null;
     order_index: number;
+    show_on_resume: boolean;
+    category: 'work' | 'personal';
     tasks: { id: string; task: string }[];
     tags: string[];
 }

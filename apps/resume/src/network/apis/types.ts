@@ -11,6 +11,7 @@ export interface Experience {
   end_date: string | null;
   is_current: boolean;
   is_dev: boolean;
+  is_hidden: boolean; // 관리자 노출 토글 (true = 숨김)
   description?: string;
   order_index: number;
   created_at?: string;
@@ -27,6 +28,7 @@ export interface ExperienceInput {
   end_date?: string | null;
   is_current: boolean;
   is_dev: boolean;
+  is_hidden?: boolean;
   description?: string;
   order_index?: number;
   user_id?: string;
@@ -70,6 +72,12 @@ export interface Portfolio extends PortfolioCore {
   is_featured?: boolean;
   category_id?: string | null;
 
+  // 노출/분류 토글
+  /** 이력서에 노출할지 (false 면 home/resume timeline 에서 숨김). 기존 컬럼 재사용. */
+  show_on_resume?: boolean;
+  /** 회사(work) / 개인(personal) 작업물 분류. resume 의 "프로젝트" vs "주요 작업물" 섹션 분기. */
+  category: 'work' | 'personal';
+
   created_at?: string;
   updated_at?: string;
 }
@@ -91,6 +99,7 @@ export interface Feature {
   description: string;
   image_url: string | null;
   order_index: number;
+  is_hidden: boolean; // 관리자 노출 토글 (true = 숨김)
   created_at?: string;
   updated_at?: string;
 }
@@ -101,6 +110,7 @@ export interface FeatureInput {
   image_url?: string | null;
   order_index?: number;
   user_id?: string;
+  is_hidden?: boolean;
 }
 
 export interface PortfolioInput extends PortfolioCore {
@@ -122,4 +132,9 @@ export interface PortfolioInput extends PortfolioCore {
   badge?: string;
   is_featured?: boolean;
   category_id?: string;
+
+  /** 이력서 노출 토글 (기본 true) */
+  show_on_resume?: boolean;
+  /** 회사(work) / 개인(personal) 분류 (기본 personal) */
+  category?: 'work' | 'personal';
 }

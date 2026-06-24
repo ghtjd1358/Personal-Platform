@@ -44,6 +44,8 @@ const ProjectsEditorPage: React.FC = () => {
     const deletePortfolio = useDeletePortfolio()
 
     // 필수 + 선택 필드 통합 form
+    // 신규 카드 기본값: ?fromResume=1 로 들어왔으면 회사 작업물(work) 의도 → category 도 'work' 로 추정.
+    // 그렇지 않으면 개인 작업물(personal) 이 안전한 기본값 (실수로 회사 분류 되는 사고 예방).
     const [form, setForm] = useState<ProjectFormState>({
         title: '',
         role: '',
@@ -51,6 +53,7 @@ const ProjectsEditorPage: React.FC = () => {
         end_date: '',
         is_current: false,
         link_to_resume: fromResume === '1',
+        category: fromResume === '1' ? 'work' : 'personal',
         short_description: '',
         demo_url: '',
         github_url: '',
@@ -83,6 +86,7 @@ const ProjectsEditorPage: React.FC = () => {
             end_date: data.end_date || '',
             is_current: data.is_current || false,
             link_to_resume: !!data.resume_id,
+            category: (data as any).category === 'work' ? 'work' : 'personal',
             short_description: (data as any).short_description || '',
             demo_url: (data as any).demo_url || '',
             github_url: (data as any).github_url || '',
@@ -127,6 +131,7 @@ const ProjectsEditorPage: React.FC = () => {
             is_current: form.is_current,
             resume_id: resumeIdToSet,
             show_on_resume: form.link_to_resume,
+            category: form.category,
             short_description: form.short_description || undefined,
             demo_url: form.demo_url || undefined,
             github_url: form.github_url || undefined,

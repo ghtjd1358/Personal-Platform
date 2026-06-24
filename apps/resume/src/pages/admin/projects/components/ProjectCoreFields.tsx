@@ -7,6 +7,8 @@ export interface ProjectFormState {
     end_date: string;
     is_current: boolean;
     link_to_resume: boolean;
+    /** 'work' = 회사 작업물 (이력서 "프로젝트" 섹션), 'personal' = 개인 작업물 (이력서 "주요 작업물" 섹션). */
+    category: 'work' | 'personal';
     short_description: string;
     demo_url: string;
     github_url: string;
@@ -96,6 +98,36 @@ const ProjectCoreFields: React.FC<ProjectCoreFieldsProps> = ({ form, onChange })
                         />
                         <span className="exp-check-box" aria-hidden="true"></span>
                         <span className="exp-check-label">이력서에 노출</span>
+                    </label>
+                </div>
+            </div>
+
+            <div className="exp-field">
+                <div className="exp-field-label">
+                    <span className="exp-field-name">분류</span>
+                    <span className="exp-field-hint">CATEGORY</span>
+                </div>
+                <div className="exp-checks">
+                    {/* radio: 회사 작업물(work) ↔ 개인 작업물(personal). 이력서 섹션 분기를 결정. */}
+                    <label className="exp-check">
+                        <input
+                            type="radio"
+                            name="portfolio-category"
+                            checked={form.category === 'work'}
+                            onChange={() => onChange({ ...form, category: 'work' })}
+                        />
+                        <span className="exp-check-box" aria-hidden="true"></span>
+                        <span className="exp-check-label">회사 작업물</span>
+                    </label>
+                    <label className="exp-check">
+                        <input
+                            type="radio"
+                            name="portfolio-category"
+                            checked={form.category === 'personal'}
+                            onChange={() => onChange({ ...form, category: 'personal' })}
+                        />
+                        <span className="exp-check-box" aria-hidden="true"></span>
+                        <span className="exp-check-label">개인 작업물</span>
                     </label>
                 </div>
             </div>

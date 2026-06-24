@@ -35,6 +35,7 @@ const ExperienceEditorPage: React.FC = () => {
         end_date: '',
         is_current: false,
         is_dev: true,
+        is_hidden: false,
     })
     const [tasksText, setTasksText] = useState('')
     const [tagsText, setTagsText] = useState('')
@@ -53,6 +54,7 @@ const ExperienceEditorPage: React.FC = () => {
             end_date: loadedExp.end_date || '',
             is_current: loadedExp.is_current || false,
             is_dev: loadedExp.is_dev ?? true,
+            is_hidden: loadedExp.is_hidden ?? false,
         })
         setTasksText(loadedExp.tasks.map((t) => t.task).join('\n'))
         setTagsText(loadedExp.tags.join(', '))
@@ -194,6 +196,16 @@ const ExperienceEditorPage: React.FC = () => {
                                 />
                                 <span className="exp-check-box" aria-hidden="true"></span>
                                 <span className="exp-check-label">개발직</span>
+                            </label>
+                            {/* 노출 = checked, 숨김 = unchecked. DB 는 is_hidden 으로 저장 → UI 만 반전. */}
+                            <label className="exp-check">
+                                <input
+                                    type="checkbox"
+                                    checked={!form.is_hidden}
+                                    onChange={(e) => setForm({ ...form, is_hidden: !e.target.checked })}
+                                />
+                                <span className="exp-check-box" aria-hidden="true"></span>
+                                <span className="exp-check-label">노출</span>
                             </label>
                         </div>
                     </div>

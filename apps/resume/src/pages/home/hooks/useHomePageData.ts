@@ -83,6 +83,7 @@ interface ExperienceRow {
     end_date: string | null;
     is_current: boolean;
     is_dev: boolean;
+    is_hidden?: boolean;
     experience_tasks?: { id: string; task: string; order_index: number }[];
     experience_tags?: { tag: string; skills?: SkillJoin }[];
 }
@@ -118,6 +119,7 @@ interface PortfolioRow {
     role: string | null;
     start_date: string | null;
     end_date: string | null;
+    category?: 'work' | 'personal';
     portfolio_tasks?: { task: string; order_index: number }[];
     portfolio_tags?: { tag: string; order_index: number; skills?: SkillJoin }[];
 }
@@ -187,6 +189,8 @@ export const useHomePageData = (): HomeData => {
                         sb.from('experiences')
                             // experience_tags JOIN skills JOIN skill_categories — 카테고리 order 까지 끌어와 정렬용
                             .select('*, experience_tasks(id, task, order_index), experience_tags(tag, skills(icon, icon_color, skill_categories(order_index)))')
+                            // 관리자가 admin 에서 토글한 숨김 행은 home 에 안 나옴.
+                            .eq('is_hidden', false)
                             .order('order_index', { ascending: true })
                     ).then((r) => (r.data ?? []) as ExperienceRow[])
                         .catch(() => [] as ExperienceRow[]),
@@ -202,6 +206,7 @@ export const useHomePageData = (): HomeData => {
                     Promise.resolve(
                         sb.from('features')
                             .select('*')
+                            .eq('is_hidden', false)
                             .order('order_index', { ascending: true })
                     ).then((r) => (r.data ?? []) as Feature[])
                         .catch(() => [] as Feature[]),
@@ -229,9 +234,13 @@ export const useHomePageData = (): HomeData => {
                 }
 
                 if (portfolioResp.length > 0) {
-                    setPortfolioData(mapPortfolios(portfolioResp));
-                    // "경력 섹션 - 프로젝트 timeline" 도 portfolios 를 재사용. ProjectDetail shape 로 매핑.
-                    setProjects(portfolioResp.map((row): ProjectDetail => ({
+                    // 회사(work) 작업물 = 경력 timeline 의 "프로젝트" 섹션.
+                    // 개인(personal) 작업물 = 별도 "주요 작업물" 카드 섹션.
+                    const workRows = portfolioResp.filter((row) => row.category === 'work');
+                    const personalRows = portfolioResp.filter((row) => row.category !== 'work');
+
+                    setPortfolioData(mapPortfolios(personalRows));
+                    setProjects(workRows.map((row): ProjectDetail => ({
                         id: row.id,
                         title: row.title,
                         role: row.role ?? '',
