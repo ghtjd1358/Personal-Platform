@@ -392,10 +392,25 @@ Host 와 Remote 가 React 를 각자 로드 → `singleton: true` 설정 누락.
 
 ---
 
+# 10. 🏗️ 기술 구현 요약 (Tech Highlights)
+
+> 노션 포트폴리오 본문에서는 **서비스 기능 중심**으로 정리하면서 빼낸, **아키텍처·인프라 어필 포인트**. 기술블로그·README·면접 도입부에서 활용.
+
+- **Module Federation 기반 MFA 통합** — Host 1개 + Remote 4개(이력서·블로그·포트폴리오·취업관리)를 런타임에 묶어 하나의 플랫폼처럼 운영
+- **JWT 인증 서버 자체 구현 (Node.js + Express)** — Supabase Auth 대신 access(메모리) + refresh(HttpOnly Cookie) 토큰 분리 저장 정책을 직접 설계
+- **Google OAuth 콜백 흐름 직접 구축** — 인증 서버 콜백 → JWT 발급 → Redux 메모리 주입 흐름까지 일원화
+- **공통 인증·UI 로직 npm 패키지화** — `@sonhoseong/mfa-lib`로 분리해 Host/Remote 4개에 단일 버전 배포, singleton 공유
+- **Supabase RLS + 라우트 Guard 이중 권한 제어** — DB 레벨(RLS)과 라우트 레벨(Guard)을 분리해 권한 누락을 양쪽에서 막음
+- **Wildcard 라우팅으로 Host 단일 라우터** — Remote가 자체 라우팅을 갖지 않고 Host가 path 패턴으로 잡아넘기는 구조, 딥링크·새로고침·인증 상태 유지
+- **Vercel 멀티 프로젝트 독립 배포** — 5개 앱(Host + Remote 4)을 각각 별도 Vercel 프로젝트로 배포, 한 앱 재배포가 다른 앱에 영향 주지 않음
+
+---
+
 ## 📝 업데이트 로그
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-06-23 | 노션 포폴 서비스 기능 중심 재정리 + 기술 자랑 7개 bullet은 본 문서 10장으로 이관 |
 | 2026-04-25 | 단일 통합 페이지 재작성 (remote2 + host + lib 중심), 구 문서 19개 + 중복 DB 1개 정리 |
 | 2026-02-25 | Host v2 / Remote1 v2 문서 |
 | 2026-01-11 | 레이아웃 Phase, 트러블슈팅, 배포, 면접 |
