@@ -3,8 +3,9 @@ import { useSelector } from 'react-redux';
 import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import { useCurrentUser, useToast, selectAccessToken, LoadingSpinner, useImageUpload } from '@sonhoseong/mfa-lib';
 import { resumesApi, uploadProfileImage, experiencesApi, portfoliosApi } from '@/network';
-import type { ResumeProfile, ResumeVisibility } from '@/network/apis/resume/types/resume';
+import type { ResumeProfile } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
+import { useResumeForm } from '@/hooks';
 import {
   ExperienceEditor,
   ProjectEditor,
@@ -18,36 +19,6 @@ import {
   type ProjectFormData,
 } from './components';
 
-interface FormData {
-  resume_name: string;
-  name: string;
-  title: string;
-  summary: string;
-  profile_image: string;
-  contact_email: string;
-  github: string;
-  blog: string;
-  visibility: ResumeVisibility;
-  experiences: ExperienceFormData[];
-  projects: ProjectFormData[];
-  skills: string[];
-}
-
-const initialFormData: FormData = {
-  resume_name: '',
-  name: '',
-  title: '',
-  summary: '',
-  profile_image: '',
-  contact_email: '',
-  github: '',
-  blog: '',
-  visibility: 'private',
-  experiences: [],
-  projects: [],
-  skills: [],
-};
-
 const ResumeEditorPage: React.FC = () => {
   const { resumeId } = useParams<{ resumeId: string }>();
   const navigate = useNavigate();
@@ -57,7 +28,7 @@ const ResumeEditorPage: React.FC = () => {
   const user = useCurrentUser();
 
   const [resume, setResume] = useState<ResumeProfile | null>(null);
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const { formData, setFormData, handleChange, setVisibility } = useResumeForm();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -186,11 +157,6 @@ const ResumeEditorPage: React.FC = () => {
     loadData();
   }, [accessToken, user?.id, navigate, resumeId, isCreateMode]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -304,10 +270,6 @@ const ResumeEditorPage: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const setVisibility = (value: ResumeVisibility) => {
-    setFormData(prev => ({ ...prev, visibility: value }));
   };
 
   if (!accessToken) {
