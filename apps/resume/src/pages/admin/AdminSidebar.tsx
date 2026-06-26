@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { getSupabase } from '@sonhoseong/mfa-lib';
 
 interface MenuItem {
   title: string;
@@ -105,6 +106,23 @@ const AdminSidebar: React.FC = () => {
       </nav>
 
       <div className="admin-sidebar-footer">
+        {/* 1회용: owner 계정에 Google identity 연결. 링크 완료 후 이 블록 제거 예정. */}
+        <button
+          type="button"
+          className="admin-back-link"
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+          onClick={async () => {
+            const { error } = await getSupabase().auth.linkIdentity({ provider: 'google' });
+            if (error) alert(`Google 연동 실패: ${error.message}`);
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v8M8 12h8" />
+          </svg>
+          <span>Google 계정 연동</span>
+        </button>
+
         <NavLink to="/" className="admin-back-link">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
