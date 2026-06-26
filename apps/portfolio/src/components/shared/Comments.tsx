@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { useAsyncConfirm, Button, LoadingSpinner } from '@sonhoseong/mfa-lib';
+import { useAsyncConfirm, Button, LoadingSpinner, useInlineEdit } from '@sonhoseong/mfa-lib';
 import { Link } from 'react-router-dom';
 import { usePortfolioComments } from '@/hooks';
 import { Comment } from '@/network/apis/comments';
@@ -36,8 +36,10 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
   const [newComment, setNewComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState('');
+  // editingId/editContent 페어 → useInlineEdit
+  const edit = useInlineEdit<string, string>('');
+  const editContent = edit.draft;
+  const setEditContent = edit.setDraft;
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,7 +63,7 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
     if (!editContent.trim() || submitting) return;
     setSubmitting(true);
     const ok = await update(commentId, editContent.trim());
-    if (ok) { setEditingId(null); setEditContent(''); }
+    if (ok) edit.cancel();
     setSubmitting(false);
   };
 
@@ -73,7 +75,7 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
 
   const renderComment = (comment: Comment, isReply = false) => {
     const isOwner = currentUser?.id === comment.user_id;
-    const isEditing = editingId === comment.id;
+    const isEditing = edit.isEditing(comment.id);
 
     return (
       <div key={comment.id} className={`comment-item ${isReply ? 'reply' : ''}`}>
@@ -89,7 +91,7 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
           </div>
           {isOwner && !isEditing && (
             <div className="comment-actions">
-              <Button variant="text" size="sm" className="comment-action-btn" onClick={() => { setEditingId(comment.id); setEditContent(comment.content); }}>수정</Button>
+              <Button variant="text" size="sm" className="comment-action-btn" onClick={() => edit.start(comment.id, comment.content)}>수정</Button>
               <Button variant="danger" size="sm" className="comment-action-btn delete" onClick={() => handleDelete(comment.id)}>삭제</Button>
             </div>
           )}
@@ -99,7 +101,7 @@ const Comments: React.FC<CommentsProps> = ({ portfolioId }) => {
           <div className="comment-edit-form">
             <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="comment-textarea" rows={3} />
             <div className="comment-edit-actions">
-              <Button variant="ghost" size="sm" className="comment-btn secondary" onClick={() => { setEditingId(null); setEditContent(''); }}>취소</Button>
+              <Button variant="ghost" size="sm" className="comment-btn secondary" onClick={() => edit.cancel()}>취소</Button>
               <Button variant="primary" size="sm" className="comment-btn primary" onClick={() => handleEdit(comment.id)} disabled={submitting} loading={submitting}>저장</Button>
             </div>
           </div>

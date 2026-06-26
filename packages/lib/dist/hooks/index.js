@@ -22,3 +22,4 @@ export * from './use-async-state';
 export * from './use-form-from-data';
 export * from './use-image-upload';
 export * from './use-line-delimited-input';
+export * from './use-inline-edit';

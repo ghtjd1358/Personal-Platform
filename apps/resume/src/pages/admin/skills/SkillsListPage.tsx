@@ -5,7 +5,7 @@
  * - iconMap 에 없는 커스텀 아이콘/이모지는 "+ 커스텀 아이콘" 링크로 editor 페이지로 fallback
  */
 import React, { useMemo, useState } from 'react';
-import { useAsyncConfirm, usePermission, Button, EmptyState } from '@sonhoseong/mfa-lib';
+import { useAsyncConfirm, usePermission, Button, EmptyState, useInlineEdit } from '@sonhoseong/mfa-lib';
 import { techIconMap as iconMap } from '@sonhoseong/mfa-lib';
 import type { SkillCategoryWithSkills } from '../../../network/apis/supabase';
 import {
@@ -34,8 +34,11 @@ const SkillsListPage: React.FC = () => {
 
     const [newCategoryName, setNewCategoryName] = useState('');
     const [creatingCategory, setCreatingCategory] = useState(false);
-    const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
-    const [editingCategoryName, setEditingCategoryName] = useState('');
+    // editingCategoryId(=id) + editingCategoryName(=draft) 페어 → useInlineEdit 표준화.
+    const categoryEdit = useInlineEdit<string, string>('');
+    const editingCategoryId = categoryEdit.editingId;
+    const editingCategoryName = categoryEdit.draft;
+    const setEditingCategoryName = categoryEdit.setDraft;
 
     // picker drawer 상태
     const [pickerOpenFor, setPickerOpenFor] = useState<string | null>(null);
@@ -66,8 +69,7 @@ const SkillsListPage: React.FC = () => {
         if (!name) return;
         const res = await updateCategory(id, { label: name });
         if (!res) return;
-        setEditingCategoryId(null);
-        setEditingCategoryName('');
+        categoryEdit.cancel();
         refresh();
     };
 
@@ -119,15 +121,8 @@ const SkillsListPage: React.FC = () => {
         setPickerSearch('');
     };
 
-    const handleStartEdit = (id: string, currentName: string) => {
-        setEditingCategoryId(id);
-        setEditingCategoryName(currentName);
-    };
-
-    const handleCancelEdit = () => {
-        setEditingCategoryId(null);
-        setEditingCategoryName('');
-    };
+    const handleStartEdit = (id: string, currentName: string) => categoryEdit.start(id, currentName);
+    const handleCancelEdit = () => categoryEdit.cancel();
 
     const isEmpty = categories.length === 0;
 
