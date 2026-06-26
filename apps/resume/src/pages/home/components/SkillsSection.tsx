@@ -15,7 +15,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ categories }) => {
   if (categories.length === 0) return null;
 
   return (
-    <section id="skills" className="section">
+    <section id="tech-stack" className="section">
       <div className="container">
         <div className="section-header animate-on-scroll">
           <div className="section-label">기술 스택</div>
