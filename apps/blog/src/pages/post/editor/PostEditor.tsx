@@ -21,12 +21,13 @@ const PostEditor: React.FC = () => {
   // 데이터 페칭 (시리즈는 더 이상 UI에 노출하지 않지만 initialFormData 호환성 유지)
   const { tags, originalPost, initialFormData, isLoading } = usePostEditorData(slug);
 
-  // 에디터 이미지 업로드 — lib useEditorImageUploader 위임 (검증 + toast 통일)
+  // 에디터 이미지 업로드 — lib useEditorImageUploader 위임 (UI 채널은 onError 로 주입)
   const uploadImageFn = useUploadImage();
   const handleEditorUpload = useEditorImageUploader({
     uploader: (file) => uploadImageFn(file, 'blog'),
     extractUrl: (r) => (r === false ? null : r.url),
     maxSizeBytes: UPLOAD_CONFIG.maxImageSize,
+    onError: (msg) => toast.error(msg),
   });
 
   // 뮤테이션

@@ -55,6 +55,7 @@ const PortfolioEditorPage: React.FC = () => {
         uploader: (file) => uploadImageFn(file, 'portfolio'),
         extractUrl: (r) => (r === false ? null : r.url),
         maxSizeBytes: UPLOAD_CONFIG.maxImageSize,
+        onError: (msg) => toast.error(msg),
     });
 
     useEffect(() => {
