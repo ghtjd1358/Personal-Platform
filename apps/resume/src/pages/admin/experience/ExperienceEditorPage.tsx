@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { useToast, useCurrentUser, Badge } from '@sonhoseong/mfa-lib'
+import { useToast, useCurrentUser, useLineDelimitedInput } from '@sonhoseong/mfa-lib'
 import { LINK_PREFIX } from '@/config/constants'
 import {
     useFetchExperienceByIdWithDetails,
@@ -36,8 +36,10 @@ const ExperienceEditorPage: React.FC = () => {
         is_current: false,
         is_dev: true,
         is_hidden: false,
+        description: '',
     })
-    const [tasksText, setTasksText] = useState('')
+    // tasks 는 줄바꿈 → string[], tags 는 쉼표 → string[] (구분자 다르므로 hook 분기)
+    const tasks = useLineDelimitedInput()
     const [tagsText, setTagsText] = useState('')
 
     const listUrl = resumeId
@@ -55,9 +57,12 @@ const ExperienceEditorPage: React.FC = () => {
             is_current: loadedExp.is_current || false,
             is_dev: loadedExp.is_dev ?? true,
             is_hidden: loadedExp.is_hidden ?? false,
+            description: loadedExp.description || '',
         })
-        setTasksText(loadedExp.tasks.map((t) => t.task).join('\n'))
+        tasks.setFromList(loadedExp.tasks.map((t) => t.task))
         setTagsText(loadedExp.tags.join(', '))
+        // tasks 는 함수형 setter 외 안정 ref — deps 누락 의도적
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEdit, loadedExp])
 
     const parsedTags = useMemo(
@@ -72,10 +77,7 @@ const ExperienceEditorPage: React.FC = () => {
             return
         }
 
-        const parsedTasks = tasksText
-            .split('\n')
-            .map((s) => s.trim())
-            .filter(Boolean)
+        const parsedTasks = tasks.lines
 
         let expId: string | undefined = id
         if (isEdit && id) {
@@ -215,13 +217,27 @@ const ExperienceEditorPage: React.FC = () => {
                 <div className="exp-editor-card">
                     <div className="exp-field">
                         <div className="exp-field-label">
+                            <span className="exp-field-name">설명 (헤드라인 + 컨텍스트)</span>
+                            <span className="exp-field-hint">빈 줄로 문단 구분 · 첫 문단=강조</span>
+                        </div>
+                        <textarea
+                            className="exp-textarea"
+                            value={form.description}
+                            onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            rows={5}
+                            placeholder={'예)\n한국음악저작권협회 ... 통합 리뉴얼 프로젝트 프론트엔드 개발 담당\n\n차세대·포털·모바일앱으로 분산된 ... Micro Frontend 환경에서 재구성'}
+                        />
+                    </div>
+
+                    <div className="exp-field">
+                        <div className="exp-field-label">
                             <span className="exp-field-name">주요 업무</span>
                             <span className="exp-field-hint">ONE TASK PER LINE · **BOLD** OK</span>
                         </div>
                         <textarea
                             className="exp-textarea"
-                            value={tasksText}
-                            onChange={(e) => setTasksText(e.target.value)}
+                            value={tasks.text}
+                            onChange={(e) => tasks.setText(e.target.value)}
                             rows={8}
                             placeholder={'예)\n**React + TypeScript** 기반 관리자 페이지 개발\n성능 최적화로 리렌더 40% 감소'}
                         />
@@ -241,7 +257,7 @@ const ExperienceEditorPage: React.FC = () => {
                         <div className="exp-chips">
                             {parsedTags.length > 0 ? (
                                 parsedTags.map((t) => (
-                                    <Badge key={t} variant="default" className="exp-chip">{t}</Badge>
+                                    <span key={t} className="exp-chip">{t}</span>
                                 ))
                             ) : (
                                 <span className="exp-chips-empty">쉼표로 구분하면 여기에 칩으로 나타나요.</span>

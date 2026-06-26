@@ -1,17 +1,14 @@
-/**
- * PortfolioEditorPage - 포트폴리오 생성/편집 페이지
- */
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCurrentUser, useToast, EmptyState, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, EmptyState, Button, useImageUpload } from '@sonhoseong/mfa-lib';
+import { CreatePortfolioRequest } from '@/network';
 import {
-    createPortfolio,
-    updatePortfolio,
-    getPortfolioById,
-    uploadImage,
-    CreatePortfolioRequest,
-} from '@/network';
+    useFetchPortfolioById,
+    useCreatePortfolio,
+    useUpdatePortfolio,
+    useUploadImage,
+} from '@/network/hooks';
+import { usePortfolioForm, INITIAL_FORM_DATA } from '@/hooks/usePortfolioForm';
 import { LINK_PREFIX, UPLOAD_CONFIG } from '@/config/constants';
 import {
     PortfolioBasicSection,
@@ -21,13 +18,6 @@ import {
     PortfolioPreview,
 } from './components';
 
-interface TechStackItem {
-    name: string;
-    icon?: string;
-    icon_color?: string;
-}
-
-// API 응답의 태그 타입 (객체 또는 문자열)
 type TagItem = { tag: string } | string;
 
 const PortfolioEditorPage: React.FC = () => {
@@ -35,215 +25,112 @@ const PortfolioEditorPage: React.FC = () => {
     const navigate = useNavigate();
     const toast = useToast();
     const currentUser = useCurrentUser();
-
     const isEditing = !!id;
 
-    // Form state
-    const [title, setTitle] = useState('');
-    const [slug, setSlug] = useState('');
-    const [shortDescription, setShortDescription] = useState('');
-    const [description, setDescription] = useState('');
-    const [coverImage, setCoverImage] = useState('');
-    const [badge, setBadge] = useState('');
-    const [status, setStatus] = useState<'draft' | 'published' | 'archived'>('draft');
-    const [isFeatured, setIsFeatured] = useState(false);
-    const [isPublic, setIsPublic] = useState(true);
-    const [showOnResume, setShowOnResume] = useState(true);
-    const [demoUrl, setDemoUrl] = useState('');
-    const [githubUrl, setGithubUrl] = useState('');
+    const { formData, setFormData, updateField, addTechStack, removeTechStack, generateSlug } =
+        usePortfolioForm();
 
-    // Detail state
-    const [role, setRole] = useState('');
-    const [teamSize, setTeamSize] = useState('');
-    const [duration, setDuration] = useState('');
-    const [period, setPeriod] = useState('');
-    const [overview, setOverview] = useState('');
-    const [challenge, setChallenge] = useState('');
-    const [solution, setSolution] = useState('');
-    const [outcome, setOutcome] = useState('');
-
-    // Tags & Tech
-    const [tagsInput, setTagsInput] = useState('');
-    const [techStack, setTechStack] = useState<TechStackItem[]>([]);
     const [newTechName, setNewTechName] = useState('');
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { detail } = useFetchPortfolioById(id);
+    const createPortfolioFn = useCreatePortfolio();
+    const updatePortfolioFn = useUpdatePortfolio();
+    const uploadImageFn = useUploadImage();
+
+    // useImageUpload — uploadImageFn 결과({url} | null) 받아 coverImage field set.
+    const { isUploading, inputRef: fileInputRef, handleFileChange: handleImageUpload } = useImageUpload({
+        uploader: (file) => uploadImageFn(file, 'portfolio'),
+        maxSizeBytes: UPLOAD_CONFIG.maxImageSize,
+        onSuccess: (result) => {
+            if (result) {
+                updateField('coverImage', result.url);
+                toast.success('이미지가 업로드되었습니다.');
+            }
+        },
+        onError: (msg) => toast.error(msg),
+    });
 
     useEffect(() => {
-        if (isEditing && id) {
-            loadPortfolio(id);
-        }
-    }, [id, isEditing]);
-
-    const loadPortfolio = async (portfolioId: string) => {
-        setIsLoading(true);
-        const result = await getPortfolioById(portfolioId);
-        if (result.success && result.data) {
-            const p = result.data;
-            setTitle(p.title || '');
-            setSlug(p.slug || '');
-            setShortDescription(p.short_description || '');
-            setDescription(p.description || '');
-            setCoverImage(p.cover_image || '');
-            setBadge(p.badge || '');
-            setStatus(p.status || 'draft');
-            setIsFeatured(p.is_featured || false);
-            setIsPublic(p.is_public !== false);
-            setShowOnResume(p.show_on_resume !== false);
-            setDemoUrl(p.demo_url || '');
-            setGithubUrl(p.github_url || '');
-
-            if (p.detail) {
-                setRole(p.detail.role || '');
-                setTeamSize(p.detail.team_size?.toString() || '');
-                setDuration(p.detail.duration || '');
-                setPeriod(p.detail.period || '');
-                setOverview(p.detail.overview || '');
-                setChallenge(p.detail.challenge || '');
-                setSolution(p.detail.solution || '');
-                setOutcome(p.detail.outcome || '');
-            }
-
-            if (p.tags && p.tags.length > 0) {
-                setTagsInput(p.tags.map((t: TagItem) => typeof t === 'string' ? t : t.tag).join(', '));
-            }
-
-            if (p.techStack && p.techStack.length > 0) {
-                setTechStack(p.techStack.map((t) => ({
-                    name: t.name,
-                    icon: t.icon ?? undefined,
-                    icon_color: t.icon_color ?? undefined,
-                })));
-            }
-        } else {
-            toast.error('포트폴리오를 불러올 수 없습니다.');
-            navigate(`${LINK_PREFIX}/mypage`);
-        }
-        setIsLoading(false);
-    };
-
-    const generateSlug = (text: string) => {
-        return text
-            .toLowerCase()
-            .replace(/[^a-z0-9가-힣\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .substring(0, 100);
-    };
+        if (!detail) return;
+        setFormData({
+            ...INITIAL_FORM_DATA,
+            title: detail.title ?? '',
+            slug: detail.slug ?? '',
+            shortDescription: detail.short_description ?? '',
+            description: detail.description ?? '',
+            coverImage: detail.cover_image ?? '',
+            badge: detail.badge ?? '',
+            status: detail.status ?? 'draft',
+            isFeatured: detail.is_featured ?? false,
+            isPublic: detail.is_public !== false,
+            showOnResume: detail.show_on_resume !== false,
+            demoUrl: detail.demo_url ?? '',
+            githubUrl: detail.github_url ?? '',
+            role: detail.detail?.role ?? '',
+            teamSize: detail.detail?.team_size?.toString() ?? '',
+            duration: detail.detail?.duration ?? '',
+            period: detail.detail?.period ?? '',
+            overview: detail.detail?.overview ?? '',
+            challenge: detail.detail?.challenge ?? '',
+            solution: detail.detail?.solution ?? '',
+            outcome: detail.detail?.outcome ?? '',
+            tagsInput: detail.tags?.length
+                ? detail.tags.map((t: TagItem) => (typeof t === 'string' ? t : t.tag)).join(', ')
+                : '',
+            techStack: detail.techStack?.map((t) => ({
+                name: t.name,
+                icon: t.icon ?? undefined,
+                icon_color: t.icon_color ?? undefined,
+            })) ?? [],
+        });
+    }, [detail, setFormData]);
 
     const handleTitleChange = (value: string) => {
-        setTitle(value);
-        if (!isEditing && !slug) {
-            setSlug(generateSlug(value) + '-' + Date.now().toString(36));
-        }
-    };
-
-    const addTechStack = () => {
-        if (newTechName.trim()) {
-            setTechStack([...techStack, { name: newTechName.trim() }]);
-            setNewTechName('');
-        }
-    };
-
-    const removeTechStack = (index: number) => {
-        setTechStack(techStack.filter((_, i) => i !== index));
-    };
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        if (file.size > UPLOAD_CONFIG.maxImageSize) {
-            toast.error(`이미지 크기는 ${UPLOAD_CONFIG.maxImageSize / (1024 * 1024)}MB 이하여야 합니다.`);
-            return;
-        }
-
-        if (!file.type.startsWith('image/')) {
-            toast.error('이미지 파일만 업로드 가능합니다.');
-            return;
-        }
-
-        setIsUploading(true);
-        const result = await uploadImage(file, 'portfolio');
-        setIsUploading(false);
-
-        if (result.success && result.data) {
-            setCoverImage(result.data.url);
-            toast.success('이미지가 업로드되었습니다.');
-        } else {
-            toast.error(result.error || '이미지 업로드에 실패했습니다.');
-        }
-
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+        updateField('title', value);
+        if (!isEditing && !formData.slug) {
+            updateField('slug', generateSlug(value) + '-' + Date.now().toString(36));
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.title.trim()) return toast.error('제목을 입력해주세요.');
+        if (!formData.slug.trim()) return toast.error('슬러그를 입력해주세요.');
 
-        if (!title.trim()) {
-            toast.error('제목을 입력해주세요.');
-            return;
-        }
+        const tags = formData.tagsInput.split(',').map((t) => t.trim()).filter(Boolean);
 
-        if (!slug.trim()) {
-            toast.error('슬러그를 입력해주세요.');
-            return;
-        }
-
-        setIsSaving(true);
-
-        const tags = tagsInput
-            .split(',')
-            .map((t) => t.trim())
-            .filter((t) => t);
-
-        const portfolioData: CreatePortfolioRequest = {
-            title: title.trim(),
-            slug: slug.trim(),
-            description: description.trim() || undefined,
-            short_description: shortDescription.trim() || undefined,
-            cover_image: coverImage.trim() || undefined,
-            badge: badge.trim() || undefined,
-            status,
-            is_featured: isFeatured,
-            is_public: isPublic,
-            show_on_resume: showOnResume,
-            demo_url: demoUrl.trim() || undefined,
-            github_url: githubUrl.trim() || undefined,
+        const payload: CreatePortfolioRequest = {
+            title: formData.title.trim(),
+            slug: formData.slug.trim(),
+            description: formData.description.trim() || undefined,
+            short_description: formData.shortDescription.trim() || undefined,
+            cover_image: formData.coverImage.trim() || undefined,
+            badge: formData.badge.trim() || undefined,
+            status: formData.status,
+            is_featured: formData.isFeatured,
+            is_public: formData.isPublic,
+            show_on_resume: formData.showOnResume,
+            demo_url: formData.demoUrl.trim() || undefined,
+            github_url: formData.githubUrl.trim() || undefined,
             detail: {
-                role: role.trim() || undefined,
-                team_size: teamSize ? parseInt(teamSize) : undefined,
-                duration: duration.trim() || undefined,
-                period: period.trim() || undefined,
-                overview: overview.trim() || undefined,
-                challenge: challenge.trim() || undefined,
-                solution: solution.trim() || undefined,
-                outcome: outcome.trim() || undefined,
+                role: formData.role.trim() || undefined,
+                team_size: formData.teamSize ? parseInt(formData.teamSize) : undefined,
+                duration: formData.duration.trim() || undefined,
+                period: formData.period.trim() || undefined,
+                overview: formData.overview.trim() || undefined,
+                challenge: formData.challenge.trim() || undefined,
+                solution: formData.solution.trim() || undefined,
+                outcome: formData.outcome.trim() || undefined,
             },
             tags: tags.length > 0 ? tags : undefined,
-            techStack: techStack.length > 0 ? techStack : undefined,
+            techStack: formData.techStack.length > 0 ? formData.techStack : undefined,
         };
 
-        let result;
-        if (isEditing && id) {
-            result = await updatePortfolio({ id, ...portfolioData });
-        } else {
-            result = await createPortfolio(portfolioData);
-        }
+        const result = isEditing && id
+            ? await updatePortfolioFn(id, payload)
+            : await createPortfolioFn(payload);
 
-        setIsSaving(false);
-
-        if (result.success) {
-            toast.success(isEditing ? '포트폴리오가 수정되었습니다.' : '포트폴리오가 생성되었습니다.');
-            navigate(`${LINK_PREFIX}/mypage`);
-        } else {
-            toast.error(result.error || '저장에 실패했습니다.');
-        }
+        if (result) navigate(`${LINK_PREFIX}/mypage`);
     };
 
     if (!currentUser) {
@@ -254,17 +141,8 @@ const PortfolioEditorPage: React.FC = () => {
         );
     }
 
-    if (isLoading) {
-        return (
-            <div className="editor-container">
-                <LoadingSpinner message="불러오는 중" />
-            </div>
-        );
-    }
-
     return (
         <div className="editor-container editor-split-layout">
-            {/* 왼쪽: 폼 영역 */}
             <form onSubmit={handleSubmit} className="editor-form">
                 <div className="editor-header">
                     <h1>{isEditing ? '포트폴리오 편집' : '새 포트폴리오'}</h1>
@@ -274,95 +152,96 @@ const PortfolioEditorPage: React.FC = () => {
                             variant="secondary"
                             className="btn-secondary"
                             onClick={() => navigate(`${LINK_PREFIX}/mypage`)}
-                            disabled={isSaving}
                         >
                             취소
                         </Button>
-                        <Button type="submit" variant="primary" className="btn-primary" disabled={isSaving} loading={isSaving}>
-                            {isSaving ? '저장 중...' : isEditing ? '수정' : '생성'}
+                        <Button type="submit" variant="primary" className="btn-primary">
+                            {isEditing ? '수정' : '생성'}
                         </Button>
                     </div>
                 </div>
 
                 <div className="editor-content">
                     <PortfolioBasicSection
-                        title={title}
-                        slug={slug}
-                        badge={badge}
-                        shortDescription={shortDescription}
-                        description={description}
-                        coverImage={coverImage}
+                        title={formData.title}
+                        slug={formData.slug}
+                        badge={formData.badge}
+                        shortDescription={formData.shortDescription}
+                        description={formData.description}
+                        coverImage={formData.coverImage}
                         isUploading={isUploading}
                         fileInputRef={fileInputRef}
                         onTitleChange={handleTitleChange}
-                        onSlugChange={setSlug}
-                        onBadgeChange={setBadge}
-                        onShortDescriptionChange={setShortDescription}
-                        onDescriptionChange={setDescription}
-                        onCoverImageChange={setCoverImage}
+                        onSlugChange={(v) => updateField('slug', v)}
+                        onBadgeChange={(v) => updateField('badge', v)}
+                        onShortDescriptionChange={(v) => updateField('shortDescription', v)}
+                        onDescriptionChange={(v) => updateField('description', v)}
+                        onCoverImageChange={(v) => updateField('coverImage', v)}
                         onImageUpload={handleImageUpload}
                     />
 
                     <PortfolioDetailSection
-                        role={role}
-                        teamSize={teamSize}
-                        period={period}
-                        duration={duration}
-                        overview={overview}
-                        challenge={challenge}
-                        solution={solution}
-                        outcome={outcome}
-                        onRoleChange={setRole}
-                        onTeamSizeChange={setTeamSize}
-                        onPeriodChange={setPeriod}
-                        onDurationChange={setDuration}
-                        onOverviewChange={setOverview}
-                        onChallengeChange={setChallenge}
-                        onSolutionChange={setSolution}
-                        onOutcomeChange={setOutcome}
+                        role={formData.role}
+                        teamSize={formData.teamSize}
+                        period={formData.period}
+                        duration={formData.duration}
+                        overview={formData.overview}
+                        challenge={formData.challenge}
+                        solution={formData.solution}
+                        outcome={formData.outcome}
+                        onRoleChange={(v) => updateField('role', v)}
+                        onTeamSizeChange={(v) => updateField('teamSize', v)}
+                        onPeriodChange={(v) => updateField('period', v)}
+                        onDurationChange={(v) => updateField('duration', v)}
+                        onOverviewChange={(v) => updateField('overview', v)}
+                        onChallengeChange={(v) => updateField('challenge', v)}
+                        onSolutionChange={(v) => updateField('solution', v)}
+                        onOutcomeChange={(v) => updateField('outcome', v)}
                     />
 
                     <PortfolioTechTagsSection
-                        techStack={techStack}
+                        techStack={formData.techStack}
                         newTechName={newTechName}
-                        tagsInput={tagsInput}
+                        tagsInput={formData.tagsInput}
                         onNewTechNameChange={setNewTechName}
-                        onAddTechStack={addTechStack}
+                        onAddTechStack={() => {
+                            addTechStack(newTechName);
+                            setNewTechName('');
+                        }}
                         onRemoveTechStack={removeTechStack}
-                        onTagsInputChange={setTagsInput}
+                        onTagsInputChange={(v) => updateField('tagsInput', v)}
                     />
 
                     <PortfolioLinksSettingsSection
-                        demoUrl={demoUrl}
-                        githubUrl={githubUrl}
-                        status={status}
-                        isPublic={isPublic}
-                        isFeatured={isFeatured}
-                        showOnResume={showOnResume}
-                        onDemoUrlChange={setDemoUrl}
-                        onGithubUrlChange={setGithubUrl}
-                        onStatusChange={setStatus}
-                        onIsPublicChange={setIsPublic}
-                        onIsFeaturedChange={setIsFeatured}
-                        onShowOnResumeChange={setShowOnResume}
+                        demoUrl={formData.demoUrl}
+                        githubUrl={formData.githubUrl}
+                        status={formData.status}
+                        isPublic={formData.isPublic}
+                        isFeatured={formData.isFeatured}
+                        showOnResume={formData.showOnResume}
+                        onDemoUrlChange={(v) => updateField('demoUrl', v)}
+                        onGithubUrlChange={(v) => updateField('githubUrl', v)}
+                        onStatusChange={(v) => updateField('status', v)}
+                        onIsPublicChange={(v) => updateField('isPublic', v)}
+                        onIsFeaturedChange={(v) => updateField('isFeatured', v)}
+                        onShowOnResumeChange={(v) => updateField('showOnResume', v)}
                     />
                 </div>
             </form>
 
-            {/* 오른쪽: 실시간 미리보기 */}
             <PortfolioPreview
-                title={title}
-                shortDescription={shortDescription}
-                coverImage={coverImage}
-                badge={badge}
-                isFeatured={isFeatured}
-                techStack={techStack}
-                role={role}
-                period={period}
-                teamSize={teamSize}
-                demoUrl={demoUrl}
-                githubUrl={githubUrl}
-                description={description}
+                title={formData.title}
+                shortDescription={formData.shortDescription}
+                coverImage={formData.coverImage}
+                badge={formData.badge}
+                isFeatured={formData.isFeatured}
+                techStack={formData.techStack}
+                role={formData.role}
+                period={formData.period}
+                teamSize={formData.teamSize}
+                demoUrl={formData.demoUrl}
+                githubUrl={formData.githubUrl}
+                description={formData.description}
             />
         </div>
     );

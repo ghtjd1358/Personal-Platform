@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
-import { useCurrentUser, useToast, selectAccessToken, LoadingSpinner } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, selectAccessToken, LoadingSpinner, useImageUpload } from '@sonhoseong/mfa-lib';
 import { resumesApi, uploadProfileImage, experiencesApi, portfoliosApi } from '@/network';
 import type { ResumeProfile, ResumeVisibility } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
@@ -60,8 +60,24 @@ const ResumeEditorPage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // useImageUpload — uploadProfileImage(user.id) 결과 받아 profile_image field set.
+  // user?.id 가 hook 옵션 deps 에 들어가야 하므로 uploader 는 closure 로 캡처.
+  const { isUploading, inputRef: fileInputRef, handleFileChange: handleImageUpload } = useImageUpload({
+    uploader: async (file) => {
+      if (!user?.id) throw new Error('로그인이 필요합니다.');
+      return uploadProfileImage(file, user.id);
+    },
+    onSuccess: (result) => {
+      if (result.success && result.publicUrl) {
+        setFormData((prev) => ({ ...prev, profile_image: result.publicUrl ?? prev.profile_image }));
+        toast.success('이미지가 업로드되었습니다.');
+      } else {
+        toast.error(result.error || '업로드에 실패했습니다.');
+      }
+    },
+    onError: (msg) => toast.error(msg),
+  });
 
   const isCreateMode = location.pathname.includes('/create');
   const isEditMode = !!resumeId && !isCreateMode;
@@ -173,30 +189,6 @@ const ResumeEditorPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user?.id) return;
-
-    setIsUploading(true);
-    try {
-      const result = await uploadProfileImage(file, user.id);
-      if (result.success && result.publicUrl) {
-        setFormData((prev) => ({ ...prev, profile_image: result.publicUrl ?? prev.profile_image }));
-        toast.success('이미지가 업로드되었습니다.');
-      } else {
-        toast.error(result.error || '업로드에 실패했습니다.');
-      }
-    } catch (err) {
-      console.error('Image upload failed:', err);
-      toast.error('이미지 업로드 중 오류가 발생했습니다.');
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

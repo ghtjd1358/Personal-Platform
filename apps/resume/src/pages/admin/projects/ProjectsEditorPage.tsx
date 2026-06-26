@@ -11,7 +11,7 @@
  */
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { useToast, useCurrentUser, getSupabase } from '@sonhoseong/mfa-lib'
+import { useToast, useCurrentUser, getSupabase, useLineDelimitedInput } from '@sonhoseong/mfa-lib'
 import {
     useFetchPortfolioByIdWithDetails,
     useCreatePortfolio,
@@ -60,7 +60,7 @@ const ProjectsEditorPage: React.FC = () => {
         figma_url: '',
         cover_image: '',
     })
-    const [tasksText, setTasksText] = useState('')
+    const tasks = useLineDelimitedInput()
     const [tagsText, setTagsText] = useState('')
 
     // 저장/취소 후 복귀: URL 의 ?fromResume=1 query 있을 때만 경력&프로젝트 로.
@@ -93,8 +93,10 @@ const ProjectsEditorPage: React.FC = () => {
             figma_url: (data as any).figma_url || '',
             cover_image: (data as any).cover_image || '',
         })
-        setTasksText(data.tasks.map((t) => t.task).join('\n'))
+        tasks.setFromList(data.tasks.map((t) => t.task))
         setTagsText(data.tags.join(', '))
+        // tasks 안정 ref — deps 누락 의도적
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEdit, loadedPortfolio])
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -104,10 +106,7 @@ const ProjectsEditorPage: React.FC = () => {
             return
         }
 
-        const parsedTasks = tasksText
-            .split('\n')
-            .map((s) => s.trim())
-            .filter(Boolean)
+        const parsedTasks = tasks.lines
 
         const parsedTags = tagsText.split(',').map((s) => s.trim()).filter(Boolean)
 
@@ -184,9 +183,9 @@ const ProjectsEditorPage: React.FC = () => {
                 <ProjectCoreFields form={form} onChange={setForm} />
 
                 <ProjectTasksTagsFields
-                    tasksText={tasksText}
+                    tasksText={tasks.text}
                     tagsText={tagsText}
-                    onTasksTextChange={setTasksText}
+                    onTasksTextChange={tasks.setText}
                     onTagsTextChange={setTagsText}
                 />
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useCurrentUser, useToast, Button, useTabState } from '@sonhoseong/mfa-lib';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useCurrentUser, useToast, Button, useTabState, useImageUpload } from '@sonhoseong/mfa-lib';
 import {
   SeriesDetail,
   CreateSeriesRequest,
@@ -45,8 +45,19 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // useImageUpload — validation/isUploading/input clear 모두 위임. caller 는 url 추출만.
+  const { isUploading, inputRef: fileInputRef, handleFileChange: handleImageUpload } = useImageUpload({
+    uploader: (file) => uploadImage(file, 'series'),
+    onSuccess: (result) => {
+      if (result.success && result.data) {
+        setCoverImage(result.data.url);
+      } else {
+        toast.error(result.error || '이미지 업로드에 실패했습니다.');
+      }
+    },
+    onError: (msg) => toast.error(msg),
+  });
 
   // 포스트 관리 상태
   const [userPosts, setUserPosts] = useState<PostItem[]>([]);
@@ -168,38 +179,6 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
       console.error('포스트 저장 실패:', err);
     } finally {
       setPostsSaving(false);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('이미지 파일만 업로드 가능합니다.');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('파일 크기는 5MB 이하만 가능합니다.');
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const result = await uploadImage(file, 'series');
-      if (result.success && result.data) {
-        setCoverImage(result.data.url);
-      } else {
-        toast.error(result.error || '이미지 업로드에 실패했습니다.');
-      }
-    } catch (err) {
-      toast.error('이미지 업로드 중 오류가 발생했습니다.');
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
