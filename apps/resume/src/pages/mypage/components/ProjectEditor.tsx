@@ -1,5 +1,5 @@
 import React from 'react';
-import { EmptyState } from '@sonhoseong/mfa-lib';
+import { EmptyState, useListState } from '@sonhoseong/mfa-lib';
 
 export interface ProjectFormData {
   id?: string;
@@ -33,28 +33,17 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   onChange,
   disabled = false,
 }) => {
-  const handleAdd = () => {
-    // 신규 항목에 stable temp id 부여 — 추가/삭제 시 React key 안정성 보장.
-    const tempId = typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    onChange([...projects, { ...emptyProject, id: tempId }]);
-  };
+  const list = useListState<ProjectFormData>({
+    items: projects,
+    onChange,
+    emptyItem: () => emptyProject,
+  });
 
-  const handleRemove = (index: number) => {
-    onChange(projects.filter((_, i) => i !== index));
-  };
-
+  // is_current=true 시 end_date 비우는 도메인 side effect — patch 에 미리 박아 hook 으로 흘림.
   const handleChange = (index: number, field: keyof ProjectFormData, value: any) => {
-    const updated = projects.map((proj, i) => {
-      if (i !== index) return proj;
-      const newProj = { ...proj, [field]: value };
-      if (field === 'is_current' && value === true) {
-        newProj.end_date = '';
-      }
-      return newProj;
-    });
-    onChange(updated);
+    const patch: Partial<ProjectFormData> = { [field]: value };
+    if (field === 'is_current' && value === true) patch.end_date = '';
+    list.update(index, patch);
   };
 
   return (
@@ -69,7 +58,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         <button
           type="button"
           className="inline-editor-add-btn"
-          onClick={handleAdd}
+          onClick={() => list.add()}
           disabled={disabled}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -86,7 +75,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
             <button
               type="button"
               className="inline-editor-empty-btn"
-              onClick={handleAdd}
+              onClick={() => list.add()}
               disabled={disabled}
             >
               첫 프로젝트 추가하기
@@ -102,7 +91,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
                 <button
                   type="button"
                   className="inline-editor-item-remove"
-                  onClick={() => handleRemove(index)}
+                  onClick={() => list.remove(index)}
                   disabled={disabled}
                   title="삭제"
                 >
