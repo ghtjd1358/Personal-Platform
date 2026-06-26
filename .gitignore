@@ -27,6 +27,9 @@ out/
 *.swp
 *.swo
 
+# Claude Code — 사용자별 로컬 권한/에이전트/스케줄 락
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
