@@ -55,6 +55,8 @@ export interface ExperienceDetail {
   end_date: string | null;
   is_current: boolean;
   is_dev: boolean;
+  /** 회사/프로젝트 헤드라인 + 컨텍스트 문단. `\n\n` 으로 paragraph 구분 — 첫 문단=헤드라인, 이후=설명. */
+  description?: string | null;
   tasks: ExperienceTask[];
   tags: PortfolioTag[];
 }

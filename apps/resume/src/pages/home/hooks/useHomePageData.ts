@@ -84,6 +84,7 @@ interface ExperienceRow {
     is_current: boolean;
     is_dev: boolean;
     is_hidden?: boolean;
+    description?: string | null;
     experience_tasks?: { id: string; task: string; order_index: number }[];
     experience_tags?: { tag: string; skills?: SkillJoin }[];
 }
@@ -96,6 +97,7 @@ const mapExperiences = (rows: ExperienceRow[]): ExperienceDetail[] =>
         end_date: row.end_date,
         is_current: row.is_current,
         is_dev: row.is_dev,
+        description: row.description ?? null,
         tasks: (row.experience_tasks ?? [])
             .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
             .map((t) => ({ id: t.id, task: t.task })),

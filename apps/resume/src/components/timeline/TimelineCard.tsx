@@ -18,6 +18,8 @@ import type { PortfolioTag } from '@/types';
 interface TimelineCardProps {
   title: string;
   subtitle: string;
+  /** 헤드라인 + 컨텍스트 문단. `\n\n` 로 paragraph 구분 — 첫 문단은 강조, 나머지는 본문. */
+  description?: string | null;
   tags?: PortfolioTag[] | string[];
   className?: string;
   children?: React.ReactNode;
@@ -29,17 +31,33 @@ const isPortfolioTag = (tag: PortfolioTag | string): tag is PortfolioTag =>
 const TimelineCard: React.FC<TimelineCardProps> = ({
   title,
   subtitle,
+  description,
   tags,
   className = '',
   children,
 }) => {
   const hasTags = Array.isArray(tags) && tags.length > 0;
+  const descParagraphs = description
+    ? description.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+    : [];
 
   return (
     <Card className={`timeline-content ${className}`.trim()}>
       <Card.Body>
         <Card.Title as="h3">{title}</Card.Title>
         {subtitle && <Card.Description>{subtitle}</Card.Description>}
+        {descParagraphs.length > 0 && (
+          <div className="timeline-desc">
+            {descParagraphs.map((para, i) => (
+              <p
+                key={i}
+                className={i === 0 ? 'timeline-desc-headline' : 'timeline-desc-body'}
+              >
+                {para}
+              </p>
+            ))}
+          </div>
+        )}
         {hasTags && (
           <Card.Tags className="timeline-tech-icons">
             {(tags as Array<PortfolioTag | string>).map((tag, index) => {

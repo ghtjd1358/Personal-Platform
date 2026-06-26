@@ -512,6 +512,29 @@ body.has-header {
   line-height: 1.7;
 }
 
+/* 첫 문단(headline) — 카드 전체 톤을 잡는 문장. 굵게 + 약간 큰 사이즈. */
+.feature-desc.is-headline {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+/* 후속 문단(body) — 컨텍스트 보강. headline 보다 한 단 낮은 weight/opacity.
+   전역 .feature-desc { font-weight:600 } 가 있어 명시적으로 500 으로 override. */
+.feature-desc.is-body {
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.75;
+  margin-bottom: 8px;
+  opacity: 0.92;
+}
+
+.feature-desc.is-body:last-child {
+  margin-bottom: 0;
+}
+
 /* ===== Skills ===== */
 .skill-tabs {
   display: flex;
@@ -729,6 +752,36 @@ body.has-header {
   margin-bottom: 12px;
 }
 
+/* description = 헤드라인 1문단 + 본문 N문단. position 아래 / tags 위에 배치.
+   .timeline-content p 보다 specificity 높여 (.timeline-content + class) 폰트·색상 덮어씀. */
+.timeline-content .timeline-desc {
+  margin-top: 8px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.025);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 4px;
+}
+
+.timeline-content .timeline-desc-headline {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary);
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+
+.timeline-content .timeline-desc-body {
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+  line-height: 1.75;
+  margin-bottom: 6px;
+}
+
+.timeline-content .timeline-desc-body:last-child {
+  margin-bottom: 0;
+}
+
 .timeline-tasks {
   margin-top: 16px;
   margin-bottom: 16px;
@@ -759,6 +812,37 @@ body.has-header {
 .timeline-tasks li strong {
   color: var(--color-primary);
   font-weight: 600;
+}
+
+/* 프로젝트 task "**제목** — 상세" 의 상세 부분을 한 단 들여쓴 sub-list 로 분리.
+   동그라미 bullet 대신 가는 dash bar 로 hierarchy 약화 → 시각 weight: 본문 > 부연. */
+.timeline-tasks-sub {
+  list-style: none;
+  margin: 6px 0 0 0;
+  padding-left: 18px;
+}
+
+.timeline-tasks-sub > li {
+  position: relative;
+  padding-left: 14px;
+  margin-bottom: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  line-height: 1.7;
+  opacity: 0.88;
+}
+
+.timeline-tasks-sub > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 8px;
+  height: 1px;
+  background: var(--color-text-secondary);
+  opacity: 0.5;
+  border-radius: 0;
 }
 
 .timeline-tech-icons {

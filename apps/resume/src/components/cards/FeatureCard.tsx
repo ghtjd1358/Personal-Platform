@@ -18,6 +18,12 @@ interface FeatureCardProps {
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, imageSrc, index }) => {
+  // `\n\n` 으로 문단 구분 → 첫 문단 = headline(굵게), 이후 = body. 단일 문단도 동일 경로.
+  const paragraphs = description
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
   return (
     <Card className={`feature-card animate-on-scroll delay-${index + 1}`}>
       {imageSrc && (
@@ -27,7 +33,14 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, imageSrc,
       )}
       <Card.Body>
         <Card.Title className="feature-title">{title}</Card.Title>
-        <Card.Description className="feature-desc">{description}</Card.Description>
+        {paragraphs.map((p, i) => (
+          <Card.Description
+            key={i}
+            className={`feature-desc ${i === 0 ? 'is-headline' : 'is-body'}`}
+          >
+            {p}
+          </Card.Description>
+        ))}
       </Card.Body>
     </Card>
   );
