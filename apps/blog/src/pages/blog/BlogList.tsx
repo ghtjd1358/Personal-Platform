@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { usePermission, useCurrentUser, useDebounce } from '@sonhoseong/mfa-lib';
+import { usePermission, useCurrentUser, useDebounce, useTabState } from '@sonhoseong/mfa-lib';
 import {useBlogData, useScrollAnimation} from "@/hooks";
 import {useFetchSeries} from "@/network/hooks";
 import {HeroSection, PostsSection, SeriesGrid, SEOHead, SearchBar} from "@/components";
@@ -19,7 +19,7 @@ type ListTab = 'posts' | 'series';
 const BlogList: React.FC = () => {
   const { isAdmin } = usePermission();
   const currentUser = useCurrentUser();
-  const [activeTab, setActiveTab] = useState<ListTab>('posts');
+  const { activeTab, setActiveTab } = useTabState<ListTab>('posts');
   const [categories, setCategories] = useState<CategoryDetail[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('date');

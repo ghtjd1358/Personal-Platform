@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@sonhoseong/mfa-lib';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, useAsyncState } from '@sonhoseong/mfa-lib';
 import { ProfileDetail, updateProfile, UpdateProfileRequest } from '@/network';
 
 interface ProfileEditModalProps {
@@ -20,8 +20,6 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     short_bio: '',
     bio: '',
   });
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -40,25 +38,22 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // useAsyncState 의 error 는 Error 객체 — response.success=false 의 비즈니스 에러도 throw 로 통일해 single channel.
+  const submit = useCallback(async () => {
+    if (!profile) throw new Error('프로필 정보가 없습니다.');
+    const response = await updateProfile(profile.id, formData);
+    if (!response.success) throw new Error(response.error || '저장 중 오류가 발생했습니다.');
+    return response;
+  }, [profile, formData]);
+
+  const { isLoading: saving, error, execute } = useAsyncState(submit);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!profile) return;
-
-    setSaving(true);
-    setError(null);
-
-    try {
-      const response = await updateProfile(profile.id, formData);
-      if (response.success) {
-        onSave();
-        onClose();
-      } else {
-        setError(response.error || '저장 중 오류가 발생했습니다.');
-      }
-    } catch (err) {
-      setError('저장 중 오류가 발생했습니다.');
-    } finally {
-      setSaving(false);
+    const result = await execute();
+    if (result) {
+      onSave();
+      onClose();
     }
   };
 
@@ -107,7 +102,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             />
           </div>
 
-          {error && <div className="form-error">{error}</div>}
+          {error && <div className="form-error">{error.message}</div>}
 
           <Button.Group gap="sm" align="end" className="modal-actions">
             <Button

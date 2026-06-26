@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useCurrentUser, useToast, Button } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, Button, useTabState } from '@sonhoseong/mfa-lib';
 import {
   SeriesDetail,
   CreateSeriesRequest,
@@ -41,7 +41,7 @@ const SeriesModal: React.FC<SeriesModalProps> = ({
   onSave,
 }) => {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<TabType>('info');
+  const { activeTab, setActiveTab } = useTabState<TabType>('info');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState('');

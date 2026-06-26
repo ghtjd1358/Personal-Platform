@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCurrentUser, EmptyState } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, EmptyState, useTabState } from '@sonhoseong/mfa-lib';
 import { LoadingSpinner } from '@/components/loading';
 import { useMyPageData, useScrollAnimation } from '@/hooks';
 import { LINK_PREFIX } from '@/config/constants';
@@ -39,7 +39,7 @@ const MyPage: React.FC = () => {
   }, [targetUserId, currentUser?.id]);
 
   const { profile, posts, series, stats, isLoading, refetch } = useMyPageData(targetUserId);
-  const [activeTab, setActiveTab] = useState<TabType>('posts');
+  const { activeTab, setActiveTab } = useTabState<TabType>('posts');
   const [editModalOpen, setEditModalOpen] = useState(false);
 
   // 스크롤 애니메이션 - activeTab 변경 시에도 재설정

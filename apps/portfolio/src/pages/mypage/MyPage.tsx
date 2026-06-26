@@ -2,37 +2,37 @@
  * MyPage - 포트폴리오 관리 페이지
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCurrentUser, useAsyncConfirm, useToast, Badge, EmptyState, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useAsyncConfirm, useToast, Badge, EmptyState, LoadingSpinner, Button, useAsyncState } from '@sonhoseong/mfa-lib';
 import { getMyPortfolios, deletePortfolio, PortfolioSummary } from '@/network';
 import { LINK_PREFIX } from '@/config/constants';
 
 const MyPage: React.FC = () => {
-    const [portfolios, setPortfolios] = useState<PortfolioSummary[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
     const toast = useToast();
     const confirmDialog = useAsyncConfirm();
 
     const currentUser = useCurrentUser();
 
-    useEffect(() => {
-        if (currentUser?.id) {
-            loadPortfolios();
-        }
+    // currentUser.id 없으면 fetch 자체 skip → null 반환. useAsyncState 의 data 기본 [] 로 EmptyState 분기는 그대로 동작.
+    const fetchPortfolios = useCallback(async (): Promise<PortfolioSummary[]> => {
+        if (!currentUser?.id) return [];
+        const result = await getMyPortfolios(currentUser.id);
+        return result.success && result.data ? result.data : [];
     }, [currentUser?.id]);
 
-    const loadPortfolios = async () => {
-        if (!currentUser?.id) return;
+    const { data, isLoading, execute: loadPortfolios } = useAsyncState<PortfolioSummary[]>(
+        fetchPortfolios,
+        { initialData: [], autoExecute: false },
+    );
+    // useAsyncState 의 data 는 T|null — initialData=[] 이지만 타입은 union, 사용처 narrowing 회피용 fallback.
+    const portfolios = data ?? [];
 
-        setIsLoading(true);
-        const result = await getMyPortfolios(currentUser.id);
-        if (result.success && result.data) {
-            setPortfolios(result.data);
-        }
-        setIsLoading(false);
-    };
+    // currentUser.id 변화 시 fetch — autoExecute 는 mount-only 이므로 직접 트리거.
+    useEffect(() => {
+        if (currentUser?.id) void loadPortfolios();
+    }, [currentUser?.id, loadPortfolios]);
 
     const handleDelete = async (portfolio: PortfolioSummary) => {
         // useAsyncConfirm 시그니처: (message, title) — ModalContext 의 한지 editorial 다이얼로그가 표시됨.
