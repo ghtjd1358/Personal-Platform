@@ -5,7 +5,8 @@ import { TiptapEditor, EditorHeader, TagSelector } from '@/components/editor';
 import { LoadingSpinner } from '@/components/loading';
 import { usePostEditorData, useCreatePost, useUpdatePost, usePostAutosave, PostFormData } from '@/hooks';
 import { CreatePostRequest, UpdatePostRequest } from '@/network';
-import { LINK_PREFIX } from '@/config/constants';
+import { useUploadImage } from '@/network/hooks';
+import { LINK_PREFIX, UPLOAD_CONFIG } from '@/config/constants';
 import './PostEditor.editorial.css';
 
 type PostStatus = 'draft' | 'published';
@@ -19,6 +20,25 @@ const PostEditor: React.FC = () => {
 
   // 데이터 페칭 (시리즈는 더 이상 UI에 노출하지 않지만 initialFormData 호환성 유지)
   const { tags, originalPost, initialFormData, isLoading } = usePostEditorData(slug);
+
+  // 에디터 이미지 업로드 — lib TiptapEditor uploader contract: Promise<string | null>
+  const uploadImageFn = useUploadImage();
+  const handleEditorUpload = useCallback(async (file: File): Promise<string | null> => {
+    if (!file.type.startsWith('image/')) {
+      toast.warning('이미지 파일만 업로드할 수 있습니다.');
+      return null;
+    }
+    if (file.size > UPLOAD_CONFIG.maxImageSize) {
+      toast.warning(`이미지 크기는 ${UPLOAD_CONFIG.maxImageSize / (1024 * 1024)}MB 이하여야 합니다.`);
+      return null;
+    }
+    const result = await uploadImageFn(file, 'blog');
+    if (result === false) {
+      toast.error('이미지 업로드에 실패했습니다.');
+      return null;
+    }
+    return result.url;
+  }, [uploadImageFn, toast]);
 
   // 뮤테이션
   const { createPost, isCreating } = useCreatePost({
@@ -147,6 +167,7 @@ const PostEditor: React.FC = () => {
             content={formData.content}
             onChange={(content) => updateField('content', content)}
             placeholder="여기에 내용을 작성하세요..."
+            uploader={handleEditorUpload}
           />
         </div>
       </div>

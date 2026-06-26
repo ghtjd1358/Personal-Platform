@@ -142,6 +142,46 @@ export function isValidUrl(url) {
         return false;
     }
 }
+/**
+ * 리치텍스트 에디터(Tiptap 등) link/image 입력 검증 — XSS 방어 포함.
+ * - `javascript:`, `data:`, `vbscript:`, `file:` 등 위험 프로토콜 차단
+ * - image 타입은 확장자(`jpg|png|gif|webp|svg|bmp|ico`) 또는 `data:image/` 만 허용
+ * - 프로토콜 없는 URL 은 `https://` 자동 prefix
+ *
+ * @example
+ * validateRichTextUrl('javascript:alert(1)', 'link')
+ * // { valid: false, url: 'javascript:alert(1)', error: '허용되지 않는 URL 형식입니다.' }
+ *
+ * @example
+ * validateRichTextUrl('example.com', 'link')
+ * // { valid: true, url: 'https://example.com' }
+ */
+export function validateRichTextUrl(url, type) {
+    const trimmed = url.trim();
+    if (!trimmed) {
+        return { valid: false, url: '', error: 'URL을 입력해주세요.' };
+    }
+    const dangerousProtocols = /^(javascript:|data:|vbscript:|file:)/i;
+    if (dangerousProtocols.test(trimmed)) {
+        return { valid: false, url: trimmed, error: '허용되지 않는 URL 형식입니다.' };
+    }
+    if (type === 'image') {
+        const imageUrlPattern = /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?.*)?$/i;
+        const isDataUrl = /^data:image\//i.test(trimmed);
+        if (!imageUrlPattern.test(trimmed) && !isDataUrl) {
+            return {
+                valid: false,
+                url: trimmed,
+                error: '유효한 이미지 URL을 입력하세요 (jpg, png, gif, webp, svg)',
+            };
+        }
+    }
+    const allowedProtocols = /^(https?:\/\/|mailto:|tel:|\/)/i;
+    if (!allowedProtocols.test(trimmed)) {
+        return { valid: true, url: 'https://' + trimmed };
+    }
+    return { valid: true, url: trimmed };
+}
 // ============================================
 // IP 주소 검증
 // ============================================

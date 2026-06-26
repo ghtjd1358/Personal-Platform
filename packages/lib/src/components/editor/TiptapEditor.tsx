@@ -10,51 +10,12 @@ import Highlight from '@tiptap/extension-highlight';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import { common, createLowlight } from 'lowlight';
-import { uploadImage } from '@/network';
-import { useToast, LoadingSpinner, Button } from '@sonhoseong/mfa-lib';
-import { UPLOAD_CONFIG } from '@/config/constants';
+import { Button } from '../button/Button';
+import { LoadingSpinner } from '../loading/LoadingSpinner';
+import { useToast } from '../toast/ToastContext';
+import { validateRichTextUrl } from '../../utils/validation';
 
 const lowlight = createLowlight(common);
-
-/**
- * URL 검증 함수 - XSS 공격 방지
- * @param url 검증할 URL
- * @param type 'link' | 'image'
- * @returns 유효한 URL 또는 null
- */
-const validateUrl = (url: string, type: 'link' | 'image'): { valid: boolean; url: string; error?: string } => {
-  const trimmed = url.trim();
-
-  // 빈 URL 체크
-  if (!trimmed) {
-    return { valid: false, url: '', error: 'URL을 입력해주세요.' };
-  }
-
-  // 위험한 프로토콜 차단 (XSS 방지)
-  const dangerousProtocols = /^(javascript:|data:|vbscript:|file:)/i;
-  if (dangerousProtocols.test(trimmed)) {
-    return { valid: false, url: trimmed, error: '허용되지 않는 URL 형식입니다.' };
-  }
-
-  // 이미지 URL 검증
-  if (type === 'image') {
-    const imageUrlPattern = /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?.*)?$/i;
-    const isDataUrl = /^data:image\//i.test(trimmed); // base64 이미지 허용
-
-    if (!imageUrlPattern.test(trimmed) && !isDataUrl) {
-      return { valid: false, url: trimmed, error: '유효한 이미지 URL을 입력하세요 (jpg, png, gif, webp, svg)' };
-    }
-  }
-
-  // 허용된 프로토콜 확인
-  const allowedProtocols = /^(https?:\/\/|mailto:|tel:|\/)/i;
-  if (!allowedProtocols.test(trimmed)) {
-    // 프로토콜 없으면 https 추가
-    return { valid: true, url: 'https://' + trimmed };
-  }
-
-  return { valid: true, url: trimmed };
-};
 
 const ToolbarButton: React.FC<{
   onClick: () => void;
@@ -63,42 +24,41 @@ const ToolbarButton: React.FC<{
   disabled?: boolean;
   children: React.ReactNode;
 }> = ({ onClick, isActive, title, disabled, children }) => (
-  <Button type="button" variant="text" size="sm" onClick={onClick} className={isActive ? 'active' : ''} title={title} disabled={disabled}>
+  <Button
+    type="button"
+    variant="text"
+    size="sm"
+    onClick={onClick}
+    className={isActive ? 'active' : ''}
+    title={title}
+    disabled={disabled}
+  >
     {children}
   </Button>
 );
 
-interface TiptapEditorProps {
+export interface TiptapEditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
+  /**
+   * 파일 업로드 함수 — 성공 시 image URL, 실패/검증 실패 시 null.
+   * 호출자가 MIME/size 검증과 toast 통지를 책임지는 책임 분리 contract.
+   */
+  uploader: (file: File) => Promise<string | null>;
 }
 
-const TiptapEditor: React.FC<TiptapEditorProps> = ({
+export const TiptapEditor: React.FC<TiptapEditorProps> = ({
   content,
   onChange,
-  placeholder = '내용을 입력하세요...'
+  placeholder = '내용을 입력하세요...',
+  uploader,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const toast = useToast();
-
-  const uploadImageFile = useCallback(async (file: File): Promise<string | null> => {
-    if (!file.type.startsWith('image/')) {
-      toast.warning('이미지 파일만 업로드할 수 있습니다.');
-      return null;
-    }
-    if (file.size > UPLOAD_CONFIG.maxImageSize) {
-      toast.warning(`이미지 크기는 ${UPLOAD_CONFIG.maxImageSize / (1024 * 1024)}MB 이하여야 합니다.`);
-      return null;
-    }
-    const result = await uploadImage(file, 'blog');
-    if (result.success && result.data) return result.data.url;
-    toast.error(result.error || '이미지 업로드에 실패했습니다.');
-    return null;
-  }, [toast]);
 
   const editor = useEditor({
     extensions: [
@@ -118,13 +78,13 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       handlePaste: (view, event) => {
         const items = event.clipboardData?.items;
         if (!items) return false;
-        for (const item of items) {
+        for (const item of Array.from(items)) {
           if (item.type.startsWith('image/')) {
             event.preventDefault();
             const file = item.getAsFile();
             if (file) {
               setUploading(true);
-              uploadImageFile(file).then(url => {
+              uploader(file).then((url) => {
                 if (url && view.state) {
                   const { schema } = view.state;
                   const node = schema.nodes.image.create({ src: url });
@@ -148,7 +108,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         event.preventDefault();
         setUploading(true);
         const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY });
-        uploadImageFile(file).then(url => {
+        uploader(file).then((url) => {
           if (url && view.state && coordinates) {
             const { schema } = view.state;
             const node = schema.nodes.image.create({ src: url });
@@ -163,6 +123,8 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     },
   });
 
+  // 외부에서 content 가 늦게 도착했을 때 초기 빈 상태(<p></p>) 1회만 주입.
+  // 일반 onUpdate 흐름과 충돌하지 않도록 가드.
   useEffect(() => {
     if (editor && content && !editor.isDestroyed) {
       const currentContent = editor.getHTML();
@@ -172,6 +134,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     }
   }, [editor, content]);
 
+  // wrapper level drag overlay — handleDrop 외에 enter/leave 시각 효과만 담당.
   useEffect(() => {
     const wrapper = editorWrapperRef.current;
     if (!wrapper) return;
@@ -204,7 +167,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     const file = e.target.files?.[0];
     if (!file || !editor) return;
     setUploading(true);
-    uploadImageFile(file)
+    uploader(file)
       .then((url) => {
         if (url) editor.chain().focus().setImage({ src: url }).run();
       })
@@ -213,7 +176,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         setUploading(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
       });
-  }, [editor, uploadImageFile, toast]);
+  }, [editor, uploader, toast]);
 
   const addImage = useCallback(() => fileInputRef.current?.click(), []);
 
@@ -221,14 +184,14 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     const url = window.prompt('이미지 URL을 입력하세요:');
     if (!url || !editor) return;
 
-    const result = validateUrl(url, 'image');
+    const result = validateRichTextUrl(url, 'image');
     if (!result.valid) {
       toast.warning(result.error || '유효하지 않은 URL입니다.');
       return;
     }
 
     editor.chain().focus().setImage({ src: result.url }).run();
-  }, [editor]);
+  }, [editor, toast]);
 
   const setLink = useCallback(() => {
     if (!editor) return;
@@ -241,7 +204,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       return;
     }
 
-    const result = validateUrl(url, 'link');
+    const result = validateRichTextUrl(url, 'link');
     if (!result.valid) {
       toast.error(result.error || '유효하지 않은 URL입니다.');
       return;
@@ -250,7 +213,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     editor.chain().focus().extendMarkRange('link')
       .setLink({ href: result.url, target: '_blank', rel: 'noopener noreferrer' })
       .run();
-  }, [editor]);
+  }, [editor, toast]);
 
   if (!editor) return null;
 
@@ -346,5 +309,3 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     </div>
   );
 };
-
-export { TiptapEditor };

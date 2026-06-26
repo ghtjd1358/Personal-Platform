@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@sonhoseong/mfa-lib';
-import TiptapEditor from '@/components/editor/TiptapEditor';
+import { TiptapEditor } from '@/components/editor';
 
 interface PortfolioBasicSectionProps {
     title: string;
@@ -11,6 +11,7 @@ interface PortfolioBasicSectionProps {
     coverImage: string;
     isUploading: boolean;
     fileInputRef: React.RefObject<HTMLInputElement | null>;
+    descriptionUploader: (file: File) => Promise<string | null>;
     onTitleChange: (value: string) => void;
     onSlugChange: (value: string) => void;
     onBadgeChange: (value: string) => void;
@@ -29,6 +30,7 @@ const PortfolioBasicSection: React.FC<PortfolioBasicSectionProps> = ({
     coverImage,
     isUploading,
     fileInputRef,
+    descriptionUploader,
     onTitleChange,
     onSlugChange,
     onBadgeChange,
@@ -94,6 +96,7 @@ const PortfolioBasicSection: React.FC<PortfolioBasicSectionProps> = ({
                     content={description}
                     onChange={onDescriptionChange}
                     placeholder="프로젝트에 대한 상세 설명을 작성하세요..."
+                    uploader={descriptionUploader}
                 />
             </div>
 
