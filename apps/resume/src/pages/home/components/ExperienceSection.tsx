@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Badge, Button, EmptyState } from '@sonhoseong/mfa-lib';
+import { Badge, Button, EmptyState, useCollapsibleSet } from '@sonhoseong/mfa-lib';
 import type { ExperienceDetail, ProjectDetail } from '../../../types';
 import { SectionEditButton } from '../../../components/common';
 import { TimelineCard } from '../../../components/timeline/TimelineCard';
@@ -24,19 +24,39 @@ const sortByRecent = <T extends { is_current?: boolean; start_date?: string | nu
   return (b.start_date || '').localeCompare(a.start_date || '');
 };
 
+// task 본문의 **word** 마크다운 → <strong>. admin editor placeholder 가 'BOLD OK' 안내하므로 home 도 일관 처리.
+const renderTaskWithBold = (text: string): React.ReactNode[] =>
+  text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    /^\*\*[^*]+\*\*$/.test(part)
+      ? <strong key={i}>{part.slice(2, -2)}</strong>
+      : <React.Fragment key={i}>{part}</React.Fragment>
+  );
+
+// 프로젝트 tasks: "**제목** — 상세" 패턴을 제목 + 하위 ul 로 분리.
+// 한 줄에 제목/상세 다 박히면 가독성 떨어진다는 피드백 → 시각적 hierarchy 분리.
+const renderTaskNested = (text: string): React.ReactNode => {
+  const sepIdx = text.indexOf(' — ');
+  if (sepIdx === -1) return renderTaskWithBold(text);
+  const head = text.slice(0, sepIdx);
+  const detail = text.slice(sepIdx + 3);
+  return (
+    <>
+      {renderTaskWithBold(head)}
+      <ul className="timeline-tasks-sub">
+        <li>{renderTaskWithBold(detail)}</li>
+      </ul>
+    </>
+  );
+};
+
 export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experiences, projects }) => {
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  // 토글 default: 개발(is_dev=true) 경력은 펼침 / 비개발 경력·프로젝트(is_dev 없음)는 접힘.
+  // mfa-lib useCollapsibleSet 의 XOR 모델 — 사용자 override 만 별도 추적.
+  const { isOpen: isExpanded, toggle: toggleItem } = useCollapsibleSet<{ id: string; is_dev?: boolean }>({
+    getDefaultOpen: (item) => item.is_dev === true,
+  });
   const [showAllExp, setShowAllExp] = useState(false);
   const [showAllProjects, setShowAllProjects] = useState(false);
-
-  const toggleItem = (id: string) => {
-    setExpandedItems((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   const sortedExperiences = useMemo(() => [...experiences].sort(sortByRecent), [experiences]);
   const sortedProjects = useMemo(() => [...projects].sort(sortByRecent), [projects]);
@@ -88,22 +108,22 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                       {exp.is_dev ? '개발' : '비개발'}
                     </Badge>
                   </div>
-                  <TimelineCard title={exp.company} subtitle={exp.position} tags={exp.tags}>
+                  <TimelineCard title={exp.company} subtitle={exp.position} description={exp.description} tags={exp.tags}>
                     {exp.tasks && exp.tasks.length > 0 && (
                       <>
                         <button
                           type="button"
-                          className={`toggle-tasks ${expandedItems.has(exp.id) ? 'active' : ''}`}
+                          className={`toggle-tasks ${isExpanded(exp) ? 'active' : ''}`}
                           onClick={() => toggleItem(exp.id)}
-                          aria-expanded={expandedItems.has(exp.id)}
+                          aria-expanded={isExpanded(exp)}
                         >
                           <span className="toggle-icon">›</span>
                           <span>주요 업무 내용</span>
                         </button>
-                        <div className={`timeline-tasks-collapsible ${expandedItems.has(exp.id) ? 'is-open' : ''}`}>
+                        <div className={`timeline-tasks-collapsible ${isExpanded(exp) ? 'is-open' : ''}`}>
                           <ul className="timeline-tasks">
                             {exp.tasks.map((task, i) => (
-                              <li key={task.id} style={{ ['--i' as any]: i }}>{task.task}</li>
+                              <li key={task.id} style={{ ['--i' as any]: i }}>{renderTaskWithBold(task.task)}</li>
                             ))}
                           </ul>
                         </div>
@@ -148,17 +168,17 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                       <>
                         <button
                           type="button"
-                          className={`toggle-tasks ${expandedItems.has(proj.id) ? 'active' : ''}`}
+                          className={`toggle-tasks ${isExpanded(proj) ? 'active' : ''}`}
                           onClick={() => toggleItem(proj.id)}
-                          aria-expanded={expandedItems.has(proj.id)}
+                          aria-expanded={isExpanded(proj)}
                         >
                           <span className="toggle-icon">›</span>
                           <span>주요 작업 내용</span>
                         </button>
-                        <div className={`timeline-tasks-collapsible ${expandedItems.has(proj.id) ? 'is-open' : ''}`}>
+                        <div className={`timeline-tasks-collapsible ${isExpanded(proj) ? 'is-open' : ''}`}>
                           <ul className="timeline-tasks">
                             {proj.tasks.map((task, i) => (
-                              <li key={task.id} style={{ ['--i' as any]: i }}>{task.task}</li>
+                              <li key={task.id} style={{ ['--i' as any]: i }}>{renderTaskNested(task.task)}</li>
                             ))}
                           </ul>
                         </div>

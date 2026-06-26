@@ -6,8 +6,10 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * Remote 앱 단독 실행 시 사용
  */
 import { useState, useCallback } from 'react';
+import { useCollapsibleSet } from '../../hooks/use-collapsible-set';
 export function AppSidebar({ appName = 'MFA', isAuthenticated = false, userName, userEmail, menuItems = [], onLogout, onNavigate, currentPath = '/', logo, collapsed: controlledCollapsed, onCollapsedChange, }) {
-    const [expandedMenus, setExpandedMenus] = useState(new Set());
+    // 메뉴 default 접힘 — 사용자가 펼친 항목만 override set 에 저장 (단순 모드).
+    const { isOpen: isMenuExpanded, toggle: toggleMenu } = useCollapsibleSet();
     const [internalCollapsed, setInternalCollapsed] = useState(false);
     // 외부 제어 또는 내부 상태 사용
     const collapsed = controlledCollapsed ?? internalCollapsed;
@@ -16,24 +18,12 @@ export function AppSidebar({ appName = 'MFA', isAuthenticated = false, userName,
         setInternalCollapsed(newValue);
         onCollapsedChange?.(newValue);
     }, [collapsed, onCollapsedChange]);
-    const toggleMenu = useCallback((menuId) => {
-        setExpandedMenus(prev => {
-            const next = new Set(prev);
-            if (next.has(menuId)) {
-                next.delete(menuId);
-            }
-            else {
-                next.add(menuId);
-            }
-            return next;
-        });
-    }, []);
     const handleNavigate = useCallback((path) => {
         onNavigate?.(path);
     }, [onNavigate]);
     const renderMenuItem = (item, depth = 0) => {
         const hasChildren = item.children && item.children.length > 0;
-        const isExpanded = expandedMenus.has(item.id);
+        const isExpanded = isMenuExpanded(item.id);
         const isActive = item.path === currentPath;
         return (_jsxs("li", { className: "sidebar-menu-item", children: [_jsxs("button", { className: `sidebar-menu-btn ${isActive ? 'active' : ''} ${depth > 0 ? 'child' : ''}`, onClick: () => {
                         if (hasChildren) {

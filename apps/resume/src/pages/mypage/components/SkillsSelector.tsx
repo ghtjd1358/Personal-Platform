@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Badge, EmptyState } from '@sonhoseong/mfa-lib';
+import React from 'react';
+import { Badge, EmptyState, useCollapsibleSet } from '@sonhoseong/mfa-lib';
 import { useFetchSkillCategories } from '@/network/hooks';
 
 interface SkillsSelectorProps {
@@ -14,26 +14,10 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
   disabled = false,
 }) => {
   const { categories } = useFetchSkillCategories();
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-
-  // 카테고리 fetch 되면 기본 전부 펼침
-  useEffect(() => {
-    if (categories.length > 0) {
-      setExpandedCategories(new Set(categories.map((c) => c.id)));
-    }
-  }, [categories]);
-
-  const toggleCategory = (categoryId: string) => {
-    setExpandedCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(categoryId)) {
-        next.delete(categoryId);
-      } else {
-        next.add(categoryId);
-      }
-      return next;
-    });
-  };
+  // 모든 카테고리 기본 펼침 — getDefaultOpen 항상 true. 사용자가 클릭하면 그 카테고리만 접힘.
+  const { isOpen: isCategoryExpanded, toggle: toggleCategory } = useCollapsibleSet<{ id: string }>({
+    getDefaultOpen: () => true,
+  });
 
   const toggleSkill = (skillName: string) => {
     if (selectedSkills.includes(skillName)) {
@@ -85,7 +69,7 @@ const SkillsSelector: React.FC<SkillsSelectorProps> = ({
       ) : (
         <div className="skills-selector-categories">
           {categories.map((category) => {
-            const isExpanded = expandedCategories.has(category.id);
+            const isExpanded = isCategoryExpanded(category);
             const categorySkillNames = category.skills.map((s) => s.name);
             const selectedCount = categorySkillNames.filter((name) =>
               selectedSkills.includes(name)

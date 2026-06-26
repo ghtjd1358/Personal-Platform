@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { useCollapsibleSet } from '../../hooks/use-collapsible-set';
 
 export interface SidebarMenuItem {
     id: string;
@@ -53,7 +54,8 @@ export function AppSidebar({
     collapsed: controlledCollapsed,
     onCollapsedChange,
 }: AppSidebarProps) {
-    const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
+    // 메뉴 default 접힘 — 사용자가 펼친 항목만 override set 에 저장 (단순 모드).
+    const { isOpen: isMenuExpanded, toggle: toggleMenu } = useCollapsibleSet<string>();
     const [internalCollapsed, setInternalCollapsed] = useState(false);
 
     // 외부 제어 또는 내부 상태 사용
@@ -65,25 +67,13 @@ export function AppSidebar({
         onCollapsedChange?.(newValue);
     }, [collapsed, onCollapsedChange]);
 
-    const toggleMenu = useCallback((menuId: string) => {
-        setExpandedMenus(prev => {
-            const next = new Set(prev);
-            if (next.has(menuId)) {
-                next.delete(menuId);
-            } else {
-                next.add(menuId);
-            }
-            return next;
-        });
-    }, []);
-
     const handleNavigate = useCallback((path: string) => {
         onNavigate?.(path);
     }, [onNavigate]);
 
     const renderMenuItem = (item: SidebarMenuItem, depth = 0) => {
         const hasChildren = item.children && item.children.length > 0;
-        const isExpanded = expandedMenus.has(item.id);
+        const isExpanded = isMenuExpanded(item.id);
         const isActive = item.path === currentPath;
 
         return (
