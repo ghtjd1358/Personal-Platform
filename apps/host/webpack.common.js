@@ -9,6 +9,8 @@ if (!process.env.CI && !process.env.VERCEL) {
     if (result.error && process.env.NODE_ENV !== 'production') {
         console.warn('[webpack] .env 파일을 찾을 수 없습니다. 환경변수를 직접 설정해야 합니다.');
     }
+    // .env.local이 있으면 .env를 덮어씀 (로컬 오버라이드)
+    require('dotenv').config({ path: '.env.local', override: true });
 }
 if (process.env.NODE_ENV === 'production') {
     if (!process.env.REMOTE1_URL) throw new Error('REMOTE1_URL이 설정되지 않았습니다.');

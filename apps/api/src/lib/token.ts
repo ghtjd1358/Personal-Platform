@@ -16,16 +16,18 @@ export function verifyRefreshToken(token: string): JwtPayload {
   return jwt.verify(token, env.jwtRefreshSecret) as JwtPayload
 }
 
+const isLocal = process.env.NODE_ENV !== 'production'
+
 export function setRefreshCookie(res: import('express').Response, token: string) {
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: true,             // SameSite=none은 반드시 Secure 필요
-    sameSite: 'none',         // 크로스 도메인 전송 허용 (api ↔ frontend 별개 vercel.app)
+    secure: !isLocal,
+    sameSite: isLocal ? 'lax' : 'none',
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/api/auth',
   })
 }
 
 export function clearRefreshCookie(res: import('express').Response) {
-  res.clearCookie('refreshToken', { path: '/api/auth', secure: true, sameSite: 'none' })
+  res.clearCookie('refreshToken', { path: '/api/auth', secure: !isLocal, sameSite: isLocal ? 'lax' : 'none' })
 }
