@@ -1,71 +1,50 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Axios from 'axios';
-import { getStore, logout } from '../store/app-store';
+import { getStore } from '../store/app-store';
 import { setAccessToken, setUser, setSessionRestoring } from '../store/app-slice';
-import { clearRecentMenu } from '../store/recent-menu-slice';
 import { getApiClient, initApiClient } from '../network/api-client';
 const API_BASE = (process.env.REACT_APP_API_URL ?? 'http://localhost:4000') + '/api';
 // 초기화 전용 plain axios — 인터셉터 없이 refresh를 호출해 401 retry 루프 차단
 const initAxios = Axios.create({ baseURL: API_BASE, withCredentials: true, timeout: 3000 });
+async function restoreSession(signal) {
+    initApiClient();
+    const store = getStore();
+    try {
+        // 1. HttpOnly 쿠키의 refresh token → 새 access token 요청
+        const { data: refreshData } = await initAxios.post('/auth/refresh', undefined, { signal });
+        const accessToken = refreshData?.data?.accessToken;
+        if (!accessToken)
+            return;
+        // 2. access token은 메모리(Redux)에만 저장 — localStorage 사용 안 함
+        store.dispatch(setAccessToken(accessToken));
+        // 3. 내 정보 조회 → Redux에 저장
+        const { data: meData } = await getApiClient().get('/auth/me', { signal });
+        const user = meData?.data;
+        if (user) {
+            store.dispatch(setUser(user));
+        }
+    }
+    catch (err) {
+        if (Axios.isCancel(err))
+            return; // 컴포넌트 언마운트 시 취소
+        if (Axios.isAxiosError(err) && (err.response?.status === 401 || err.response?.status === 403))
+            return; // 비로그인 정상
+        console.warn('[NodeInitialize] 세션 복구 실패:', err);
+    }
+    finally {
+        store.dispatch(setSessionRestoring(false));
+    }
+}
 export function useNodeInitialize() {
     const ranRef = useRef(false);
+    const [initialized, setInitialized] = useState(false);
     useEffect(() => {
         if (ranRef.current)
             return;
         ranRef.current = true;
         const controller = new AbortController();
-        const { signal } = controller;
-        const restoreSession = async () => {
-            initApiClient();
-            const store = getStore();
-            try {
-                const refreshRes = await initAxios.post('/auth/refresh', undefined, { signal });
-                if (signal.aborted)
-                    return;
-                const accessToken = refreshRes.data?.data?.accessToken;
-                if (!accessToken) {
-                    store.dispatch(setSessionRestoring(false));
-                    return;
-                }
-                store.dispatch(setAccessToken(accessToken));
-                const meRes = await getApiClient().get('/auth/me', { signal });
-                if (signal.aborted)
-                    return;
-                const user = meRes.data?.data;
-                if (user)
-                    store.dispatch(setUser(user));
-            }
-            catch (err) {
-                if (signal.aborted)
-                    return;
-                // 비로그인(401/403)은 정상 케이스, 그 외는 경고
-                if (!Axios.isAxiosError(err) || (err.response?.status !== 401 && err.response?.status !== 403)) {
-                    console.warn('[NodeInitialize] 세션 복구 실패:', err);
-                }
-            }
-            finally {
-                if (!signal.aborted)
-                    store.dispatch(setSessionRestoring(false));
-            }
-        };
-        restoreSession();
-        return () => { controller.abort(); };
+        restoreSession(controller.signal).finally(() => setInitialized(true));
+        return () => controller.abort();
     }, []);
-    return { initialized: true };
-}
-export function useNodeLogout() {
-    const doLogout = useCallback(async () => {
-        const store = getStore();
-        try {
-            await getApiClient().post('/auth/logout');
-        }
-        catch {
-            // 서버 실패해도 로컬 상태는 반드시 클리어
-        }
-        finally {
-            store.dispatch(logout());
-            store.dispatch(clearRecentMenu());
-        }
-    }, []);
-    return { logout: doLogout };
+    return { initialized };
 }
