@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { Badge } from '@sonhoseong/mfa-lib';
 
 interface ProjectTasksTagsFieldsProps {
     tasksText: string;
@@ -49,7 +48,7 @@ const ProjectTasksTagsFields: React.FC<ProjectTasksTagsFieldsProps> = ({
                 <div className="exp-chips">
                     {parsedTags.length > 0 ? (
                         parsedTags.map((t) => (
-                            <Badge key={t} variant="default" className="exp-chip">{t}</Badge>
+                            <span key={t} className="exp-chip">{t}</span>
                         ))
                     ) : (
                         <span className="exp-chips-empty">쉼표로 구분하면 여기에 칩으로 나타나요.</span>
