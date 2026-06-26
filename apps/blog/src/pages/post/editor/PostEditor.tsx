@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCurrentUser, useToast } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, useEditorImageUploader } from '@sonhoseong/mfa-lib';
 import { TiptapEditor, EditorHeader, TagSelector } from '@/components/editor';
 import { LoadingSpinner } from '@/components/loading';
 import { usePostEditorData, useCreatePost, useUpdatePost, usePostAutosave, PostFormData } from '@/hooks';
@@ -21,24 +21,13 @@ const PostEditor: React.FC = () => {
   // 데이터 페칭 (시리즈는 더 이상 UI에 노출하지 않지만 initialFormData 호환성 유지)
   const { tags, originalPost, initialFormData, isLoading } = usePostEditorData(slug);
 
-  // 에디터 이미지 업로드 — lib TiptapEditor uploader contract: Promise<string | null>
+  // 에디터 이미지 업로드 — lib useEditorImageUploader 위임 (검증 + toast 통일)
   const uploadImageFn = useUploadImage();
-  const handleEditorUpload = useCallback(async (file: File): Promise<string | null> => {
-    if (!file.type.startsWith('image/')) {
-      toast.warning('이미지 파일만 업로드할 수 있습니다.');
-      return null;
-    }
-    if (file.size > UPLOAD_CONFIG.maxImageSize) {
-      toast.warning(`이미지 크기는 ${UPLOAD_CONFIG.maxImageSize / (1024 * 1024)}MB 이하여야 합니다.`);
-      return null;
-    }
-    const result = await uploadImageFn(file, 'blog');
-    if (result === false) {
-      toast.error('이미지 업로드에 실패했습니다.');
-      return null;
-    }
-    return result.url;
-  }, [uploadImageFn, toast]);
+  const handleEditorUpload = useEditorImageUploader({
+    uploader: (file) => uploadImageFn(file, 'blog'),
+    extractUrl: (r) => (r === false ? null : r.url),
+    maxSizeBytes: UPLOAD_CONFIG.maxImageSize,
+  });
 
   // 뮤테이션
   const { createPost, isCreating } = useCreatePost({

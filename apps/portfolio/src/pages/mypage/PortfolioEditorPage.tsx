@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCurrentUser, useToast, EmptyState, Button, useImageUpload } from '@sonhoseong/mfa-lib';
+import { useCurrentUser, useToast, EmptyState, Button, useImageUpload, useEditorImageUploader } from '@sonhoseong/mfa-lib';
 import { CreatePortfolioRequest } from '@/network';
 import {
     useFetchPortfolioById,
@@ -50,23 +50,12 @@ const PortfolioEditorPage: React.FC = () => {
         onError: (msg) => toast.error(msg),
     });
 
-    // TiptapEditor uploader contract — Promise<string | null>
-    const handleDescriptionUpload = useCallback(async (file: File): Promise<string | null> => {
-        if (!file.type.startsWith('image/')) {
-            toast.warning('이미지 파일만 업로드할 수 있습니다.');
-            return null;
-        }
-        if (file.size > UPLOAD_CONFIG.maxImageSize) {
-            toast.warning(`이미지 크기는 ${UPLOAD_CONFIG.maxImageSize / (1024 * 1024)}MB 이하여야 합니다.`);
-            return null;
-        }
-        const result = await uploadImageFn(file, 'portfolio');
-        if (result === false) {
-            toast.error('이미지 업로드에 실패했습니다.');
-            return null;
-        }
-        return result.url;
-    }, [uploadImageFn, toast]);
+    // TiptapEditor uploader contract — lib useEditorImageUploader 위임
+    const handleDescriptionUpload = useEditorImageUploader({
+        uploader: (file) => uploadImageFn(file, 'portfolio'),
+        extractUrl: (r) => (r === false ? null : r.url),
+        maxSizeBytes: UPLOAD_CONFIG.maxImageSize,
+    });
 
     useEffect(() => {
         if (!detail) return;
