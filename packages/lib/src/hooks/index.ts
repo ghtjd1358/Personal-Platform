@@ -20,3 +20,4 @@ export * from './use-collapsible-set';
 export * from './use-list-state';
 export * from './use-tab-state';
 export * from './use-async-state';
+export * from './use-form-from-data';

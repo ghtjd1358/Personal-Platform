@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useFormFromData } from '@sonhoseong/mfa-lib';
 
 /** 기술 스택 아이템 */
 export interface TechStackItem {
@@ -19,6 +20,7 @@ export interface PortfolioFormData {
   status: 'draft' | 'published' | 'archived';
   isFeatured: boolean;
   isPublic: boolean;
+  showOnResume: boolean;
   demoUrl: string;
   githubUrl: string;
 
@@ -48,6 +50,7 @@ export const INITIAL_FORM_DATA: PortfolioFormData = {
   status: 'draft',
   isFeatured: false,
   isPublic: true,
+  showOnResume: true,
   demoUrl: '',
   githubUrl: '',
   role: '',
@@ -76,21 +79,15 @@ interface UsePortfolioFormReturn {
  * 포트폴리오 폼 상태 관리 훅
  */
 export function usePortfolioForm(initialData?: Partial<PortfolioFormData>): UsePortfolioFormReturn {
-  const [formData, setFormData] = useState<PortfolioFormData>({
+  // formData/setFormData/setField/reset 은 lib hook 에 위임. 도메인 메서드만 합성.
+  const { formData, setFormData, setField, reset } = useFormFromData<PortfolioFormData>({
     ...INITIAL_FORM_DATA,
     ...initialData,
   });
 
-  const updateField = useCallback(<K extends keyof PortfolioFormData>(
-    field: K,
-    value: PortfolioFormData[K]
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  }, []);
+  const updateField = setField;
 
-  const resetForm = useCallback(() => {
-    setFormData(INITIAL_FORM_DATA);
-  }, []);
+  const resetForm = reset;
 
   const addTechStack = useCallback((name: string) => {
     if (name.trim()) {

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Button, useAsyncState } from '@sonhoseong/mfa-lib';
+import React, { useEffect, useCallback } from 'react';
+import { Button, useAsyncState, useFormFromData } from '@sonhoseong/mfa-lib';
 import { ProfileDetail, updateProfile, UpdateProfileRequest } from '@/network';
 
 interface ProfileEditModalProps {
@@ -15,7 +15,8 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   onClose,
   onSave
 }) => {
-  const [formData, setFormData] = useState<UpdateProfileRequest>({
+  // profile 이 비동기 로드 → null 가능. mount 시점엔 빈 객체로 초기화 후 useEffect 로 동기화.
+  const { formData, setFormData, handleChange } = useFormFromData<UpdateProfileRequest>({
     name: '',
     short_bio: '',
     bio: '',
@@ -29,14 +30,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
         bio: profile.bio || '',
       });
     }
-  }, [profile]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, [profile, setFormData]);
 
   // useAsyncState 의 error 는 Error 객체 — response.success=false 의 비즈니스 에러도 throw 로 통일해 single channel.
   const submit = useCallback(async () => {

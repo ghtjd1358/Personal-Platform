@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useFormFromData } from '@sonhoseong/mfa-lib';
 import { CreateApplicationInput } from '@/network/apis';
 
 interface UseApplicationFormOptions {
@@ -39,19 +40,12 @@ export function useApplicationForm({
   onCreate,
   onSuccess,
 }: UseApplicationFormOptions): UseApplicationFormReturn {
-  const [formData, setFormData] = useState<CreateApplicationInput>({
+  // form state + handleChange 는 lib 위임, submit/validation 은 도메인 로직.
+  const { formData, handleChange } = useFormFromData<CreateApplicationInput>({
     ...DEFAULT_VALUES,
     ...initialValues,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    },
-    []
-  );
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
