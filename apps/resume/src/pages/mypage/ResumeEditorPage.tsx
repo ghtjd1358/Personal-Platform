@@ -5,7 +5,7 @@ import { useCurrentUser, useToast, selectAccessToken, LoadingSpinner, useImageUp
 import { resumesApi, uploadProfileImage, experiencesApi, portfoliosApi } from '@/network';
 import type { ResumeProfile } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
-import { useResumeForm } from '@/hooks';
+import { useResumeForm, useFetchResumeEditorData } from '@/hooks';
 import {
   ExperienceEditor,
   ProjectEditor,
@@ -29,8 +29,22 @@ const ResumeEditorPage: React.FC = () => {
 
   const [resume, setResume] = useState<ResumeProfile | null>(null);
   const { formData, setFormData, handleChange, setVisibility } = useResumeForm();
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+
+  const isCreateMode = location.pathname.includes('/create');
+  const isEditMode = !!resumeId && !isCreateMode;
+
+  const isValidUUID = (id: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  };
+
+  // 유효 UUID 만 fetch hook 에 흘려서 잘못된 user id 로 ownership 검사 오염되는 거 차단
+  const validUserId = user?.id && isValidUUID(user.id) ? user.id : undefined;
+  const { data: fetchedData, error: fetchError } = useFetchResumeEditorData(
+    isEditMode ? resumeId : undefined,
+    validUserId,
+  );
 
   // useImageUpload — uploadProfileImage(user.id) 결과 받아 profile_image field set.
   // user?.id 가 hook 옵션 deps 에 들어가야 하므로 uploader 는 closure 로 캡처.
@@ -50,112 +64,58 @@ const ResumeEditorPage: React.FC = () => {
     onError: (msg) => toast.error(msg),
   });
 
-  const isCreateMode = location.pathname.includes('/create');
-  const isEditMode = !!resumeId && !isCreateMode;
-
-  const isValidUUID = (id: string) => {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(id);
-  };
-
+  // auth guard — token 없거나 user id 형식이 잘못된 세션 정리
   useEffect(() => {
     if (!accessToken) {
       navigate(`${LINK_PREFIX}/login`);
       return;
     }
+    if (user?.id && !isValidUUID(user.id)) {
+      console.error('Invalid user ID format. Please re-login.');
+      localStorage.removeItem('user');
+      localStorage.removeItem('accessToken');
+      toast.warning('세션이 만료되었습니다. 다시 로그인해주세요.');
+      navigate(`${LINK_PREFIX}/login`);
+    }
+  }, [accessToken, user?.id, navigate, toast]);
 
-    const loadData = async () => {
-      if (!user?.id) {
-        setIsLoading(false);
-        return;
-      }
+  // create 모드 — user 프로필에서 이름/이메일 prefill
+  useEffect(() => {
+    if (isCreateMode && user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name || '',
+        contact_email: user.email || '',
+      }));
+    }
+  }, [isCreateMode, user, setFormData]);
 
-      if (!isValidUUID(user.id)) {
-        console.error('Invalid user ID format. Please re-login.');
-        localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
-        toast.warning('세션이 만료되었습니다. 다시 로그인해주세요.');
-        navigate(`${LINK_PREFIX}/login`);
-        return;
-      }
+  // fetch 결과 → form populate
+  useEffect(() => {
+    if (!fetchedData) return;
+    setResume(fetchedData.resume);
+    setFormData({
+      resume_name: fetchedData.resume.resume_name || '',
+      name: fetchedData.resume.name || '',
+      title: fetchedData.resume.title || '',
+      summary: fetchedData.resume.summary || '',
+      profile_image: fetchedData.resume.profile_image || '',
+      contact_email: fetchedData.resume.contact_email || '',
+      github: fetchedData.resume.github || '',
+      blog: fetchedData.resume.blog || '',
+      visibility: fetchedData.resume.visibility || 'private',
+      experiences: fetchedData.experiences,
+      projects: fetchedData.projects,
+      skills: [],
+    });
+  }, [fetchedData, setFormData]);
 
-      if (isCreateMode) {
-        setFormData(prev => ({
-          ...prev,
-          name: user.name || '',
-          contact_email: user.email || '',
-        }));
-        setIsLoading(false);
-        return;
-      }
-
-      if (resumeId) {
-        try {
-          setIsLoading(true);
-          const data = await resumesApi.getById(resumeId);
-
-          if (data.user_id !== user.id) {
-            toast.error('접근 권한이 없습니다.');
-            navigate(`${LINK_PREFIX}/mypage`);
-            return;
-          }
-
-          const [expResult, projResult] = await Promise.all([
-            experiencesApi.getByResumeId(resumeId),
-            portfoliosApi.getByResumeId(resumeId),
-          ]);
-
-          const experiences: ExperienceFormData[] = (expResult.data || []).map((exp: any) => ({
-            id: exp.id,
-            company: exp.company || '',
-            position: exp.position || '',
-            start_date: exp.start_date || '',
-            end_date: exp.end_date || '',
-            is_current: exp.is_current || false,
-            is_dev: exp.is_dev ?? true,
-            description: exp.description || '',
-          }));
-
-          const projects: ProjectFormData[] = (projResult.data || []).map((proj: any) => ({
-            id: proj.id,
-            title: proj.title || '',
-            role: proj.role || '',
-            start_date: proj.start_date || '',
-            end_date: proj.end_date || '',
-            is_current: proj.is_current || false,
-            description: proj.description || '',
-            tech_stack: Array.isArray(proj.tech_stack) ? proj.tech_stack.join(', ') : '',
-          }));
-
-          setResume(data);
-          setFormData({
-            resume_name: data.resume_name || '',
-            name: data.name || '',
-            title: data.title || '',
-            summary: data.summary || '',
-            profile_image: data.profile_image || '',
-            contact_email: data.contact_email || '',
-            github: data.github || '',
-            blog: data.blog || '',
-            visibility: data.visibility || 'private',
-            experiences,
-            projects,
-            skills: [],
-          });
-        } catch (err) {
-          console.error('Failed to load resume:', err);
-          toast.error('이력서를 불러올 수 없습니다.');
-          navigate(`${LINK_PREFIX}/mypage`);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [accessToken, user?.id, navigate, resumeId, isCreateMode]);
+  // fetch 에러 → 토스트 + redirect (hook 은 headless 라 caller 가 결정)
+  useEffect(() => {
+    if (!fetchError) return;
+    toast.error(fetchError === 'forbidden' ? '접근 권한이 없습니다.' : '이력서를 불러올 수 없습니다.');
+    navigate(`${LINK_PREFIX}/mypage`);
+  }, [fetchError, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,7 +236,8 @@ const ResumeEditorPage: React.FC = () => {
     return null;
   }
 
-  if (isLoading) {
+  // user 로드 대기 + (edit 모드라면) fetch 결과 대기. error 시는 redirect effect 가 곧 처리.
+  if (!user || (isEditMode && !fetchedData && !fetchError)) {
     return <LoadingSpinner fullPage message="이력서를 불러오는 중..." />;
   }
 
