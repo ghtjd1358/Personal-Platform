@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import { useCurrentUser, useToast, selectAccessToken, LoadingSpinner, useImageUpload } from '@sonhoseong/mfa-lib';
-import { resumesApi, uploadProfileImage, experiencesApi, portfoliosApi } from '@/network';
+import { uploadProfileImage } from '@/network';
 import type { ResumeProfile } from '@/network/apis/resume/types/resume';
 import { LINK_PREFIX } from '@/config/constants';
-import { useResumeForm, useFetchResumeEditorData } from '@/hooks';
+import { useResumeForm, useFetchResumeEditorData, useSubmitResume } from '@/hooks';
 import {
   ExperienceEditor,
   ProjectEditor,
@@ -29,7 +29,7 @@ const ResumeEditorPage: React.FC = () => {
 
   const [resume, setResume] = useState<ResumeProfile | null>(null);
   const { formData, setFormData, handleChange, setVisibility } = useResumeForm();
-  const [isSaving, setIsSaving] = useState(false);
+  const { submit: submitResume, isSaving } = useSubmitResume();
 
   const isCreateMode = location.pathname.includes('/create');
   const isEditMode = !!resumeId && !isCreateMode;
@@ -124,111 +124,26 @@ const ResumeEditorPage: React.FC = () => {
       toast.warning('이력서 이름을 입력해주세요.');
       return;
     }
-
     if (!formData.name.trim()) {
       toast.warning('이름을 입력해주세요.');
       return;
     }
-
     if (!formData.title.trim()) {
       toast.warning('직함을 입력해주세요.');
       return;
     }
-
     if (!user?.id) {
       toast.error('로그인이 필요합니다.');
       return;
     }
 
     try {
-      setIsSaving(true);
-
-      let targetResumeId: string;
-
-      if (isEditMode && resume) {
-        await resumesApi.update(resume.id, {
-          resume_name: formData.resume_name.trim() || undefined,
-          name: formData.name.trim(),
-          title: formData.title.trim(),
-          summary: formData.summary.trim() || undefined,
-          profile_image: formData.profile_image.trim() || null,
-          contact_email: formData.contact_email.trim() || null,
-          github: formData.github.trim() || null,
-          blog: formData.blog.trim() || null,
-          visibility: formData.visibility,
-        }, user.id);
-        targetResumeId = resume.id;
-      } else {
-        const newResume = await resumesApi.create(user.id, {
-          resume_name: formData.resume_name.trim() || '기본 이력서',
-          name: formData.name.trim(),
-          title: formData.title.trim(),
-          summary: formData.summary.trim() || undefined,
-          profile_image: formData.profile_image.trim() || undefined,
-          contact_email: formData.contact_email.trim() || undefined,
-          github: formData.github.trim() || undefined,
-          blog: formData.blog.trim() || undefined,
-          visibility: formData.visibility,
-        });
-        targetResumeId = newResume.id;
-      }
-
-      if (isEditMode && resume) {
-        const { data: existingExps } = await experiencesApi.getByResumeId(resume.id);
-        for (const exp of existingExps || []) {
-          await experiencesApi.delete(exp.id);
-        }
-      }
-
-      for (let i = 0; i < formData.experiences.length; i++) {
-        const exp = formData.experiences[i];
-        if (exp.company.trim() && exp.position.trim()) {
-          await experiencesApi.create({
-            user_id: user.id,
-            resume_id: targetResumeId,
-            company: exp.company.trim(),
-            position: exp.position.trim(),
-            start_date: exp.start_date || new Date().toISOString().slice(0, 7),
-            end_date: exp.is_current ? null : (exp.end_date || null),
-            is_current: exp.is_current,
-            is_dev: exp.is_dev,
-            description: exp.description.trim() || undefined,
-            order_index: i,
-          });
-        }
-      }
-
-      if (isEditMode && resume) {
-        const { data: existingProjs } = await portfoliosApi.getByResumeId(resume.id);
-        for (const proj of existingProjs || []) {
-          await portfoliosApi.delete(proj.id);
-        }
-      }
-
-      for (let i = 0; i < formData.projects.length; i++) {
-        const proj = formData.projects[i];
-        if (proj.title.trim() && proj.role.trim()) {
-          await portfoliosApi.create({
-            user_id: user.id,
-            resume_id: targetResumeId,
-            title: proj.title.trim(),
-            role: proj.role.trim(),
-            start_date: proj.start_date || new Date().toISOString().slice(0, 7),
-            end_date: proj.is_current ? null : (proj.end_date || null),
-            is_current: proj.is_current,
-            description: proj.description.trim() || undefined,
-            order_index: i,
-          });
-        }
-      }
-
+      const targetResumeId = await submitResume({ userId: user.id, resume, formData });
       toast.success(isEditMode ? '이력서가 수정되었습니다!' : '이력서가 생성되었습니다!');
       navigate(`${LINK_PREFIX}/mypage/${targetResumeId}`);
     } catch (err) {
       console.error('Failed to save resume:', err);
       toast.error('저장에 실패했습니다.');
-    } finally {
-      setIsSaving(false);
     }
   };
 
