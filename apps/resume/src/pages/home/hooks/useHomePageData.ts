@@ -111,6 +111,7 @@ interface PortfolioRow {
     title: string;
     badge: string | null;
     short_description: string | null;
+    description: string | null;
     cover_image: string | null;
     image_url: string | null;
     demo_url: string | null;
@@ -246,6 +247,7 @@ export const useHomePageData = (): HomeData => {
                         id: row.id,
                         title: row.title,
                         role: row.role ?? '',
+                        description: row.description ?? null,
                         start_date: row.start_date,
                         end_date: row.end_date,
                         is_current: false,

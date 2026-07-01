@@ -815,7 +815,7 @@ body.has-header {
 }
 
 /* 프로젝트 task "**제목** — 상세" 의 상세 부분을 한 단 들여쓴 sub-list 로 분리.
-   동그라미 bullet 대신 가는 dash bar 로 hierarchy 약화 → 시각 weight: 본문 > 부연. */
+   부모 = 채운 원, 자식 = 빈 원 (표준 nested list 컨벤션) + opacity 로 hierarchy 약화. */
 .timeline-tasks-sub {
   list-style: none;
   margin: 6px 0 0 0;
@@ -836,13 +836,14 @@ body.has-header {
 .timeline-tasks-sub > li::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0.75em;
-  width: 8px;
-  height: 1px;
-  background: var(--color-text-secondary);
-  opacity: 0.5;
-  border-radius: 0;
+  left: 2px;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  border-radius: 50%;
+  opacity: 0.7;
 }
 
 .timeline-tech-icons {

@@ -34,16 +34,21 @@ const renderTaskWithBold = (text: string): React.ReactNode[] =>
 
 // 프로젝트 tasks: "**제목** — 상세" 패턴을 제목 + 하위 ul 로 분리.
 // 한 줄에 제목/상세 다 박히면 가독성 떨어진다는 피드백 → 시각적 hierarchy 분리.
+// 상세를 여러 항목으로 나누고 싶으면 개행 뒤 "- " 로 시작. "**Title** — lead\n- item1\n- item2"
 const renderTaskNested = (text: string): React.ReactNode => {
   const sepIdx = text.indexOf(' — ');
   if (sepIdx === -1) return renderTaskWithBold(text);
   const head = text.slice(0, sepIdx);
-  const detail = text.slice(sepIdx + 3);
+  const rest = text.slice(sepIdx + 3);
+  const lines = rest.split('\n');
+  const lead = lines[0];
+  const bullets = lines.slice(1).filter(l => l.startsWith('- ')).map(l => l.slice(2));
   return (
     <>
       {renderTaskWithBold(head)}
       <ul className="timeline-tasks-sub">
-        <li>{renderTaskWithBold(detail)}</li>
+        {lead && <li>{renderTaskWithBold(lead)}</li>}
+        {bullets.map((b, i) => <li key={i}>{renderTaskWithBold(b)}</li>)}
       </ul>
     </>
   );
@@ -163,7 +168,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experience
                   <div className={`timeline-date ${!proj.is_current ? 'past' : ''}`}>
                     {formatDate(proj.start_date)} - {formatDate(proj.end_date, true, proj.is_current)}
                   </div>
-                  <TimelineCard title={proj.title} subtitle={proj.role} tags={proj.tags}>
+                  <TimelineCard title={proj.title} subtitle={proj.role} description={proj.description} tags={proj.tags}>
                     {proj.tasks && proj.tasks.length > 0 && (
                       <>
                         <button
